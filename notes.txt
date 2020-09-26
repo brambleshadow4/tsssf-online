@@ -1,0 +1,50 @@
+model:
+	board:{}
+	hand:[]
+	currentGoals:[]
+	goalDrawPile:[];
+	ponyDiscardPile:[]
+	ponyDrawPile
+	shipDiscardPile
+	shipDrawPile
+
+
+
+LoadCards()
+LoadGame()
+randomizeOrder(arr)
+makeCardElement(card, dragLocation, dropLocation)
+isValidMove(cardDragged, targetCard, endLocation)
+moveCard(cardData, endLocation)
+addCardToBoard(location, card)
+offsetPonyCard(location, card)
+
+updateCardElement(imgElement, card, location, isDraggable, isDropTarget)
+
+animateCardMove(card, startdiv, endlocation)
+
+getNeighborKeys(key)
+
+updateBoard()
+updateGoals()
+updateHand()
+
+
+placement = p | sr | sb
+
+location = hand | board:[placement, x, y] | offset:[id, x, y]
+
+locations = 
+	| "ponyDiscardPile" 
+	| "hand" 
+	| <placement>,<x>,<y> 
+	| "offset",<id>,<x>,<y>
+
+blankType = "pony" | "ship"
+card = "blank:"<blankType> | <card-name>
+
+
+cardData = [cardname, location]
+
+
+forgot to rename isBlank to isShip when copied

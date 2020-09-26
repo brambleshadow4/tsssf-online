@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	
+	<head>
+		<link href="game.css" type="text/css" rel="stylesheet" />
+
+
+	</head>
+
+	<body>
+		<div>
+			<div id='sidebar'>
+				<div id='ponyDrawPile' class='card pony'></div>
+				<div class='shuffleContainer'>
+					<img id='ponyShuffle' class='shuffle' src="../img/shuffle.svg"/>
+				</div>
+				<div id='ponyDiscardPile' class='card discard'></div>
+				<div id="shipDrawPile" class='card ship'></div>
+				<div class='shuffleContainer'>
+					<img id='shipShuffle' class='shuffle' src="../img/shuffle.svg"/>
+				</div>
+				<div id="shipDiscardPile" class='card discard'></div>
+				<div id="goalDrawPile" class='card goal'></div>
+				<div class='shuffleContainer'>
+					<img id='goalShuffle' class='shuffle' src="../img/shuffle.svg"/>
+				</div>
+				<div id="goalDiscardPile" class='card discard'></div>
+			</div>
+			<div id='playingArea'></div>
+		</div>
+		<div id='cardRow'>
+			<div id='goals'>
+				<div class='card goal'></div>
+				<div class='card goal'></div>
+				<div class='card goal'></div>
+			</div>
+			<div class='divider'></div>
+			<div id='hand'>
+				<div id='hand-pony'>
+					<div class='card pony'></div>
+					<div class='card pony'></div>
+					<div class='card pony'></div>
+					<div class='card pony'></div>
+				</div>
+				<div id='hand-ship'>
+				
+					<div class='card ship'></div>
+					<div class='card ship'></div>
+					<div class='card ship'></div>
+				</div>
+			</div>
+		</div>
+
+		<script src="cards.js"></script>
+		<script src="game.js"></script>
+	</body>
+
+
+</html>
