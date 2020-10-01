@@ -21,11 +21,15 @@ var offsetId = 0;
 var hoverCard = "";
 var hoverCardDiv;
 
+var network = {};
+
+var USE_NETWORK = true;
 
 
 var draggingBoard = false;
 
 (function (){
+
 
 	var x;
 	var y;
@@ -141,8 +145,9 @@ var draggingBoard = false;
 		refPoint.style.top = curY + "px";
 	};
 
-	document.getElementById("ponyDrawPile").onclick = drawPonyCard;
-	document.getElementById("shipDrawPile").onclick = drawShipCard;
+	document.getElementById("ponyDrawPile").onclick = requestDrawPony;
+	document.getElementById("shipDrawPile").onclick = requestDrawShip;
+	document.getElementById("goalDrawPile").onclick = requestDrawGoal;
 
 	var shuffles = ["pony","ship","goal"];
 
@@ -150,39 +155,7 @@ var draggingBoard = false;
 	{
 		let id = key+"Shuffle";
 
-		document.getElementById(id).onclick = function()
-		{
-			var discards = model[key+"DiscardPile"];
-			model[key+"DiscardPile"] = model[key+"DrawPile"];
-			model[key+"DrawPile"] = discards;
-
-			randomizeOrder(model[key+"DrawPile"]);
-
-			var discardElement = document.getElementById(key+"DiscardPile");
-
-			if(model[key+"DiscardPile"].length)
-			{
-				var card = model[key+"DiscardPile"][model[key+"DiscardPile"].length-1];
-
-				setCardBackground(discardElement, card);
-			}
-			else
-			{
-				setCardBackground(discardElement, "blank:" + key);
-			}
-			
-
-			var drawElement = document.getElementById(key+"DrawPile");
-			if(model[key+"DrawPile"].length)
-			{
-				drawElement.classList.remove('blank')
-			}
-			else
-			{
-
-				drawElement.classList.add('blank');
-			}
-		}
+		document.getElementById(id).onclick = () => requestSwapShuffle(key)
 	}
 
 	var hand = document.getElementById('hand')
@@ -230,8 +203,10 @@ var draggingBoard = false;
 				{
 					e.preventDefault();
 					div.parentNode.removeChild(div);
+					var [card, startLoc] = e.dataTransfer.getData("text").split(";")
 
-					moveCard(e.dataTransfer.getData("text"), "hand");
+					moveCard(card, startLoc, "hand");
+					broadcastMove(card, startLoc, "hand");
 				}
 
 				hand.appendChild(div);
@@ -251,7 +226,7 @@ function LoadCards()
 	{
 		var nodes = key.split(".");
 		nodes.pop();
-		var urlToImg = "../img/" + nodes.join("/") + "/" + cards[key].url;
+		var urlToImg = "/img/" + nodes.join("/") + "/" + cards[key].url;
 
 		cards[key].fullUrl = urlToImg;
 	}
@@ -259,7 +234,7 @@ function LoadCards()
 
 
 LoadCards();
-LoadGame();
+//LoadGame();
 
 function randomizeOrder(arr)
 {
@@ -278,125 +253,288 @@ function randomizeOrder(arr)
 }
 
 
-function animateCardMove(card, startdiv, endlocation)
+function getPosFromElement(element)
+{
+	var rect = element.getBoundingClientRect();
+	return {top: rect.top +"px", left: rect.left + "px"};
+}
+function getPosFromId( id)
+{
+	var rect = document.getElementById(id).getBoundingClientRect();
+	return {top: rect.top + "px", left: rect.left + "px"};
+}
+
+function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
 {
 	var floatCard = makeCardElement(card);
-	var rect = startdiv.getBoundingClientRect();
-
 	floatCard.style.margin = "0px";
 	floatCard.style.position = "absolute";
-	floatCard.style.top = rect.top + "px"
-	floatCard.style.left = rect.left + "px";
+	floatCard.classList.add('flying');
+	for(var key in startPos)
+		floatCard.style[key] = startPos[key];
+
 	floatCard.style.zIndex = 4;
 	floatCard.style.transition = "top .5s, left .5s";
 	floatCard.style.transitionTimingFunction = "linear";
 
 	document.body.appendChild(floatCard);
-	var enddiv;
-
-	if(endlocation == "hand")
-	{
-		vh = window.innerHeight / 100;
-
-		if(isPony(card))
-		{
-			enddiv = document.getElementById('hand-pony');
-			rect = enddiv.getBoundingClientRect();
-			floatCard.style.top = (rect.top-vh) + "px";
-			floatCard.style.left = (rect.right-vh) + "px";
-		}
-
-		else
-		{
-			enddiv = document.getElementById('hand-ship');
-			rect = enddiv.getBoundingClientRect();
-			floatCard.style.top = (rect.top-vh) + "px";
-			floatCard.style.left = (rect.right-vh) + "px";
-		}
-		
-	}
-
-	else if(endlocation == "ponyDiscardPile")
-	{
-		enddiv = document.getElementById('ponyDiscardPile');
-		rect = enddiv.getBoundingClientRect();
-		floatCard.style.top = rect.top + "px";
-		floatCard.style.left = rect.left + "px";
-	}
-	else if(endlocation == "shipDiscardPile")
-	{
-		enddiv = document.getElementById('shipDiscardPile');
-		rect = enddiv.getBoundingClientRect();
-		floatCard.style.top = rect.top + "px";
-		floatCard.style.left = rect.left + "px";
-	}
-	else
-	{
-		throw Error("Unsupport location: " + endlocation)
-	}
 
 	setTimeout(function(){
+		for(var key in endPos)
+			floatCard.style[key] = endPos[key];
 
-		if(endlocation == "hand")
-		{
-			model.hand.push(card);
-			updateHand();
-		}
-		else if(endlocation == "shipDiscardPile")
-		{
-			model.shipDiscardPile.push(card);
+	},20)
+	
 
-			var element= document.getElementById('shipDiscardPile');
-
-			updateCardElement(element, card, "shipDiscardPile", true, false);
-		}
-		else if(endlocation == "ponyDiscardPile")
-		{
-			model.ponyDiscardPile.push(card);
-
-			var element= document.getElementById('ponyDiscardPile')
-			updateCardElement(element, card, "ponyDiscardPile", true, false);
-		}
-
-		floatCard.parentNode.removeChild(floatCard);
-		enddiv.style.visibility = "visible";
-	}, 500);
-
-
-}
-
-function drawPonyCard()
-{
-	if(model.ponyDrawPile.length)
+	setTimeout(function()
 	{
-
-		var element = document.getElementById("ponyDrawPile");
-		var card = model.ponyDrawPile.pop();
-
-		if(model.ponyDrawPile.length == 0)
-			setCardBackground(element, "blank:pony");
-
-		animateCardMove(card, element, "hand");
-	}
+		endLocationUpdateFn();
+		floatCard.parentNode.removeChild(floatCard);
+	}, 520);
 }
 
-function drawShipCard()
+
+if(!USE_NETWORK)
 {
-	if(model.shipDrawPile.length)
-	{	
-		var element = document.getElementById("shipDrawPile");
-		var card = model.shipDrawPile.pop();
+	network.requestDrawPony = async function()
+	{
+		var len = model.ponyDrawPile.length;
+		if(len)
+			return [len, model.ponyDrawPile.pop()];
+		else
+			return [len, "blank:pony"]
+	}
 
-		if(model.shipDrawPile.length == 0)
-			setCardBackground(element, "blank:pony");
+	network.requestDrawShip = async function()
+	{
+		var len = model.shipDrawPile.length;
+		if(len)
 
-		animateCardMove(card, element, "hand");
+			return [len, model.shipDrawPile.pop()];
+		else
+			return [len, "blank:ship"]
+	}
+
+	network.requestDrawGoal = async function()
+	{
+		var len = model.goalDrawPile.length;
+		if(len)
+		{	
+			var i = 0;
+			while(i < model.currentGoals.length)
+			{
+				if(isBlank(model.currentGoals[i]))
+					break;
+				i++;
+			}
+			
+			if(i >= 3) return;
+
+			model.currentGoals[i] = card;
+
+			if(len <= 1)
+				setCardBackground(document.getElementById("goalDrawPile"), "blank:goal");
+
+			moveCard(
+				card,
+				'goalDrawPile',
+				"goal," + i
+			)
+		}
+	}
+
+	network.requestSwapShuffle(typ) = function()
+	{
+		var drawPile = typ + "DrawPile";
+		var discardPile = typ + "DiscardPile";
+		var discards = model[discardPile];
+		model[discardPile] = model[drawPile];
+		model[drawPile] = discards;
+
+		randomizeOrder(model[drawPile]);
+
+		var discardElement = document.getElementById(discardPile);
+		var updateHandlers =
+		{
+			pony: updatePonyDiscard,
+			ship: updateShipDiscard,
+			goal: updateGoalDiscard
+		}
+
+		updateHandlers[typ]();
+
+		var drawElement = document.getElementById(drawPile);
+		if(model[drawPile].length)
+		{
+			drawElement.classList.remove('blank')
+		}
+		else
+		{
+			drawElement.classList.add('blank');
+		}
 	}
 }
+
+function requestDrawPony()
+{
+	network.requestDrawPony()
+}
+
+
+function requestDrawShip()
+{
+	network.requestDrawShip()
+}
+
+function requestDrawGoal()
+{
+	var i = 0;
+	while(i < model.currentGoals.length)
+	{
+		if(isBlank(model.currentGoals[i]))
+			break;
+		i++;
+	}
+
+	if(i >= 3) return;
+
+	network.requestDrawGoal()
+}
+
+function requestSwapShuffle(typ)
+{
+	network.requestSwapShuffle(typ);
+}
+
+function updatePonyDiscard(cardOnTop)
+{
+	if(model.ponyDrawPileLength == 0)
+		document.getElementById("ponyDrawPile").classList.add('blank');
+	else
+		document.getElementById("ponyDrawPile").classList.remove('blank');
+
+
+	var l = model.ponyDiscardPile.length;
+	var topCard = cardOnTop || (l ? model.ponyDiscardPile[l-1] : "blank:pony");
+
+
+
+	updateCardElement(
+		document.getElementById("ponyDiscardPile"),
+		topCard,
+		"ponyDiscardPile",
+		l > 0, false
+	)
+
+	var element = document.getElementById("ponyDiscardPile");
+	element.addEventListener('click', async function(){
+		
+		if(model.ponyDiscardPile.length)
+		{
+			var card = await openCardSelect("Discarded ponies", model.ponyDiscardPile);
+
+			if(card)
+			{
+				moveCard(card,"ponyDiscardPile", "hand");
+				broadcastMove(card, "ponyDiscardPile", "hand");
+			}
+		}
+
+	});
+}
+
+function updateShipDiscard(tempCard)
+{
+	console.log("updateShipDiscard");
+
+	if(model.shipDrawPileLength == 0)
+		document.getElementById("shipDrawPile").classList.add('blank');
+	else
+		document.getElementById("shipDrawPile").classList.remove('blank');
+
+
+	var l = model.shipDiscardPile.length;
+	var topCard = tempCard || (l ? model.shipDiscardPile[l-1] : "blank:ship");
+
+	updateCardElement(
+		document.getElementById("shipDiscardPile"),
+		topCard,
+		"shipDiscardPile",
+		l > 0, false
+	)
+
+	var element = document.getElementById("shipDiscardPile");
+	element.addEventListener('click', async function(){
+		
+		if(model.shipDiscardPile.length)
+		{
+			var card = await openCardSelect("Discarded ships", model.shipDiscardPile);
+
+			if(card)
+			{
+				moveCard(card,"shipDiscardPile", "hand");
+				broadcastMove(card, "shipDiscardPile", "hand");
+			}
+		}
+
+	});
+}
+
+function updateGoalDiscard(tempCard)
+{
+	if(model.goalDrawPileLength == 0)
+		document.getElementById("goalDrawPile").classList.add('blank');
+	else
+		document.getElementById("goalDrawPile").classList.remove('blank');
+
+	var l = model.goalDiscardPile.length;
+	var topCard = tempCard || (l ? model.goalDiscardPile[l-1] : "blank:goal");
+
+	updateCardElement(
+		document.getElementById("goalDiscardPile"),
+		topCard,
+		"goalDiscardPile",
+		false, false
+	)
+}
+
+function updateWinnings()
+{
+	var element = document.getElementById('winnings');
+	element.innerHTML = "";
+
+	console.log("winnings updated")
+
+	var cardOffset = 2;
+	var offset = model.winnings.length * cardOffset;
+
+	for(var i=0; i < model.winnings.length; i++)
+	{
+		offset -= cardOffset;
+		var card = makeCardElement(model.winnings[i], "winnings");
+		card.style.position = "absolute";
+		card.style.bottom = offset + "vh";
+		card.style.right = "0vh"
+		element.appendChild(card)
+	}
+
+}
+
+function updateGame()
+{
+	updateHand();
+	updateGoals();
+	updateBoard();
+
+	updatePonyDiscard();
+	updateShipDiscard();
+	updateGoalDiscard();
+	updateWinnings();
+}
+
 
 function LoadGame()
 {
-
 	model = {
 		board:{
 			"p,0,0":{
@@ -405,6 +543,7 @@ function LoadGame()
 		},
 		hand:[],
 		currentGoals:[],
+		winnings:[],
 	};
 
 	model.goalDrawPile = [];
@@ -417,15 +556,15 @@ function LoadGame()
 
 	for(var key in cards)
 	{
-		if(key.indexOf(".Goal.") > -1)
+		if(isGoal(key))
 		{
 			model.goalDrawPile.push(key);
 		}
-		else if(key.indexOf(".Pony.") > -1)
+		else if(isPony(key))
 		{	
 			model.ponyDrawPile.push(key)
 		}
-		else if(key.indexOf(".Ship.") > -1)
+		else if(isShip(key))
 		{
 			model.shipDrawPile.push(key);
 		}
@@ -445,15 +584,14 @@ function LoadGame()
 	model.hand.push(model.ponyDrawPile.pop());
 	model.hand.push(model.ponyDrawPile.pop());
 
+
 	model.hand.push(model.shipDrawPile.pop());
 	model.hand.push(model.shipDrawPile.pop());
 	model.hand.push(model.shipDrawPile.pop());
 	
 	//await model from server
 
-	updateHand();
-	updateGoals();
-	updateBoard();
+	updateGame();
 }
 
 // dragHandler is responsible for removing a card from its old location
@@ -464,6 +602,8 @@ function updateCardElement(oldElement, card, location, isDraggable, isDropTarget
 	var div = makeCardElement(card, location, isDraggable, isDropTarget);
 	div.id = oldElement.id;
 	oldElement.parentNode.replaceChild(div, oldElement);
+
+	return div;
 }
 
 
@@ -478,37 +618,28 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 	{	
 		if(isDkeyPressed)
 		{
-			if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(location) > -1)
+			if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile", "winnings"].indexOf(location) > -1)
 				return;
+
 
 			if(isPony(card))
 			{	
-				animateCardMove(card, imgElement, "ponyDiscardPile");
+				moveCard(card, location, "ponyDiscardPile");
+				broadcastMove(card, location, "ponyDiscardPile");
 			}
 			else if(isShip(card))
 			{	
-				animateCardMove(card, imgElement, "shipDiscardPile");
+				moveCard(card, location, "shipDiscardPile");
+				broadcastMove(card, location, "shipDiscardPile");
+			}
+			else if (isGoal(card))
+			{
+				moveCard(card, location, "goalDiscardPile");
+				broadcastMove(card, location, "goalDiscardPile");
 			}
 			else
 			{
 				return;
-			}
-
-			if(isBoardLoc(location))
-			{
-				imgElement.parentNode.removeChild(imgElement);
-				delete model.board[location];
-				updateBoard();
-			}
-			if(isOffsetLoc(location))
-			{
-				imgElement.parentNode.removeChild(imgElement);
-			}
-			if(location == "hand")
-			{
-				var i = model.hand.indexOf(card);
-				model.hand.splice(i, 1);
-				updateHand();
 			}
 		}
 		
@@ -539,8 +670,11 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 			var img = document.createElement('span')
 			e.dataTransfer.setDragImage(img, 0, 0);
 
-			if(isPony(card))
+			console.log(card);
+
+			if(isPonyOrStart(card))
 			{
+				console.log(card);
 				document.getElementById('playingArea').classList.add('draggingPony');
 			}
 
@@ -548,8 +682,6 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 			{
 				document.getElementById('playingArea').classList.add('draggingShip');
 			}
-
-
 
 			var ghostCard = makeCardElement(card);
 			ghostCard.style.opacity = ".5";
@@ -580,13 +712,10 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 			}
 
 			window.addEventListener('dragover', ghostCardDragHandler);
-
 			window.addEventListener('dragend', ghostCardDragEndHandler);
 			window.addEventListener('drop', ghostCardDragEndHandler);
 
 			document.body.appendChild(ghostCard);
-
-
 		}
 	}
 	else
@@ -622,11 +751,12 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 		{	
 			e.preventDefault();
 
-			imgElement.parentNode.removeChild(imgElement);
+			console.log('ondrop');
+			console.log(model.board[location]);
 
-			delete model.board[location].element;
-
-			moveCard(e.dataTransfer.getData("text"), location);
+			var [card, startLoc] = e.dataTransfer.getData("text").split(";")
+			moveCard(card, startLoc, location);
+			broadcastMove(card, startLoc, location);
 			return false;
 		}
 
@@ -671,7 +801,7 @@ function addTrashHandlers(card, element, location)
 		var trash = document.createElement('img');
 		trash.id = "trash";
 		trash.style.height = "5vh";
-		trash.src = "../img/trash.svg";
+		trash.src = "/img/trash.svg";
 		trash.style.position = "absolute";
 		trash.style.bottom = ".5vh"
 		trash.style.right = ".5vh"
@@ -694,7 +824,6 @@ function addTrashHandlers(card, element, location)
 
 		trash.onclick = function()
 		{
-			console.log("trash clicked")
 			
 		}
 	});
@@ -724,16 +853,15 @@ function isValidMove(cardDragged, targetCard, endLocation)
 }
 
 
-function moveCard(cardData, endLocation)
+function moveCard(card, startLocation, endLocation)
 {
-	var card = cardData.split(";")[0];
-	var startLocation = cardData.split(";")[1];
-
-	console.log("startlocation" + startLocation);
+	var startPos;
 
 	if(startLocation == "hand")
 	{
 		var i = model.hand.indexOf(card);
+
+		startPos = getPosFromId("hand" + i);
 
 		if(i == -1) { return };
 		model.hand.splice(i,1);
@@ -742,76 +870,175 @@ function moveCard(cardData, endLocation)
 	}
 	else if(startLocation == "shipDiscardPile")
 	{
-		model.shipDiscardPile.pop();
-
-
-		var topCard = model.shipDiscardPile.length 
-			? model.shipDiscardPile[model.shipDiscardPile.length-1]
-			: "blank:ship"; 
-
-		console.log("updataing shipDiscard " + topCard);
-
-		console.log(document.getElementById("shipDiscardPile"));
-
-		updateCardElement(
-			document.getElementById("shipDiscardPile"),
-			topCard,
-			"shipDiscardPile",
-			topCard != "blank:ship", false
-		)
+		var i = model.shipDiscardPile.indexOf(card);
+		model.shipDiscardPile.splice(i,1);
+		startPos = getPosFromId("shipDiscardPile");
+		updateShipDiscard();
 	}
 	else if(startLocation == "ponyDiscardPile")
 	{
-		model.ponyDiscardPile.pop();
-
-		var topCard = model.ponyDiscardPile.length 
-			? model.ponyDiscardPile[model.ponyDiscardPile.length-1]
-			: "blank:pony"; 
-
-		updateCardElement(
-			document.getElementById("ponyDiscardPile"),
-			topCard,
-			"ponyDiscardPile",
-			topCard != "blank:pony", false
-		)
+		var i = model.ponyDiscardPile.indexOf(card);
+		model.ponyDiscardPile.splice(i,1);
+		startPos = getPosFromId("ponyDiscardPile");
+		updatePonyDiscard();
 	}
-
+	else if(["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1)
+	{
+		startPos = getPosFromId(startLocation)
+	}
+	else if(startLocation == "player")
+	{
+		startPos = {top: "-18vh", left: "50vh"}
+	}
 	else if(isOffsetLoc(startLocation))
 	{
-		var id = startLocation.split(",")[1];
-
-		var element = document.getElementById(id);
-
+		var [_,x,y] = startLocation.split(",")
+		var offsetKey = [card,x,y].join(",");
+		var element = model.offsets[offsetKey];
+		startPos = getPosFromElement(element);
 		element.parentNode.removeChild(element);
+
+		delete model.offsets[offsetKey];
 	}
-	else
+	else if(isBoardLoc(startLocation))
 	{
 		var element = model.board[startLocation].element;
+		startPos = getPosFromElement(element);
 		element.parentNode.removeChild(element);
-		delete model.board[startLocation]
+		delete model.board[startLocation];
+
+		updateBoard();
+	}
+	else if(isGoalLoc(startLocation))
+	{
+		var [_,i] = startLocation.split(',')
+		i = Number(i);
+
+		startPos = getPosFromElement(document.getElementById('currentGoals').getElementsByClassName('card')[i]);
+
+		model.currentGoals[i] = "blank:goal";
+
+		updateGoals();
 	}
 
-	console.log(endLocation)
+	/// removing
+
+	var updateFun = function(){};
+	var endPos;
+	const vh = Math.floor(window.innerHeight/100);
 
 	if(endLocation == "hand")
 	{
 		model.hand.push(card);
-		updateHand();
+
+		if(isPony(card))
+		{
+			var enddiv = document.getElementById('hand-pony');
+			rect = enddiv.getBoundingClientRect();
+			endPos = {
+				top: (rect.top - vh) + "px",
+				left: (rect.right - vh) + "px"
+			}
+
+			console.log()
+		}
+
+		else
+		{
+			var enddiv = document.getElementById('hand-ship');
+			rect = enddiv.getBoundingClientRect();
+			endPos = {
+				top: (rect.top-vh) + "px",
+				left: (rect.right-vh) + "px"
+			}
+		}
+
+		let x = model.hand.length - 1;
+
+		updateFun = () => updateHand(x);
 	}
-	else if(model.board[endLocation].card && isPonyOrStart(model.board[endLocation].card))
+	else if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1)
 	{
-		offsetPonyCard(endLocation, model.board[endLocation].card);
-		delete model.board[endLocation].element;
-		model.board[endLocation].card = card;
+		model[endLocation].push(card);
+
+		updateFun2 = {
+			"pony": updatePonyDiscard,
+			"ship": updateShipDiscard,
+			"goal": updateGoalDiscard
+		}[endLocation.substring(0,4)];
+
+		updateFun = () => updateFun2(card);
+
+		endPos = getPosFromId(endLocation);
+		console.log(endPos);
+	}
+	else if(endLocation == "winnings")
+	{
+
+		model.winnings.push(card);
+		console.log(model.winnings);
+		console.log(card);
+		updateFun = updateWinnings;
+
+		var enddiv = document.getElementById("winnings");
+		rect = enddiv.getBoundingClientRect();
+		endPos = {
+			top: rect.bottom - 18*vh + "px",
+			left: rect.right - 13*vh + "px"
+		}
+	}
+	else if(endLocation == "player")
+	{
+		endPos = {top: "-18vh", left: "50vh"}
+	}
+	else if(isBoardLoc(endLocation))
+	{
+		// element gets generated when updateBoard() is called
+		if(model.board[endLocation])
+		{
+			if(model.board[endLocation].element)
+			{
+				var el = model.board[endLocation].element;
+				el.parentNode.removeChild(el);
+			}
+
+			if(model.board[endLocation].card && isPonyOrStart(model.board[endLocation].card))
+			{
+				offsetPonyCard(endLocation, model.board[endLocation].card);
+			}
+		}
+		
+
+		model.board[endLocation] = {
+			card: card
+		}
+
+		updateFun = updateBoard;	
+	}
+	else if(isGoalLoc(endLocation))
+	{
+		let [_,i] = endLocation.split(',')
+		i = Number(i);
+
+		endPos = getPosFromElement(document.getElementById('currentGoals').getElementsByClassName('card')[i]);
+
+		model.currentGoals[i] = card;
+		updateFun = () => updateGoals(i)
+	}
+
+	// run animation (if applicable)
+	if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1
+		|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
+		|| endLocation == "winnings"
+		|| endLocation == "player"
+	)
+	{
+		animateCardMove(card, startPos, endPos, updateFun);
 	}
 	else
 	{
-		// element gets generated when updateBoard() is called
-		model.board[endLocation].card = card;
+		updateFun();
 	}
-	
-	updateBoard();
-	
 }
 
 function addCardToBoard(key, card)
@@ -837,12 +1064,10 @@ function addCardToBoard(key, card)
 			break;
 		case "sr":
 			imgElement.classList.add('sideways');
-			imgElement.classList.add('ship');
 			imgElement.style.top = y * gridWidth + "vh";
 			imgElement.style.left = x * gridWidth + 22/2 + "vh";
 			break;
 		case "sd":
-			imgElement.classList.add('ship');
 			imgElement.style.top = y * gridWidth + 22/2 + "vh";
 			imgElement.style.left = x * gridWidth + "vh";
 			break;
@@ -862,11 +1087,11 @@ function offsetPonyCard(key, card)
 	var x = Number(pieces[1]);
 	var y = Number(pieces[2]);
 
-	var id = "offset" + offsetId++;
-	var location = `offset,${id},${x},${y}`;
+	
+	var location = `offset,${x},${y}`;
 	var imgElement = makeCardElement(card, location, true);
 
-	imgElement.id = id;
+	model.offsets[card + "," + x + "," + y] = imgElement;
 
 
 	var refPoint = document.getElementById('refPoint');
@@ -883,36 +1108,96 @@ function offsetPonyCard(key, card)
 }
 
 
-function updateGoals()
+function updateGoals(goalNo)
 {
-	var goalDiv = document.getElementById('goals');
+	var goalDiv = document.getElementById('currentGoals');
 
-	goalDiv.innerHTML = "";
+	var start = 0;
+	var end = 3;
 
-	goalDiv.appendChild(makeCardElement(model.currentGoals[0]))
-	goalDiv.appendChild(makeCardElement(model.currentGoals[1]))
-	goalDiv.appendChild(makeCardElement(model.currentGoals[2]))
+	if(goalNo != undefined)
+	{
+		start = goalNo;
+		end = goalNo + 1;
+	}
+	//return;
+
+	for(let i=start; i<end; i++)
+	{
+		let element = updateCardElement(
+			goalDiv.getElementsByClassName('card')[i],
+			model.currentGoals[i], "goal," + i, false, false);
+
+		if(!isBlank(model.currentGoals[i]))
+		{
+			element.addEventListener("mouseenter", function(e)
+			{
+				var img = document.createElement('img');
+				img.id = "takeGoal"
+				img.src= "/img/check.svg";
+				img.style.width = "5vh";
+
+				img.onclick = function()
+				{
+					var card = model.currentGoals[i];
+					moveCard(card, "goal,"+i, "winnings")
+					broadcastMove(card, "goal,"+i, "winnings")
+				}
+
+				element.appendChild(img);
+			})
+
+			element.addEventListener('mouseleave', function(e){
+				var div = document.getElementById('takeGoal')
+				if(div)
+					div.parentNode.removeChild(div);
+			})
+		}
+	}
 }
 
-function updateHand()
+function updateHand(cardIndex)
 {
 	var handDiv = document.getElementById('hand');
 
-	var oldCards = handDiv.getElementsByClassName('card');
 
-	while(oldCards.length)
-	{
-		oldCards[0].parentNode.removeChild(oldCards[0]);
-	}
+	console.log(cardIndex);
+	
 
 	var ponyHand = document.getElementById('hand-pony');
 	var shipHand = document.getElementById('hand-ship')
-
-	for(var i=0; i<model.hand.length; i++)
+	if(cardIndex == undefined)
 	{
-		var cardEl = makeCardElement(model.hand[i], "hand", true);
+		var oldCards = handDiv.getElementsByClassName('card');
 
-		if(isPony(model.hand[i]))
+		while(oldCards.length)
+		{
+			oldCards[0].parentNode.removeChild(oldCards[0]);
+		}
+
+		for(var i=0; i<model.hand.length; i++)
+		{
+			var cardEl = makeCardElement(model.hand[i], "hand", true);
+			cardEl.id = "hand" + i;
+
+			if(isPony(model.hand[i]))
+			{
+				ponyHand.appendChild(cardEl);
+			}
+			else
+			{
+				shipHand.appendChild(cardEl)
+			}
+
+			//addTrashHandlers(model.hand[i], cardEl, "hand");
+		}
+	}
+	else
+	{
+		var cardEl = makeCardElement(model.hand[cardIndex], "hand", true);
+		cardEl.id = "hand" + cardIndex;
+
+		if(isPony(model.hand[cardIndex]))
 		{
 			ponyHand.appendChild(cardEl);
 		}
@@ -920,8 +1205,6 @@ function updateHand()
 		{
 			shipHand.appendChild(cardEl)
 		}
-
-		//addTrashHandlers(model.hand[i], cardEl, "hand");
 	}
 
 	updateCardRowHeight();
@@ -972,7 +1255,6 @@ function updateCardRowHeight()
 }
 
 
-
 function getNeighborKeys(key)
 {
 	var type, x,y;
@@ -1009,6 +1291,8 @@ function getNeighborKeys(key)
 
 function updateBoard()
 {
+	console.log("updating board");
+
 	var refPoint = document.getElementById('refPoint');
 
 	baseDist = window.innerHeight/100;
@@ -1033,6 +1317,8 @@ function updateBoard()
 
 	for(var key in model.board)
 	{
+		console.log(key);
+
 		var type, x,y;
 		[type,x,y] = key.split(",");
 		x = Number(x);
@@ -1071,6 +1357,7 @@ function updateBoard()
 
 		if(!model.board[key].element)
 		{
+			console.log('adding to board ' + card)
 			addCardToBoard(key, card);
 		}
 
@@ -1085,12 +1372,68 @@ function updateBoard()
 			}
 		}
 	}
+
+	for (var key in model.offsets)
+	{
+		if(model.offsets[key] === "")
+		{
+			var [card, _, _] = key.split(",");
+			offsetPonyCard(key, card) // key technically should be p,x,y, but is okay here
+		}
+	}
+}
+
+function openCardSelect(title, cards)
+{
+	function handler(accept, reject)
+	{
+		var div = document.createElement('div');
+		div.id = "cardSelect";
+
+		var h1 = document.createElement('h1');
+		h1.innerHTML = title;
+		div.appendChild(h1);
+
+		var close = document.createElement('img');
+
+		close.src = "/img/close.svg";
+		close.id = "cardSelectCloseButton";
+		close.onclick = function()
+		{
+			div.parentNode.removeChild(div);
+			close.parentNode.removeChild(close);
+			accept();
+		}
+
+		document.body.appendChild(close);
+
+
+		let cards2 = cards.slice();
+
+		cards2.sort();
+
+		for(let card of cards2)
+		{
+			var cardElement = makeCardElement(card);
+			div.appendChild(cardElement);
+
+			cardElement.onclick = function()
+			{
+				div.parentNode.removeChild(div);
+				close.parentNode.removeChild(close);
+				accept(card);
+			}
+		}
+
+		document.body.appendChild(div);
+	}
+	return new Promise(handler);
 }
 
 
 function isPonyOrStart(card)
 {
-	return card.indexOf(".Pony.") >= 0 || card.indexOf(".Start." >= 0);
+	return card.indexOf(".Pony.") >= 0 || card.indexOf(".Start.") >= 0;
 }
 
 function isPony(card)
@@ -1103,9 +1446,19 @@ function isBlank(card)
 	return card.startsWith("blank:");
 }
 
+function isAnon(card)
+{
+	return card.startsWith("anon:");
+}
+
 function isShip(card)
 {
 	return card.indexOf(".Ship.") >= 0;
+}
+
+function isGoal(card)
+{
+	return card.indexOf(".Goal.") >= 0;
 }
 
 
@@ -1119,23 +1472,47 @@ function isOffsetLoc(location)
 	return location.startsWith("offset,");
 }
 
+function isGoalLoc(location)
+{
+	return location.startsWith("goal,");
+}
+
+
 function setCardBackground(element, card)
 {
-	if(isBlank(card))
+	console.log(card);
+	if(isAnon(card))
 	{
-		console.log(card);
-		element.style.backgroundImage = "";
-		element.classList.add('blank');
+		element.classList.remove('blank');
 
+		if(card == "anon:ship")
+			element.classList.add('ship');
+		else if(card == "anon:pony")
+			element.classList.add('pony');
+		else if(card == "anon:goal")
+			element.classList.add('goal');
+
+		removeShiftHover(element);
+	}
+	else if(isBlank(card))
+	{
 		if(card == "blank:ship")
 			element.classList.add('ship');
 		else if(card == "blank:pony")
 			element.classList.add('pony');
+		else if(card == "blank:goal")
+			element.classList.add('goal');
+
+		element.style.backgroundImage = "";
+		element.classList.add('blank');
 
 		removeShiftHover(element);
 	}
 	else
 	{
+		if(isShip(card))
+			element.classList.add('ship')
+
 		element.style.backgroundImage = "url(\"" + cards[card].fullUrl + "\")";
 
 		addShiftHover(card, element);
@@ -1166,18 +1543,15 @@ function enlargeCard(cardDiv)
 
 	if(y < 10)
 		y = 10;
-
 	if(y + height +10 > window.innerHeight)
 		y = window.innerHeight - height - 10;
-
-
 
 
 	giantCard.style.top = y + "px"
 	giantCard.style.left = x + "px";
 	giantCard.style.width = width + "px";
 	giantCard.style.height = height + "px";
-	giantCard.style.zIndex = 3;
+	giantCard.style.zIndex = "6";
 	giantCard.style.borderRadius = "15px";
 	giantCard.style.backgroundPosition = "center";
 	giantCard.style.backgroundSize = "cover";

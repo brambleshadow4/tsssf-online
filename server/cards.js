@@ -1,4 +1,4 @@
-var cards = {
+exports.cards = {
 	"Core.Start.FanficAuthorTwilight":{url:"START_Fanfic Author Twilight.png"},
 
 	"Core.Pony.AloeAndLotus":{url:"Pony_Aloe & Lotus.png"},

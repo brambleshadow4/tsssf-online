@@ -1,5 +1,10 @@
 model:
-	board:{}
+	board:{
+
+	}
+	offsets:{
+		key of form <card>,<x>,<y>
+	}
 	hand:[]
 	currentGoals:[]
 	goalDrawPile:[];
@@ -7,13 +12,15 @@ model:
 	ponyDrawPile
 	shipDiscardPile
 	shipDrawPile
+	winnings:[]
+	isItMyTurn
 
 
 
 LoadCards()
 LoadGame()
 randomizeOrder(arr)
-makeCardElement(card, dragLocation, dropLocation)
+makeCardElement(card, location, isDraggable, isDropTarget)
 isValidMove(cardDragged, targetCard, endLocation)
 moveCard(cardData, endLocation)
 addCardToBoard(location, card)
@@ -25,20 +32,33 @@ animateCardMove(card, startdiv, endlocation)
 
 getNeighborKeys(key)
 
+openCardSelect(cards)
+
 updateBoard()
 updateGoals()
 updateHand()
 
+isBoardLoc()
+isOffsetLoc()
+isGoalLoc()
 
-placement = p | sr | sb
 
-location = hand | board:[placement, x, y] | offset:[id, x, y]
+placement = "p" | "sr" | "sb"
+
 
 locations = 
 	| "ponyDiscardPile" 
+	| "goalDiscardPile" 
+	| "shipDiscardPile"
+	| "ponyDrawPile" 
+	| "goalDrawPile" 
+	| "shipDrawPile"
+	| "winnings" 
 	| "hand" 
+	| "player"
 	| <placement>,<x>,<y> 
-	| "offset",<id>,<x>,<y>
+	| "offset",<x>,<y>
+	| "goal",<pos>
 
 blankType = "pony" | "ship"
 card = "blank:"<blankType> | <card-name>

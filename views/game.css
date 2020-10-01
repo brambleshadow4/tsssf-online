@@ -1,3 +1,16 @@
+/**
+	Z indexes
+	
+	6: giant card;
+	5: card select popup
+	4: animated card moving
+	3: shuffle buttons, hand drop zone, offset pony cards
+	2: pony + goal cards
+	1: ship cards
+ */
+
+
+
 #playingArea
 {
 	background-color: #AAAAFF;
@@ -79,7 +92,7 @@ body
 	height: 18vh;
 	width: 13vh;
 
-	background-image: url(../img/blank.svg);
+	background-image: url(/img/blank.svg);
 	background-position: center; 
 	background-size: cover;
 
@@ -109,27 +122,28 @@ body
 }
 
 
-.card.pony
+
+.card.pony, .card.pony.flying
 {
-	background-image: url(../img/Pony-Back.png);
+	background-image: url(/img/Pony-Back.png);
 }
 
-.card.ship
+.card.ship, .card.ship.flying
 {
-	background-image: url(../img/Ship-Back.png);
+	background-image: url(/img/Ship-Back.png);
 	z-index: 1;
 }
 
-.card.goal
+.card.goal, .card.goal.flying
 {
-	background-image: url(../img/Goal-Back.png);
+	background-image: url(/img/Goal-Back.png);
 }
 
-.card.blank, #playingArea .card.blank
+.card.blank
 {
-	background-image: url(../img/blank.svg);
-	
+	background-image: url(/img/blank.svg);
 }
+
 
 
 
@@ -201,4 +215,53 @@ body
 	height: 18vh;
 	display: inline-block;
 	vertical-align: middle;
+}
+
+#cardSelect
+{
+	font-size: initial;
+	border: solid 2px black;
+	z-index: 5;
+	position: absolute;
+	top: 10vh;
+	bottom: 10vh;
+	left: 10vh;
+	right: 10vh;
+
+	background-color: white;
+
+	overflow-y: auto;
+}
+
+#cardSelectCloseButton
+{
+	width: 10vh;
+	height: 10vh;
+	top: 7vh;
+	right: 7vh;
+	z-index: 6;
+
+	position: absolute;
+	cursor: pointer;
+}
+
+#cardSelect h1
+{
+	padding-left: 1vh;
+}
+
+#takeGoal
+{
+	position: absolute;
+	bottom: 1vh;
+	right: 1vh;
+}
+
+#winnings
+{
+	position: absolute;
+	bottom: 0vh;
+	right: 0vh;
+
+	background-color: red;
 }

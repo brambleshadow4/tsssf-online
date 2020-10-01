@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			body
+			{
+				text-align: center;
+				display: flex;
+				flex-direction: row;
+
+				justify-content: center;
+			}
+
+			#right
+			{
+				width: 500px;
+			}
+
+			img
+			{
+				width: 300px;
+			}
+
+			button
+			{
+				font-size: 15pt;
+				margin: 10px;
+				padding: 10px 20px
+
+			}
+		</style>
+	</head>
+
+	<body>
+		<div>
+			<h1>Twilight Sparkle's<br>Secret Shipfic Folder<br>Online</h1>
+
+			<h2>Beta 0.1.0</h2>
+			<div>
+				<div><button onclick="join()">Join Game</button></div>
+				<div><button onclick="host()">Host Game</button></div>
+			</div>
+		</div>
+		<div id='right'>
+			<img src="../img/tsssf-box.png">
+		</div>
+		<script>
+			function host()
+			{
+				console.log();
+				window.location.href = "/host"
+			}
+
+			function join()
+			{
+				window.location.href = "/join"
+			}
+		</script>
+	</body>
+</html>
