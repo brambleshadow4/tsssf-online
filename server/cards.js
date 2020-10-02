@@ -1,4 +1,4 @@
-exports.cards = {
+var cards = {
 	"Core.Start.FanficAuthorTwilight":{url:"START_Fanfic Author Twilight.png"},
 
 	"Core.Pony.AloeAndLotus":{url:"Pony_Aloe & Lotus.png"},
@@ -164,5 +164,6 @@ exports.cards = {
 	"Core.Goal.TheQuietGame":{url:"Goal_The Quiet Game.png"},
 	"Core.Goal.TimeTravelersAmongUs":{url:"Goal_Time Travelers Among Us.png"},
 	"Core.Goal.WellMaybe":{url:"Goal_Well...Maybe.png"},
-
 }
+
+export default cards;

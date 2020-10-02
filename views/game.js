@@ -12,212 +12,217 @@
 
 */
 
+import cards from "/cards.js";
+import {
+	isPony, 
+	isGoal, 
+	isShip, 
+	isGoalLoc, 
+	isBoardLoc,
+	isOffsetLoc
+} from "/lib.js";
+import {broadcastMove} from "/network.js";
+
+
+
 var isDkeyPressed = false;
 var isShiftPressed = false;
-var model;
-var serverModel;
+
 var offsetId = 0;
 
 var hoverCard = "";
 var hoverCardDiv;
 
-var network = {};
 
 var USE_NETWORK = true;
 
 
 var draggingBoard = false;
 
-(function (){
+
+var x;
+var y;
+
+draggingBoard= false;
+
+var playingArea = document.getElementById('playingArea');
 
 
-	var x;
-	var y;
+playingArea.onmousedown = function(e)
+{
+	draggingBoard = true;
+	x = e.clientX;
+	y = e.clientY;
+};
 
-	draggingBoard= false;
+playingArea.onmouseup = function(e)
+{
+	draggingBoard = false;
+}
 
-	var playingArea = document.getElementById('playingArea');
-	
-
-	playingArea.onmousedown = function(e)
+playingArea.onmousemove = function(e)
+{
+	if(draggingBoard)
 	{
-		draggingBoard = true;
+		var difX = x - e.clientX;
+		var difY = y - e.clientY;
 		x = e.clientX;
 		y = e.clientY;
-	};
-
-	playingArea.onmouseup = function(e)
-	{
-		draggingBoard = false;
-	}
-
-	playingArea.onmousemove = function(e)
-	{
-		if(draggingBoard)
-		{
-			var difX = x - e.clientX;
-			var difY = y - e.clientY;
-			x = e.clientX;
-			y = e.clientY;
-
-			var refPoint = document.getElementById('refPoint');
-
-			var curX = Number(refPoint.style.left.substring(0, refPoint.style.left.length-2));
-			var curY = Number(refPoint.style.top.substring(0, refPoint.style.top.length-2));
-
-			refPoint.style.left = curX - difX + "px"
-			refPoint.style.top = curY - difY + "px"
-
-		}
-	}
-
-	var zoomScale = 1;
-
-	window.addEventListener('keydown', function(e){
-
-		if(e.key == "D" || e.key == "d")
-		{
-			isDkeyPressed = true;
-		}
-
-		if(e.key == "Shift")
-		{
-			isShiftPressed = true;
-			if(hoverCard.length)
-				enlargeCard();
-		}
-	});
-
-	window.addEventListener('keyup', function(e){
-
-		if(e.key == "D" || e.key == "d")
-		{
-			isDkeyPressed = false;
-		}
-
-		if(e.key == "Shift")
-		{
-			isShiftPressed = false;
-			unenlargeCard();
-		}
-	});
-
-
-	playingArea.onwheel = function(e)
-	{
-		e.preventDefault();
-
-		//console.log(e);
 
 		var refPoint = document.getElementById('refPoint');
-		var playingArea = document.getElementById('playingArea');
 
 		var curX = Number(refPoint.style.left.substring(0, refPoint.style.left.length-2));
 		var curY = Number(refPoint.style.top.substring(0, refPoint.style.top.length-2));
 
-		curX -= playingArea.clientWidth/2;
-		curY -= playingArea.clientHeight/2;
+		refPoint.style.left = curX - difX + "px"
+		refPoint.style.top = curY - difY + "px"
 
-		curX /= zoomScale;
-		curY /= zoomScale;
+	}
+}
 
-		if(Math.sign(e.deltaY) > 0)
-		{
-			zoomScale = Math.max(zoomScale-.1, .2);
+var zoomScale = 1;
 
-			refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
-		}
+window.addEventListener('keydown', function(e){
 
-		if(Math.sign(e.deltaY) < 0)
-		{
-			zoomScale = Math.min(zoomScale+.1, 2);
-
-			refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
-		}
-
-		curX *= zoomScale;
-		curY *= zoomScale;
-
-		curX += playingArea.clientWidth/2;
-		curY += playingArea.clientHeight/2;
-
-		refPoint.style.left = curX + "px";
-		refPoint.style.top = curY + "px";
-	};
-
-	document.getElementById("ponyDrawPile").onclick = requestDrawPony;
-	document.getElementById("shipDrawPile").onclick = requestDrawShip;
-	document.getElementById("goalDrawPile").onclick = requestDrawGoal;
-
-	var shuffles = ["pony","ship","goal"];
-
-	for(let key of shuffles)
+	if(e.key == "D" || e.key == "d")
 	{
-		let id = key+"Shuffle";
-
-		document.getElementById(id).onclick = () => requestSwapShuffle(key)
+		isDkeyPressed = true;
 	}
 
-	var hand = document.getElementById('hand')
-	hand.ondragover = function(e)
+	if(e.key == "Shift")
 	{
-		var data = e.dataTransfer.getData("text").split(";")
-		var draggedCard = data[0];
-		var location = data[1];
+		isShiftPressed = true;
+		if(hoverCard.length)
+			enlargeCard();
+	}
+});
 
-		if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
-		{
-			e.preventDefault();
-		}
+window.addEventListener('keyup', function(e){
+
+	if(e.key == "D" || e.key == "d")
+	{
+		isDkeyPressed = false;
 	}
 
-
-	var inDragZone = false;
-	hand.ondragenter = function(e)
+	if(e.key == "Shift")
 	{
-		var data = e.dataTransfer.getData("text").split(";")
-		var draggedCard = data[0];
-		var location = data[1];
-		if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
+		isShiftPressed = false;
+		unenlargeCard();
+	}
+});
+
+
+playingArea.onwheel = function(e)
+{
+	e.preventDefault();
+
+	//console.log(e);
+
+	var refPoint = document.getElementById('refPoint');
+	var playingArea = document.getElementById('playingArea');
+
+	var curX = Number(refPoint.style.left.substring(0, refPoint.style.left.length-2));
+	var curY = Number(refPoint.style.top.substring(0, refPoint.style.top.length-2));
+
+	curX -= playingArea.clientWidth/2;
+	curY -= playingArea.clientHeight/2;
+
+	curX /= zoomScale;
+	curY /= zoomScale;
+
+	if(Math.sign(e.deltaY) > 0)
+	{
+		zoomScale = Math.max(zoomScale-.1, .2);
+
+		refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
+	}
+
+	if(Math.sign(e.deltaY) < 0)
+	{
+		zoomScale = Math.min(zoomScale+.1, 2);
+
+		refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
+	}
+
+	curX *= zoomScale;
+	curY *= zoomScale;
+
+	curX += playingArea.clientWidth/2;
+	curY += playingArea.clientHeight/2;
+
+	refPoint.style.left = curX + "px";
+	refPoint.style.top = curY + "px";
+};
+
+document.getElementById("ponyDrawPile").onclick = requestDrawPony;
+document.getElementById("shipDrawPile").onclick = requestDrawShip;
+document.getElementById("goalDrawPile").onclick = requestDrawGoal;
+
+var shuffles = ["pony","ship","goal"];
+
+for(let key of shuffles)
+{
+	let id = key+"Shuffle";
+
+	document.getElementById(id).onclick = () => requestSwapShuffle(key)
+}
+
+var hand = document.getElementById('hand')
+hand.ondragover = function(e)
+{
+	var data = dataTransferVar.split(";")
+	var draggedCard = data[0];
+	var location = data[1];
+
+	if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
+	{
+		e.preventDefault();
+	}
+}
+
+
+var inDragZone = false;
+hand.ondragenter = function(e)
+{
+	var data = dataTransferVar.split(";")
+	var draggedCard = data[0];
+	var location = data[1];
+	if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
+	{
+		if(!document.getElementById('handDropzone'))
 		{
-			if(!document.getElementById('handDropzone'))
+			var div = document.createElement('div');
+			div.id="handDropzone";
+			div.style.position = "absolute";
+			div.style.top = "0px"
+			div.style.bottom = "0px";
+			div.style.left = "0px";
+			div.style.right = "0px";
+			div.style.zIndex = "3";
+			div.style.backgroundColor = "rgba(0,128,0,.5)";
+
+			div.ondragleave = function(e)
 			{
-				var div = document.createElement('div');
-				div.id="handDropzone";
-				div.style.position = "absolute";
-				div.style.top = "0px"
-				div.style.bottom = "0px";
-				div.style.left = "0px";
-				div.style.right = "0px";
-				div.style.zIndex = "3";
-				div.style.backgroundColor = "rgba(0,128,0,.5)";
-
-				div.ondragleave = function(e)
-				{
-					var div = document.getElementById('handDropzone');
-					if(div)
-						div.parentNode.removeChild(div);
-				}
-
-				div.ondrop = function(e)
-				{
-					e.preventDefault();
+				var div = document.getElementById('handDropzone');
+				if(div)
 					div.parentNode.removeChild(div);
-					var [card, startLoc] = e.dataTransfer.getData("text").split(";")
-
-					moveCard(card, startLoc, "hand");
-					broadcastMove(card, startLoc, "hand");
-				}
-
-				hand.appendChild(div);
 			}
-			
+
+			div.ondrop = function(e)
+			{
+				e.preventDefault();
+				div.parentNode.removeChild(div);
+				var [card, startLoc] = dataTransferVar.split(";")
+
+				moveCard(card, startLoc, "hand");
+				broadcastMove(card, startLoc, "hand");
+			}
+
+			hand.appendChild(div);
 		}
+		
 	}
-
-
-})();
-
+}
 
 
 function LoadCards()
@@ -343,7 +348,7 @@ if(!USE_NETWORK)
 		}
 	}
 
-	network.requestSwapShuffle(typ) = function()
+	network.requestSwapShuffle = function(typ)
 	{
 		var drawPile = typ + "DrawPile";
 		var discardPile = typ + "DiscardPile";
@@ -406,7 +411,7 @@ function requestSwapShuffle(typ)
 	network.requestSwapShuffle(typ);
 }
 
-function updatePonyDiscard(cardOnTop)
+export function updatePonyDiscard(cardOnTop)
 {
 	if(model.ponyDrawPileLength == 0)
 		document.getElementById("ponyDrawPile").classList.add('blank');
@@ -443,9 +448,8 @@ function updatePonyDiscard(cardOnTop)
 	});
 }
 
-function updateShipDiscard(tempCard)
+export function updateShipDiscard(tempCard)
 {
-	console.log("updateShipDiscard");
 
 	if(model.shipDrawPileLength == 0)
 		document.getElementById("shipDrawPile").classList.add('blank');
@@ -480,7 +484,7 @@ function updateShipDiscard(tempCard)
 	});
 }
 
-function updateGoalDiscard(tempCard)
+export function updateGoalDiscard(tempCard)
 {
 	if(model.goalDrawPileLength == 0)
 		document.getElementById("goalDrawPile").classList.add('blank');
@@ -498,12 +502,10 @@ function updateGoalDiscard(tempCard)
 	)
 }
 
-function updateWinnings()
+export function updateWinnings()
 {
 	var element = document.getElementById('winnings');
 	element.innerHTML = "";
-
-	console.log("winnings updated")
 
 	var cardOffset = 2;
 	var offset = model.winnings.length * cardOffset;
@@ -520,7 +522,7 @@ function updateWinnings()
 
 }
 
-function updateGame()
+export function updateGame()
 {
 	updateHand();
 	updateGoals();
@@ -607,6 +609,8 @@ function updateCardElement(oldElement, card, location, isDraggable, isDropTarget
 }
 
 
+let dataTransferVar = "stupid";
+
 function makeCardElement(card, location, isDraggable, isDropTarget)
 {
 	var imgElement = document.createElement('div');
@@ -645,6 +649,8 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 		
 	}
 
+	
+
 	if(isDraggable)
 	{
 		imgElement.draggable = true;
@@ -665,16 +671,15 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 
 			//e.preventDefault();
 			draggingBoard = false;
-			e.dataTransfer.setData("text", card + ";" + location);
+
+			dataTransferVar = card + ";" + location;
 
 			var img = document.createElement('span')
 			e.dataTransfer.setDragImage(img, 0, 0);
 
-			console.log(card);
 
 			if(isPonyOrStart(card))
 			{
-				console.log(card);
 				document.getElementById('playingArea').classList.add('draggingPony');
 			}
 
@@ -728,7 +733,8 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 	{
 		imgElement.ondragover= function(e)
 		{
-			var draggedCard = e.dataTransfer.getData("text").split(";")[0];
+			var draggedCard = dataTransferVar.split(";")[0];
+
 
 			if(isValidMove(draggedCard, card))
 				e.preventDefault();
@@ -736,7 +742,8 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 
 		imgElement.ondragenter= function(e)
 		{
-			var draggedCard = e.dataTransfer.getData("text").split(";")[0];
+			var draggedCard = dataTransferVar.split(";")[0];
+
 
 			if(isValidMove(draggedCard, card))
 			{
@@ -751,10 +758,7 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 		{	
 			e.preventDefault();
 
-			console.log('ondrop');
-			console.log(model.board[location]);
-
-			var [card, startLoc] = e.dataTransfer.getData("text").split(";")
+			var [card, startLoc] = dataTransferVar.split(";")
 			moveCard(card, startLoc, location);
 			broadcastMove(card, startLoc, location);
 			return false;
@@ -846,14 +850,14 @@ function isValidMove(cardDragged, targetCard, endLocation)
 {
 	if(cardDragged == targetCard) return false;
 
-	return (targetCard == "blank:ship" && (cardDragged.indexOf(".Ship.") > -1 ))
-		|| (targetCard == "blank:pony" && (cardDragged.indexOf(".Pony.") > -1 || cardDragged.indexOf(".Start.") > -1)
-		|| (targetCard.indexOf(".Pony.") > -1 && (cardDragged.indexOf(".Pony.") > -1 || cardDragged.indexOf(".Start.") > -1))
+	return (targetCard == "blank:ship" && isShip(cardDragged)
+		|| (targetCard == "blank:pony" && isPonyOrStart(cardDragged))
+		|| (isPonyOrStart(targetCard) && isPonyOrStart(cardDragged))
 	);
 }
 
 
-function moveCard(card, startLocation, endLocation)
+export function moveCard(card, startLocation, endLocation)
 {
 	var startPos;
 
@@ -934,19 +938,18 @@ function moveCard(card, startLocation, endLocation)
 		if(isPony(card))
 		{
 			var enddiv = document.getElementById('hand-pony');
-			rect = enddiv.getBoundingClientRect();
+			var rect = enddiv.getBoundingClientRect();
 			endPos = {
 				top: (rect.top - vh) + "px",
 				left: (rect.right - vh) + "px"
 			}
 
-			console.log()
 		}
 
 		else
 		{
 			var enddiv = document.getElementById('hand-ship');
-			rect = enddiv.getBoundingClientRect();
+			var rect = enddiv.getBoundingClientRect();
 			endPos = {
 				top: (rect.top-vh) + "px",
 				left: (rect.right-vh) + "px"
@@ -961,7 +964,7 @@ function moveCard(card, startLocation, endLocation)
 	{
 		model[endLocation].push(card);
 
-		updateFun2 = {
+		var updateFun2 = {
 			"pony": updatePonyDiscard,
 			"ship": updateShipDiscard,
 			"goal": updateGoalDiscard
@@ -970,14 +973,11 @@ function moveCard(card, startLocation, endLocation)
 		updateFun = () => updateFun2(card);
 
 		endPos = getPosFromId(endLocation);
-		console.log(endPos);
 	}
 	else if(endLocation == "winnings")
 	{
 
 		model.winnings.push(card);
-		console.log(model.winnings);
-		console.log(card);
 		updateFun = updateWinnings;
 
 		var enddiv = document.getElementById("winnings");
@@ -1158,11 +1158,7 @@ function updateGoals(goalNo)
 
 function updateHand(cardIndex)
 {
-	var handDiv = document.getElementById('hand');
-
-
-	console.log(cardIndex);
-	
+	var handDiv = document.getElementById('hand');	
 
 	var ponyHand = document.getElementById('hand-pony');
 	var shipHand = document.getElementById('hand-ship')
@@ -1291,14 +1287,12 @@ function getNeighborKeys(key)
 
 function updateBoard()
 {
-	console.log("updating board");
-
 	var refPoint = document.getElementById('refPoint');
 
-	baseDist = window.innerHeight/100;
+	var baseDist = window.innerHeight/100;
 
-	cardLong = 18*baseDist;
-	cardShort = 13*baseDist;
+	var cardLong = 18*baseDist;
+	var cardShort = 13*baseDist;
 
 	if(!refPoint)
 	{
@@ -1313,11 +1307,10 @@ function updateBoard()
 	}
 
 
-	gridDist = 30*baseDist;
+	var gridDist = 30*baseDist;
 
 	for(var key in model.board)
 	{
-		console.log(key);
 
 		var type, x,y;
 		[type,x,y] = key.split(",");
@@ -1357,7 +1350,6 @@ function updateBoard()
 
 		if(!model.board[key].element)
 		{
-			console.log('adding to board ' + card)
 			addCardToBoard(key, card);
 		}
 
@@ -1436,11 +1428,6 @@ function isPonyOrStart(card)
 	return card.indexOf(".Pony.") >= 0 || card.indexOf(".Start.") >= 0;
 }
 
-function isPony(card)
-{
-	return card.indexOf(".Pony.") >= 0;
-}
-
 function isBlank(card)
 {
 	return card.startsWith("blank:");
@@ -1451,36 +1438,10 @@ function isAnon(card)
 	return card.startsWith("anon:");
 }
 
-function isShip(card)
-{
-	return card.indexOf(".Ship.") >= 0;
-}
-
-function isGoal(card)
-{
-	return card.indexOf(".Goal.") >= 0;
-}
-
-
-function isBoardLoc(location)
-{
-	return location.startsWith("p,") || location.startsWith("sr,") || location.startsWith("sd,");
-}
-
-function isOffsetLoc(location)
-{
-	return location.startsWith("offset,");
-}
-
-function isGoalLoc(location)
-{
-	return location.startsWith("goal,");
-}
 
 
 function setCardBackground(element, card)
 {
-	console.log(card);
 	if(isAnon(card))
 	{
 		element.classList.remove('blank');

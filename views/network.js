@@ -1,87 +1,95 @@
+import {
+	updateGame, moveCard, updatePonyDiscard, updateShipDiscard, updateGoalDiscard
+} from "/game.js";
+
 var socket;
 
 var pendingRequests = [];
 
-(function()
+
+var host = window.location.host.replace(/:.*/,"") + ":8001";
+
+socket = new WebSocket("ws://" + host + "/" + window.location.search);
+
+socket.addEventListener("open", function()
 {
-	var host = window.location.host.replace(/:.*/,"") + ":8001";
+	console.log("Socket opened successfully!")
 
-	socket = new WebSocket("ws://" + host + "/" + window.location.search);
+	socket.send("requestmodel;" + (localStorage["playerID"] || 0))
+});
 
-	socket.addEventListener("open", function()
+socket.addEventListener("close", function(){
+	console.log("closed")
+})
+
+socket.addEventListener('message', function (event)
+{
+	console.log(event.data);
+
+	if(event.data.startsWith('registered;'))
 	{
-		console.log("Socket opened successfully!")
+		var [_,id] = event.data.split(";");
+		localStorage["playerID"] = id;
 
-		socket.send("requestmodel;" + (sessionStorage["playerID"] || 0))
-	});
+	}
 
-	socket.addEventListener("close", function(){
-		console.log("closed")
-	})
-
-	socket.addEventListener('message', function (event)
+	if(event.data.startsWith("model;"))
 	{
-		console.log(event.data);
-
-		if(event.data.startsWith("model;"))
-		{
-			model = JSON.parse(event.data.substring(6));
-			sessionStorage["playerID"] = model.playerID;
-			updateGame();
-		}
-
-		if(event.data.startsWith("move;"))
-		{
-			var [_, card, startLocation, endLocation] = event.data.split(";");
-			
-			moveCard(card, startLocation, endLocation);
-		}
 
 
-		if(event.data.startsWith("draw;"))
-		{
-			var [_, typ, count] = event.data.split(";");
+		model = JSON.parse(event.data.substring(6));
+		
+		updateGame();
+	}
 
-			model[typ+ "DrawPileLength"] = count;
-
-			var funs ={
-				"pony": updatePonyDiscard,
-				"ship": updateShipDiscard,
-				"goal": updateGoalDiscard
-			};
-			funs[typ]();
-		}
-
-		if(event.data.startsWith("swapshuffle;"))
-		{
-			var [_, type, count, ...cards] = event.data.split(";");
-
-			model[type+"DrawPileLength"] = count;
-			model[type+"DiscardPile"] = cards;
-
-			var funs ={
-				"pony": updatePonyDiscard,
-				"ship": updateShipDiscard,
-				"goal": updateGoalDiscard
-			};
-			funs[type]();
-		}
-	});
-
-})();
+	if(event.data.startsWith("move;"))
+	{
+		var [_, card, startLocation, endLocation] = event.data.split(";");
+		
+		moveCard(card, startLocation, endLocation);
+	}
 
 
-function broadcastMove(card, startLocation, endLocation)
+	if(event.data.startsWith("draw;"))
+	{
+		var [_, typ, count] = event.data.split(";");
+
+		model[typ+ "DrawPileLength"] = count;
+
+		var funs ={
+			"pony": updatePonyDiscard,
+			"ship": updateShipDiscard,
+			"goal": updateGoalDiscard
+		};
+		funs[typ]();
+	}
+
+	if(event.data.startsWith("swapshuffle;"))
+	{
+		var [_, type, count, ...cards] = event.data.split(";");
+
+		model[type+"DrawPileLength"] = count;
+		model[type+"DiscardPile"] = cards;
+
+		var funs ={
+			"pony": updatePonyDiscard,
+			"ship": updateShipDiscard,
+			"goal": updateGoalDiscard
+		};
+		funs[type]();
+	}
+});
+
+
+
+export function broadcastMove(card, startLocation, endLocation)
 {
 	broadcast("move;" + card + ";" + startLocation + ";" + endLocation);
 }
 
 function broadcast(message)
 {
-	if(model.isItMyTurn)
-	{
-		socket.send(message);
-	}
+	socket.send(message);
 }
 
 network.requestDrawPony = function()
@@ -102,6 +110,5 @@ network.requestDrawGoal = function()
 
 network.requestSwapShuffle = function(typ)
 {
-	console.log("swap shuffle");
 	broadcast("swapshuffle;" + typ);
 }

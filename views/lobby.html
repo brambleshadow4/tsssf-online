@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link href="/lobby.css" type="text/css" rel="stylesheet" />
+
+	</head>
+	<body>
+
+		<div class='main'>
+			<div>
+				<p>Invite other players to join with this link</p>
+				<input id='inviteURL' readonly />
+
+				<div id='chooseName'>
+
+					<h2 class='chooseAName'>Choose a name</h2>
+					<input id='playerName' maxlength="20" />
+					<button onclick='register();'>Join</button>
+
+				</div>
+
+				<div class="off" id='startButtonArea'>
+					<button onclick="startGame();">Start Game</button>
+				</div>
+			</div>
+			<div class='playerArea'>
+				<h2>Players</h2>
+				<div id='playerList'></div>
+			</div>
+		</div>
+
+		<script src="/lobby.js"></script>
+	</body>
+</html>
