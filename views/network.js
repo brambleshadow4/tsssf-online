@@ -3,7 +3,6 @@ import {
 } from "/game.js";
 
 var socket;
-
 var pendingRequests = [];
 
 
@@ -45,10 +44,7 @@ socket.addEventListener('message', function (event)
 
 	if(event.data.startsWith("model;"))
 	{
-
-
-		model = JSON.parse(event.data.substring(6));
-		
+		model = JSON.parse(event.data.substring(6));	
 		updateGame();
 	}
 
@@ -58,7 +54,6 @@ socket.addEventListener('message', function (event)
 		
 		moveCard(card, startLocation, endLocation);
 	}
-
 
 	if(event.data.startsWith("draw;"))
 	{
