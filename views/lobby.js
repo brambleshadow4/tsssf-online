@@ -1,15 +1,16 @@
 document.getElementById('inviteURL').value = window.location.href;
 
 
-var host = window.location.host.replace(/:.*/,"") + ":8001";
+var host = window.location.host.replace(/:.*/,"") + ":8080";
 var ishost = false;
-
+var sentName = false;
 
 socket = new WebSocket("ws://" + host + "/" + window.location.search);
 
 socket.addEventListener("open", function()
 {
 	socket.send("ishost;");
+	socket.send("register;Player");
 
 	//
 });
@@ -28,17 +29,14 @@ socket.addEventListener("message", function()
 		var [_,id] = event.data.split(";")
 		localStorage["playerID"] = id;
 
-		document.getElementById('chooseName').classList.add("off");
+		if(sentName)
+			document.getElementById('chooseName').classList.add("off");
 	}
 
 	if(event.data.startsWith("ishost;"))
 	{
 		var [_,val] = event.data.split(";")
 		ishost = val == "1"? true : false;
-
-		console.log(val);
-
-		console.log(ishost);
 	}
 
 	if(event.data.startsWith("startgame;"))
@@ -59,7 +57,7 @@ socket.addEventListener("message", function()
 			list.innerHTML += "<div>" + name.replace(/</g, "&lt;") + "</div>"
 		}
 
-		if(ishost)
+		if(ishost && sentName)
 		{
 			document.getElementById("startButtonArea").classList.remove("off");
 		}
@@ -72,6 +70,7 @@ function register()
 {
 	var name = document.getElementById("playerName").value;
 
+	sentName = true;
 	socket.send("register;" + (localStorage["playerID"] || 0) + ";" + name);
 }
 

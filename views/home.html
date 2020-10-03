@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta encoding='utf-8' />
 		<style>
 			body
 			{
 				text-align: center;
+				
+			}
+
+			.split
+			{
 				display: flex;
 				flex-direction: row;
 
@@ -26,24 +32,33 @@
 				font-size: 15pt;
 				margin: 10px;
 				padding: 10px 20px
+			}
 
+			footer
+			{
+				margin-top: 20px;
 			}
 		</style>
 	</head>
 
 	<body>
-		<div>
-			<h1>Twilight Sparkle's<br>Secret Shipfic Folder<br>Online</h1>
-
-			<h2>Beta 0.1.0</h2>
+		<div class='split'>
 			<div>
-				<!--div><button onclick="join()">Join Game</button></div-->
-				<div><button onclick="host()">Host Game</button></div>
+				<h1>Twilight Sparkle's<br>Secret Shipfic Folder<br>Online</h1>
+
+				<h2>Beta 0.1.0</h2>
+				<div>
+					<!--div><button onclick="join()">Join Game</button></div-->
+					<div><button onclick="host()">Host Game</button></div>
+				</div>
+			</div>
+			<div id='right'>
+				<img src="../img/tsssf-box.png">
 			</div>
 		</div>
-		<div id='right'>
-			<img src="../img/tsssf-box.png">
-		</div>
+		<footer>
+			<a href="https://github.com/brambleshadow4/tsssf-online">Github</a> • <a href="https://discord.gg/WQVBUgv">Discord</a>
+		</footer>
 		<script>
 			function host()
 			{
