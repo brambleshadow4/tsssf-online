@@ -7,7 +7,7 @@ var socket;
 var pendingRequests = [];
 
 
-var host = window.location.host.replace(/:.*/,"") + ":8001";
+var host = window.location.host.replace(/:.*/,"") + ":8080";
 
 socket = new WebSocket("ws://" + host + "/" + window.location.search);
 
@@ -22,9 +22,19 @@ socket.addEventListener("close", function(){
 	console.log("closed")
 })
 
+socket.addEventListener("ping", function(){
+	console.log("I got pinged");
+});
+
 socket.addEventListener('message', function (event)
 {
 	console.log(event.data);
+
+
+	if(event.data.startsWith('closed;'))
+	{
+		window.location.href = location.protocol + "//" + window.location.host;
+	}
 
 	if(event.data.startsWith('registered;'))
 	{

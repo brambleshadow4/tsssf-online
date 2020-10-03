@@ -10,15 +10,49 @@ import {
 } from "./lib.js";
 
 import cards from "./cards.js";
+import {logGameHosted, logPlayerJoined} from "./stats.js";
 
 export function TsssfGameServer()
 {
-
 	const wsServer = new ws.Server({ noServer: true });
 	wsServer.games = {};
 	wsServer.startGame = startGame;
-
 	var games = wsServer.games;
+
+
+	const interval = setInterval(function ping()
+	{
+		
+		for(var key in games)
+		{
+			var anyPlayersAlive = false;
+			for(var i=0; i < games[key].players.length; i++)
+			{
+				if(games[key].players[i].socket.isAlive)
+				{
+					anyPlayersAlive = true;
+					break;
+				}
+			}
+
+			if(!anyPlayersAlive)
+			{
+				
+				games[key].deathCount++;
+
+				if(games[key].deathCount >= 4)
+				{
+					delete games[key];
+				}
+			}
+			else
+			{
+				games[key].deathCount = 0;
+			}
+		}
+
+	}, 15000);
+	
 
 	function isRegistered(key, socket)
 	{
@@ -66,6 +100,7 @@ export function TsssfGameServer()
 
 		if(player)
 		{	
+			player.name = newName;
 			socket.send("registered;" + player.id)
 			return;
 		}
@@ -81,9 +116,16 @@ export function TsssfGameServer()
 			name: newName
 		});
 
-		socket.send("registered;" + id);
+		logPlayerJoined();
 	}
 
+
+	function sendPlayerList(key)
+	{
+		var msg = "playerlist;" + games[key].players.filter(x => x.socket.isAlive)
+			.map(x => x.name).join(";");
+		toEveryone(key, msg);
+	}
 
 	function getPlayer(key, thissocket)
 	{
@@ -103,20 +145,21 @@ export function TsssfGameServer()
 		for(var i=0; i < games[key].players.length; i++)
 		{
 			var socket = games[key].players[i].socket;
-			if(socket != thissocket)
+			if(socket != thissocket && socket.isAlive)
 			{
 				socket.send(message);
 			}
 		}
-	}
+	}	
 
 	function toEveryone(key, message)
 	{
 		for(var i=0; i < games[key].players.length; i++)
 		{
 			var socket = games[key].players[i].socket;
-		
-			socket.send(message);
+			
+			if(socket.isAlive)
+				socket.send(message);
 		}
 	}	
 
@@ -144,21 +187,31 @@ export function TsssfGameServer()
 		return model;
 	}
 
+	function sendCurrentState(key, socket)
+	{
+		var model = getPlayerModel(key, socket);
+		socket.send("model;" + JSON.stringify(model));
+	}
+
 	function startGame(key)
 	{
 		if(!key)
 		{
-			var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			key = "";
-
-			for(var i=0; i< 6; i++)
+			do
 			{
-				key += letters[Math.floor(Math.random() * 26)]
+				var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+				key = "";
+
+				for(var i=0; i< 6; i++)
+				{
+					key += letters[Math.floor(Math.random() * 26)]
+				}
 			}
+			while(games[key] !== undefined)
 		}
 		
 		games[key] = {
-
+			deathCount: 0,
 			isLobbyOpen: true,
 			allowInGameRegistration: false,
 			board:{
@@ -168,8 +221,6 @@ export function TsssfGameServer()
 			},
 
 			offsets:{},
-
-
 
 			goalDiscardPile: [],
 			ponyDiscardPile: [],
@@ -190,6 +241,7 @@ export function TsssfGameServer()
 			currentPlayer:""
 		};
 
+		logGameHosted();
 
 		for(var cardName in cards)
 		{
@@ -217,31 +269,33 @@ export function TsssfGameServer()
 	startGame("dev");
 	games["dev"].allowInGameRegistration = true;
 
-
 	wsServer.on('connection', (socket, request, client) => 
 	{
-		console.log(request.url);
+		socket.isAlive = true;
 
 		var key = request.url.substring(2);
 		if(!games[key])
 		{
-			console.log('no game')
+			socket.send("closed;");
+			socket.terminate();
 			return;
 		}
 
-		var msg = "playerlist;" + games[key].players.map(x => x.name).join(";");
-		socket.send(msg);
 
+		sendPlayerList(key);
+		
+
+
+		socket.on('close', () =>
+		{
+			socket.isAlive = false;
+			sendPlayerList(key);
+		})
 
 		socket.on('message', message => 
 		{
 			var isPlayerRegistered = isRegistered(key, socket);
 			var model = games[key];
-
-			console.log(message);
-
-			
-
 
 			if(message.startsWith("ishost;"))
 			{
@@ -269,22 +323,17 @@ export function TsssfGameServer()
 			if(message.startsWith("register;"))
 			{
 				var [_,id,name] = message.split(";");
-
+				name = name || "Player";
 				var name = name.replace(/[^A-Za-z0-9 _]/g,"");
 
 				registerPlayer(key, socket, name);
-
-				var msg = "playerlist;" + games[key].players.map(x => x.name).join(";");
-
-				toEveryone(key, msg);
+				sendPlayerList(key);
 			}
 
 
 			if(message.startsWith("requestmodel;"))
 			{
 				var id = message.split(";")[1];
-
-				console.log("sent id " + id)
 
 				if(!isPlayerRegistered)
 				{
@@ -308,9 +357,7 @@ export function TsssfGameServer()
 				}
 		
 
-				model = getPlayerModel(key, socket);
-				
-				socket.send("model;" + JSON.stringify(model));
+				return sendCurrentState(key, socket);
 			}
 
 			if(!isPlayerRegistered) return;
@@ -337,6 +384,8 @@ export function TsssfGameServer()
 						toEveryone(key, msg);
 						toEveryone(key, "move;" + card + ";goalDrawPile;goal," + goalNo);
 					}
+					else
+						return sendCurrentState(key, socket);
 				}
 				else
 				{
@@ -350,7 +399,6 @@ export function TsssfGameServer()
 						toEveryone(key, msg);
 						socket.send("move;" + card + ";" + typ + "DrawPile;hand");
 						toEveryoneElse(key, socket, "move;anon:" + typ + ";" + typ + "DrawPile;player");
-
 					}
 				}
 			}
@@ -369,7 +417,6 @@ export function TsssfGameServer()
 
 					toEveryone(key, ["swapshuffle", typ, model[typ+"DrawPile"].length, ...model[typ+"DiscardPile"]].join(";"));
 				}
-
 			}
 
 			if(message.startsWith("move;"))
@@ -382,17 +429,27 @@ export function TsssfGameServer()
 				if(startLocation == "hand")
 				{
 					var i = getPlayer(key, socket).hand.indexOf(card);
+					if(i == -1)
+						return sendCurrentState(key, socket);
+
 					getPlayer(key, socket).hand.splice(i, 1);
 				}
 
 				if(isBoardLoc(startLocation))
 				{
-					delete model.board[startLocation];
+					if(model.board[startLocation].card == card)
+						delete model.board[startLocation];
+					else
+						return sendCurrentState(key, socket);
 				}
 
 				if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(startLocation) > -1)
 				{
 					var i = model[startLocation].indexOf(card);
+
+					if(i == -1)
+						return sendCurrentState(key, socket);
+
 					model[startLocation].splice(i,1);
 					
 				}
@@ -400,13 +457,23 @@ export function TsssfGameServer()
 				if(isOffsetLoc(startLocation))
 				{
 					var [_,x,y] = startLocation.split(",")
-					delete model.offsets[card + "," + x + "," + y];
+					if(model.offsets[card + "," + x + "," + y] != undefined)
+					{
+						delete model.offsets[card + "," + x + "," + y];
+					}
+					else
+					{
+						return sendCurrentState(key, socket);
+					}
 				}
 
 				if(isGoalLoc(startLocation))
 				{
 					var [_,i] = startLocation.split(",")
-					model.currentGoals[i] = "blank:goal";
+					if(model.currentGoals[i] != "blank:goal")
+						model.currentGoals[i] = "blank:goal";
+					else
+						return sendCurrentState(key, socket);
 				}
 
 				// move to end location
@@ -453,7 +520,3 @@ export function TsssfGameServer()
 
 	return wsServer;
 }
-
-
-
-
