@@ -119,7 +119,7 @@ import {isPony, isShip, isGoal, randomizeOrder} from "./lib.js";
 
 const tsssfServer = TsssfGameServer();
 
-const server = app.listen(8001);
+const server = app.listen(8080);
 server.on('upgrade', (request, socket, head) => {
 	tsssfServer.handleUpgrade(request, socket, head, socket => {
 		tsssfServer.emit('connection', socket, request);

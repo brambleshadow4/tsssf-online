@@ -1,8 +1,8 @@
 {
   "name": "tsssf",
-  "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.1.1",
+  "description": "A node.js/websocket implementation of the card game Twilight Sparkle's Secret Shipfic Folder",
+  "main": "server/server.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

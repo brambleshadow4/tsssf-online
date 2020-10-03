@@ -266,8 +266,8 @@ export function TsssfGameServer()
 		return key;
 	}
 
-	startGame("dev");
-	games["dev"].allowInGameRegistration = true;
+	//startGame("dev");
+	//games["dev"].allowInGameRegistration = true;
 
 	wsServer.on('connection', (socket, request, client) => 
 	{
