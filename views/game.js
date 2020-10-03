@@ -227,6 +227,7 @@ hand.ondragenter = function(e)
 
 function LoadCards()
 {
+	var preloadedImages = document.getElementById('preloadedImages');
 	for(var key in cards)
 	{
 		var nodes = key.split(".");
@@ -234,6 +235,11 @@ function LoadCards()
 		var urlToImg = "/img/" + nodes.join("/") + "/" + cards[key].url;
 
 		cards[key].fullUrl = urlToImg;
+		cards[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
+
+		var img = document.createElement('img');
+		img.src = cards[key].thumbnail;
+		preloadedImages.appendChild(img);
 	}
 }
 
@@ -1440,7 +1446,7 @@ function isAnon(card)
 
 
 
-function setCardBackground(element, card)
+function setCardBackground(element, card, useLarge)
 {
 	if(isAnon(card))
 	{
@@ -1474,10 +1480,13 @@ function setCardBackground(element, card)
 		if(isShip(card))
 			element.classList.add('ship')
 
-		element.style.backgroundImage = "url(\"" + cards[card].fullUrl + "\")";
+		var src = cards[card].thumbnail;
+		if(useLarge)
+			src = cards[card].fullUrl;
+
+		element.style.backgroundImage = "url(\"" + src + "\")";
 
 		addShiftHover(card, element);
-
 	}
 }
 
@@ -1517,7 +1526,7 @@ function enlargeCard(cardDiv)
 	giantCard.style.backgroundPosition = "center";
 	giantCard.style.backgroundSize = "cover";
 
-	setCardBackground(giantCard, hoverCard);
+	setCardBackground(giantCard, hoverCard, true);
 
 	document.body.appendChild(giantCard);
 }
