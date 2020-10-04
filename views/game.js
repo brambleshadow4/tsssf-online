@@ -228,6 +228,7 @@ hand.ondragenter = function(e)
 function LoadCards()
 {
 	var preloadedImages = document.getElementById('preloadedImages');
+	
 	for(var key in cards)
 	{
 		var nodes = key.split(".");
@@ -240,7 +241,62 @@ function LoadCards()
 		var img = document.createElement('img');
 		img.src = cards[key].thumbnail;
 		preloadedImages.appendChild(img);
+
 	}
+}
+
+window.addCardsToReferencePage = function()
+{
+
+	var popupPage = document.createElement('div')
+	popupPage.className = "popupPage";
+
+	var ponyReference = document.createElement('div');
+	var shipReference = document.createElement('div');
+	var goalReference = document.createElement('div');
+
+	var keys = Object.keys(cards);
+	keys.sort();
+	for(let key of keys)
+	{
+		console.log(key);
+
+		let cardDiv = makeCardElement(key)
+		
+		if(isPony(key))
+		{
+			ponyReference.appendChild(cardDiv)
+		}
+		if(isShip(key))
+		{
+			shipReference.appendChild(cardDiv)
+		}
+		if(isGoal(key))
+		{
+			goalReference.appendChild(cardDiv)
+		}
+
+		console.log(goalReference.innerHTML);
+	}
+
+	var header = document.createElement('h1');
+	header.innerHTML = "Pony Cards";
+	popupPage.appendChild(header);
+	popupPage.appendChild(ponyReference);
+
+	header = document.createElement('h1');
+	header.innerHTML = "Ship Cards";
+	popupPage.appendChild(header);
+	popupPage.appendChild(shipReference);
+
+	header = document.createElement('h1');
+	header.innerHTML = "Goal Cards";
+	popupPage.appendChild(header);
+	popupPage.appendChild(goalReference);
+
+
+	console.log(popupPage);
+	return popupPage;
 }
 
 
@@ -939,31 +995,23 @@ export function moveCard(card, startLocation, endLocation)
 
 	var updateFun = function(){};
 	var endPos;
-	const vh = Math.floor(window.innerHeight/100);
+	const vh = window.innerHeight/100;
 
 	if(endLocation == "hand")
 	{
 		model.hand.push(card);
 
-		if(isPony(card))
-		{
-			var enddiv = document.getElementById('hand-pony');
-			var rect = enddiv.getBoundingClientRect();
-			endPos = {
-				top: (rect.top - vh) + "px",
-				left: (rect.right - vh) + "px"
-			}
+		var enddiv = document.getElementById('hand-pony');
+		var rect = enddiv.getBoundingClientRect();
 
-		}
+		var cardCount = isPony(card) ? model.hand.filter(x => isPony(x)).length : model.hand.length;
+		console.log(cardCount);
 
-		else
-		{
-			var enddiv = document.getElementById('hand-ship');
-			var rect = enddiv.getBoundingClientRect();
-			endPos = {
-				top: (rect.top-vh) + "px",
-				left: (rect.right-vh) + "px"
-			}
+		var offset = ((cardCount-1) * (13 + 1) + 1) * vh;
+		
+		endPos = {
+			top: (rect.top + vh) + "px",
+			left: (rect.left + offset) + "px"
 		}
 
 		let x = model.hand.length - 1;
@@ -1396,9 +1444,14 @@ function openCardSelect(title, cards)
 		div.id = "cardSelect";
 		div.className = "popup";
 
+		var innerDiv = document.createElement('div');
+		innerDiv.id = "popupContent";
+		innerDiv.classList.add("popupPage")
+		div.appendChild(innerDiv);
+
 		var h1 = document.createElement('h1');
 		h1.innerHTML = title;
-		div.appendChild(h1);
+		innerDiv.appendChild(h1);
 
 		var close = document.createElement('img');
 		close.src = "/img/close.svg";
@@ -1420,7 +1473,7 @@ function openCardSelect(title, cards)
 		for(let card of cards2)
 		{
 			var cardElement = makeCardElement(card);
-			div.appendChild(cardElement);
+			innerDiv.appendChild(cardElement);
 
 			cardElement.onclick = function()
 			{
@@ -1546,59 +1599,3 @@ function unenlargeCard()
 }
 
 
-function createPopup()
-{
-	var help = document.getElementById('help');
-
-	var closeButton = document.createElement('img');
-	closeButton.src = "/img/close.svg";
-	closeButton.id = "popupCloseButton";
-	closeButton.onclick = function()
-	{
-		var div = document.getElementsByClassName('popup')[0];
-		div.parentNode.removeChild(div);
-
-		this.parentNode.removeChild(this);
-	}
-
-
-	var div = document.createElement('div');
-	div.className = "popup";
-
-	
-	var initialContent;
-	
-
-	var tabs = document.createElement('div');
-	tabs.className = 'popupTabs';
-	for(let i =0; i < help.children.length; i++)
-	{
-		var tab = document.createElement('div');
-
-		tab.innerHTML = help.children[i].getAttribute("tab-name");
-		tabs.appendChild(tab);
-
-		tab.onclick = function()
-		{
-			for(let j=0; j<tabs.children.length; j++)
-			{
-				tabs.children[j].classList.remove('selected')
-			}
-
-			this.classList.add('selected');
-
-			document.getElementById('popupContent').innerHTML = help.children[i].innerHTML;
-		}
-	}
-
-	help.children[0].classList.add('selected');
-	div.innerHTML = "<div id='popupContent'>" + help.children[0].innerHTML + "</div>";
-
-	div.appendChild(tabs);
-
-	document.body.appendChild(closeButton);
-	document.body.appendChild(div);
-
-}
-
-createPopup();

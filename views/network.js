@@ -93,9 +93,9 @@ export function broadcastMove(card, startLocation, endLocation)
 
 function broadcast(message)
 {
-	setTimeout(function(){
-		socket.send(message);
-	},1000);
+	//setTimeout(function(){
+	socket.send(message);
+	//},1000);
 	
 }
 

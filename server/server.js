@@ -32,6 +32,7 @@ app.get("/cards.js", file("./server/cards.js"))
 app.get("/network.js", file("./views/network.js"))
 app.get("/game.css", file("./views/game.css"))
 app.get("/rulebook.html", file("./views/rulebook.html"))
+app.get("/gamePublic.js", file("./views/gamePublic.js"))
 
 app.get("/lobby", function(req,res)
 {
@@ -108,7 +109,6 @@ function sendIfExists(url, res)
 
 ///--------------------------------------------------------------------------------------
 
-import {isPony, isShip, isGoal, randomizeOrder} from "./lib.js";
 
 
 // Set up a headless websocket server that prints any
