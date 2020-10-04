@@ -10,7 +10,6 @@
  */
 
 
-
 #playingArea
 {
 	background-color: #AAAAFF;
@@ -102,7 +101,6 @@ body
 	z-index: 2;
 	cursor: pointer;
 
-
 	display: inline-block;
 
 	border-radius: 5px;
@@ -145,8 +143,6 @@ body
 }
 
 
-
-
 .card[src]
 {
 	background-image: attr(src);
@@ -187,7 +183,7 @@ body
 	margin-left: 2vh;
 	margin-right: 1vh;
 
-	border: solid 1px black;
+	border-left: solid 3px black;
 	vertical-align: middle;
 
 }
@@ -217,7 +213,7 @@ body
 	vertical-align: middle;
 }
 
-#cardSelect
+.popup
 {
 	font-size: initial;
 	border: solid 2px black;
@@ -229,11 +225,10 @@ body
 	right: 10vh;
 
 	background-color: white;
-
 	overflow-y: auto;
 }
 
-#cardSelectCloseButton
+#popupCloseButton
 {
 	width: 10vh;
 	height: 10vh;
@@ -245,10 +240,53 @@ body
 	cursor: pointer;
 }
 
-#cardSelect h1
+.popup
+{
+	overflow: visible;
+}
+
+.popup h1
 {
 	padding-left: 1vh;
 }
+
+.popupTabs
+{
+	position: absolute;
+	bottom: calc(100%);
+	display: flex;
+	flex-direction: row;
+}
+
+.popupTabs > div:first-child
+{
+	margin-left: 20px;
+}
+
+.popupTabs > div
+{
+	border: solid 2px black;
+	margin-left: 10px;
+	
+
+	background-color: white;
+	cursor: pointer;
+	padding: 6px;
+	align-self: flex-end;
+}
+
+.popupTabs > div.selected
+{
+	border-bottom: solid 2px white;
+	padding: 10px;
+}
+
+#popupContent
+{
+	overflow-y: auto;
+	height: 100%;
+}
+
 
 #takeGoal
 {
@@ -264,4 +302,22 @@ body
 	right: 0vh;
 
 	background-color: red;
+}
+
+iframe
+{
+	position: absolute;
+	border: none;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+
+	height: 100%;
+	width: 100%;
+}
+
+#help
+{
+	display: none;
 }

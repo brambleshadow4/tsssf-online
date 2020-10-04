@@ -18,12 +18,11 @@ socket.addEventListener("open", function()
 });
 
 socket.addEventListener("close", function(){
+
+	alert("The connection to the server was closed :(")
 	console.log("closed")
 })
 
-socket.addEventListener("ping", function(){
-	console.log("I got pinged");
-});
 
 socket.addEventListener('message', function (event)
 {
@@ -94,7 +93,10 @@ export function broadcastMove(card, startLocation, endLocation)
 
 function broadcast(message)
 {
-	socket.send(message);
+	setTimeout(function(){
+		socket.send(message);
+	},1000);
+	
 }
 
 network.requestDrawPony = function()

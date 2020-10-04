@@ -31,6 +31,7 @@ app.get("/game.js", file("./views/game.js"))
 app.get("/cards.js", file("./server/cards.js"))
 app.get("/network.js", file("./views/network.js"))
 app.get("/game.css", file("./views/game.css"))
+app.get("/rulebook.html", file("./views/rulebook.html"))
 
 app.get("/lobby", function(req,res)
 {

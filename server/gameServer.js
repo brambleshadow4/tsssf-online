@@ -437,7 +437,7 @@ export function TsssfGameServer()
 
 				if(isBoardLoc(startLocation))
 				{
-					if(model.board[startLocation].card == card)
+					if(model.board[startLocation] && model.board[startLocation].card == card)
 						delete model.board[startLocation];
 					else
 						return sendCurrentState(key, socket);

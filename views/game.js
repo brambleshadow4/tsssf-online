@@ -530,6 +530,10 @@ export function updateWinnings()
 
 export function updateGame()
 {
+	var flyingCards = document.getElementsByClassName('flying');
+	while(flyingCards.length)
+		flyingCards[0].parentNode.removeChild(flyingCards[0]);
+
 	updateHand();
 	updateGoals();
 	updateBoard();
@@ -1145,13 +1149,16 @@ function updateGoals(goalNo)
 
 				img.onclick = function()
 				{
-					var card = model.currentGoals[i];
-					moveCard(card, "goal,"+i, "winnings")
-					broadcastMove(card, "goal,"+i, "winnings")
+					if(!isDkeyPressed)
+					{
+						var card = model.currentGoals[i];
+						moveCard(card, "goal,"+i, "winnings")
+						broadcastMove(card, "goal,"+i, "winnings")
+					}
 				}
 
 				element.appendChild(img);
-			})
+			});
 
 			element.addEventListener('mouseleave', function(e){
 				var div = document.getElementById('takeGoal')
@@ -1387,15 +1394,15 @@ function openCardSelect(title, cards)
 	{
 		var div = document.createElement('div');
 		div.id = "cardSelect";
+		div.className = "popup";
 
 		var h1 = document.createElement('h1');
 		h1.innerHTML = title;
 		div.appendChild(h1);
 
 		var close = document.createElement('img');
-
 		close.src = "/img/close.svg";
-		close.id = "cardSelectCloseButton";
+		close.id = "popupCloseButton";
 		close.onclick = function()
 		{
 			div.parentNode.removeChild(div);
@@ -1537,3 +1544,61 @@ function unenlargeCard()
 	if(div)
 		div.parentNode.removeChild(div);
 }
+
+
+function createPopup()
+{
+	var help = document.getElementById('help');
+
+	var closeButton = document.createElement('img');
+	closeButton.src = "/img/close.svg";
+	closeButton.id = "popupCloseButton";
+	closeButton.onclick = function()
+	{
+		var div = document.getElementsByClassName('popup')[0];
+		div.parentNode.removeChild(div);
+
+		this.parentNode.removeChild(this);
+	}
+
+
+	var div = document.createElement('div');
+	div.className = "popup";
+
+	
+	var initialContent;
+	
+
+	var tabs = document.createElement('div');
+	tabs.className = 'popupTabs';
+	for(let i =0; i < help.children.length; i++)
+	{
+		var tab = document.createElement('div');
+
+		tab.innerHTML = help.children[i].getAttribute("tab-name");
+		tabs.appendChild(tab);
+
+		tab.onclick = function()
+		{
+			for(let j=0; j<tabs.children.length; j++)
+			{
+				tabs.children[j].classList.remove('selected')
+			}
+
+			this.classList.add('selected');
+
+			document.getElementById('popupContent').innerHTML = help.children[i].innerHTML;
+		}
+	}
+
+	help.children[0].classList.add('selected');
+	div.innerHTML = "<div id='popupContent'>" + help.children[0].innerHTML + "</div>";
+
+	div.appendChild(tabs);
+
+	document.body.appendChild(closeButton);
+	document.body.appendChild(div);
+
+}
+
+createPopup();
