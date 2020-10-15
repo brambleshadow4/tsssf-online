@@ -51,7 +51,7 @@ socket.addEventListener('message', function (event)
 	{
 		var [_, card, startLocation, endLocation] = event.data.split(";");
 		
-		moveCard(card, startLocation, endLocation);
+		moveCard(card, startLocation, endLocation, true);
 	}
 
 	if(event.data.startsWith("draw;"))
@@ -96,7 +96,6 @@ function broadcast(message)
 	//setTimeout(function(){
 	socket.send(message);
 	//},1000);
-	
 }
 
 network.requestDrawPony = function()

@@ -33,6 +33,8 @@ var offsetId = 0;
 var hoverCard = "";
 var hoverCardDiv;
 
+var cardLocations = {};
+
 
 var USE_NETWORK = true;
 
@@ -574,6 +576,8 @@ export function updateWinnings()
 
 	for(var i=0; i < model.winnings.length; i++)
 	{
+		cardLocations[model.winnings[i]] = "winnings";
+
 		offset -= cardOffset;
 		var card = makeCardElement(model.winnings[i], "winnings");
 		card.style.position = "absolute";
@@ -584,11 +588,35 @@ export function updateWinnings()
 
 }
 
+window.updateGame = updateGame;
+window.model = model;
+
 export function updateGame()
 {
+	console.log("game updated");
+
 	var flyingCards = document.getElementsByClassName('flying');
 	while(flyingCards.length)
 		flyingCards[0].parentNode.removeChild(flyingCards[0]);
+
+
+
+	for(var key in model.board)
+	{
+		var element = model.board[key].element;
+		if(element)
+		{
+			element.parentNode.removeChild(element);
+			delete model.board[key].element;
+			console.log('element removed');
+		}
+
+		if(!model.board[key].card || isBlank(model.board[key].card))
+		{
+			delete model.board[key];
+		}
+	}
+
 
 	updateHand();
 	updateGoals();
@@ -597,6 +625,22 @@ export function updateGame()
 	updatePonyDiscard();
 	updateShipDiscard();
 	updateGoalDiscard();
+
+	for(var card of model.ponyDiscardPile)
+	{
+		cardLocations[card] = "ponyDiscardPile";
+	}
+
+	for(var card of model.shipDiscardPile)
+	{
+		cardLocations[card] = "shipDiscardPile";
+	}
+
+	for(var card of model.goalDiscardPile)
+	{
+		cardLocations[card] = "goalDiscardPile";
+	}
+
 	updateWinnings();
 }
 
@@ -923,9 +967,30 @@ function isValidMove(cardDragged, targetCard, endLocation)
 }
 
 
-export function moveCard(card, startLocation, endLocation)
+export function moveCard(card, startLocation, endLocation, forceCardToMove)
 {
 	var startPos;
+
+	if(startLocation != cardLocations[card] && cardLocations[card])
+	{
+		if(forceCardToMove)
+		{
+			console.log("Synchronization issue: card not at " + startLocation);
+			startLocation = cardLocations[card];
+		}
+		else
+		{
+			updateGame();
+			return;
+		}
+	}
+
+	if(startLocation == "winnings")
+	{
+		var i = model.winnings.indexOf(card);
+		model.winnings.splice(i);
+		updateWinnings();
+	}
 
 	if(startLocation == "hand")
 	{
@@ -1083,6 +1148,12 @@ export function moveCard(card, startLocation, endLocation)
 		model.currentGoals[i] = card;
 		updateFun = () => updateGoals(i)
 	}
+	else if (isOffsetLoc(endLocation))
+	{
+		offsetPonyCard(endLocation, card);
+	}
+
+	cardLocations[card] = endLocation;
 
 	// run animation (if applicable)
 	if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1
@@ -1097,6 +1168,8 @@ export function moveCard(card, startLocation, endLocation)
 	{
 		updateFun();
 	}
+
+
 }
 
 function addCardToBoard(key, card)
@@ -1151,6 +1224,8 @@ function offsetPonyCard(key, card)
 
 	model.offsets[card + "," + x + "," + y] = imgElement;
 
+	cardLocations[card] = "offset," + x + "," + y;
+
 
 	var refPoint = document.getElementById('refPoint');
 
@@ -1185,6 +1260,8 @@ function updateGoals(goalNo)
 		let element = updateCardElement(
 			goalDiv.getElementsByClassName('card')[i],
 			model.currentGoals[i], "goal," + i, false, false);
+
+		cardLocations[model.currentGoals[i]] = "goal," + i;
 
 		if(!isBlank(model.currentGoals[i]))
 		{
@@ -1236,6 +1313,8 @@ function updateHand(cardIndex)
 		{
 			var cardEl = makeCardElement(model.hand[i], "hand", true);
 			cardEl.id = "hand" + i;
+
+			cardLocations[model.hand[i]] = "hand";
 
 			if(isPony(model.hand[i]))
 			{
@@ -1379,7 +1458,10 @@ function updateBoard()
 		y = Number(y);
 
 		var card = model.board[key].card;
+		cardLocations[card] = key;
 
+
+		// remove detached blanks
 		if(!card || isBlank(card))
 		{
 			var neighbors = getNeighborKeys(key);
@@ -1408,7 +1490,7 @@ function updateBoard()
 			continue;
 		}
 
-
+		// add missing cards
 		if(!model.board[key].element)
 		{
 			addCardToBoard(key, card);
@@ -1417,6 +1499,7 @@ function updateBoard()
 		var neighbors = getNeighborKeys(key);
 		var blankType = type == "p" ? "blank:ship" : "blank:pony";
 
+		// add missing blanks
 		for(var key of neighbors)
 		{
 			if(!model.board[key])

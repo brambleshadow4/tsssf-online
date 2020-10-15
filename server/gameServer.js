@@ -21,7 +21,6 @@ export function TsssfGameServer()
 
 	const interval = setInterval(function ping()
 	{
-		
 		for(var key in games)
 		{
 			var anyPlayersAlive = false;
@@ -398,7 +397,7 @@ export function TsssfGameServer()
 						toEveryone(key, "move;" + card + ";goalDrawPile;goal," + goalNo);
 					}
 					else
-						return sendCurrentState(key, socket);
+						return ;//sendCurrentState(key, socket);
 				}
 				else
 				{
@@ -443,7 +442,7 @@ export function TsssfGameServer()
 				{
 					var i = getPlayer(key, socket).hand.indexOf(card);
 					if(i == -1)
-						return sendCurrentState(key, socket);
+						return ;//sendCurrentState(key, socket);
 
 					getPlayer(key, socket).hand.splice(i, 1);
 				}
@@ -453,7 +452,7 @@ export function TsssfGameServer()
 					if(model.board[startLocation] && model.board[startLocation].card == card)
 						delete model.board[startLocation];
 					else
-						return sendCurrentState(key, socket);
+						return;// sendCurrentState(key, socket);
 				}
 
 				if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(startLocation) > -1)
@@ -461,7 +460,7 @@ export function TsssfGameServer()
 					var i = model[startLocation].indexOf(card);
 
 					if(i == -1)
-						return sendCurrentState(key, socket);
+						return ;// sendCurrentState(key, socket);
 
 					model[startLocation].splice(i,1);
 					
@@ -476,7 +475,7 @@ export function TsssfGameServer()
 					}
 					else
 					{
-						return sendCurrentState(key, socket);
+						return;//  sendCurrentState(key, socket);
 					}
 				}
 
@@ -486,7 +485,7 @@ export function TsssfGameServer()
 					if(model.currentGoals[i] != "blank:goal")
 						model.currentGoals[i] = "blank:goal";
 					else
-						return sendCurrentState(key, socket);
+						return;//  sendCurrentState(key, socket);
 				}
 
 				// move to end location
