@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import expressSession from "express-session";
 import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
+import {getStats} from "./stats.js"
 
 const app = express()
 const PORT = 8000;
@@ -48,6 +49,23 @@ app.get("/lobby", function(req,res)
 	}
 });
 
+app.get("/stats", async function(req,res){
+
+	var template = fs.readFileSync('./views/stats.html', 'utf8');
+	var stats = await getStats();
+
+	for(var key in stats)
+	{
+		template = template.replace(key, stats[key]);
+	}
+
+	var liveStats = tsssfServer.getStats();
+	template = template.replace("$1", liveStats.players);
+	template = template.replace("$2", liveStats.games);
+
+	res.send(template);
+})
+
 
 app.get("/lobby.css", file("./views/lobby.css"))
 app.get("/lobby.js", file("./views/lobby.js"))
@@ -90,7 +108,6 @@ function fmap(routeUri, fileUrl)
 
 function sendIfExists(url, res)
 {
-
 	console.log(url);
 
 	if(fs.existsSync(url))

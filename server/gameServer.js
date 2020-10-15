@@ -19,7 +19,6 @@ export function TsssfGameServer()
 	wsServer.startGame = startGame;
 	var games = wsServer.games;
 
-
 	const interval = setInterval(function ping()
 	{
 		
@@ -52,6 +51,20 @@ export function TsssfGameServer()
 		}
 
 	}, 15000);
+
+	wsServer.getStats = function()
+	{
+		var stats = {games:0, players:0}
+		for(var key in games)
+		{
+			stats.games++;
+			stats.players += games[key].players.length;
+		}
+
+		return stats;
+	}
+
+
 	
 
 	function isRegistered(key, socket)
