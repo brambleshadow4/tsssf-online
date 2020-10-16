@@ -72,6 +72,11 @@ socket.addEventListener('message', function (event)
 	{
 		var [_, type, count, ...cards] = event.data.split(";");
 
+		for(var card of model[type + "DiscardPile"])
+		{
+			delete cardLocations[card];
+		}
+
 		model[type+"DrawPileLength"] = count;
 		model[type+"DiscardPile"] = cards;
 

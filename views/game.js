@@ -19,7 +19,8 @@ import {
 	isShip, 
 	isGoalLoc, 
 	isBoardLoc,
-	isOffsetLoc
+	isOffsetLoc,
+	isPlayerLoc
 } from "/lib.js";
 import {broadcastMove} from "/network.js";
 
@@ -32,8 +33,6 @@ var offsetId = 0;
 
 var hoverCard = "";
 var hoverCardDiv;
-
-var cardLocations = {};
 
 
 var USE_NETWORK = true;
@@ -227,23 +226,34 @@ hand.ondragenter = function(e)
 }
 
 
+var haveCardsLoaded = false;
+
 function LoadCards()
 {
+	if(haveCardsLoaded)
+		return;
+
+	haveCardsLoaded = true;
+
 	var preloadedImages = document.getElementById('preloadedImages');
 	
+	var re = new RegExp(model.cardDecks) 
+
 	for(var key in cards)
 	{
-		var nodes = key.split(".");
-		nodes.pop();
-		var urlToImg = "/img/" + nodes.join("/") + "/" + cards[key].url;
+		if(re.exec(key))
+		{
+			var nodes = key.split(".");
+			nodes.pop();
+			var urlToImg = "/img/" + nodes.join("/") + "/" + cards[key].url;
 
-		cards[key].fullUrl = urlToImg;
-		cards[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
+			cards[key].fullUrl = urlToImg;
+			cards[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
 
-		var img = document.createElement('img');
-		img.src = cards[key].thumbnail;
-		preloadedImages.appendChild(img);
-
+			var img = document.createElement('img');
+			img.src = cards[key].thumbnail;
+			preloadedImages.appendChild(img);
+		}
 	}
 }
 
@@ -258,9 +268,11 @@ window.addCardsToReferencePage = function()
 	var goalReference = document.createElement('div');
 
 	var keys = Object.keys(cards);
+	var re = new RegExp(model.cardDecks);
 	keys.sort();
 	for(let key of keys)
 	{
+		if(!re.exec(key)) continue;
 		console.log(key);
 
 		let cardDiv = makeCardElement(key)
@@ -301,8 +313,6 @@ window.addCardsToReferencePage = function()
 	return popupPage;
 }
 
-
-LoadCards();
 //LoadGame();
 
 function randomizeOrder(arr)
@@ -588,11 +598,32 @@ export function updateWinnings()
 
 }
 
+function updatePlayerList()
+{
+	var playerList = document.getElementById('playerList');
+	playerList.innerHTML = "";
+	for(var player of model.players)
+	{
+		var div = document.createElement('div');
+		div.className = "player";
+		div.innerHTML = `
+			<span>${player.name}</span>
+			<span class='ponyCount'>${player.ponies}</span>
+			<span class='shipCount'>${player.ships}</span>
+			<span class='goalCount'>${player.winnings.length}</span>
+		`;
+		playerList.appendChild(div);
+	}
+}
+
+
 window.updateGame = updateGame;
 window.model = model;
 
 export function updateGame()
 {
+	LoadCards();
+
 	console.log("game updated");
 
 	var flyingCards = document.getElementsByClassName('flying');
@@ -642,6 +673,7 @@ export function updateGame()
 	}
 
 	updateWinnings();
+	updatePlayerList();
 }
 
 
@@ -975,7 +1007,7 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	{
 		if(forceCardToMove)
 		{
-			console.log("Synchronization issue: card not at " + startLocation);
+			console.log("Synchronization issue: card not at " + startLocation + "; card at " + cardLocations[card]);
 			startLocation = cardLocations[card];
 		}
 		else
@@ -1021,8 +1053,21 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	{
 		startPos = getPosFromId(startLocation)
 	}
-	else if(startLocation == "player")
+	else if(isPlayerLoc(startLocation))
 	{
+		var [,playerName] = startLocation.split(",");
+		var player = getPlayerWithName(playerName);
+
+		if(isPony(card))
+			player.ponies--;
+		if(isGoal(card))
+			player.splice(player.winnings.indexOf(card),1)
+		if(isShip(card))
+			player.ships--;
+
+		updatePlayerList();
+
+
 		startPos = {top: "-18vh", left: "50vh"}
 	}
 	else if(isOffsetLoc(startLocation))
@@ -1110,9 +1155,23 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 			left: rect.right - 13*vh + "px"
 		}
 	}
-	else if(endLocation == "player")
+	else if(isPlayerLoc(endLocation))
 	{
-		endPos = {top: "-18vh", left: "50vh"}
+		endPos = {top: "-18vh", left: "50vh"};
+
+		var [,playerName] = endLocation.split(",");
+		var player = getPlayerWithName(playerName);
+
+		console.log(player);
+
+		if(card=="anon:pony")
+			player.ponies++;
+		if(card=="anon:ship")
+			player.ships++;
+		if(isGoal(card))
+			player.winnings.push(card);
+		
+		updatePlayerList();
 	}
 	else if(isBoardLoc(endLocation))
 	{
@@ -1154,12 +1213,15 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	}
 
 	cardLocations[card] = endLocation;
+	
+	if(isPlayerLoc(endLocation))
+		delete cardLocations[card];
 
 	// run animation (if applicable)
 	if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1
 		|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
 		|| endLocation == "winnings"
-		|| endLocation == "player"
+		|| isPlayerLoc(endLocation)
 	)
 	{
 		animateCardMove(card, startPos, endPos, updateFun);
@@ -1170,6 +1232,20 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	}
 
 
+}
+
+function getPlayerWithName(name)
+{
+	if(name == model.playerName)
+		return {ponies:0,ships:0,winnings:[]};
+
+	for(var player of model.players)
+	{
+		if(player.name == name)
+			return player;
+	}
+
+	return {ponies:0,ships:0,winnings:[]};
 }
 
 function addCardToBoard(key, card)

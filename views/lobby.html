@@ -7,16 +7,40 @@
 	<body>
 
 		<div class='main'>
-			<div>
-				<p>Invite other players to join with this link</p>
-				<input id='inviteURL' readonly />
+			<div id='tabs' class="popupTabs offf">
+				<div id='joinGameTab' onclick='joinGameTab()' class="selected">Join Game</div>
+				<div id='gameOptionsTab' onclick="gameOptionsTab()">Game Options</div>
+				<div id='chooseCardsTab' onclick="chooseCardsTab()">Choose cards</div>
+			</div>
+			<div class='innerMain'>
+				<div id='joinGameInfo'>
+					<p>Invite other players to join with this link</p>
+					<input type="text" id='inviteURL' readonly />
 
-				<div id='chooseName'>
+					<div id='chooseName'>
+						<h2 class='chooseAName'>Choose a name</h2>
+						<input type='text' id='playerName' maxlength="20" />
+						<button onclick='register();'>Join</button>
+					</div>
+				</div>
 
-					<h2 class='chooseAName'>Choose a name</h2>
-					<input id='playerName' maxlength="20" />
-					<button onclick='register();'>Join</button>
+				<div class='off'  id='gameOptionsInfo'>
+					<h2>Rule Enforcement</h2>
+					<div><input type='radio' name='gamerules' disabled><label>Full rules - Coming soon!</label></div>
+					<div><input type='radio' name='gamerules' disabled><label>Turns only - Coming soon!</label></div>
+					<div><input type='radio' name='gamerules' checked><label>Sandbox</label></div>
+				</div>
 
+				<div class='off' id='chooseCardsInfo'>
+					<div class='cardbox selected' id='Core-deck-select'>
+						<img src="/img/core-box.png" />
+					</div>
+					<div class='cardbox' id='EC-deck-select'>
+						<img src="/img/ec-box.png" />
+					</div>
+					<div class='cardbox' id='PU-deck-select'>
+						<img src="/img/pu-box.png" />
+					</div>
 				</div>
 
 				<div class="off" id='startButtonArea'>

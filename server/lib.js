@@ -43,3 +43,8 @@ export function isGoalLoc(location)
 {
 	return location.startsWith("goal,");
 }
+
+export function isPlayerLoc(location)
+{
+	return location.startsWith("player,");
+}

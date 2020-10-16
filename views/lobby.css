@@ -2,12 +2,9 @@
 body
 {
 	display: flex;
-
 	flex-direction: row;
-
 	justify-content: center;
 	height: 100%;
-
 }
 
 
@@ -17,13 +14,15 @@ h2{
 
 .main
 {
-	min-width: 600px;
-
+	max-width: 800px;
 	padding: .5in;
-
 	border: solid 3px black;
-
+	margin-top: 50px;
 	display: flex;
+
+	flex-grow: 1;
+
+	position: relative;
 }
 
 .playerArea
@@ -38,23 +37,105 @@ h2{
 {
 	margin-top: 30px;
 }
-.off
-{
-	display: none;
-}
+
 
 .chooseAName
 {
 	margin-top: 30px;
 }
 
-input
+input[type='text']
 {
-	width: 100%;
+	width: 300px;
 	padding: 5px;
 }
 
 button
 {
 	font-size: 14pt;
+}
+
+h2
+{
+	margin: 0px 0px 10px 0px
+}
+
+
+.popupTabs
+{
+	position: absolute;
+	bottom: calc(100%);
+	display: flex;
+	flex-direction: row;
+}
+
+
+.innerMain
+{
+	flex-grow: 1;
+	flex-shrink: 1;
+
+	display: block;
+}
+
+.popupTabs > div
+{
+	border: solid 3px black;
+	margin-left: 10px;
+	
+	/*border-bottom: none;*/
+
+	background-color: white;
+	cursor: pointer;
+	padding: 6px;
+	align-self: flex-end;
+}
+
+.popupTabs > div.selected
+{
+	border-bottom: solid 3px white;
+	padding: 10px;
+}
+
+.off
+{
+	display: none;
+}
+
+.cardbox
+{
+	display: inline-block;
+	margin: 5px;
+	padding: 15px;
+}
+
+#chooseCardsInfo
+{
+	font-size: 0px;
+}
+
+
+.cardbox
+{
+	cursor: pointer;
+	border: solid 2px white;
+}
+.cardbox img
+{
+	height: 170px;
+	position: relative;
+	z-index: -1;
+
+}
+
+.cardbox.selected
+{
+	border: solid 2px #0066ff;
+	border-radius: 10px;
+	background-color: rgba(102, 163, 255, .5);
+}
+
+#Core-deck-select
+{
+	cursor: no-drop;
 }

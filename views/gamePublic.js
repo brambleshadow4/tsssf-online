@@ -1,5 +1,6 @@
 var network = {}; 
 var model = {};
+var cardLocations = {};
 
 function createHelpPopup()
 {
@@ -16,10 +17,8 @@ function createHelpPopup()
 		this.parentNode.removeChild(this);
 	}
 
-
 	var div = document.createElement('div');
 	div.className = "popup";
-
 	
 	var initialContent;
 	

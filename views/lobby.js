@@ -37,6 +37,9 @@ socket.addEventListener("message", function()
 	{
 		var [_,val] = event.data.split(";")
 		ishost = val == "1"? true : false;
+
+		if(ishost)
+			document.getElementById('tabs').classList.remove('off');
 	}
 
 	if(event.data.startsWith("startgame;"))
@@ -77,4 +80,55 @@ function register()
 function startGame()
 {
 	socket.send("startgame;");
+}
+
+var gameOptionsDiv = document.getElementById('gameOptionsInfo');
+var chooseCardsDiv = document.getElementById('chooseCardsInfo');
+var joinGameDiv = document.getElementById('joinGameInfo');
+
+
+function joinGameTab()
+{
+	gameOptionsDiv.classList.add('off');
+	chooseCardsDiv.classList.add('off');
+	joinGameDiv.classList.remove("off");
+
+	document.getElementsByClassName('selected')[0].classList.remove('selected');
+	document.getElementById('joinGameTab').classList.add('selected')
+}
+
+function gameOptionsTab()
+{
+	gameOptionsDiv.classList.remove('off');
+	chooseCardsDiv.classList.add('off');
+	joinGameDiv.classList.add("off");
+
+	document.getElementsByClassName('selected')[0].classList.remove('selected');
+	document.getElementById('gameOptionsTab').classList.add('selected')
+}
+
+
+function chooseCardsTab()
+{
+	gameOptionsDiv.classList.add('off');
+	chooseCardsDiv.classList.remove('off');
+	joinGameDiv.classList.add("off");
+
+	document.getElementsByClassName('selected')[0].classList.remove('selected');
+	document.getElementById('chooseCardsTab').classList.add('selected')
+}
+
+var cardBoxes = document.getElementsByClassName('cardbox')
+
+
+for(var i=1; i < cardBoxes.length; i++)
+{
+	let box = cardBoxes[i];
+	box.onclick = function()
+	{
+		if(this.classList.contains('selected'))
+			this.classList.remove("selected")
+		else
+			this.classList.add('selected');
+	}
 }

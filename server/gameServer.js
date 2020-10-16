@@ -16,7 +16,7 @@ export function TsssfGameServer()
 {
 	const wsServer = new ws.Server({ noServer: true });
 	wsServer.games = {};
-	wsServer.startGame = startGame;
+	wsServer.openLobby = openLobby;
 	var games = wsServer.games;
 
 	const interval = setInterval(function ping()
@@ -180,6 +180,7 @@ export function TsssfGameServer()
 		var model = {};
 
 		model.board = games[key].board;
+		model.cardDecks = games[key].cardDecks;
 		model.offsets = games[key].offsets;
 		model.ponyDiscardPile = games[key].ponyDiscardPile;
 		model.shipDiscardPile = games[key].shipDiscardPile;
@@ -196,6 +197,23 @@ export function TsssfGameServer()
 		model.hand = player.hand;
 		model.winnings = player.winnings;
 
+		model.playerName = player.name;
+		model.players = [];
+
+		for(var i=0; i < games[key].players.length; i++)
+		{
+			let other = games[key].players[i];
+			if(other != player)
+			{
+				model.players.push({
+					name: other.name,
+					ponies: other.hand.filter(x => isPony(x)).length,
+					ships: other.hand.filter(x => isShip(x)).length,
+					winnings: other.winnings
+				});
+			}
+		}
+
 		return model;
 	}
 
@@ -205,7 +223,7 @@ export function TsssfGameServer()
 		socket.send("model;" + JSON.stringify(model));
 	}
 
-	function startGame(key)
+	function openLobby(key)
 	{
 		if(!key)
 		{
@@ -226,37 +244,49 @@ export function TsssfGameServer()
 			deathCount: 0,
 			isLobbyOpen: true,
 			allowInGameRegistration: false,
-			board:{
-				"p,0,0":{
-					card: "Core.Start.FanficAuthorTwilight"
-				}
-			},
+			players: []
+		}
 
-			offsets:{},
+		return key;
+	}
 
-			goalDiscardPile: [],
-			ponyDiscardPile: [],
-			shipDiscardPile: [],
-
-			currentGoals:["blank:goal","blank:goal","blank:goal"],
-
-			// client only props
-			//     hand:
-			//     winnings
-
-			// private props
-			goalDrawPile: [],
-			ponyDrawPile: [],
-			shipDrawPile: [],
-
-			players:[],
-			currentPlayer:""
+	function startGame(key)
+	{	
+		games[key].board = {
+			"p,0,0":{
+				card: "Core.Start.FanficAuthorTwilight"
+			}
 		};
+		games[key].offsets = {};
+
+		games[key].decks = "^Core\\.";
+
+		games[key].goalDiscardPile = [];
+		games[key].ponyDiscardPile = [];
+		games[key].shipDiscardPile = [];
+
+		games[key].currentGoals = ["blank:goal","blank:goal","blank:goal"];
+
+		// client only props
+		//     hand:
+		//     winnings
+
+		// private props
+		games[key].goalDrawPile = [];
+		games[key].ponyDrawPile = [];
+		games[key].shipDrawPile = [];
+
+		games[key].currentPlayer = "";
 
 		logGameHosted();
 
+		var re = new RegExp(games[key].cardDecks);
+
 		for(var cardName in cards)
 		{
+			if(!re.exec(cardName))
+				continue;
+
 			if(isGoal(cardName))
 			{
 				games[key].goalDrawPile.push(cardName);
@@ -271,6 +301,7 @@ export function TsssfGameServer()
 			}
 		}
 
+		randomizeOrder(games[key].players);
 		randomizeOrder(games[key].goalDrawPile);
 		randomizeOrder(games[key].ponyDrawPile);
 		randomizeOrder(games[key].shipDrawPile);
@@ -293,10 +324,7 @@ export function TsssfGameServer()
 			return;
 		}
 
-
-		sendPlayerList(key);
-		
-
+		sendPlayerList(key);	
 
 		socket.on('close', () =>
 		{
@@ -327,6 +355,7 @@ export function TsssfGameServer()
 				if(model.host == socket)
 				{
 					model.isLobbyOpen = false;
+					startGame(key);
 					toEveryone(key, "startgame;");
 				}		
 			}
@@ -405,12 +434,13 @@ export function TsssfGameServer()
 					{
 						var card = model[typ + "DrawPile"].pop();
 
-						getPlayer(key, socket).hand.push(card);
+						var player = getPlayer(key, socket)
+						player.hand.push(card);
 
 						var msg = "draw;" + typ + ";" + (len - 1);
 						toEveryone(key, msg);
 						socket.send("move;" + card + ";" + typ + "DrawPile;hand");
-						toEveryoneElse(key, socket, "move;anon:" + typ + ";" + typ + "DrawPile;player");
+						toEveryoneElse(key, socket, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
 					}
 				}
 			}
@@ -434,6 +464,7 @@ export function TsssfGameServer()
 			if(message.startsWith("move;"))
 			{
 				var [_,card,startLocation,endLocation] = message.split(";");
+				var player = getPlayer(key, socket);
 
 				//todo validate move
 
@@ -509,7 +540,7 @@ export function TsssfGameServer()
 
 				if(endLocation == "winnings")
 				{
-					getPlayer(key, socket).winnings.push(card)
+					player.winnings.push(card)
 				}
 
 				if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1)
@@ -520,10 +551,10 @@ export function TsssfGameServer()
 				// cant move to a goal location yet
 
 				if(startLocation == "hand" || startLocation == "winnings")
-					startLocation = "player";
+					startLocation = "player,"+player.name;
 
 				if(endLocation == "hand" || endLocation == "winnings")
-					endLocation = "player";
+					endLocation = "player,"+player.name;
 
 				toEveryoneElse(key, socket, "move;" + card + ";" + startLocation + ";" + endLocation);
 			}

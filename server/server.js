@@ -72,7 +72,7 @@ app.get("/lobby.js", file("./views/lobby.js"))
 
 app.get("/host", function(req, res){
 
-	var key = tsssfServer.startGame();
+	var key = tsssfServer.openLobby();
 
 	res.redirect("/lobby?" + key);
 })

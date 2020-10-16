@@ -26,9 +26,34 @@
 	cursor: move;
 }
 
+#topToolbar
+{
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	left: 0px;
+
+	display: flex;
+	flex-direction: row;
+
+	z-index: 3;
+}
+
+#playerList
+{
+	flex-grow: 1;
+	flex-shrink: 1;
+	font-size: 12pt;
+
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
 #actionButtons
 {
-	
+	flex-grow: 0;
+	flex-shrink: 0;
 	position: absolute;
 	top: 0px;
 	right: 0px;
@@ -83,6 +108,29 @@
 	min-width: calc(100vw - 50vh);
 	height: 20vh;
 	vertical-align: middle;
+}
+
+.player
+{
+	margin: 0px 10px;
+}
+
+.ponyCount { background-image: url(/img/Pony-Back.png); }
+.shipCount { background-image: url(/img/Ship-Back.png); }
+.goalCount { background-image: url(/img/Goal-Back.png); }
+
+.ponyCount, .shipCount, .goalCount
+{
+	
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+
+	color: white;
+	height: 3vh;
+	min-width: 2vh;
+	display: inline-block;
+	text-align: center;
 }
 
 
