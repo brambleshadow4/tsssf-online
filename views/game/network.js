@@ -26,8 +26,6 @@ socket.addEventListener("close", function(){
 
 socket.addEventListener('message', function (event)
 {
-	console.log(event.data);
-
 
 	if(event.data.startsWith('closed;'))
 	{
@@ -49,6 +47,7 @@ socket.addEventListener('message', function (event)
 
 	if(event.data.startsWith("move;"))
 	{
+		console.log(event.data);
 		var [_, card, startLocation, endLocation] = event.data.split(";");
 		
 		moveCard(card, startLocation, endLocation, true);
@@ -87,6 +86,16 @@ socket.addEventListener('message', function (event)
 		};
 		funs[type]();
 	}
+
+	if(/^(pony|ship|goal)DiscardPile;/.exec(event.data))
+	{
+		var [pile, ...cards] = event.data.split(";");
+		model[pile] = cards;
+
+		updateGoalDiscard();
+		updateShipDiscard();
+		updatePonyDiscard();
+	}
 });
 
 
@@ -98,9 +107,9 @@ export function broadcastMove(card, startLocation, endLocation)
 
 function broadcast(message)
 {
-	//setTimeout(function(){
+	setTimeout(function(){
 	socket.send(message);
-	//},2000);
+	},5000);
 }
 
 network.requestDrawPony = function()

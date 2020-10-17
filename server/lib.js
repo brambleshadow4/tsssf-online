@@ -1,10 +1,10 @@
 export function isPony(card)
 {
-	return card.indexOf(".Pony.") >= 0;
+	return card.indexOf(".Pony.") >= 0 || card == "anon:pony";
 }
 export function isShip(card)
 {
-	return card.indexOf(".Ship.") >= 0;
+	return card.indexOf(".Ship.") >= 0 || card == "anon:ship";
 }
 
 export function isGoal(card)

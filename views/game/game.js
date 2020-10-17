@@ -273,7 +273,6 @@ window.addCardsToReferencePage = function()
 	for(let key of keys)
 	{
 		if(!re.exec(key)) continue;
-		console.log(key);
 
 		let cardDiv = makeCardElement(key)
 		
@@ -290,7 +289,6 @@ window.addCardsToReferencePage = function()
 			goalReference.appendChild(cardDiv)
 		}
 
-		console.log(goalReference.innerHTML);
 	}
 
 	var header = document.createElement('h1');
@@ -308,8 +306,6 @@ window.addCardsToReferencePage = function()
 	popupPage.appendChild(header);
 	popupPage.appendChild(goalReference);
 
-
-	console.log(popupPage);
 	return popupPage;
 }
 
@@ -368,7 +364,8 @@ function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
 	setTimeout(function()
 	{
 		endLocationUpdateFn();
-		floatCard.parentNode.removeChild(floatCard);
+		if(floatCard.parentNode)
+			floatCard.parentNode.removeChild(floatCard);
 	}, 520);
 }
 
@@ -623,8 +620,6 @@ window.model = model;
 export function updateGame()
 {
 	LoadCards();
-
-	console.log("game updated");
 
 	var flyingCards = document.getElementsByClassName('flying');
 	while(flyingCards.length)
@@ -891,8 +886,6 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 
 			if(isBoardLoc(location))
 			{
-				console.log(model.board[location]);
-
 				if(model.board[location] && model.board[location].card && isPonyOrStart(model.board[location].card))
 				{
 					var [_,x,y] = location.split(",");
@@ -1011,7 +1004,9 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 {
 	var startPos;
 
-	console.log(card + ";" + startLocation + ";"+ endLocation);
+	//console.log(card + ";" + startLocation + ";"+ endLocation);
+
+
 
 	if(startLocation != cardLocations[card] && cardLocations[card])
 	{
@@ -1027,6 +1022,9 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 			return;
 		}
 	}
+
+	if(startLocation == endLocation)
+		return;
 
 	if(startLocation == "winnings")
 	{
@@ -1093,7 +1091,6 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	}
 	else if(isBoardLoc(startLocation))
 	{
-		console.log("removing old card location " + startLocation);
 
 		startPos = getPosFromElement(model.board[startLocation].element);
 		removeCardFromBoard(startLocation);
@@ -1126,7 +1123,6 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 		var rect = enddiv.getBoundingClientRect();
 
 		var cardCount = isPony(card) ? model.hand.filter(x => isPony(x)).length : model.hand.length;
-		console.log(cardCount);
 
 		var offset = ((cardCount-1) * (13 + 1) + 1) * vh;
 		
@@ -1173,11 +1169,9 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 		var [,playerName] = endLocation.split(",");
 		var player = getPlayerWithName(playerName);
 
-		console.log(player);
-
-		if(card=="anon:pony")
+		if(isPony(card))
 			player.ponies++;
-		if(card=="anon:ship")
+		if(isShip(card))
 			player.ships++;
 		if(isGoal(card))
 			player.winnings.push(card);
@@ -1186,6 +1180,21 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	}
 	else if(isBoardLoc(endLocation))
 	{
+		if(model.board[endLocation])
+		{
+			if(!isBlank(model.board[endLocation].card))
+			{
+				// This can happen if a player has moved a card on the board when another player just
+				// moved a card onto the same square.
+				//
+				// The server sends a move msg down with the correct card, and the incorrect card moves to limbo.
+				// Then server sends a move msg down moving the limbo card back to its proper place.
+				cardLocations[model.board[endLocation].card] = "limbo";
+			}
+			
+			removeCardFromBoard(endLocation);
+		}
+
 		model.board[endLocation] = {
 			card: card
 		}
@@ -1213,10 +1222,11 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 		delete cardLocations[card];
 
 	// run animation (if applicable)
-	if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1
+	if(startLocation != "limbo" && 
+		(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1
 		|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
 		|| endLocation == "winnings"
-		|| isPlayerLoc(endLocation)
+		|| isPlayerLoc(endLocation))
 	)
 	{
 		animateCardMove(card, startPos, endPos, updateFun);
@@ -1502,7 +1512,7 @@ function removeCardFromBoard(key)
 	if(model.board[key])
 	{
 		var el = model.board[key].element;
-		if(el)
+		if(el && el.parentNode) // how tf does el not have a parent node???
 			el.parentNode.removeChild(el);
 		delete model.board[key];
 	}
@@ -1513,7 +1523,7 @@ function removeCardElement(key)
 	if(model.board[key])
 	{
 		var el = model.board[key].element;
-		if(el)
+		if(el && el.parentNode)
 			el.parentNode.removeChild(el);
 	}
 }

@@ -257,13 +257,16 @@ export function TsssfGameServer()
 
 	function startGame(key, options)
 	{	
-		games[key].board = {
+		var model = games[key];
+		model.cardLocations = {};
+		model.board = {
 			"p,0,0":{
 				card: "Core.Start.FanficAuthorTwilight"
 			}
 		};
-		games[key].offsets = {};
+		model.offsets = {};
 
+		model.cardLocations["Core.Start.FanficAuthorTwilight"] = "p,0,0";
 
 		var decks = "^Core\\.";
 		if(options.cardDecks)
@@ -275,28 +278,29 @@ export function TsssfGameServer()
 			decks = decks.map(x => "^" + x + "\\.").join("|");
 		}
 
-		games[key].cardDecks = decks;
+		model.cardDecks = decks;
+		
 
-		games[key].goalDiscardPile = [];
-		games[key].ponyDiscardPile = [];
-		games[key].shipDiscardPile = [];
+		model.goalDiscardPile = [];
+		model.ponyDiscardPile = [];
+		model.shipDiscardPile = [];
 
-		games[key].currentGoals = ["blank:goal","blank:goal","blank:goal"];
+		model.currentGoals = ["blank:goal","blank:goal","blank:goal"];
 
 		// client only props
 		//     hand:
 		//     winnings
 
 		// private props
-		games[key].goalDrawPile = [];
-		games[key].ponyDrawPile = [];
-		games[key].shipDrawPile = [];
+		model.goalDrawPile = [];
+		model.ponyDrawPile = [];
+		model.shipDrawPile = [];
 
-		games[key].currentPlayer = "";
+		model.currentPlayer = "";
 
 		logGameHosted();
 
-		var re = new RegExp(games[key].cardDecks);
+		var re = new RegExp(model.cardDecks);
 
 		for(var cardName in cards)
 		{
@@ -305,22 +309,25 @@ export function TsssfGameServer()
 
 			if(isGoal(cardName))
 			{
-				games[key].goalDrawPile.push(cardName);
+				model.goalDrawPile.push(cardName);
+				model.cardLocations[key] = "goalDrawPile";
 			}
 			else if(isPony(cardName))
 			{	
-				games[key].ponyDrawPile.push(cardName)
+				model.ponyDrawPile.push(cardName);
+				model.cardLocations[key] = "ponyDrawPile";
 			}
 			else if(isShip(cardName))
 			{
-				games[key].shipDrawPile.push(cardName);
+				model.shipDrawPile.push(cardName);
+				model.cardLocations[key] = "shipDrawPile";
 			}
 		}
 
-		randomizeOrder(games[key].players);
-		randomizeOrder(games[key].goalDrawPile);
-		randomizeOrder(games[key].ponyDrawPile);
-		randomizeOrder(games[key].shipDrawPile);
+		randomizeOrder(model.players);
+		randomizeOrder(model.goalDrawPile);
+		randomizeOrder(model.ponyDrawPile);
+		randomizeOrder(model.shipDrawPile);
 
 		return key;
 	}
@@ -454,6 +461,7 @@ export function TsssfGameServer()
 					{
 						var card = model[typ + "DrawPile"].pop();
 						model.currentGoals[goalNo] = card;
+						model.cardLocations[card] = "goal," + goalNo;
 
 						var msg = "draw;" + typ + ";" + (len - 1);
 						toEveryone(key, msg);
@@ -470,6 +478,7 @@ export function TsssfGameServer()
 
 						var player = getPlayer(key, socket)
 						player.hand.push(card);
+						model.cardLocations[card] = "player," + player.name;
 
 						var msg = "draw;" + typ + ";" + (len - 1);
 						toEveryone(key, msg);
@@ -491,6 +500,15 @@ export function TsssfGameServer()
 
 					randomizeOrder(model[typ+"DrawPile"]);
 
+					for(var arr of ["ponyDrawPile","shipDrawPile","goalDrawPile","ponyDiscardPile","shipDiscardPile","goalDiscardPile"])
+					{
+						console.log(arr);
+						for(var card of model[arr])
+						{
+							model.cardLocations[card] = arr;
+						}
+					}
+
 					toEveryone(key, ["swapshuffle", typ, model[typ+"DrawPile"].length, ...model[typ+"DiscardPile"]].join(";"));
 				}
 			}
@@ -502,17 +520,43 @@ export function TsssfGameServer()
 
 				console.log(message);
 
+				let serverStartLoc = startLocation;
+				if(startLocation == "hand")
+					serverStartLoc = "player," + player.name;
 
-				//todo validate move
-				if(isLocOccupied(key, endLocation))
+
+				// if the player has an incorrect position for a card, move it to where it actually should be.
+				if(model.cardLocations[card] != serverStartLoc || isLocOccupied(key, endLocation))
+				{
+					var whereThePlayerThinksTheCardIs = endLocation;
+					if(isLocOccupied(key, endLocation))
+					{}
+					else
+						console.log("bad start location; card is at " +model.cardLocations[card]);
+
+					var whereTheCardActuallyIs = model.cardLocations[card];
+					if(whereTheCardActuallyIs == "player," + player.name)
+						whereTheCardActuallyIs = "hand";
+
+
+					console.log("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
+					socket.send("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
+
 					return;
+				}
+
+
+				let serverEndLoc = endLocation;
+				if(serverEndLoc == "hand")
+					serverEndLoc = "player," + player.name;
+
+				model.cardLocations[card] = serverEndLoc;
 
 				// remove from old location
 				if(startLocation == "hand")
 				{
 					var i = getPlayer(key, socket).hand.indexOf(card);
-					if(i == -1)
-						return ;//sendCurrentState(key, socket);
+					
 
 					getPlayer(key, socket).hand.splice(i, 1);
 				}
@@ -521,17 +565,12 @@ export function TsssfGameServer()
 				{
 					if(model.board[startLocation] && model.board[startLocation].card == card)
 						delete model.board[startLocation];
-					else
-						return;// sendCurrentState(key, socket);
+					
 				}
 
 				if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(startLocation) > -1)
 				{
 					var i = model[startLocation].indexOf(card);
-
-					if(i == -1)
-						return ;// sendCurrentState(key, socket);
-
 					model[startLocation].splice(i,1);
 					
 				}
@@ -543,10 +582,7 @@ export function TsssfGameServer()
 					{
 						delete model.offsets[card + "," + x + "," + y];
 					}
-					else
-					{
-						return;//  sendCurrentState(key, socket);
-					}
+					
 				}
 
 				if(isGoalLoc(startLocation))
@@ -554,8 +590,7 @@ export function TsssfGameServer()
 					var [_,i] = startLocation.split(",")
 					if(model.currentGoals[i] != "blank:goal")
 						model.currentGoals[i] = "blank:goal";
-					else
-						return;//  sendCurrentState(key, socket);
+					
 				}
 
 				// move to end location
