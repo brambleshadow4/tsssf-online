@@ -181,6 +181,9 @@ export function TsssfGameServer()
 
 		model.board = games[key].board;
 		model.cardDecks = games[key].cardDecks;
+
+		console.log("cardDecks " +games[key].cardDecks);
+
 		model.offsets = games[key].offsets;
 		model.ponyDiscardPile = games[key].ponyDiscardPile;
 		model.shipDiscardPile = games[key].shipDiscardPile;
@@ -250,7 +253,7 @@ export function TsssfGameServer()
 		return key;
 	}
 
-	function startGame(key)
+	function startGame(key, options)
 	{	
 		games[key].board = {
 			"p,0,0":{
@@ -259,7 +262,18 @@ export function TsssfGameServer()
 		};
 		games[key].offsets = {};
 
-		games[key].decks = "^Core\\.";
+
+		var decks = "^Core\\.";
+		if(options.cardDecks)
+		{
+			var allowedDecks = ["PU","EC"]
+			var decks = options.cardDecks.filter( x => allowedDecks.indexOf(x) > -1);
+			decks.push("Core");
+
+			decks = decks.map(x => "^" + x + "\\.").join("|");
+		}
+
+		games[key].cardDecks = decks;
 
 		games[key].goalDiscardPile = [];
 		games[key].ponyDiscardPile = [];
@@ -352,10 +366,18 @@ export function TsssfGameServer()
 
 			if(message.startsWith("startgame;"))
 			{
+				var options = {cardDecks:[]};
+				try 
+				{
+					options = JSON.parse(message.substring(10))
+				}
+				catch(e){ }
+
+
 				if(model.host == socket)
 				{
 					model.isLobbyOpen = false;
-					startGame(key);
+					startGame(key, options);
 					toEveryone(key, "startgame;");
 				}		
 			}

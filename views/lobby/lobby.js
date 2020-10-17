@@ -79,7 +79,23 @@ function register()
 
 function startGame()
 {
-	socket.send("startgame;");
+	var cardDecks = document.getElementsByClassName('cardbox');
+
+	// skip 0 because it's core
+	var options = {cardDecks:[]};
+
+
+	for(var i=1; i<cardDecks.length; i++)
+	{
+		if(cardDecks[i].classList.contains('selected'))
+		{
+			var cardDeckName = cardDecks[i].id;
+			cardDeckName = cardDeckName.substring(0,cardDeckName.indexOf("-"))
+			options.cardDecks.push(cardDeckName)
+		}
+	}
+
+	socket.send("startgame;" + JSON.stringify(options));
 }
 
 var gameOptionsDiv = document.getElementById('gameOptionsInfo');

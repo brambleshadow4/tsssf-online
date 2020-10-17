@@ -12,7 +12,7 @@
 
 */
 
-import cards from "/cards.js";
+import cards from "/game/cards.js";
 import {
 	isPony, 
 	isGoal, 
@@ -22,7 +22,7 @@ import {
 	isOffsetLoc,
 	isPlayerLoc
 } from "/lib.js";
-import {broadcastMove} from "/network.js";
+import {broadcastMove} from "/game/network.js";
 
 
 

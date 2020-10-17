@@ -1,6 +1,6 @@
 import {
 	updateGame, moveCard, updatePonyDiscard, updateShipDiscard, updateGoalDiscard
-} from "/game.js";
+} from "/game/game.js";
 
 var socket;
 var pendingRequests = [];

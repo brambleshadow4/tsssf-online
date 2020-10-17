@@ -8,7 +8,10 @@ import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js"
 
 const app = express()
-const PORT = 8000;
+let PORT = 80;
+
+if(process.argv[2] == "dev")
+	PORT = 8000;
 
 
 app.use(cookieParser());
@@ -24,16 +27,20 @@ app.use(expressSession({
 app.get('/', file("./views/home.html"));
 app.get('/img/**', fmap("/img/**", "./img/**"));
 
-app.get("/game", file("./views/game.html"))
+app.get("/game", file("./views/game/game.html"))
+app.get("/game/game.js", file("./views/game/game.js"))
+app.get("/game/network.js", file("./views/game/network.js"))
+app.get("/game/game.css", file("./views/game/game.css"))
 
 
 app.get("/lib.js", file("./server/lib.js"))
-app.get("/game.js", file("./views/game.js"))
-app.get("/cards.js", file("./server/cards.js"))
-app.get("/network.js", file("./views/network.js"))
-app.get("/game.css", file("./views/game.css"))
+
+
+
+app.get("/game/cards.js", file("./server/cards.js"))
+
 app.get("/rulebook.html", file("./views/rulebook.html"))
-app.get("/gamePublic.js", file("./views/gamePublic.js"))
+app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
 
 app.get("/lobby", function(req,res)
 {
@@ -41,7 +48,7 @@ app.get("/lobby", function(req,res)
 
 	if(tsssfServer.games[key])
 	{
-		sendIfExists("./views/lobby.html", res);
+		sendIfExists("./views/lobby/lobby.html", res);
 	}
 	else
 	{
@@ -67,8 +74,8 @@ app.get("/stats", async function(req,res){
 })
 
 
-app.get("/lobby.css", file("./views/lobby.css"))
-app.get("/lobby.js", file("./views/lobby.js"))
+app.get("/lobby.css", file("./views/lobby/lobby.css"))
+app.get("/lobby.js", file("./views/lobby/lobby.js"))
 
 app.get("/host", function(req, res){
 
@@ -77,7 +84,7 @@ app.get("/host", function(req, res){
 	res.redirect("/lobby?" + key);
 })
 	
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
+app.listen(PORT, () => console.log(`TSSSF web server listening on port ${PORT}!`))
 
 
 
