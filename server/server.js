@@ -83,8 +83,11 @@ app.get("/host", function(req, res){
 
 	res.redirect("/lobby?" + key);
 })
+
+app.get("/**", function(req,res){ res.redirect("/"); });
 	
 app.listen(PORT, () => console.log(`TSSSF web server listening on port ${PORT}!`))
+
 
 
 
@@ -115,8 +118,6 @@ function fmap(routeUri, fileUrl)
 
 function sendIfExists(url, res)
 {
-	console.log(url);
-
 	if(fs.existsSync(url))
 	{
 		res.sendFile(url, {root:"./"})

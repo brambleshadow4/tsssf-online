@@ -5,6 +5,9 @@ body
 	flex-direction: row;
 	justify-content: center;
 	height: 100%;
+
+	background-color: #F0F0F0;
+	position: relative;
 }
 
 
@@ -23,6 +26,7 @@ h2{
 	flex-grow: 1;
 
 	position: relative;
+	background-color: white;
 }
 
 .playerArea
@@ -57,7 +61,8 @@ button
 
 h2
 {
-	margin: 0px 0px 10px 0px
+	margin: 0px 0px 10px 0px;
+	font-size: 20pt;
 }
 
 
@@ -119,20 +124,39 @@ h2
 {
 	cursor: pointer;
 	border: solid 2px white;
+	position: relative;
+	z-index: 1;
 }
 .cardbox img
 {
 	height: 170px;
 	position: relative;
-	z-index: -1;
+	z-index: 0;
 
+	user-select: none;
+}
+.cardbox .shield
+{
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	z-index: 1;
+
+	color: transparent;
 }
 
-.cardbox.selected
+.cardbox.selected .shield
 {
 	border: solid 2px #0066ff;
 	border-radius: 10px;
 	background-color: rgba(102, 163, 255, .5);
+}
+
+.cardbox.selected
+{
+	
 }
 
 #Core-deck-select
