@@ -132,6 +132,7 @@ export function TsssfGameServer()
 	}
 
 
+
 	function sendPlayerList(key)
 	{
 		var msg = "playerlist;" + games[key].players.filter(x => x.socket.isAlive)
@@ -225,6 +226,7 @@ export function TsssfGameServer()
 		var model = getPlayerModel(key, socket);
 		socket.send("model;" + JSON.stringify(model));
 	}
+
 
 	function openLobby(key)
 	{
@@ -323,6 +325,17 @@ export function TsssfGameServer()
 		return key;
 	}
 
+	function isLocOccupied(key, loc)
+	{
+		var model = games[key];
+		if(isBoardLoc(loc))
+		{
+			return (model.board[loc] != undefined)
+		}
+
+		return false;
+	}
+
 	//startGame("dev");
 	//games["dev"].allowInGameRegistration = true;
 
@@ -372,7 +385,6 @@ export function TsssfGameServer()
 					options = JSON.parse(message.substring(10))
 				}
 				catch(e){ }
-
 
 				if(model.host == socket)
 				{
@@ -488,7 +500,12 @@ export function TsssfGameServer()
 				var [_,card,startLocation,endLocation] = message.split(";");
 				var player = getPlayer(key, socket);
 
+				console.log(message);
+
+
 				//todo validate move
+				if(isLocOccupied(key, endLocation))
+					return;
 
 				// remove from old location
 				if(startLocation == "hand")
@@ -550,14 +567,12 @@ export function TsssfGameServer()
 
 				if(isBoardLoc(endLocation))
 				{
-					if(model.board[endLocation])
-					{
-						var [_,x,y] = endLocation.split(",")
-						var offsetCard = model.board[endLocation].card
-						model.offsets[offsetCard + "," + x + "," + y] = "";
-					}
-
 					model.board[endLocation] = {card: card}
+				}
+				if(isOffsetLoc(endLocation))
+				{
+					var [_,x,y] = endLocation.split(",")
+					model.offsets[card + "," + x + "," + y] = "";
 				}
 
 				if(endLocation == "winnings")

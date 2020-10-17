@@ -100,7 +100,7 @@ function broadcast(message)
 {
 	//setTimeout(function(){
 	socket.send(message);
-	//},1000);
+	//},2000);
 }
 
 network.requestDrawPony = function()

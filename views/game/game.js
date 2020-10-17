@@ -634,18 +634,7 @@ export function updateGame()
 
 	for(var key in model.board)
 	{
-		var element = model.board[key].element;
-		if(element)
-		{
-			element.parentNode.removeChild(element);
-			delete model.board[key].element;
-			console.log('element removed');
-		}
-
-		if(!model.board[key].card || isBlank(model.board[key].card))
-		{
-			delete model.board[key];
-		}
+		removeCardElement(key);
 	}
 
 
@@ -766,7 +755,6 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 		{
 			if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile", "winnings"].indexOf(location) > -1)
 				return;
-
 
 			if(isPony(card))
 			{	
@@ -899,8 +887,29 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 		imgElement.ondrop= function(e)
 		{	
 			e.preventDefault();
-
 			var [card, startLoc] = dataTransferVar.split(";")
+
+			if(isBoardLoc(location))
+			{
+				console.log(model.board[location]);
+
+				if(model.board[location] && model.board[location].card && isPonyOrStart(model.board[location].card))
+				{
+					var [_,x,y] = location.split(",");
+					var offsetLoc = "offset," + x + "," + y;
+					let offsetCard = model.board[location].card;
+					moveCard(offsetCard, location, offsetLoc);
+					broadcastMove(offsetCard, location, offsetLoc);
+				}
+				else
+				{
+					// delete drop zone card;
+					this.parentNode.removeChild(this);
+				}
+			}
+
+			
+
 			moveCard(card, startLoc, location);
 			broadcastMove(card, startLoc, location);
 			return false;
@@ -998,10 +1007,11 @@ function isValidMove(cardDragged, targetCard, endLocation)
 	);
 }
 
-
 export function moveCard(card, startLocation, endLocation, forceCardToMove)
 {
 	var startPos;
+
+	console.log(card + ";" + startLocation + ";"+ endLocation);
 
 	if(startLocation != cardLocations[card] && cardLocations[card])
 	{
@@ -1012,6 +1022,7 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 		}
 		else
 		{
+			console.log("sync issue update");
 			updateGame();
 			return;
 		}
@@ -1082,10 +1093,10 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	}
 	else if(isBoardLoc(startLocation))
 	{
-		var element = model.board[startLocation].element;
-		startPos = getPosFromElement(element);
-		element.parentNode.removeChild(element);
-		delete model.board[startLocation];
+		console.log("removing old card location " + startLocation);
+
+		startPos = getPosFromElement(model.board[startLocation].element);
+		removeCardFromBoard(startLocation);
 
 		updateBoard();
 	}
@@ -1175,22 +1186,6 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	}
 	else if(isBoardLoc(endLocation))
 	{
-		// element gets generated when updateBoard() is called
-		if(model.board[endLocation])
-		{
-			if(model.board[endLocation].element)
-			{
-				var el = model.board[endLocation].element;
-				el.parentNode.removeChild(el);
-			}
-
-			if(model.board[endLocation].card && isPonyOrStart(model.board[endLocation].card))
-			{
-				offsetPonyCard(endLocation, model.board[endLocation].card);
-			}
-		}
-		
-
 		model.board[endLocation] = {
 			card: card
 		}
@@ -1281,9 +1276,10 @@ function addCardToBoard(key, card)
 	}
 	
 	refPoint.appendChild(imgElement);
+
 	if(!model.board[key])
 	{
-		model.board[key] = {};
+		model.board[key] = {card: card};
 	}
 	model.board[key].element = imgElement;
 }
@@ -1501,6 +1497,27 @@ function getNeighborKeys(key)
 	}
 }
 
+function removeCardFromBoard(key)
+{
+	if(model.board[key])
+	{
+		var el = model.board[key].element;
+		if(el)
+			el.parentNode.removeChild(el);
+		delete model.board[key];
+	}
+}
+
+function removeCardElement(key)
+{
+	if(model.board[key])
+	{
+		var el = model.board[key].element;
+		if(el)
+			el.parentNode.removeChild(el);
+	}
+}
+
 function updateBoard()
 {
 	var refPoint = document.getElementById('refPoint');
@@ -1527,7 +1544,6 @@ function updateBoard()
 
 	for(var key in model.board)
 	{
-
 		var type, x,y;
 		[type,x,y] = key.split(",");
 		x = Number(x);
@@ -1538,7 +1554,7 @@ function updateBoard()
 
 
 		// remove detached blanks
-		if(!card || isBlank(card))
+		if(isBlank(card))
 		{
 			var neighbors = getNeighborKeys(key);
 			var cardHasValidNeighbor = false;
@@ -1560,9 +1576,8 @@ function updateBoard()
 			// all cards next to this blank are blank; remove it.
 
 
-			var element = model.board[key].element;
-			element.parentNode.removeChild(element);
-			delete model.board[key];
+			removeCardFromBoard(key);
+		
 			continue;
 		}
 
