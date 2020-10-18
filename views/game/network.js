@@ -26,6 +26,7 @@ socket.addEventListener("close", function(){
 
 socket.addEventListener('message', function (event)
 {
+	console.log(event.data);
 
 	if(event.data.startsWith('closed;'))
 	{
@@ -47,9 +48,7 @@ socket.addEventListener('message', function (event)
 
 	if(event.data.startsWith("move;"))
 	{
-		console.log(event.data);
 		var [_, card, startLocation, endLocation] = event.data.split(";");
-		
 		moveCard(card, startLocation, endLocation, true);
 	}
 
@@ -87,14 +86,24 @@ socket.addEventListener('message', function (event)
 		funs[type]();
 	}
 
-	if(/^(pony|ship|goal)DiscardPile;/.exec(event.data))
+	if(event.data.startsWith("ontop;"))
 	{
-		var [pile, ...cards] = event.data.split(";");
-		model[pile] = cards;
+		var [_, location, card] = event.data.split(";");
 
-		updateGoalDiscard();
-		updateShipDiscard();
-		updatePonyDiscard();
+		var pile = location.split(",")[0];
+
+		var i = model[pile].indexOf(card);
+
+		if(i+1 && i+1 != model[pile].length)
+		{	
+			model[pile].splice(i,1);
+			model[pile].push(card);
+
+			updateShipDiscard();
+			updatePonyDiscard();
+			updateGoalDiscard();
+		}
+
 	}
 });
 
@@ -107,9 +116,11 @@ export function broadcastMove(card, startLocation, endLocation)
 
 function broadcast(message)
 {
-	setTimeout(function(){
+	console.log("sending " + message);
+
+	//setTimeout(function(){
 	socket.send(message);
-	},5000);
+	//},1000);
 }
 
 network.requestDrawPony = function()

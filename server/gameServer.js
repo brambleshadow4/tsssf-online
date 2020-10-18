@@ -6,7 +6,8 @@ import {
 	isShip,
 	isBoardLoc,
 	isOffsetLoc,
-	isGoalLoc
+	isGoalLoc,
+	isDiscardLoc
 } from "./lib.js";
 
 import cards from "./cards.js";
@@ -505,9 +506,17 @@ export function TsssfGameServer()
 						console.log(arr);
 						for(var card of model[arr])
 						{
-							model.cardLocations[card] = arr;
+							model.cardLocations[card] = arr + ",stack";
 						}
 					}
+
+					var pileArr = model[typ+"DiscardPile"];
+					if(pileArr.length >0)
+					{
+						var topCard = pileArr[pileArr.length-1];
+						model.cardLocations[topCard] = typ+"DiscardPile,top";
+					}
+					
 
 					toEveryone(key, ["swapshuffle", typ, model[typ+"DrawPile"].length, ...model[typ+"DiscardPile"]].join(";"));
 				}
@@ -518,7 +527,7 @@ export function TsssfGameServer()
 				var [_,card,startLocation,endLocation] = message.split(";");
 				var player = getPlayer(key, socket);
 
-				console.log(message);
+				//console.log(message);
 
 				let serverStartLoc = startLocation;
 				if(startLocation == "hand")
@@ -529,21 +538,26 @@ export function TsssfGameServer()
 				if(model.cardLocations[card] != serverStartLoc || isLocOccupied(key, endLocation))
 				{
 					var whereThePlayerThinksTheCardIs = endLocation;
-					if(isLocOccupied(key, endLocation))
-					{}
-					else
-						console.log("bad start location; card is at " +model.cardLocations[card]);
+						
+
 
 					var whereTheCardActuallyIs = model.cardLocations[card];
 					if(whereTheCardActuallyIs == "player," + player.name)
 						whereTheCardActuallyIs = "hand";
 
 
-					console.log("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
+					console.log("X " + message);
+					console.log("  P: " + player.name);
+
+					console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
+					//console.log("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
 					socket.send("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
 
 					return;
 				}
+
+				console.log("\u221A " + message);
+				console.log("  P: " + player.name);
 
 
 				let serverEndLoc = endLocation;
@@ -565,14 +579,19 @@ export function TsssfGameServer()
 				{
 					if(model.board[startLocation] && model.board[startLocation].card == card)
 						delete model.board[startLocation];
-					
 				}
 
-				if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(startLocation) > -1)
+				if(isDiscardLoc(startLocation))
 				{
-					var i = model[startLocation].indexOf(card);
-					model[startLocation].splice(i,1);
-					
+					var [pile,slot] = startLocation.split(",");
+					var i = model[pile].indexOf(card);
+					model[pile].splice(i,1);
+
+					if(model[pile].length)
+					{
+						var topCard = model[pile][model[pile].length-1]
+						model.cardLocations[topCard] = pile+",top";
+					}
 				}
 
 				if(isOffsetLoc(startLocation))
@@ -582,7 +601,6 @@ export function TsssfGameServer()
 					{
 						delete model.offsets[card + "," + x + "," + y];
 					}
-					
 				}
 
 				if(isGoalLoc(startLocation))
@@ -615,12 +633,25 @@ export function TsssfGameServer()
 					player.winnings.push(card)
 				}
 
-				if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1)
+				if(isDiscardLoc(endLocation))
 				{
-					model[endLocation].push(card);
+					// the only valid placement is on top of the discard pile
+					var [pile,slot] = endLocation.split(",");
+					model[pile].push(card);
+
+					if(model[pile].length > 1)
+					{
+						var underCard = model[pile][model[pile].length-2];
+						model.cardLocations[underCard] = pile + ",stack";
+					}
 				}
 
+			
 				// cant move to a goal location yet
+
+				//setTimeout(function(){
+
+				socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
 
 				if(startLocation == "hand" || startLocation == "winnings")
 					startLocation = "player,"+player.name;
@@ -629,6 +660,19 @@ export function TsssfGameServer()
 					endLocation = "player,"+player.name;
 
 				toEveryoneElse(key, socket, "move;" + card + ";" + startLocation + ";" + endLocation);
+
+
+				if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
+				{
+					var [pile,slot] = startLocation.split(",");
+					if(model[pile].length)
+					{
+						var topCard = model[pile][model[pile].length-1]
+						toEveryone(key, "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
+					}
+				}
+
+				//}, 5000)
 			}
 		});
 	});

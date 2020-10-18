@@ -48,3 +48,10 @@ export function isPlayerLoc(location)
 {
 	return location.startsWith("player,");
 }
+
+export function isDiscardLoc(location)
+{
+	return location.startsWith("shipDiscardPile,") || 
+		location.startsWith("ponyDiscardPile,") || 
+		location.startsWith('shipDiscardPile,')
+}

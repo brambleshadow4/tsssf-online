@@ -20,7 +20,8 @@ import {
 	isGoalLoc, 
 	isBoardLoc,
 	isOffsetLoc,
-	isPlayerLoc
+	isPlayerLoc,
+	isDiscardLoc
 } from "/lib.js";
 import {broadcastMove} from "/game/network.js";
 
@@ -493,12 +494,10 @@ export function updatePonyDiscard(cardOnTop)
 	var l = model.ponyDiscardPile.length;
 	var topCard = cardOnTop || (l ? model.ponyDiscardPile[l-1] : "blank:pony");
 
-
-
 	updateCardElement(
 		document.getElementById("ponyDiscardPile"),
 		topCard,
-		"ponyDiscardPile",
+		"ponyDiscardPile,top",
 		l > 0, false
 	)
 
@@ -511,8 +510,11 @@ export function updatePonyDiscard(cardOnTop)
 
 			if(card)
 			{
-				moveCard(card,"ponyDiscardPile", "hand");
-				broadcastMove(card, "ponyDiscardPile", "hand");
+				var i = model.ponyDiscardPile.indexOf(card);
+				var area = (i+1 == model.ponyDiscardPile.length ? "top" : "stack");
+				var loc = "ponyDiscardPile," + area
+				moveCard(card, loc, "hand");
+				broadcastMove(card, loc, "hand");
 			}
 		}
 
@@ -534,7 +536,7 @@ export function updateShipDiscard(tempCard)
 	updateCardElement(
 		document.getElementById("shipDiscardPile"),
 		topCard,
-		"shipDiscardPile",
+		"shipDiscardPile,top",
 		l > 0, false
 	)
 
@@ -547,8 +549,11 @@ export function updateShipDiscard(tempCard)
 
 			if(card)
 			{
-				moveCard(card,"shipDiscardPile", "hand");
-				broadcastMove(card, "shipDiscardPile", "hand");
+				var i = model.shipDiscardPile.indexOf(card);
+				var area = (i+1 == model.shipDiscardPile.length ? "top" : "stack");
+				var loc = "shipDiscardPile," + area
+				moveCard(card, loc, "hand");
+				broadcastMove(card, loc, "hand");
 			}
 		}
 
@@ -568,7 +573,7 @@ export function updateGoalDiscard(tempCard)
 	updateCardElement(
 		document.getElementById("goalDiscardPile"),
 		topCard,
-		"goalDiscardPile",
+		"goalDiscardPile,top",
 		false, false
 	)
 }
@@ -643,84 +648,27 @@ export function updateGame()
 
 	for(var card of model.ponyDiscardPile)
 	{
-		cardLocations[card] = "ponyDiscardPile";
+		cardLocations[card] = "ponyDiscardPile,stack";
 	}
 
 	for(var card of model.shipDiscardPile)
 	{
-		cardLocations[card] = "shipDiscardPile";
+		cardLocations[card] = "shipDiscardPile,stack";
 	}
 
 	for(var card of model.goalDiscardPile)
 	{
-		cardLocations[card] = "goalDiscardPile";
+		cardLocations[card] = "goalDiscardPile,stack";
 	}
+
+	cardLocations[model.ponyDiscardPile[model.ponyDiscardPile.length-1]] = "ponyDiscardPile,top";
+	cardLocations[model.shipDiscardPile[model.shipDiscardPile.length-1]] = "shipDiscardPile,top";
+	cardLocations[model.goalDiscardPile[model.goalDiscardPile.length-1]] = "goalDiscardPile,top";
 
 	updateWinnings();
 	updatePlayerList();
 }
 
-
-function LoadGame()
-{
-	model = {
-		board:{
-			"p,0,0":{
-				card: "Core.Start.FanficAuthorTwilight"
-			}
-		},
-		hand:[],
-		currentGoals:[],
-		winnings:[],
-	};
-
-	model.goalDrawPile = [];
-	model.ponyDrawPile = [];
-	model.shipDrawPile = [];
-
-	model.goalDiscardPile = [];
-	model.ponyDiscardPile = [];
-	model.shipDiscardPile = [];
-
-	for(var key in cards)
-	{
-		if(isGoal(key))
-		{
-			model.goalDrawPile.push(key);
-		}
-		else if(isPony(key))
-		{	
-			model.ponyDrawPile.push(key)
-		}
-		else if(isShip(key))
-		{
-			model.shipDrawPile.push(key);
-		}
-	}
-
-	randomizeOrder(model.goalDrawPile);
-	randomizeOrder(model.ponyDrawPile);
-	randomizeOrder(model.shipDrawPile);
-
-	
-	model.currentGoals.push(model.goalDrawPile.pop());
-	model.currentGoals.push(model.goalDrawPile.pop());
-	model.currentGoals.push(model.goalDrawPile.pop());
-
-	model.hand.push(model.ponyDrawPile.pop());
-	model.hand.push(model.ponyDrawPile.pop());
-	model.hand.push(model.ponyDrawPile.pop());
-	model.hand.push(model.ponyDrawPile.pop());
-
-
-	model.hand.push(model.shipDrawPile.pop());
-	model.hand.push(model.shipDrawPile.pop());
-	model.hand.push(model.shipDrawPile.pop());
-	
-	//await model from server
-
-	updateGame();
-}
 
 // dragHandler is responsible for removing a card from its old location
 // dropHandler is responsible for adding a card to its new location.
@@ -748,23 +696,23 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 	{	
 		if(isDkeyPressed)
 		{
-			if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile", "winnings"].indexOf(location) > -1)
+			if(isDiscardLoc(location) || location == "winnings")
 				return;
 
 			if(isPony(card))
 			{	
-				moveCard(card, location, "ponyDiscardPile");
-				broadcastMove(card, location, "ponyDiscardPile");
+				moveCard(card, location, "ponyDiscardPile,top");
+				broadcastMove(card, location, "ponyDiscardPile,top");
 			}
 			else if(isShip(card))
 			{	
-				moveCard(card, location, "shipDiscardPile");
-				broadcastMove(card, location, "shipDiscardPile");
+				moveCard(card, location, "shipDiscardPile,top");
+				broadcastMove(card, location, "shipDiscardPile,top");
 			}
 			else if (isGoal(card))
 			{
-				moveCard(card, location, "goalDiscardPile");
-				broadcastMove(card, location, "goalDiscardPile");
+				moveCard(card, location, "goalDiscardPile,top");
+				broadcastMove(card, location, "goalDiscardPile,top");
 			}
 			else
 			{
@@ -897,7 +845,7 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 				else
 				{
 					// delete drop zone card;
-					this.parentNode.removeChild(this);
+					//this.parentNode.removeChild(this);
 				}
 			}
 
@@ -1004,27 +952,44 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 {
 	var startPos;
 
-	//console.log(card + ";" + startLocation + ";"+ endLocation);
+	//console.log("call to moveCard: " + card + ";" + startLocation + ";"+ endLocation);
 
+	console.log("moving from " + startLocation + " to " + endLocation);
 
-
-	if(startLocation != cardLocations[card] && cardLocations[card])
+	if(startLocation != cardLocations[card])
 	{
-		if(forceCardToMove)
+		var shouldCardBeOnBoard = !(isPlayerLoc(card) || ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1);
+
+		if(shouldCardBeOnBoard && !cardLocations[card])
 		{
-			console.log("Synchronization issue: card not at " + startLocation + "; card at " + cardLocations[card]);
-			startLocation = cardLocations[card];
+			// In this case, the card should be on the board, but the client thinks it isn't.
+			// We set the start position to limbo since there isn't a place on the board to move the card from.
+			startLocation = "limbo";
 		}
-		else
+		else if(cardLocations[card])
 		{
-			console.log("sync issue update");
-			updateGame();
-			return;
+			if(forceCardToMove)
+			{
+				//console.log("Synchronization issue: card not at " + startLocation + "; card at " + cardLocations[card]);
+				startLocation = cardLocations[card];
+
+			}
+			else
+			{
+				console.log("sync issue update");
+				updateGame();
+				return;
+			}
 		}
 	}
 
+
+
 	if(startLocation == endLocation)
+	{
+		console.log("same location: " + startLocation);
 		return;
+	}
 
 	if(startLocation == "winnings")
 	{
@@ -1044,19 +1009,21 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 
 		updateHand();
 	}
-	else if(startLocation == "shipDiscardPile")
+	else if(isDiscardLoc(startLocation))
 	{
-		var i = model.shipDiscardPile.indexOf(card);
-		model.shipDiscardPile.splice(i,1);
-		startPos = getPosFromId("shipDiscardPile");
-		updateShipDiscard();
-	}
-	else if(startLocation == "ponyDiscardPile")
-	{
-		var i = model.ponyDiscardPile.indexOf(card);
-		model.ponyDiscardPile.splice(i,1);
-		startPos = getPosFromId("ponyDiscardPile");
-		updatePonyDiscard();
+		
+		var [pile,slot] = startLocation.split(",");
+		var i = model[pile].indexOf(card);
+		model[pile].splice(i,1)
+
+		var newTopCard = model[pile][model[pile].length-1];
+		cardLocations[newTopCard] = pile + ",top";
+
+		startPos = getPosFromId(pile);
+
+		var typ = startLocation.substring(0,4)
+		if(typ == "pony") updatePonyDiscard();
+		if(typ == "ship") updateShipDiscard();
 	}
 	else if(["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1)
 	{
@@ -1091,10 +1058,8 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	}
 	else if(isBoardLoc(startLocation))
 	{
-
 		startPos = getPosFromElement(model.board[startLocation].element);
 		removeCardFromBoard(startLocation);
-
 		updateBoard();
 	}
 	else if(isGoalLoc(startLocation))
@@ -1135,9 +1100,21 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 
 		updateFun = () => updateHand(x);
 	}
-	else if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1)
+	else if(isDiscardLoc(endLocation))
 	{
-		model[endLocation].push(card);
+		var [pile,slot] = endLocation.split(",");
+
+		if (slot=="top")
+		{
+			if(model[pile].length)
+				cardLocations[model[pile][model[pile].length-1]] = pile + ",stack";
+
+			model[pile].push(card);
+		}
+		else
+		{
+			model[pile].splice(Math.max(0,model[pile].length-2), 0, card);
+		}
 
 		var updateFun2 = {
 			"pony": updatePonyDiscard,
@@ -1147,7 +1124,7 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 
 		updateFun = () => updateFun2(card);
 
-		endPos = getPosFromId(endLocation);
+		endPos = getPosFromId(pile);
 	}
 	else if(endLocation == "winnings")
 	{
@@ -1221,9 +1198,12 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	if(isPlayerLoc(endLocation))
 		delete cardLocations[card];
 
+
+	console.log("moving from " + startLocation + " to " + endLocation);
+
 	// run animation (if applicable)
 	if(startLocation != "limbo" && 
-		(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1
+		(isDiscardLoc(endLocation)
 		|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
 		|| endLocation == "winnings"
 		|| isPlayerLoc(endLocation))
@@ -1507,12 +1487,21 @@ function getNeighborKeys(key)
 	}
 }
 
+window.moveCard = moveCard;
+
 function removeCardFromBoard(key)
 {
 	if(model.board[key])
 	{
 		var el = model.board[key].element;
-		if(el && el.parentNode) // how tf does el not have a parent node???
+
+		if(el && !el.parentNode)
+		{
+			alert("something really weird happened");
+			throw Error("something really weird happened")
+		}
+
+		if(el) // how tf does el not have a parent node???
 			el.parentNode.removeChild(el);
 		delete model.board[key];
 	}
@@ -1524,7 +1513,11 @@ function removeCardElement(key)
 	{
 		var el = model.board[key].element;
 		if(el && el.parentNode)
+		{
 			el.parentNode.removeChild(el);
+
+		}
+		delete model.board[key].element;
 	}
 }
 
