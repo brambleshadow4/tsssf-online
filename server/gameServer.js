@@ -7,7 +7,8 @@ import {
 	isBoardLoc,
 	isOffsetLoc,
 	isGoalLoc,
-	isDiscardLoc
+	isDiscardLoc,
+	isPlayerLoc
 } from "./lib.js";
 
 import cards from "./cards.js";
@@ -344,6 +345,17 @@ export function TsssfGameServer()
 		return false;
 	}
 
+	function sendPlayerCounts(key, player)
+	{
+		//console.log(player);
+		var ponies = player.hand.filter(x => isPony(x)).length;
+		var ships = player.hand.filter(x => isShip(x)).length;
+
+
+		var args = ["counts", player.name, ponies, ships, ...player.winnings]
+		toEveryoneElse(key, player.socket, args.join(";"));
+	}
+
 	//startGame("dev");
 	//games["dev"].allowInGameRegistration = true;
 
@@ -485,6 +497,8 @@ export function TsssfGameServer()
 						toEveryone(key, msg);
 						socket.send("move;" + card + ";" + typ + "DrawPile;hand");
 						toEveryoneElse(key, socket, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
+					
+						sendPlayerCounts(key, player);
 					}
 				}
 			}
@@ -561,7 +575,7 @@ export function TsssfGameServer()
 
 
 				let serverEndLoc = endLocation;
-				if(serverEndLoc == "hand")
+				if(serverEndLoc == "hand" || serverEndLoc == "winnings")
 					serverEndLoc = "player," + player.name;
 
 				model.cardLocations[card] = serverEndLoc;
@@ -660,6 +674,12 @@ export function TsssfGameServer()
 					endLocation = "player,"+player.name;
 
 				toEveryoneElse(key, socket, "move;" + card + ";" + startLocation + ";" + endLocation);
+
+
+				if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
+				{
+					sendPlayerCounts(key, player);
+				}
 
 
 				if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))

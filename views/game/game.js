@@ -118,8 +118,6 @@ playingArea.onwheel = function(e)
 {
 	e.preventDefault();
 
-	//console.log(e);
-
 	var refPoint = document.getElementById('refPoint');
 	var playingArea = document.getElementById('playingArea');
 
@@ -221,8 +219,7 @@ hand.ondragenter = function(e)
 			}
 
 			hand.appendChild(div);
-		}
-		
+		}	
 	}
 }
 
@@ -600,7 +597,7 @@ export function updateWinnings()
 
 }
 
-function updatePlayerList()
+export function updatePlayerList()
 {
 	var playerList = document.getElementById('playerList');
 	playerList.innerHTML = "";
@@ -951,10 +948,8 @@ function isValidMove(cardDragged, targetCard, endLocation)
 export function moveCard(card, startLocation, endLocation, forceCardToMove)
 {
 	var startPos;
-
+	const vh = window.innerHeight/100;
 	//console.log("call to moveCard: " + card + ";" + startLocation + ";"+ endLocation);
-
-	console.log("moving from " + startLocation + " to " + endLocation);
 
 	if(startLocation != cardLocations[card])
 	{
@@ -976,26 +971,30 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 			}
 			else
 			{
-				console.log("sync issue update");
 				updateGame();
 				return;
 			}
 		}
 	}
 
-
-
 	if(startLocation == endLocation)
 	{
-		console.log("same location: " + startLocation);
+		//console.log("same location: " + startLocation);
 		return;
 	}
 
 	if(startLocation == "winnings")
 	{
 		var i = model.winnings.indexOf(card);
-		model.winnings.splice(i);
+		model.winnings.splice(i,1);
 		updateWinnings();
+
+		var enddiv = document.getElementById("winnings");
+		rect = enddiv.getBoundingClientRect();
+		startPos = {
+			top: rect.bottom - 18*vh + "px",
+			left: rect.right - 13*vh + "px"
+		}
 	}
 
 	if(startLocation == "hand")
@@ -1014,7 +1013,9 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 		
 		var [pile,slot] = startLocation.split(",");
 		var i = model[pile].indexOf(card);
-		model[pile].splice(i,1)
+		model[pile].splice(i,1);
+
+
 
 		var newTopCard = model[pile][model[pile].length-1];
 		cardLocations[newTopCard] = pile + ",top";
@@ -1031,19 +1032,6 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	}
 	else if(isPlayerLoc(startLocation))
 	{
-		var [,playerName] = startLocation.split(",");
-		var player = getPlayerWithName(playerName);
-
-		if(isPony(card))
-			player.ponies--;
-		if(isGoal(card))
-			player.splice(player.winnings.indexOf(card),1)
-		if(isShip(card))
-			player.ships--;
-
-		updatePlayerList();
-
-
 		startPos = {top: "-18vh", left: "50vh"}
 	}
 	else if(isOffsetLoc(startLocation))
@@ -1078,7 +1066,7 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 
 	var updateFun = function(){};
 	var endPos;
-	const vh = window.innerHeight/100;
+	
 
 	if(endLocation == "hand")
 	{
@@ -1142,18 +1130,6 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	else if(isPlayerLoc(endLocation))
 	{
 		endPos = {top: "-18vh", left: "50vh"};
-
-		var [,playerName] = endLocation.split(",");
-		var player = getPlayerWithName(playerName);
-
-		if(isPony(card))
-			player.ponies++;
-		if(isShip(card))
-			player.ships++;
-		if(isGoal(card))
-			player.winnings.push(card);
-		
-		updatePlayerList();
 	}
 	else if(isBoardLoc(endLocation))
 	{
@@ -1198,15 +1174,13 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	if(isPlayerLoc(endLocation))
 		delete cardLocations[card];
 
-
-	console.log("moving from " + startLocation + " to " + endLocation);
-
 	// run animation (if applicable)
-	if(startLocation != "limbo" && 
-		(isDiscardLoc(endLocation)
-		|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
-		|| endLocation == "winnings"
-		|| isPlayerLoc(endLocation))
+	if(startLocation != "limbo" 
+		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation))
+		&& (isDiscardLoc(endLocation)
+			|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
+			|| endLocation == "winnings"
+			|| isPlayerLoc(endLocation))
 	)
 	{
 		animateCardMove(card, startPos, endPos, updateFun);
@@ -1518,6 +1492,9 @@ function removeCardElement(key)
 
 		}
 		delete model.board[key].element;
+
+		if(isBlank(model.board[key].card))
+			delete model.board[key];
 	}
 }
 

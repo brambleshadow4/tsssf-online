@@ -83,7 +83,7 @@ var cards = {
 	"Core.Ship.DoYouThinkLoveCanBloomEvenOnABattlefield": {url:"Ship_Do You Think Love Can BloomEven on a Battlefield.png"},
 	"Core.Ship.DudeLooksLikeaLady": {url:"Ship_Dude Looks Like a Lady.png"},
 	"Core.Ship.FillyhoodCrush": {url:"Ship_Fillyhood Crush.png"},
-	"Core.Ship.FromanAlternateDimension": {url:"Ship_From an AlternateDimension.png"},
+	"Core.Ship.FromAnAlternateDimension": {url:"Ship_From an AlternateDimension.png"},
 	"Core.Ship.HaveYouMetMyFriend": {url:"Ship_Have You Met My Friend.png"},
 	"Core.Ship.HowToPickUpMaresAReferenceGuide": {url:"Ship_How to Pick Up MaresA Reference Guide.png"},
 	"Core.Ship.IReadThatInABookOnce": {url:"Ship_I Read That in a Book Once!.png"},

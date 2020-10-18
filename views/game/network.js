@@ -1,5 +1,5 @@
 import {
-	updateGame, moveCard, updatePonyDiscard, updateShipDiscard, updateGoalDiscard
+	updateGame, moveCard, updatePonyDiscard, updateShipDiscard, updateGoalDiscard, updatePlayerList
 } from "/game/game.js";
 
 var socket;
@@ -26,8 +26,6 @@ socket.addEventListener("close", function(){
 
 socket.addEventListener('message', function (event)
 {
-	console.log(event.data);
-
 	if(event.data.startsWith('closed;'))
 	{
 		window.location.href = location.protocol + "//" + window.location.host;
@@ -42,12 +40,14 @@ socket.addEventListener('message', function (event)
 
 	if(event.data.startsWith("model;"))
 	{
+		console.log(event.data);
 		model = JSON.parse(event.data.substring(6));	
 		updateGame();
 	}
 
 	if(event.data.startsWith("move;"))
 	{
+		console.log(event.data);
 		var [_, card, startLocation, endLocation] = event.data.split(";");
 		moveCard(card, startLocation, endLocation, true);
 	}
@@ -78,6 +78,14 @@ socket.addEventListener('message', function (event)
 		model[type+"DrawPileLength"] = count;
 		model[type+"DiscardPile"] = cards;
 
+		for(var card of cards)
+		{
+			cardLocations[card] = type + "DiscardPile,stack";
+		}
+
+		if(cards.length)
+			cardLocations[cards[cards.length-1]] = type + "DiscardPile,top";
+
 		var funs ={
 			"pony": updatePonyDiscard,
 			"ship": updateShipDiscard,
@@ -86,24 +94,24 @@ socket.addEventListener('message', function (event)
 		funs[type]();
 	}
 
-	if(event.data.startsWith("ontop;"))
+	if(event.data.startsWith("counts;"))
 	{
-		var [_, location, card] = event.data.split(";");
+		var [_, name, ponies, ships, ...winnings] = event.data.split(";");
 
-		var pile = location.split(",")[0];
+		var player = model.players.filter(x => x.name == name)[0];
 
-		var i = model[pile].indexOf(card);
-
-		if(i+1 && i+1 != model[pile].length)
-		{	
-			model[pile].splice(i,1);
-			model[pile].push(card);
-
-			updateShipDiscard();
-			updatePonyDiscard();
-			updateGoalDiscard();
+		if(player)
+		{
+			player.ponies = ponies;
+			player.ships = ships;
+			player.winnings = winnings;
+		}
+		else
+		{
+			console.error("player " + name + " doesn't exist");
 		}
 
+		updatePlayerList();
 	}
 });
 
@@ -120,7 +128,7 @@ function broadcast(message)
 
 	//setTimeout(function(){
 	socket.send(message);
-	//},1000);
+	//},3000);
 }
 
 network.requestDrawPony = function()
