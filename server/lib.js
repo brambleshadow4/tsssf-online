@@ -1,10 +1,10 @@
 export function isPony(card)
 {
-	return card.indexOf(".Pony.") >= 0;
+	return card.indexOf(".Pony.") >= 0 || card == "anon:pony";
 }
 export function isShip(card)
 {
-	return card.indexOf(".Ship.") >= 0;
+	return card.indexOf(".Ship.") >= 0 || card == "anon:ship";
 }
 
 export function isGoal(card)
@@ -42,4 +42,16 @@ export function isOffsetLoc(location)
 export function isGoalLoc(location)
 {
 	return location.startsWith("goal,");
+}
+
+export function isPlayerLoc(location)
+{
+	return location.startsWith("player,");
+}
+
+export function isDiscardLoc(location)
+{
+	return location.startsWith("shipDiscardPile,") || 
+		location.startsWith("ponyDiscardPile,") || 
+		location.startsWith('shipDiscardPile,')
 }

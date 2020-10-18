@@ -1,0 +1,165 @@
+
+body
+{
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	height: 100%;
+
+	background-color: #F0F0F0;
+	position: relative;
+}
+
+
+h2{
+	margin: 0;
+}
+
+.main
+{
+	max-width: 800px;
+	padding: .5in;
+	border: solid 3px black;
+	margin-top: 50px;
+	display: flex;
+
+	flex-grow: 1;
+
+	position: relative;
+	background-color: white;
+}
+
+.playerArea
+{
+	margin-left: 20px;
+	padding-left: 20px;
+	border-left: solid 2px black;
+	width: 200px;
+}
+
+#startButtonArea
+{
+	margin-top: 30px;
+}
+
+
+.chooseAName
+{
+	margin-top: 30px;
+}
+
+input[type='text']
+{
+	width: 300px;
+	padding: 5px;
+}
+
+button
+{
+	font-size: 14pt;
+}
+
+h2
+{
+	margin: 0px 0px 10px 0px;
+	font-size: 20pt;
+}
+
+
+.popupTabs
+{
+	position: absolute;
+	bottom: calc(100%);
+	display: flex;
+	flex-direction: row;
+}
+
+
+.innerMain
+{
+	flex-grow: 1;
+	flex-shrink: 1;
+
+	display: block;
+}
+
+.popupTabs > div
+{
+	border: solid 3px black;
+	margin-left: 10px;
+	
+	/*border-bottom: none;*/
+
+	background-color: white;
+	cursor: pointer;
+	padding: 6px;
+	align-self: flex-end;
+}
+
+.popupTabs > div.selected
+{
+	border-bottom: solid 3px white;
+	padding: 10px;
+}
+
+.off
+{
+	display: none;
+}
+
+.cardbox
+{
+	display: inline-block;
+	margin: 5px;
+	padding: 15px;
+}
+
+#chooseCardsInfo
+{
+	font-size: 0px;
+}
+
+
+.cardbox
+{
+	cursor: pointer;
+	border: solid 2px white;
+	position: relative;
+	z-index: 1;
+}
+.cardbox img
+{
+	height: 170px;
+	position: relative;
+	z-index: 0;
+
+	user-select: none;
+}
+.cardbox .shield
+{
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	z-index: 1;
+
+	color: transparent;
+}
+
+.cardbox.selected .shield
+{
+	border: solid 2px #0066ff;
+	border-radius: 10px;
+	background-color: rgba(102, 163, 255, .5);
+}
+
+.cardbox.selected
+{
+	
+}
+
+#Core-deck-select
+{
+	cursor: no-drop;
+}

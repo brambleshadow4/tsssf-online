@@ -6,7 +6,9 @@ import {
 	isShip,
 	isBoardLoc,
 	isOffsetLoc,
-	isGoalLoc
+	isGoalLoc,
+	isDiscardLoc,
+	isPlayerLoc
 } from "./lib.js";
 
 import cards from "./cards.js";
@@ -16,13 +18,11 @@ export function TsssfGameServer()
 {
 	const wsServer = new ws.Server({ noServer: true });
 	wsServer.games = {};
-	wsServer.startGame = startGame;
+	wsServer.openLobby = openLobby;
 	var games = wsServer.games;
-
 
 	const interval = setInterval(function ping()
 	{
-		
 		for(var key in games)
 		{
 			var anyPlayersAlive = false;
@@ -52,6 +52,20 @@ export function TsssfGameServer()
 		}
 
 	}, 15000);
+
+	wsServer.getStats = function()
+	{
+		var stats = {games:0, players:0}
+		for(var key in games)
+		{
+			stats.games++;
+			stats.players += games[key].players.length;
+		}
+
+		return stats;
+	}
+
+
 	
 
 	function isRegistered(key, socket)
@@ -120,6 +134,7 @@ export function TsssfGameServer()
 	}
 
 
+
 	function sendPlayerList(key)
 	{
 		var msg = "playerlist;" + games[key].players.filter(x => x.socket.isAlive)
@@ -168,6 +183,10 @@ export function TsssfGameServer()
 		var model = {};
 
 		model.board = games[key].board;
+		model.cardDecks = games[key].cardDecks;
+
+		console.log("cardDecks " +games[key].cardDecks);
+
 		model.offsets = games[key].offsets;
 		model.ponyDiscardPile = games[key].ponyDiscardPile;
 		model.shipDiscardPile = games[key].shipDiscardPile;
@@ -184,6 +203,23 @@ export function TsssfGameServer()
 		model.hand = player.hand;
 		model.winnings = player.winnings;
 
+		model.playerName = player.name;
+		model.players = [];
+
+		for(var i=0; i < games[key].players.length; i++)
+		{
+			let other = games[key].players[i];
+			if(other != player)
+			{
+				model.players.push({
+					name: other.name,
+					ponies: other.hand.filter(x => isPony(x)).length,
+					ships: other.hand.filter(x => isShip(x)).length,
+					winnings: other.winnings
+				});
+			}
+		}
+
 		return model;
 	}
 
@@ -193,7 +229,8 @@ export function TsssfGameServer()
 		socket.send("model;" + JSON.stringify(model));
 	}
 
-	function startGame(key)
+
+	function openLobby(key)
 	{
 		if(!key)
 		{
@@ -214,56 +251,109 @@ export function TsssfGameServer()
 			deathCount: 0,
 			isLobbyOpen: true,
 			allowInGameRegistration: false,
-			board:{
-				"p,0,0":{
-					card: "Core.Start.FanficAuthorTwilight"
-				}
-			},
+			players: []
+		}
 
-			offsets:{},
+		return key;
+	}
 
-			goalDiscardPile: [],
-			ponyDiscardPile: [],
-			shipDiscardPile: [],
-
-			currentGoals:["blank:goal","blank:goal","blank:goal"],
-
-			// client only props
-			//     hand:
-			//     winnings
-
-			// private props
-			goalDrawPile: [],
-			ponyDrawPile: [],
-			shipDrawPile: [],
-
-			players:[],
-			currentPlayer:""
+	function startGame(key, options)
+	{	
+		var model = games[key];
+		model.cardLocations = {};
+		model.board = {
+			"p,0,0":{
+				card: "Core.Start.FanficAuthorTwilight"
+			}
 		};
+		model.offsets = {};
+
+		model.cardLocations["Core.Start.FanficAuthorTwilight"] = "p,0,0";
+
+		var decks = "^Core\\.";
+		if(options.cardDecks)
+		{
+			var allowedDecks = ["PU","EC"]
+			var decks = options.cardDecks.filter( x => allowedDecks.indexOf(x) > -1);
+			decks.push("Core");
+
+			decks = decks.map(x => "^" + x + "\\.").join("|");
+		}
+
+		model.cardDecks = decks;
+		
+
+		model.goalDiscardPile = [];
+		model.ponyDiscardPile = [];
+		model.shipDiscardPile = [];
+
+		model.currentGoals = ["blank:goal","blank:goal","blank:goal"];
+
+		// client only props
+		//     hand:
+		//     winnings
+
+		// private props
+		model.goalDrawPile = [];
+		model.ponyDrawPile = [];
+		model.shipDrawPile = [];
+
+		model.currentPlayer = "";
 
 		logGameHosted();
 
+		var re = new RegExp(model.cardDecks);
+
 		for(var cardName in cards)
 		{
+			if(!re.exec(cardName))
+				continue;
+
 			if(isGoal(cardName))
 			{
-				games[key].goalDrawPile.push(cardName);
+				model.goalDrawPile.push(cardName);
+				model.cardLocations[key] = "goalDrawPile";
 			}
 			else if(isPony(cardName))
 			{	
-				games[key].ponyDrawPile.push(cardName)
+				model.ponyDrawPile.push(cardName);
+				model.cardLocations[key] = "ponyDrawPile";
 			}
 			else if(isShip(cardName))
 			{
-				games[key].shipDrawPile.push(cardName);
+				model.shipDrawPile.push(cardName);
+				model.cardLocations[key] = "shipDrawPile";
 			}
 		}
 
-		randomizeOrder(games[key].goalDrawPile);
-		randomizeOrder(games[key].ponyDrawPile);
-		randomizeOrder(games[key].shipDrawPile);
+		randomizeOrder(model.players);
+		randomizeOrder(model.goalDrawPile);
+		randomizeOrder(model.ponyDrawPile);
+		randomizeOrder(model.shipDrawPile);
 
 		return key;
+	}
+
+	function isLocOccupied(key, loc)
+	{
+		var model = games[key];
+		if(isBoardLoc(loc))
+		{
+			return (model.board[loc] != undefined)
+		}
+
+		return false;
+	}
+
+	function sendPlayerCounts(key, player)
+	{
+		//console.log(player);
+		var ponies = player.hand.filter(x => isPony(x)).length;
+		var ships = player.hand.filter(x => isShip(x)).length;
+
+
+		var args = ["counts", player.name, ponies, ships, ...player.winnings]
+		toEveryoneElse(key, player.socket, args.join(";"));
 	}
 
 	//startGame("dev");
@@ -281,10 +371,7 @@ export function TsssfGameServer()
 			return;
 		}
 
-
-		sendPlayerList(key);
-		
-
+		sendPlayerList(key);	
 
 		socket.on('close', () =>
 		{
@@ -312,9 +399,17 @@ export function TsssfGameServer()
 
 			if(message.startsWith("startgame;"))
 			{
+				var options = {cardDecks:[]};
+				try 
+				{
+					options = JSON.parse(message.substring(10))
+				}
+				catch(e){ }
+
 				if(model.host == socket)
 				{
 					model.isLobbyOpen = false;
+					startGame(key, options);
 					toEveryone(key, "startgame;");
 				}		
 			}
@@ -379,13 +474,14 @@ export function TsssfGameServer()
 					{
 						var card = model[typ + "DrawPile"].pop();
 						model.currentGoals[goalNo] = card;
+						model.cardLocations[card] = "goal," + goalNo;
 
 						var msg = "draw;" + typ + ";" + (len - 1);
 						toEveryone(key, msg);
 						toEveryone(key, "move;" + card + ";goalDrawPile;goal," + goalNo);
 					}
 					else
-						return sendCurrentState(key, socket);
+						return ;//sendCurrentState(key, socket);
 				}
 				else
 				{
@@ -393,12 +489,16 @@ export function TsssfGameServer()
 					{
 						var card = model[typ + "DrawPile"].pop();
 
-						getPlayer(key, socket).hand.push(card);
+						var player = getPlayer(key, socket)
+						player.hand.push(card);
+						model.cardLocations[card] = "player," + player.name;
 
 						var msg = "draw;" + typ + ";" + (len - 1);
 						toEveryone(key, msg);
 						socket.send("move;" + card + ";" + typ + "DrawPile;hand");
-						toEveryoneElse(key, socket, "move;anon:" + typ + ";" + typ + "DrawPile;player");
+						toEveryoneElse(key, socket, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
+					
+						sendPlayerCounts(key, player);
 					}
 				}
 			}
@@ -415,6 +515,23 @@ export function TsssfGameServer()
 
 					randomizeOrder(model[typ+"DrawPile"]);
 
+					for(var arr of ["ponyDrawPile","shipDrawPile","goalDrawPile","ponyDiscardPile","shipDiscardPile","goalDiscardPile"])
+					{
+						console.log(arr);
+						for(var card of model[arr])
+						{
+							model.cardLocations[card] = arr + ",stack";
+						}
+					}
+
+					var pileArr = model[typ+"DiscardPile"];
+					if(pileArr.length >0)
+					{
+						var topCard = pileArr[pileArr.length-1];
+						model.cardLocations[topCard] = typ+"DiscardPile,top";
+					}
+					
+
 					toEveryone(key, ["swapshuffle", typ, model[typ+"DrawPile"].length, ...model[typ+"DiscardPile"]].join(";"));
 				}
 			}
@@ -422,36 +539,73 @@ export function TsssfGameServer()
 			if(message.startsWith("move;"))
 			{
 				var [_,card,startLocation,endLocation] = message.split(";");
+				var player = getPlayer(key, socket);
 
-				//todo validate move
+				//console.log(message);
+
+				let serverStartLoc = startLocation;
+				if(startLocation == "hand")
+					serverStartLoc = "player," + player.name;
+
+
+				// if the player has an incorrect position for a card, move it to where it actually should be.
+				if(model.cardLocations[card] != serverStartLoc || isLocOccupied(key, endLocation))
+				{
+					var whereThePlayerThinksTheCardIs = endLocation;
+						
+
+
+					var whereTheCardActuallyIs = model.cardLocations[card];
+					if(whereTheCardActuallyIs == "player," + player.name)
+						whereTheCardActuallyIs = "hand";
+
+
+					console.log("X " + message);
+					console.log("  P: " + player.name);
+
+					console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
+					//console.log("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
+					socket.send("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
+
+					return;
+				}
+
+				console.log("\u221A " + message);
+				console.log("  P: " + player.name);
+
+
+				let serverEndLoc = endLocation;
+				if(serverEndLoc == "hand" || serverEndLoc == "winnings")
+					serverEndLoc = "player," + player.name;
+
+				model.cardLocations[card] = serverEndLoc;
 
 				// remove from old location
 				if(startLocation == "hand")
 				{
 					var i = getPlayer(key, socket).hand.indexOf(card);
-					if(i == -1)
-						return sendCurrentState(key, socket);
+					
 
 					getPlayer(key, socket).hand.splice(i, 1);
 				}
 
 				if(isBoardLoc(startLocation))
 				{
-					if(model.board[startLocation].card == card)
+					if(model.board[startLocation] && model.board[startLocation].card == card)
 						delete model.board[startLocation];
-					else
-						return sendCurrentState(key, socket);
 				}
 
-				if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(startLocation) > -1)
+				if(isDiscardLoc(startLocation))
 				{
-					var i = model[startLocation].indexOf(card);
+					var [pile,slot] = startLocation.split(",");
+					var i = model[pile].indexOf(card);
+					model[pile].splice(i,1);
 
-					if(i == -1)
-						return sendCurrentState(key, socket);
-
-					model[startLocation].splice(i,1);
-					
+					if(model[pile].length)
+					{
+						var topCard = model[pile][model[pile].length-1]
+						model.cardLocations[topCard] = pile+",top";
+					}
 				}
 
 				if(isOffsetLoc(startLocation))
@@ -461,10 +615,6 @@ export function TsssfGameServer()
 					{
 						delete model.offsets[card + "," + x + "," + y];
 					}
-					else
-					{
-						return sendCurrentState(key, socket);
-					}
 				}
 
 				if(isGoalLoc(startLocation))
@@ -472,8 +622,7 @@ export function TsssfGameServer()
 					var [_,i] = startLocation.split(",")
 					if(model.currentGoals[i] != "blank:goal")
 						model.currentGoals[i] = "blank:goal";
-					else
-						return sendCurrentState(key, socket);
+					
 				}
 
 				// move to end location
@@ -485,35 +634,65 @@ export function TsssfGameServer()
 
 				if(isBoardLoc(endLocation))
 				{
-					if(model.board[endLocation])
-					{
-						var [_,x,y] = endLocation.split(",")
-						var offsetCard = model.board[endLocation].card
-						model.offsets[offsetCard + "," + x + "," + y] = "";
-					}
-
 					model.board[endLocation] = {card: card}
+				}
+				if(isOffsetLoc(endLocation))
+				{
+					var [_,x,y] = endLocation.split(",")
+					model.offsets[card + "," + x + "," + y] = "";
 				}
 
 				if(endLocation == "winnings")
 				{
-					getPlayer(key, socket).winnings.push(card)
+					player.winnings.push(card)
 				}
 
-				if(["ponyDiscardPile","shipDiscardPile","goalDiscardPile"].indexOf(endLocation) > -1)
+				if(isDiscardLoc(endLocation))
 				{
-					model[endLocation].push(card);
+					// the only valid placement is on top of the discard pile
+					var [pile,slot] = endLocation.split(",");
+					model[pile].push(card);
+
+					if(model[pile].length > 1)
+					{
+						var underCard = model[pile][model[pile].length-2];
+						model.cardLocations[underCard] = pile + ",stack";
+					}
 				}
 
+			
 				// cant move to a goal location yet
 
+				//setTimeout(function(){
+
+				socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
+
 				if(startLocation == "hand" || startLocation == "winnings")
-					startLocation = "player";
+					startLocation = "player,"+player.name;
 
 				if(endLocation == "hand" || endLocation == "winnings")
-					endLocation = "player";
+					endLocation = "player,"+player.name;
 
 				toEveryoneElse(key, socket, "move;" + card + ";" + startLocation + ";" + endLocation);
+
+
+				if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
+				{
+					sendPlayerCounts(key, player);
+				}
+
+
+				if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
+				{
+					var [pile,slot] = startLocation.split(",");
+					if(model[pile].length)
+					{
+						var topCard = model[pile][model[pile].length-1]
+						toEveryone(key, "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
+					}
+				}
+
+				//}, 5000)
 			}
 		});
 	});

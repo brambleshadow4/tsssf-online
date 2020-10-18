@@ -5,9 +5,13 @@ import cookieParser from "cookie-parser";
 import expressSession from "express-session";
 import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
+import {getStats} from "./stats.js"
 
 const app = express()
-const PORT = 8000;
+let PORT = 80;
+
+if(process.argv[2] == "dev")
+	PORT = 8000;
 
 
 app.use(cookieParser());
@@ -23,14 +27,20 @@ app.use(expressSession({
 app.get('/', file("./views/home.html"));
 app.get('/img/**', fmap("/img/**", "./img/**"));
 
-app.get("/game", file("./views/game.html"))
+app.get("/game", file("./views/game/game.html"))
+app.get("/game/game.js", file("./views/game/game.js"))
+app.get("/game/network.js", file("./views/game/network.js"))
+app.get("/game/game.css", file("./views/game/game.css"))
 
 
 app.get("/lib.js", file("./server/lib.js"))
-app.get("/game.js", file("./views/game.js"))
-app.get("/cards.js", file("./server/cards.js"))
-app.get("/network.js", file("./views/network.js"))
-app.get("/game.css", file("./views/game.css"))
+
+
+
+app.get("/game/cards.js", file("./server/cards.js"))
+
+app.get("/rulebook.html", file("./views/rulebook.html"))
+app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
 
 app.get("/lobby", function(req,res)
 {
@@ -38,7 +48,7 @@ app.get("/lobby", function(req,res)
 
 	if(tsssfServer.games[key])
 	{
-		sendIfExists("./views/lobby.html", res);
+		sendIfExists("./views/lobby/lobby.html", res);
 	}
 	else
 	{
@@ -46,18 +56,38 @@ app.get("/lobby", function(req,res)
 	}
 });
 
+app.get("/stats", async function(req,res){
 
-app.get("/lobby.css", file("./views/lobby.css"))
-app.get("/lobby.js", file("./views/lobby.js"))
+	var template = fs.readFileSync('./views/stats.html', 'utf8');
+	var stats = await getStats();
+
+	for(var key in stats)
+	{
+		template = template.replace(key, stats[key]);
+	}
+
+	var liveStats = tsssfServer.getStats();
+	template = template.replace("$1", liveStats.players);
+	template = template.replace("$2", liveStats.games);
+
+	res.send(template);
+})
+
+
+app.get("/lobby.css", file("./views/lobby/lobby.css"))
+app.get("/lobby.js", file("./views/lobby/lobby.js"))
 
 app.get("/host", function(req, res){
 
-	var key = tsssfServer.startGame();
+	var key = tsssfServer.openLobby();
 
 	res.redirect("/lobby?" + key);
 })
+
+app.get("/**", function(req,res){ res.redirect("/"); });
 	
-app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`))
+app.listen(PORT, () => console.log(`TSSSF web server listening on port ${PORT}!`))
+
 
 
 
@@ -88,9 +118,6 @@ function fmap(routeUri, fileUrl)
 
 function sendIfExists(url, res)
 {
-
-	console.log(url);
-
 	if(fs.existsSync(url))
 	{
 		res.sendFile(url, {root:"./"})
@@ -107,7 +134,6 @@ function sendIfExists(url, res)
 
 ///--------------------------------------------------------------------------------------
 
-import {isPony, isShip, isGoal, randomizeOrder} from "./lib.js";
 
 
 // Set up a headless websocket server that prints any
