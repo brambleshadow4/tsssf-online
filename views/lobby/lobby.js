@@ -57,7 +57,11 @@ socket.addEventListener("message", function()
 
 		for(var name of names)
 		{
-			list.innerHTML += "<div>" + name.replace(/</g, "&lt;") + "</div>"
+			name = name.replace(/</g, "&lt;")
+			if(name == "")
+				name = "<span class='loadingPlayer'></span>";
+
+			list.innerHTML += "<div>" + name + "</div>"
 		}
 
 		if(ishost && sentName)
@@ -148,3 +152,48 @@ for(var i=1; i < cardBoxes.length; i++)
 			this.classList.add('selected');
 	}
 }
+
+
+var animCounter = 0;
+function loadingPlayerAnimation()
+{
+	requestAnimationFrame(loadingPlayerAnimation);
+	var txt = "<em>player joining</em>";
+	var doUpdate = false;
+
+	if(animCounter == 20)
+	{
+		txt = "<em>player joining.</em>";
+		doUpdate = true;
+	}
+	if(animCounter == 40)
+	{
+		txt = "<em>player joining..</em>";
+		doUpdate = true;
+	}
+	if(animCounter == 60)
+	{
+		txt = "<em>player joining...</em>";
+		doUpdate = true;
+	}
+	if(animCounter >=80)
+	{
+		txt = "<em>player joining</em>";
+		doUpdate = true;
+		animCounter = -1;
+	}
+	
+	if(doUpdate)
+	{
+		var joiningPlayers = document.getElementsByClassName('loadingPlayer');
+
+		for(var i=0; i<joiningPlayers.length; i++)
+		{
+			joiningPlayers[i].innerHTML = txt;
+		}
+	}
+
+	animCounter++;
+}
+
+loadingPlayerAnimation();

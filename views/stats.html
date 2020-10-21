@@ -3,30 +3,135 @@
 	<body>
 		<h1>Stats</h1>
 
-		<table>
-			<tr>
-				<th></th><th>Players joined</th><th>Games started</th>
-			</tr>
-			<tr>
-				<td>Right now</td><td>$1</td><td>$2</td>
-			</tr>
-			<tr>
-				<td>Last hour</td><td>$3</td><td>$4</td>
-			</tr>
-			<tr>
-				<td>Last 24 hours</td><td>$5</td><td>$6</td>
-			</tr>
-			<tr>
-				<td>Week</td><td>$7</td><td>$8</td>
-			</tr>
-			<tr>
-				<td>Month</td><td>$9</td><td>$A</td>
-			</tr>
-			<tr>
-				<td>All time</td><td>$B</td><td>$C</td>
-			</tr>
+		<h2>Right now</h2>
+
+		<div><span class='playerStat'>$1 Players</span><span class='gameStat'>$2 Games</span>
+
+		<h2>This Last hour</h2>
+
+		<div><span class='playerStat'>$3 Players</span><span class='gameStat'>$4 Games</span>
+
+		<h2 class='thisWeek'>This week</h2>
+		
+
+		<div class='row'>
+			<div>
+				<h3>Players Joined</h3>
+				<div id='graph2' class='graph'></div>
+			</div>
+
+			<div>
+				<h3>Games per day</h3>
+				<div id='graph1' class='graph'></div>
+			</div>
+
+		</div>
+
+		<h2>This Month</h2>
+
+		<div><span class='playerStat'>$9 Players</span><span class='gameStat'>$A Games</span>
+
+		<h2>Since the dawn of time</h2>
+
+		<div><span class='playerStat'>$B Players</span><span class='gameStat'>$C Games</span>
+		
+		<style>
+			.bar
+			{
+				display: inline-block;
+				width: 30px;
+				background-color: #b3e0ff;
+				border: solid 1px #33adff;
+				vertical-align: bottom;
+			}
+
+			.bar span.val
+			{
+				text-align: center;
+				display: inline-block;
+				width: 100%;
+				position: relative;
+				bottom: 20px;
+			}
+
+			.graph
+			{
+				vertical-align: bottom;
+				margin: 40px 0px;
+			}
+
+
+			.bar span.label
+			{
+				text-align: center;
+				display: inline-block;
+				width: 100%;
+				position: relative;
+				top: calc(100% - 15px);
+			}
+
+			.playerStat,.gameStat
+			{
+				display: inline-block;
+				width: 100px;
+				border: solid 1px black;
+				border-radius: 5px;
+				text-align: center;
+				margin: 0px 5px;
+			}
+
+			.playerStat {background-color: #cc99ff;}
+			.gameStat {background-color: #88FF88;}
+
+			.row > div
+			{
+				display: inline-block;
+				padding-right: 20px;
+
+			}
+
+			.row h3
+			{
+				margin-top: 0px
+			}
+
+			.thisWeek
+			{
+				margin-bottom: 0px;
+			}
+
+		</style>
+		<script>
+			var data = {
+				"graph1": $D.reverse(),
+				"graph2": $E.reverse()
+			};
+
+			var days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+			var x = new Date();
+			var thisDay = new Date( x.getTime() + x.getTimezoneOffset()*60*1000 + 2000).getDay() + 1;
+
+			for(var key in data)
+			{
+				var max = data[key].reduce((a,b) => Math.max(a,b));
+				var max = Math.max(max, 1);
+				for(var i=0; i < data[key].length; i++)
+				{
+					var bar = document.createElement('div');
+					bar.className = "bar";
+					bar.style.height = 100*data[key][i]/max + "px";
+
+					bar.innerHTML = "<span class='val'>" + data[key][i] + "</span>"
+					 +  "<span class='label'>" + days[((thisDay + i)%7)] + "</span>"
+
+					document.getElementById(key).appendChild(bar);
+
+				}
+			}
+
 			
-		</table>
+
+		</script>
 
 	</body>
 </html>
