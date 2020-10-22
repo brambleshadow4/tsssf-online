@@ -45,6 +45,8 @@ var draggingBoard = false;
 var x;
 var y;
 
+const gridWidth = 22;
+
 draggingBoard= false;
 
 var playingArea = document.getElementById('playingArea');
@@ -112,6 +114,39 @@ window.addEventListener('keyup', function(e){
 		unenlargeCard();
 	}
 });
+
+window.moveToStartCard = function()
+{
+	var refPoint = document.getElementById('refPoint')
+	refPoint.style.transform = "scale(1,1)";
+	zoomScale = 1;
+
+	var loc = cardLocations["Core.Start.FanficAuthorTwilight"];
+	var [_, x, y] = loc.split(",");
+
+	
+
+	x = Number(x);
+	y = Number(y);
+
+	const vh = window.innerHeight/100;
+
+	x = x * gridWidth * vh;
+	y = y * gridWidth * vh;
+
+	x *= -1;
+	y *= -1;
+
+	var playingArea = document.getElementById('playingArea');
+
+
+
+	y += playingArea.clientHeight/2 - 18/2*vh;
+	x += playingArea.clientWidth/2 - 13/2*vh;
+
+	refPoint.style.left = x + "px";
+	refPoint.style.top = y + "px";
+}
 
 
 playingArea.onwheel = function(e)
@@ -1221,7 +1256,7 @@ function addCardToBoard(key, card)
 	var refPoint = document.getElementById('refPoint');
 
 	
-	const gridWidth = 22;
+	
 	switch(pieces[0])
 	{
 		case "p":
