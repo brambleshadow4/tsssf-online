@@ -37,6 +37,27 @@
 			{
 				margin-top: 20px;
 			}
+
+			.footerLinks img
+			{
+				height: 30px;
+				width: 30px;
+			}
+
+
+
+			.footerLinks a > *
+			{
+				vertical-align: middle;
+			}
+
+			.footerLinks a
+			{
+				text-decoration: none;
+				color: black;
+				margin: 0px 20px;
+			}
+
 		</style>
 	</head>
 
@@ -46,6 +67,7 @@
 				<h1>Twilight Sparkle's<br>Secret Shipfic Folder<br>Online</h1>
 
 				<h2>Beta 0.2.0</h2>
+				<p>No mobile support (sorry)</p>
 				<div>
 					<!--div><button onclick="join()">Join Game</button></div-->
 					<div><button onclick="host()">Host Game</button></div>
@@ -56,7 +78,23 @@
 			</div>
 		</div>
 		<footer>
-			<a href="https://github.com/brambleshadow4/tsssf-online">Github</a> • <a href="https://discord.gg/WQVBUgv">Discord</a>
+			<div class='footerLinks'>
+				<a href="http://www.secretshipfic.com/">
+					<img id='shipficlogo' src='/img/shipficWebsiteLogo.png' />
+					<span>About the game</span>
+				</a>
+				<a href="https://github.com/brambleshadow4/tsssf-online">
+					<img src="/img/GitHub.png" />
+					<span>Source code</span></a>
+				<a href="https://discord.gg/WQVBUgv">
+					<img src='/img/discord.svg' / >
+					<span>Submit a bug</span>
+				</a>
+				<a href="https://discord.me/kefentse">
+					<img src='/img/discord.svg' / >
+					<span>Find Players</span>
+				</a>
+			</div>
 		</footer>
 		<script>
 			function host()
