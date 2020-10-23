@@ -140,7 +140,6 @@ window.moveToStartCard = function()
 	var playingArea = document.getElementById('playingArea');
 
 
-
 	y += playingArea.clientHeight/2 - 18/2*vh;
 	x += playingArea.clientWidth/2 - 13/2*vh;
 
@@ -984,11 +983,10 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 {
 	var startPos;
 	const vh = window.innerHeight/100;
-	//console.log("call to moveCard: " + card + ";" + startLocation + ";"+ endLocation);
 
 	if(startLocation != cardLocations[card])
 	{
-		var shouldCardBeOnBoard = !(isPlayerLoc(card) || ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1);
+		var shouldCardBeOnBoard = !(isPlayerLoc(startLocation) || ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1);
 
 		if(shouldCardBeOnBoard && !cardLocations[card])
 		{
@@ -1210,6 +1208,8 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 		delete cardLocations[card];
 
 	// run animation (if applicable)
+	
+
 	if(startLocation != "limbo" 
 		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation))
 		&& (isDiscardLoc(endLocation)

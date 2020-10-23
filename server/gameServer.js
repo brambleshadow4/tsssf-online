@@ -65,9 +65,6 @@ export function TsssfGameServer()
 		return stats;
 	}
 
-
-	
-
 	function isRegistered(key, socket)
 	{
 		for(var i=0; i < games[key].players.length; i++)
@@ -199,7 +196,7 @@ export function TsssfGameServer()
 
 		model.currentGoals = games[key].currentGoals;
 
-		model.goalDrawPileLength = games[key].goalDrawPile.length;
+		model.goalDrawPile = games[key].goalDrawPile.slice();
 		model.ponyDrawPileLength = games[key].ponyDrawPile.length;
 		model.shipDrawPileLength = games[key].shipDrawPile.length;
 
@@ -559,18 +556,21 @@ export function TsssfGameServer()
 
 					randomizeOrder(model[typ+"DrawPile"]);
 
-					for(var arr of ["ponyDrawPile","shipDrawPile","goalDrawPile","ponyDiscardPile","shipDiscardPile","goalDiscardPile"])
+					for(var card of model[typ+"DrawPile"])
 					{
-						console.log(arr);
-						for(var card of model[arr])
-						{
-							model.cardLocations[card] = arr + ",stack";
-						}
+						model.cardLocations[card] = typ + "DrawPile,stack";
 					}
 
+
 					var pileArr = model[typ+"DiscardPile"];
+					
 					if(pileArr.length >0)
 					{
+						for(var card of pileArr)
+						{
+							model.cardLocations[card] = typ + "DiscardPile,stack";
+						}
+
 						var topCard = pileArr[pileArr.length-1];
 						model.cardLocations[topCard] = typ+"DiscardPile,top";
 					}
