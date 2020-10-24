@@ -65,9 +65,6 @@ export function TsssfGameServer()
 		return stats;
 	}
 
-
-	
-
 	function isRegistered(key, socket)
 	{
 		for(var i=0; i < games[key].players.length; i++)
@@ -103,17 +100,24 @@ export function TsssfGameServer()
 		var count = 0;
 		var newName = name;
 
-		while(!checkNameIsUnique(key, newName))
-		{
-			console.log(newName);
-			count++;
-			newName = name + count;
-		}
-
 		var player = getPlayer(key,socket)
 
 		if(player)
 		{	
+
+			if(player.name == "")
+			{
+				name = name || "Player";
+				while(!checkNameIsUnique(key, newName))
+				{
+					console.log(newName);
+					count++;
+					newName = name + count;
+				}
+
+				logPlayerJoined();
+			}
+			
 			player.name = newName;
 			socket.send("registered;" + player.id)
 			return;
@@ -127,10 +131,8 @@ export function TsssfGameServer()
 			hand: [],
 			winnings: [],
 			id: id,
-			name: newName
+			name: ""
 		});
-
-		logPlayerJoined();
 	}
 
 
@@ -194,7 +196,7 @@ export function TsssfGameServer()
 
 		model.currentGoals = games[key].currentGoals;
 
-		model.goalDrawPileLength = games[key].goalDrawPile.length;
+		model.goalDrawPile = games[key].goalDrawPile.slice();
 		model.ponyDrawPileLength = games[key].ponyDrawPile.length;
 		model.shipDrawPileLength = games[key].shipDrawPile.length;
 
@@ -326,6 +328,16 @@ export function TsssfGameServer()
 			}
 		}
 
+		// remove players which disconnected before the games started
+		for(var i=0; i<model.players.length; i++)
+		{
+			if(model.players[i].name == "" || !model.players[i].socket.isAlive)
+			{
+				model.players.splice(i,1);
+				i--;
+			}
+		}
+
 		randomizeOrder(model.players);
 		randomizeOrder(model.goalDrawPile);
 		randomizeOrder(model.ponyDrawPile);
@@ -376,6 +388,32 @@ export function TsssfGameServer()
 		socket.on('close', () =>
 		{
 			socket.isAlive = false;
+
+			if(games[key].isLobbyOpen)
+			{
+				for(var i=0; i < games[key].players.length; i++)
+				{
+					if(socket == games[key].players[i].socket)
+					{
+						games[key].players.splice(i, 1);
+						break;
+					}
+				}
+
+				if(games[key].host == socket)
+				{
+					if(games[key].players.length)
+					{
+						games[key].host = games[key].players[0].socket;
+						games[key].players[0].socket.send("ishost;1");
+					}
+					else
+					{
+						delete games[key].host;
+					}
+				}
+			}
+			
 			sendPlayerList(key);
 		})
 
@@ -384,45 +422,48 @@ export function TsssfGameServer()
 			var isPlayerRegistered = isRegistered(key, socket);
 			var model = games[key];
 
-			if(message.startsWith("ishost;"))
+			if(model.isLobbyOpen)
 			{
-				if(!model.host || model.host == socket)
+				if(message.startsWith("ishost;"))
 				{
-					model.host = socket;
-					socket.send("ishost;1");
+					if(!model.host || model.host == socket)
+					{
+						model.host = socket;
+						socket.send("ishost;1");
+					}
+					else
+					{
+						socket.send("ishost;0");
+					}			
 				}
-				else
-				{
-					socket.send("ishost;0");
-				}			
-			}
 
-			if(message.startsWith("startgame;"))
-			{
-				var options = {cardDecks:[]};
-				try 
+				if(message.startsWith("startgame;"))
 				{
-					options = JSON.parse(message.substring(10))
+					var options = {cardDecks:[]};
+					try 
+					{
+						options = JSON.parse(message.substring(10))
+					}
+					catch(e){ }
+
+					if(model.host == socket)
+					{
+						model.isLobbyOpen = false;
+						startGame(key, options);
+						toEveryone(key, "startgame;");
+					}		
 				}
-				catch(e){ }
 
-				if(model.host == socket)
+
+				if(message.startsWith("register;"))
 				{
-					model.isLobbyOpen = false;
-					startGame(key, options);
-					toEveryone(key, "startgame;");
-				}		
-			}
+					var [_,id,name] = message.split(";");
+					name = (name || "").replace(/[^A-Za-z0-9 _]/g,"");
+					
 
-
-			if(message.startsWith("register;"))
-			{
-				var [_,id,name] = message.split(";");
-				name = name || "Player";
-				var name = name.replace(/[^A-Za-z0-9 _]/g,"");
-
-				registerPlayer(key, socket, name);
-				sendPlayerList(key);
+					registerPlayer(key, socket, name);
+					sendPlayerList(key);
+				}
 			}
 
 
@@ -515,18 +556,21 @@ export function TsssfGameServer()
 
 					randomizeOrder(model[typ+"DrawPile"]);
 
-					for(var arr of ["ponyDrawPile","shipDrawPile","goalDrawPile","ponyDiscardPile","shipDiscardPile","goalDiscardPile"])
+					for(var card of model[typ+"DrawPile"])
 					{
-						console.log(arr);
-						for(var card of model[arr])
-						{
-							model.cardLocations[card] = arr + ",stack";
-						}
+						model.cardLocations[card] = typ + "DrawPile,stack";
 					}
 
+
 					var pileArr = model[typ+"DiscardPile"];
+					
 					if(pileArr.length >0)
 					{
+						for(var card of pileArr)
+						{
+							model.cardLocations[card] = typ + "DiscardPile,stack";
+						}
+
 						var topCard = pileArr[pileArr.length-1];
 						model.cardLocations[topCard] = typ+"DiscardPile,top";
 					}

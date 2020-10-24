@@ -70,6 +70,9 @@ app.get("/stats", async function(req,res){
 	template = template.replace("$1", liveStats.players);
 	template = template.replace("$2", liveStats.games);
 
+	template = template.replace("$D", JSON.stringify(stats.gamesHostedThisWeek));
+	template = template.replace("$E", JSON.stringify(stats.playersJoinedThisWeek));
+
 	res.send(template);
 })
 

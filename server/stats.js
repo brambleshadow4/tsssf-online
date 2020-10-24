@@ -81,6 +81,18 @@ function timeQuery(db, table, start, end)
 	});
 }
 
+function startOfTodayUTC(dte)
+{
+	var d = new Date(dte.getTime() + dte.getTimezoneOffset()*60*1000 + 2000);
+	d = new Date(d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()))
+	return d;
+}
+
+function utcDay(dte)
+{
+	return new Date(dte.getTime() + dte.getTimezoneOffset()*60*1000);
+}
+
 export async function getStats()
 {
 
@@ -94,17 +106,17 @@ export async function getStats()
 	
 	var hr24 = now - 24*60*60*1000;
 
+	var utc = utcDay(dte);
 
-	var week = new Date(now - 24*60*60*1000*dte.getDay());
-	week = new Date(week.getFullYear() + "-" + pad(week.getMonth()+1) + "-" + pad(week.getDate()))
-	week = week.getTime();
+	var today = startOfTodayUTC(dte);
+	var week =  today.getTime() - 24*60*60*1000*utc.getDay()
+	
+	var dayLen = 24*60*60*1000;
 
-	var month = new Date(dte.getFullYear() + "-" + pad(dte.getMonth()+1) + "-01");
+	var month = new Date(utc.getFullYear() + "-" + pad(utc.getMonth()+1) + "-01");
 	month = month.getTime();
 
 	var db = new sqlite3.Database('./server/stats.db');
-
-
 
 	var stats = await Promise.all([
 		timeQuery(db, "PlayersJoined", hr1, now),
@@ -117,6 +129,25 @@ export async function getStats()
 		timeQuery(db, "GamesHosted", month, now),
 		timeQuery(db, "PlayersJoined", 0, now),
 		timeQuery(db, "GamesHosted", 0, now),
+		//
+		timeQuery(db, "GamesHosted", today, now),
+		timeQuery(db, "GamesHosted", today-dayLen, today),
+		timeQuery(db, "GamesHosted", today-dayLen*2, today-dayLen),
+		timeQuery(db, "GamesHosted", today-dayLen*3, today-dayLen*2),
+		timeQuery(db, "GamesHosted", today-dayLen*4, today-dayLen*3),
+		timeQuery(db, "GamesHosted", today-dayLen*5, today-dayLen*4),
+		timeQuery(db, "GamesHosted", today-dayLen*6, today-dayLen*5),
+
+		timeQuery(db, "PlayersJoined", today, now),
+		timeQuery(db, "PlayersJoined", today-dayLen, today),
+		timeQuery(db, "PlayersJoined", today-dayLen*2, today-dayLen),
+		timeQuery(db, "PlayersJoined", today-dayLen*3, today-dayLen*2),
+		timeQuery(db, "PlayersJoined", today-dayLen*4, today-dayLen*3),
+		timeQuery(db, "PlayersJoined", today-dayLen*5, today-dayLen*4),
+		timeQuery(db, "PlayersJoined", today-dayLen*6, today-dayLen*5),
+
+
+
 	]);
 
 	db.close();
@@ -132,6 +163,8 @@ export async function getStats()
 		"$A": stats[7],
 		"$B": stats[8],
 		"$C": stats[9],
+		"gamesHostedThisWeek": stats.slice(10,17),
+		"playersJoinedThisWeek": stats.slice(17,24)
 	};
 
 }
