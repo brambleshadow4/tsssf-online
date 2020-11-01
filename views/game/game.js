@@ -653,8 +653,9 @@ export function updatePlayerList()
 	for(var player of model.players)
 	{
 		var div = document.createElement('div');
-		var star = "";
 		div.className = "player";
+
+		var className = player.disconnected ? "disconnected" : "";
 
 		if(model.turnstate && model.turnstate.currentPlayer == player.name)
 		{
@@ -662,7 +663,7 @@ export function updatePlayerList()
 		}
 
 		div.innerHTML = `
-			<span>${player.name}${star}</span>
+			<span class="${className}">${player.name}</span>
 			<span class='ponyCount'>${player.ponies}</span>
 			<span class='shipCount'>${player.ships}</span>
 			<span class='goalCount'>${player.winnings.length}</span>

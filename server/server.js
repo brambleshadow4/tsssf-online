@@ -46,7 +46,7 @@ app.get("/lobby", function(req,res)
 {
 	var key = Object.keys(req.query)[0];
 
-	if(tsssfServer.games[key])
+	if(tsssfServer.games[key] && tsssfServer.games[key].isLobbyOpen)
 	{
 		sendIfExists("./views/lobby/lobby.html", res);
 	}

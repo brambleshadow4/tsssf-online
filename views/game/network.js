@@ -6,7 +6,6 @@ import {
 var socket;
 var pendingRequests = [];
 
-
 var host = window.location.host.replace(/:.*/,"") + ":8080";
 
 socket = new WebSocket("ws://" + host + "/" + window.location.search);
@@ -43,6 +42,12 @@ socket.addEventListener('message', function (event)
 		var [_,id] = event.data.split(";");
 		localStorage["playerID"] = id;
 
+	}
+
+	if(event.data.startsWith("playerlist;"))
+	{
+		model.players = JSON.parse(event.data.substring(11));
+		updatePlayerList();
 	}
 
 	if(event.data.startsWith("model;"))

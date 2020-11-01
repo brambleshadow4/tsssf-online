@@ -346,6 +346,11 @@ body
 	cursor: pointer;
 }
 
+.disconnected
+{
+	text-decoration: line-through;
+}
+
 .popup
 {
 	overflow: visible;
