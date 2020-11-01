@@ -2,7 +2,25 @@
 <html>
 	<head>
 		<meta encoding='utf-8' />
+
+		<title>Twilight Sparkle's Secret Shipfic Folder Online</title>
+
+		<meta name="twitter:card" content="summary" />
+		<meta property="og:title" content="Twilight Sparkle's Secret Shipfic Folder Online">
+		<meta property="og:description" content="Play and host TSSSF games through the magic of the internet">
+		<meta property="og:image" content="https://tsssf.net/img/tsssf-box.png">
+		<meta property="og:url" content="http://www.tsssf.net">
+		<meta property="og:type" content="website">
+
 		<style>
+
+			html
+			{
+				background-image: url(/img/tileBackground2.png);
+				background-size: 40%;
+				margin: 0px;
+			}
+			
 			body
 			{
 				text-align: center;
@@ -10,15 +28,22 @@
 
 			.split
 			{
+				margin-top: 5vh;
 				display: flex;
 				flex-direction: row;
 
 				justify-content: center;
+				vertical-align: middle;
 			}
 
+			#left{
+				width: 500px;
+				background-color: white;
+			}
 			#right
 			{
-				width: 500px;
+				/*width: 500px;*/
+				background-color: white;
 			}
 
 			img
@@ -35,7 +60,10 @@
 
 			footer
 			{
-				margin-top: 20px;
+				margin: auto;
+				padding: 20px 0px;
+				max-width: 800px;
+				background-color: white;
 			}
 
 			.footerLinks img
@@ -43,7 +71,6 @@
 				height: 30px;
 				width: 30px;
 			}
-
 
 
 			.footerLinks a > *
@@ -63,10 +90,10 @@
 
 	<body>
 		<div class='split'>
-			<div>
+			<div id="left">
 				<h1>Twilight Sparkle's<br>Secret Shipfic Folder<br>Online</h1>
 
-				<h2>Beta 0.2.1</h2>
+				<h2>Beta 0.3.0</h2>
 				<p>No mobile support yet (sorry)</p>
 				<div>
 					<!--div><button onclick="join()">Join Game</button></div-->
@@ -77,6 +104,7 @@
 				<img src="/img/tsssf-box.png">
 			</div>
 		</div>
+		
 		<footer>
 			<div class='footerLinks'>
 				<a href="http://www.secretshipfic.com/">
@@ -96,6 +124,7 @@
 				</a>
 			</div>
 		</footer>
+	
 		<script>
 			function host()
 			{

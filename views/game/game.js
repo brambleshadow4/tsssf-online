@@ -1,12 +1,28 @@
 /**
 
-	Model
-
-	{
+	model: {
 		board: {
-			"<x>,<y>": {
-				
+			[boardLocation]: {	
+				element: HtmlElement,
+				card: CardNamepspaceString
 			}
+		}
+
+		offsets: {
+			// existence of the offset key signifies the card is offset
+			[offsetKey]: string // the string is the id of the card element added to the DOM
+		}
+		
+		players:[
+			[id]:
+		]
+
+		playerName: string // the name of the player
+
+
+		// turnstate is undefined in sandbox mode
+		turnstate:{
+			currentPlayer: string // the name of the player whose turn it is
 		}
 	}
 
@@ -23,7 +39,7 @@ import {
 	isPlayerLoc,
 	isDiscardLoc
 } from "/lib.js";
-import {broadcastMove} from "/game/network.js";
+import {broadcastMove, broadcast} from "/game/network.js";
 
 
 
@@ -80,7 +96,6 @@ playingArea.onmousemove = function(e)
 
 		refPoint.style.left = curX - difX + "px"
 		refPoint.style.top = curY - difY + "px"
-
 	}
 }
 
@@ -539,7 +554,7 @@ export function updatePonyDiscard(cardOnTop)
 		{
 			var card = await openCardSelect("Discarded ponies", model.ponyDiscardPile);
 
-			if(card)
+			if(card && isItMyTurn())
 			{
 				var i = model.ponyDiscardPile.indexOf(card);
 				var area = (i+1 == model.ponyDiscardPile.length ? "top" : "stack");
@@ -578,7 +593,7 @@ export function updateShipDiscard(tempCard)
 		{
 			var card = await openCardSelect("Discarded ships", model.shipDiscardPile);
 
-			if(card)
+			if(card && isItMyTurn())
 			{
 				var i = model.shipDiscardPile.indexOf(card);
 				var area = (i+1 == model.shipDiscardPile.length ? "top" : "stack");
@@ -639,8 +654,16 @@ export function updatePlayerList()
 	{
 		var div = document.createElement('div');
 		div.className = "player";
+
+		var className = player.disconnected ? "disconnected" : "";
+
+		if(model.turnstate && model.turnstate.currentPlayer == player.name)
+		{
+			div.classList.add('currentPlayer');
+		}
+
 		div.innerHTML = `
-			<span>${player.name}</span>
+			<span class="${className}">${player.name}</span>
 			<span class='ponyCount'>${player.ponies}</span>
 			<span class='shipCount'>${player.ships}</span>
 			<span class='goalCount'>${player.winnings.length}</span>
@@ -698,6 +721,49 @@ export function updateGame()
 
 	updateWinnings();
 	updatePlayerList();
+	updateTurnstate();
+}
+
+
+export function updateTurnstate()
+{
+	console.log("update turnstate");
+
+	var turnstate = model.turnstate
+	if(!turnstate)
+		return;
+
+
+	var div = document.getElementById('turnInfo');
+	if(isItMyTurn())
+	{
+		document.body.classList.remove("nomove");
+
+		div.innerHTML = "<div>It is currently your turn</div>";
+		var button = document.createElement('button');
+		button.innerHTML = "End My Turn";
+		div.appendChild(button);
+
+		button.onclick = function()
+		{
+			broadcast("endturn");
+		}
+	}
+	else
+	{
+		document.body.classList.add("nomove");
+
+		div.innerHTML = `<div>It is currently ${turnstate.currentPlayer}'s turn`;
+	}
+
+	updatePlayerList();
+
+
+}
+
+export function isItMyTurn()
+{
+	return model.turnstate == undefined || model.turnstate.currentPlayer == model.playerName;
 }
 
 
@@ -725,7 +791,7 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 
 	imgElement.onclick = function()
 	{	
-		if(isDkeyPressed)
+		if(isDkeyPressed && isItMyTurn())
 		{
 			if(isDiscardLoc(location) || location == "winnings")
 				return;
@@ -759,7 +825,7 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 	{
 		imgElement.draggable = true;
 
-		imgElement.style.cursor = "grab";
+		imgElement.classList.add('grab');
 
 		var ghostCard;
 		var ghostCardDragHandler;
@@ -767,10 +833,9 @@ function makeCardElement(card, location, isDraggable, isDropTarget)
 
 		imgElement.ondragstart = function(e)
 		{
-			if(isDkeyPressed){
+			if(isDkeyPressed || !isItMyTurn()){
 				e.preventDefault();
 				return;
-
 			}
 
 			//e.preventDefault();
@@ -1338,6 +1403,8 @@ function updateGoals(goalNo)
 		{
 			element.addEventListener("mouseenter", function(e)
 			{
+				if(!isItMyTurn()) return;
+
 				var img = document.createElement('img');
 				img.id = "takeGoal"
 				img.src= "/img/check.svg";
@@ -1345,12 +1412,14 @@ function updateGoals(goalNo)
 
 				img.onclick = function()
 				{
-					if(!isDkeyPressed)
+		
+					if(isItMyTurn() && !isDkeyPressed)
 					{
 						var card = model.currentGoals[i];
 						moveCard(card, "goal,"+i, "winnings")
 						broadcastMove(card, "goal,"+i, "winnings")
 					}
+					
 				}
 
 				element.appendChild(img);

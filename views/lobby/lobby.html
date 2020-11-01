@@ -3,6 +3,16 @@
 	<head>
 		<link href="/lobby.css" type="text/css" rel="stylesheet" />
 
+		<title>Lobby: Twilight Sparkle's Secret Shipfic Folder Online</title>
+
+		<meta name="twitter:card" content="summary" />
+		<meta property="og:title" content="Join TSSSF Game">
+		<meta property="og:description" content="You've been invited to play a game of Twilight Sparkle's Secret Shipfic Folder">
+		<meta property="og:image" content="http://tsssf.net/img/tsssf-box.png">
+
+		<meta property="og:url" content="http://www.tsssf.net">
+		<meta property="og:type" content="website">
+	
 	</head>
 	<body>
 
@@ -26,9 +36,9 @@
 
 				<div class='off'  id='gameOptionsInfo'>
 					<h2>Rule Enforcement</h2>
-					<div><input type='radio' name='gamerules' disabled><label>Full rules - Coming soon!</label></div>
-					<div><input type='radio' name='gamerules' disabled><label>Turns only - Coming soon!</label></div>
-					<div><input type='radio' name='gamerules' checked><label>Sandbox</label></div>
+					<div><input type='radio' name='gamerules' disabled><label for=''>Full rules - Coming soon!</label></div>
+					<div><input id='turnsOnly' type='radio' name='gamerules' checked><label for='turnsOnly'>Turns - Only one person can play at a time</label></div>
+					<div><input id='sandbox' type='radio' name='gamerules' ><label for='sandbox'>Sandbox - Everyone can play simultaneously</label></div>
 				</div>
 
 				<div class='off' id='chooseCardsInfo'>
