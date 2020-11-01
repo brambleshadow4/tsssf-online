@@ -157,6 +157,19 @@ export function TsssfGameServer()
 		}
 	}
 
+	function getPlayerIndex(key, thissocket)
+	{
+		for(var i=0; i < games[key].players.length; i++)
+		{
+			var socket = games[key].players[i].socket;
+
+			if(socket == thissocket)
+			{
+				return i;
+			}
+		}
+	}
+
 	function toEveryoneElse(key, thissocket, message)
 	{
 		for(var i=0; i < games[key].players.length; i++)
@@ -201,6 +214,7 @@ export function TsssfGameServer()
 		model.shipDrawPileLength = games[key].shipDrawPile.length;
 
 		var player = getPlayer(key, socket);
+		var playerIndex = getPlayerIndex(key, socket);
 
 		model.hand = player.hand;
 		model.winnings = player.winnings;
@@ -208,11 +222,16 @@ export function TsssfGameServer()
 		model.playerName = player.name;
 		model.players = [];
 
-		for(var i=0; i < games[key].players.length; i++)
+		model.turnstate = games[key].turnstate;
+
+
+		var playerCount = games[key].players.length 
+		if(playerCount > 1)
 		{
-			let other = games[key].players[i];
-			if(other != player)
+			for(var i=(playerIndex+1) % playerCount; i != playerIndex; i = ((i + 1) % playerCount))
 			{
+				let other = games[key].players[i];
+				
 				model.players.push({
 					name: other.name,
 					ponies: other.hand.filter(x => isPony(x)).length,
@@ -261,6 +280,8 @@ export function TsssfGameServer()
 
 	function startGame(key, options)
 	{	
+		console.log(options)
+
 		var model = games[key];
 		model.cardLocations = {};
 		model.board = {
@@ -300,7 +321,6 @@ export function TsssfGameServer()
 		model.ponyDrawPile = [];
 		model.shipDrawPile = [];
 
-		model.currentPlayer = "";
 
 		logGameHosted();
 
@@ -339,6 +359,17 @@ export function TsssfGameServer()
 		}
 
 		randomizeOrder(model.players);
+
+		if(options.ruleset == "turnsOnly")
+		{
+			model.turnstate = {
+				currentPlayer: model.players[0].name
+			};
+
+		}
+
+		
+
 		randomizeOrder(model.goalDrawPile);
 		randomizeOrder(model.ponyDrawPile);
 		randomizeOrder(model.shipDrawPile);
@@ -737,6 +768,23 @@ export function TsssfGameServer()
 				}
 
 				//}, 5000)
+			}
+
+			if(message == "endturn")
+			{
+				var player = getPlayer(key, socket);
+
+				if(!model.turnstate) return;
+
+				if(player.name == model.turnstate.currentPlayer)
+				{
+					var k = getPlayerIndex(key, socket);
+					k = (k+1) % model.players.length;
+
+					model.turnstate.currentPlayer = model.players[k].name;
+
+					toEveryone(key, "turnstate;" + JSON.stringify(model.turnstate));
+				}
 			}
 		});
 	});

@@ -1,5 +1,6 @@
 import {
-	updateGame, moveCard, updatePonyDiscard, updateShipDiscard, updateGoalDiscard, updatePlayerList
+	updateGame, moveCard, updatePonyDiscard, updateShipDiscard, updateGoalDiscard, updatePlayerList, isItMyTurn,
+	updateTurnstate
 } from "/game/game.js";
 
 var socket;
@@ -26,6 +27,12 @@ socket.addEventListener("close", function(){
 
 socket.addEventListener('message', function (event)
 {
+	if(event.data.startsWith('turnstate;'))
+	{
+		model.turnstate = JSON.parse(event.data.substring(10));	
+		updateTurnstate();
+	}
+
 	if(event.data.startsWith('closed;'))
 	{
 		window.location.href = location.protocol + "//" + window.location.host;
@@ -122,7 +129,7 @@ export function broadcastMove(card, startLocation, endLocation)
 	broadcast("move;" + card + ";" + startLocation + ";" + endLocation);
 }
 
-function broadcast(message)
+export function broadcast(message)
 {
 	console.log("sending " + message);
 
@@ -133,21 +140,25 @@ function broadcast(message)
 
 network.requestDrawPony = function()
 {
-	broadcast("draw;pony");
+	if(isItMyTurn())
+		broadcast("draw;pony");
 }
 
 network.requestDrawShip = function()
 {
-	broadcast("draw;ship");
+	if(isItMyTurn())
+		broadcast("draw;ship");
 }
 
 network.requestDrawGoal = function()
 {
-	broadcast("draw;goal");
+	if(isItMyTurn())
+		broadcast("draw;goal");
 }
 
 
 network.requestSwapShuffle = function(typ)
 {
-	broadcast("swapshuffle;" + typ);
+	if(isItMyTurn())
+		broadcast("swapshuffle;" + typ);
 }

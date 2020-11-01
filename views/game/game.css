@@ -146,6 +146,9 @@
 	width: 29vh;
 }
 
+
+
+
 body
 {
 	margin: 0px;
@@ -247,6 +250,15 @@ body
 	background-color: white;
 }
 
+.nomove #cardRow, .nomove #sidebar
+{
+	background-color: #C8C8C8;
+}
+
+.nomove .shuffle, .nomove .card.grab, .nomove .card{
+	cursor: not-allowed;
+}
+
 #cardRow  div
 {
 	display: inline-block;
@@ -260,13 +272,25 @@ body
 
 	border-left: solid 3px black;
 	vertical-align: middle;
-
 }
+
+
+.card.grab
+{
+	cursor: grab; 
+}
+
 
 #refPoint
 {
 	width: 0;
 	height: 0;
+}
+
+
+.currentPlayer
+{
+	background-color: gold;
 }
 
 .shuffle
@@ -301,6 +325,13 @@ body
 
 	background-color: white;
 	overflow-y: auto;
+}
+
+#turnInfo
+{
+	font-size: 12pt;
+	margin-top: 3vh;
+	text-align: center;
 }
 
 #popupCloseButton

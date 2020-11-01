@@ -85,10 +85,12 @@ function startGame()
 {
 	var cardDecks = document.getElementsByClassName('cardbox');
 
-	// skip 0 because it's core
+	
 	var options = {cardDecks:[]};
 
 
+
+	// skip 0 because it's core
 	for(var i=1; i<cardDecks.length; i++)
 	{
 		if(cardDecks[i].classList.contains('selected'))
@@ -98,6 +100,11 @@ function startGame()
 			options.cardDecks.push(cardDeckName)
 		}
 	}
+
+	if(document.getElementById('sandbox').checked)
+		options.ruleset = "sandbox";
+	if(document.getElementById('turnsOnly').checked)
+		options.ruleset = "turnsOnly";
 
 	socket.send("startgame;" + JSON.stringify(options));
 }
