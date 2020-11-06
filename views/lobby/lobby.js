@@ -1,26 +1,68 @@
-document.getElementById('inviteURL').value = window.location.href;
+import * as LobbyView from "/lobby/lobbyView.js";
 
-
-var host = window.location.host.replace(/:.*/,"") + ":8080";
+var gameOptionsDiv 
+var chooseCardsDiv 
+var joinGameDiv 
 var ishost = false;
 var sentName = false;
 
-socket = new WebSocket("ws://" + host + "/" + window.location.search);
 
-socket.addEventListener("open", function()
+export function loadView(isOpen)
 {
-	socket.send("ishost;");
-	socket.send("register;Player");
+	if(window.location.pathname != "/lobby")
+	{
+		history.replaceState(null, "", "/lobby" + window.location.search)
+	}
 
-	//
-});
+	document.body.innerHTML = LobbyView.HTML;
+	document.head.innerHTML = LobbyView.HEAD;
 
-socket.addEventListener("close", function(){
-	console.log("closed")
-});
+	if(isOpen)
+	{
+		document.getElementById('inviteURL').value = window.location.href;
+		socket = window.socket;
+
+		socket.send("ishost;");
+		socket.send("register;");
+
+		socket.onMessageHandler = onMessage;
+
+		gameOptionsDiv = document.getElementById('gameOptionsInfo');
+		chooseCardsDiv = document.getElementById('chooseCardsInfo');
+		joinGameDiv = document.getElementById('joinGameInfo');
+
+		window.joinGameTab = joinGameTab;
+		window.gameOptionsTab = gameOptionsTab;
+		window.chooseCardsTab = chooseCardsTab;
+		window.register = register;
+		window.startGame = startGame;
+
+		var cardBoxes = document.getElementsByClassName('cardbox')
 
 
-socket.addEventListener("message", function()
+		for(var i=1; i < cardBoxes.length; i++)
+		{
+			let box = cardBoxes[i];
+			box.onclick = function()
+			{
+				if(this.classList.contains('selected'))
+					this.classList.remove("selected")
+				else
+					this.classList.add('selected');
+			}
+		}
+	}
+	else
+	{
+		document.getElementById('joinGameInfo').classList.add('off');
+		document.getElementById('playerArea').classList.add('off');
+
+		document.getElementById('closedLobby').classList.remove('off');
+	}
+
+}
+
+function onMessage()
 {
 	console.log(event.data);	
 	console.log("ishost " + ishost);
@@ -42,10 +84,10 @@ socket.addEventListener("message", function()
 			document.getElementById('tabs').classList.remove('off');
 	}
 
-	if(event.data.startsWith("startgame;"))
+	/*if(event.data.startsWith("startgame;"))
 	{
 		window.location.href = window.location.origin + "/game" + window.location.search;
-	}
+	}*/
 
 	if(event.data.startsWith("playerlist;"))
 	{
@@ -69,8 +111,7 @@ socket.addEventListener("message", function()
 			document.getElementById("startButtonArea").classList.remove("off");
 		}
 	}
-});
-
+}
 
 
 function register()
@@ -84,11 +125,7 @@ function register()
 function startGame()
 {
 	var cardDecks = document.getElementsByClassName('cardbox');
-
-	
 	var options = {cardDecks:[]};
-
-
 
 	// skip 0 because it's core
 	for(var i=1; i<cardDecks.length; i++)
@@ -109,9 +146,8 @@ function startGame()
 	socket.send("startgame;" + JSON.stringify(options));
 }
 
-var gameOptionsDiv = document.getElementById('gameOptionsInfo');
-var chooseCardsDiv = document.getElementById('chooseCardsInfo');
-var joinGameDiv = document.getElementById('joinGameInfo');
+
+
 
 
 function joinGameTab()
@@ -145,20 +181,6 @@ function chooseCardsTab()
 	document.getElementById('chooseCardsTab').classList.add('selected')
 }
 
-var cardBoxes = document.getElementsByClassName('cardbox')
-
-
-for(var i=1; i < cardBoxes.length; i++)
-{
-	let box = cardBoxes[i];
-	box.onclick = function()
-	{
-		if(this.classList.contains('selected'))
-			this.classList.remove("selected")
-		else
-			this.classList.add('selected');
-	}
-}
 
 
 var animCounter = 0;

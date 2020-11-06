@@ -27,10 +27,13 @@ app.use(expressSession({
 app.get('/', file("./views/home.html"));
 app.get('/img/**', fmap("/img/**", "./img/**"));
 
-app.get("/game", file("./views/game/game.html"))
+app.get("/game", file("./views/app.html"))
 app.get("/game/game.js", file("./views/game/game.js"))
+app.get("/game/gameView.js", file("./views/game/gameView.js"))
 app.get("/game/network.js", file("./views/game/network.js"))
 app.get("/game/game.css", file("./views/game/game.css"))
+
+app.get("/viewSelector.js", file("./views/viewSelector.js"))
 
 
 app.get("/lib.js", file("./server/lib.js"))
@@ -46,9 +49,9 @@ app.get("/lobby", function(req,res)
 {
 	var key = Object.keys(req.query)[0];
 
-	if(tsssfServer.games[key] && tsssfServer.games[key].isLobbyOpen)
+	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
-		sendIfExists("./views/lobby/lobby.html", res);
+		sendIfExists("./views/app.html", res);
 	}
 	else
 	{
@@ -79,6 +82,7 @@ app.get("/stats", async function(req,res){
 
 app.get("/lobby.css", file("./views/lobby/lobby.css"))
 app.get("/lobby.js", file("./views/lobby/lobby.js"))
+app.get("/lobby/lobbyView.js", file("./views/lobby/lobbyView.js"))
 
 app.get("/host", function(req, res){
 

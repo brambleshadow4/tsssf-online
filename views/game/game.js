@@ -39,9 +39,17 @@ import {
 	isPlayerLoc,
 	isDiscardLoc
 } from "/lib.js";
-import {broadcastMove, broadcast} from "/game/network.js";
+
+import * as GameView from "/game/gameView.js" 
+
+import {broadcastMove, broadcast, requestDrawPony, requestDrawShip, requestSwapShuffle, requestDrawGoal, attachToSocket} from "/game/network.js";
 
 
+var model = {};
+window.model = model;
+
+var cardLocations = {};
+window.cardLocations = cardLocations;
 
 var isDkeyPressed = false;
 var isShiftPressed = false;
@@ -54,6 +62,7 @@ var hoverCardDiv;
 
 var USE_NETWORK = true;
 
+var haveCardsLoaded = false;
 
 var draggingBoard = false;
 
@@ -63,217 +72,330 @@ var y;
 
 const gridWidth = 22;
 
-draggingBoard= false;
-
-var playingArea = document.getElementById('playingArea');
 
 
-playingArea.onmousedown = function(e)
+export function loadView()
 {
-	draggingBoard = true;
-	x = e.clientX;
-	y = e.clientY;
-};
-
-playingArea.onmouseup = function(e)
-{
-	draggingBoard = false;
-}
-
-playingArea.onmousemove = function(e)
-{
-	if(draggingBoard)
+	if(window.location.pathname != "/game")
 	{
-		var difX = x - e.clientX;
-		var difY = y - e.clientY;
+		history.replaceState(null, "", "/game" + window.location.search)
+	}
+
+	document.body.innerHTML = "";
+	document.head.innerHTML = GameView.HEAD;
+	document.body.innerHTML = GameView.HTML;
+	
+
+	var playingArea = document.getElementById('playingArea');
+
+
+	playingArea.onmousedown = function(e)
+	{
+		draggingBoard = true;
 		x = e.clientX;
 		y = e.clientY;
+	};
+
+	playingArea.onmouseup = function(e)
+	{
+		draggingBoard = false;
+	}
+
+	playingArea.onmousemove = function(e)
+	{
+		if(draggingBoard)
+		{
+			var difX = x - e.clientX;
+			var difY = y - e.clientY;
+			x = e.clientX;
+			y = e.clientY;
+
+			var refPoint = document.getElementById('refPoint');
+			if(!refPoint)
+				return;
+
+			var curX = Number(refPoint.style.left.substring(0, refPoint.style.left.length-2));
+			var curY = Number(refPoint.style.top.substring(0, refPoint.style.top.length-2));
+
+			refPoint.style.left = curX - difX + "px"
+			refPoint.style.top = curY - difY + "px"
+		}
+	}
+
+	var zoomScale = 1;
+
+	window.addEventListener('keydown', function(e){
+
+		if(e.key == "D" || e.key == "d")
+		{
+			isDkeyPressed = true;
+		}
+
+		if(e.key == "Shift")
+		{
+			isShiftPressed = true;
+			if(hoverCard.length)
+				enlargeCard();
+		}
+	});
+
+
+
+	window.addEventListener('keyup', function(e){
+
+		if(e.key == "D" || e.key == "d")
+		{
+			isDkeyPressed = false;
+		}
+
+		if(e.key == "Shift")
+		{
+			isShiftPressed = false;
+			unenlargeCard();
+		}
+	});
+
+	window.moveToStartCard = function()
+	{
+		console.log("moving to start card");
+
+		var refPoint = document.getElementById('refPoint')
+		if(!refPoint)
+			return;
+
+		refPoint.style.transform = "scale(1,1)";
+		zoomScale = 1;
+
+		var loc = cardLocations["Core.Start.FanficAuthorTwilight"];
+
+		console.log(loc);
+		var [_, x, y] = loc.split(",");
+
+		
+
+		x = Number(x);
+		y = Number(y);
+
+		const vh = window.innerHeight/100;
+
+		x = x * gridWidth * vh;
+		y = y * gridWidth * vh;
+
+		x *= -1;
+		y *= -1;
+
+		var playingArea = document.getElementById('playingArea');
+
+
+		console.log(playingArea.clientWidth + "," + playingArea.clientHeight);
+
+		y += playingArea.clientHeight/2 - 18/2*vh;
+		x += playingArea.clientWidth/2 - 13/2*vh;
+
+		refPoint.style.left = x + "px";
+		refPoint.style.top = y + "px";
+	}
+
+	var instances = 60;
+	var lastDims = "";
+	function moveToStartCardListener()
+	{
+		var newDims = playingArea.clientWidth + "," + playingArea.clientHeight;
+
+		if(newDims != lastDims)
+		{
+			moveToStartCard();
+			instances = 60;
+			lastDims = newDims
+		}
+		else 
+			instances--;
+
+		if(instances)
+			requestAnimationFrame(moveToStartCardListener)
+	}
+
+	moveToStartCardListener();
+
+
+	playingArea.onwheel = function(e)
+	{
+		e.preventDefault();
 
 		var refPoint = document.getElementById('refPoint');
+		var playingArea = document.getElementById('playingArea');
 
 		var curX = Number(refPoint.style.left.substring(0, refPoint.style.left.length-2));
 		var curY = Number(refPoint.style.top.substring(0, refPoint.style.top.length-2));
 
-		refPoint.style.left = curX - difX + "px"
-		refPoint.style.top = curY - difY + "px"
-	}
-}
+		curX -= playingArea.clientWidth/2;
+		curY -= playingArea.clientHeight/2;
 
-var zoomScale = 1;
+		curX /= zoomScale;
+		curY /= zoomScale;
 
-window.addEventListener('keydown', function(e){
+		if(Math.sign(e.deltaY) > 0)
+		{
+			zoomScale = Math.max(zoomScale-.1, .2);
 
-	if(e.key == "D" || e.key == "d")
+			refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
+		}
+
+		if(Math.sign(e.deltaY) < 0)
+		{
+			zoomScale = Math.min(zoomScale+.1, 2);
+
+			refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
+		}
+
+		curX *= zoomScale;
+		curY *= zoomScale;
+
+		curX += playingArea.clientWidth/2;
+		curY += playingArea.clientHeight/2;
+
+		refPoint.style.left = curX + "px";
+		refPoint.style.top = curY + "px";
+	};
+
+	document.getElementById("ponyDrawPile").onclick = requestDrawPony;
+	document.getElementById("shipDrawPile").onclick = requestDrawShip;
+	document.getElementById("goalDrawPile").onclick = preRequestDrawGoal;
+
+	var shuffles = ["pony","ship","goal"];
+
+	for(let key of shuffles)
 	{
-		isDkeyPressed = true;
+		let id = key+"Shuffle";
+
+		document.getElementById(id).onclick = () => requestSwapShuffle(key)
 	}
 
-	if(e.key == "Shift")
+	var hand = document.getElementById('hand')
+	hand.ondragover = function(e)
 	{
-		isShiftPressed = true;
-		if(hoverCard.length)
-			enlargeCard();
+		var data = dataTransferVar.split(";")
+		var draggedCard = data[0];
+		var location = data[1];
+
+		if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
+		{
+			e.preventDefault();
+		}
 	}
-});
 
-window.addEventListener('keyup', function(e){
 
-	if(e.key == "D" || e.key == "d")
+	var inDragZone = false;
+	hand.ondragenter = function(e)
 	{
-		isDkeyPressed = false;
+		var data = dataTransferVar.split(";")
+		var draggedCard = data[0];
+		var location = data[1];
+		if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
+		{
+			if(!document.getElementById('handDropzone'))
+			{
+				var div = document.createElement('div');
+				div.id="handDropzone";
+				div.style.position = "absolute";
+				div.style.top = "0px"
+				div.style.bottom = "0px";
+				div.style.left = "0px";
+				div.style.right = "0px";
+				div.style.zIndex = "3";
+				div.style.backgroundColor = "rgba(0,128,0,.5)";
+
+				div.ondragleave = function(e)
+				{
+					var div = document.getElementById('handDropzone');
+					if(div)
+						div.parentNode.removeChild(div);
+				}
+
+				div.ondrop = function(e)
+				{
+					e.preventDefault();
+					div.parentNode.removeChild(div);
+					var [card, startLoc] = dataTransferVar.split(";")
+
+					moveCard(card, startLoc, "hand");
+					broadcastMove(card, startLoc, "hand");
+				}
+
+				hand.appendChild(div);
+			}	
+		}
 	}
 
-	if(e.key == "Shift")
+	window.addCardsToReferencePage = function()
 	{
-		isShiftPressed = false;
-		unenlargeCard();
+
+		var popupPage = document.createElement('div')
+		popupPage.className = "popupPage";
+
+		var ponyReference = document.createElement('div');
+		var shipReference = document.createElement('div');
+		var goalReference = document.createElement('div');
+
+		var keys = Object.keys(cards);
+		var re = new RegExp(model.cardDecks);
+		keys.sort();
+		for(let key of keys)
+		{
+			if(!re.exec(key)) continue;
+
+			let cardDiv = makeCardElement(key)
+			
+			if(isPony(key))
+			{
+				ponyReference.appendChild(cardDiv)
+			}
+			if(isShip(key))
+			{
+				shipReference.appendChild(cardDiv)
+			}
+			if(isGoal(key))
+			{
+				goalReference.appendChild(cardDiv)
+			}
+
+		}
+
+		var header = document.createElement('h1');
+		header.innerHTML = "Pony Cards";
+		popupPage.appendChild(header);
+		popupPage.appendChild(ponyReference);
+
+		header = document.createElement('h1');
+		header.innerHTML = "Ship Cards";
+		popupPage.appendChild(header);
+		popupPage.appendChild(shipReference);
+
+		header = document.createElement('h1');
+		header.innerHTML = "Goal Cards";
+		popupPage.appendChild(header);
+		popupPage.appendChild(goalReference);
+
+		return popupPage;
 	}
-});
 
-window.moveToStartCard = function()
-{
-	var refPoint = document.getElementById('refPoint')
-	refPoint.style.transform = "scale(1,1)";
-	zoomScale = 1;
+	if(!sessionStorage["shownHelp"])
+	{
+		sessionStorage["shownHelp"] = "true";
+		createHelpPopup();
+	}
 
-	var loc = cardLocations["Core.Start.FanficAuthorTwilight"];
-	var [_, x, y] = loc.split(",");
 
 	
-
-	x = Number(x);
-	y = Number(y);
-
-	const vh = window.innerHeight/100;
-
-	x = x * gridWidth * vh;
-	y = y * gridWidth * vh;
-
-	x *= -1;
-	y *= -1;
-
-	var playingArea = document.getElementById('playingArea');
+	attachToSocket(window.socket);
 
 
-	y += playingArea.clientHeight/2 - 18/2*vh;
-	x += playingArea.clientWidth/2 - 13/2*vh;
-
-	refPoint.style.left = x + "px";
-	refPoint.style.top = y + "px";
+	window.updateGame = updateGame;
 }
 
 
-playingArea.onwheel = function(e)
-{
-	e.preventDefault();
-
-	var refPoint = document.getElementById('refPoint');
-	var playingArea = document.getElementById('playingArea');
-
-	var curX = Number(refPoint.style.left.substring(0, refPoint.style.left.length-2));
-	var curY = Number(refPoint.style.top.substring(0, refPoint.style.top.length-2));
-
-	curX -= playingArea.clientWidth/2;
-	curY -= playingArea.clientHeight/2;
-
-	curX /= zoomScale;
-	curY /= zoomScale;
-
-	if(Math.sign(e.deltaY) > 0)
-	{
-		zoomScale = Math.max(zoomScale-.1, .2);
-
-		refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
-	}
-
-	if(Math.sign(e.deltaY) < 0)
-	{
-		zoomScale = Math.min(zoomScale+.1, 2);
-
-		refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
-	}
-
-	curX *= zoomScale;
-	curY *= zoomScale;
-
-	curX += playingArea.clientWidth/2;
-	curY += playingArea.clientHeight/2;
-
-	refPoint.style.left = curX + "px";
-	refPoint.style.top = curY + "px";
-};
-
-document.getElementById("ponyDrawPile").onclick = requestDrawPony;
-document.getElementById("shipDrawPile").onclick = requestDrawShip;
-document.getElementById("goalDrawPile").onclick = requestDrawGoal;
-
-var shuffles = ["pony","ship","goal"];
-
-for(let key of shuffles)
-{
-	let id = key+"Shuffle";
-
-	document.getElementById(id).onclick = () => requestSwapShuffle(key)
-}
-
-var hand = document.getElementById('hand')
-hand.ondragover = function(e)
-{
-	var data = dataTransferVar.split(";")
-	var draggedCard = data[0];
-	var location = data[1];
-
-	if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
-	{
-		e.preventDefault();
-	}
-}
 
 
-var inDragZone = false;
-hand.ondragenter = function(e)
-{
-	var data = dataTransferVar.split(";")
-	var draggedCard = data[0];
-	var location = data[1];
-	if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
-	{
-		if(!document.getElementById('handDropzone'))
-		{
-			var div = document.createElement('div');
-			div.id="handDropzone";
-			div.style.position = "absolute";
-			div.style.top = "0px"
-			div.style.bottom = "0px";
-			div.style.left = "0px";
-			div.style.right = "0px";
-			div.style.zIndex = "3";
-			div.style.backgroundColor = "rgba(0,128,0,.5)";
-
-			div.ondragleave = function(e)
-			{
-				var div = document.getElementById('handDropzone');
-				if(div)
-					div.parentNode.removeChild(div);
-			}
-
-			div.ondrop = function(e)
-			{
-				e.preventDefault();
-				div.parentNode.removeChild(div);
-				var [card, startLoc] = dataTransferVar.split(";")
-
-				moveCard(card, startLoc, "hand");
-				broadcastMove(card, startLoc, "hand");
-			}
-
-			hand.appendChild(div);
-		}	
-	}
-}
-
-
-var haveCardsLoaded = false;
 
 function LoadCards()
 {
@@ -304,57 +426,7 @@ function LoadCards()
 	}
 }
 
-window.addCardsToReferencePage = function()
-{
 
-	var popupPage = document.createElement('div')
-	popupPage.className = "popupPage";
-
-	var ponyReference = document.createElement('div');
-	var shipReference = document.createElement('div');
-	var goalReference = document.createElement('div');
-
-	var keys = Object.keys(cards);
-	var re = new RegExp(model.cardDecks);
-	keys.sort();
-	for(let key of keys)
-	{
-		if(!re.exec(key)) continue;
-
-		let cardDiv = makeCardElement(key)
-		
-		if(isPony(key))
-		{
-			ponyReference.appendChild(cardDiv)
-		}
-		if(isShip(key))
-		{
-			shipReference.appendChild(cardDiv)
-		}
-		if(isGoal(key))
-		{
-			goalReference.appendChild(cardDiv)
-		}
-
-	}
-
-	var header = document.createElement('h1');
-	header.innerHTML = "Pony Cards";
-	popupPage.appendChild(header);
-	popupPage.appendChild(ponyReference);
-
-	header = document.createElement('h1');
-	header.innerHTML = "Ship Cards";
-	popupPage.appendChild(header);
-	popupPage.appendChild(shipReference);
-
-	header = document.createElement('h1');
-	header.innerHTML = "Goal Cards";
-	popupPage.appendChild(header);
-	popupPage.appendChild(goalReference);
-
-	return popupPage;
-}
 
 //LoadGame();
 
@@ -417,99 +489,8 @@ function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
 }
 
 
-if(!USE_NETWORK)
-{
-	network.requestDrawPony = async function()
-	{
-		var len = model.ponyDrawPile.length;
-		if(len)
-			return [len, model.ponyDrawPile.pop()];
-		else
-			return [len, "blank:pony"]
-	}
 
-	network.requestDrawShip = async function()
-	{
-		var len = model.shipDrawPile.length;
-		if(len)
-
-			return [len, model.shipDrawPile.pop()];
-		else
-			return [len, "blank:ship"]
-	}
-
-	network.requestDrawGoal = async function()
-	{
-		var len = model.goalDrawPile.length;
-		if(len)
-		{	
-			var i = 0;
-			while(i < model.currentGoals.length)
-			{
-				if(isBlank(model.currentGoals[i]))
-					break;
-				i++;
-			}
-			
-			if(i >= 3) return;
-
-			model.currentGoals[i] = card;
-
-			if(len <= 1)
-				setCardBackground(document.getElementById("goalDrawPile"), "blank:goal");
-
-			moveCard(
-				card,
-				'goalDrawPile',
-				"goal," + i
-			)
-		}
-	}
-
-	network.requestSwapShuffle = function(typ)
-	{
-		var drawPile = typ + "DrawPile";
-		var discardPile = typ + "DiscardPile";
-		var discards = model[discardPile];
-		model[discardPile] = model[drawPile];
-		model[drawPile] = discards;
-
-		randomizeOrder(model[drawPile]);
-
-		var discardElement = document.getElementById(discardPile);
-		var updateHandlers =
-		{
-			pony: updatePonyDiscard,
-			ship: updateShipDiscard,
-			goal: updateGoalDiscard
-		}
-
-		updateHandlers[typ]();
-
-		var drawElement = document.getElementById(drawPile);
-		if(model[drawPile].length)
-		{
-			drawElement.classList.remove('blank')
-		}
-		else
-		{
-			drawElement.classList.add('blank');
-		}
-	}
-}
-
-function requestDrawPony()
-{
-	network.requestDrawPony()
-}
-
-
-function requestDrawShip()
-{
-	network.requestDrawShip()
-}
-
-function requestDrawGoal()
+function preRequestDrawGoal()
 {
 	var i = 0;
 	while(i < model.currentGoals.length)
@@ -521,13 +502,9 @@ function requestDrawGoal()
 
 	if(i >= 3) return;
 
-	network.requestDrawGoal()
+	requestDrawGoal()
 }
 
-function requestSwapShuffle(typ)
-{
-	network.requestSwapShuffle(typ);
-}
 
 export function updatePonyDiscard(cardOnTop)
 {
@@ -673,11 +650,11 @@ export function updatePlayerList()
 }
 
 
-window.updateGame = updateGame;
-window.model = model;
-
-export function updateGame()
+export function updateGame(newModel)
 {
+	if(newModel)
+		model = window.model = newModel;
+
 	LoadCards();
 
 	var flyingCards = document.getElementsByClassName('flying');
@@ -1745,6 +1722,70 @@ function openCardSelect(title, cards)
 	}
 	return new Promise(handler);
 }
+
+
+function createHelpPopup()
+{
+	var help = document.getElementById('help');
+
+	var closeButton = document.createElement('img');
+	closeButton.src = "/img/close.svg";
+	closeButton.id = "popupCloseButton";
+	closeButton.onclick = function()
+	{
+		var div = document.getElementsByClassName('popup')[0];
+		div.parentNode.removeChild(div);
+
+		this.parentNode.removeChild(this);
+	}
+
+	var div = document.createElement('div');
+	div.className = "popup";
+	
+	var initialContent;
+	
+
+	var tabs = document.createElement('div');
+	tabs.className = 'popupTabs';
+	for(let i =0; i < help.children.length; i++)
+	{
+		var tab = document.createElement('div');
+		let tabName = help.children[i].getAttribute("tab-name")
+		tab.innerHTML = tabName;
+		tabs.appendChild(tab);
+
+		tab.onclick = function()
+		{
+			for(let j=0; j<tabs.children.length; j++)
+			{
+				tabs.children[j].classList.remove('selected')
+			}
+
+			this.classList.add('selected');
+
+			var container = document.getElementById('popupContent');
+			if(tabName == "Card Reference")
+			{
+				container.innerHTML = "";
+				container.appendChild(window.addCardsToReferencePage())
+			}
+			else
+				container.innerHTML = help.children[i].innerHTML;
+		}
+	}
+
+	tabs.children[0].classList.add('selected');
+	div.innerHTML = "<div id='popupContent'>" + help.children[0].innerHTML + "</div>";
+
+	div.appendChild(tabs);
+
+	document.body.appendChild(closeButton);
+	document.body.appendChild(div);
+}
+
+window.createHelpPopup = createHelpPopup;
+
+
 
 
 function isPonyOrStart(card)

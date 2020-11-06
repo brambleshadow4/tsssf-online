@@ -454,6 +454,8 @@ export function TsssfGameServer()
 		socket.on('close', () =>
 		{
 			socket.isAlive = false;
+			console.log(key);
+			console.log(games[key]);
 
 			if(games[key].isLobbyOpen)
 			{
@@ -499,6 +501,38 @@ export function TsssfGameServer()
 		{
 			var isPlayerRegistered = isRegistered(key, socket);
 			var model = games[key];
+
+			console.log(message);
+
+			if(message.startsWith("handshake;"))
+			{
+				var id = message.split(";")[1];
+
+				for(var i=0; i < games[key].players.length; i++)
+				{
+					if(games[key].players[i].id == id)
+					{
+						games[key].players[i].socket = socket;
+						isPlayerRegistered = true;
+					}
+				}
+
+				if(isPlayerRegistered && model.isInGame)
+				{
+					socket.send("handshake;game");
+				}
+				else if(model.isLobbyOpen)
+				{
+					socket.send("handshake;lobby")
+				}
+				else
+				{
+					socket.send("handshake;closed");
+				}
+
+				return;
+			}
+
 
 			if(model.isLobbyOpen)
 			{
@@ -552,24 +586,7 @@ export function TsssfGameServer()
 
 				if(!isPlayerRegistered)
 				{
-					// check if there's a matching key
-					for(var i=0; i < games[key].players.length; i++)
-					{
-						if(games[key].players[i].id == id)
-						{
-							games[key].players[i].socket = socket;
-							isPlayerRegistered = true;
-							updateAllPlayers = true;	
-						}
-					}
-				}
-
-				if(!isPlayerRegistered)
-				{
-					if(games[key].allowInGameRegistration)
-						registerPlayer(key, socket, "player");
-					else
-						return;
+					return; 				
 				}
 		
 				sendCurrentState(key, socket);
