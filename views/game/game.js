@@ -297,7 +297,6 @@ export function isItMyTurn()
 }
 
 
-
 let dataTransferVar = "stupid";
 
 export function setDataTransfer(val)

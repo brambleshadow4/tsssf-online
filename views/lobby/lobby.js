@@ -141,10 +141,10 @@ function startGame()
 	if(document.getElementById('turnsOnly').checked)
 		options.ruleset = "turnsOnly";
 
+	options.keepLobbyOpen = !!document.getElementById('keepLobbyOpen').checked;
+
 	socket.send("startgame;" + JSON.stringify(options));
 }
-
-
 
 
 

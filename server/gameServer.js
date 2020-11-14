@@ -115,20 +115,20 @@ export function TsssfGameServer()
 			player = addPlayerConnection(key, socket);
 		}
 
-			
-		if(player.name == "")
+		name = name || "Player";
+		while(!checkNameIsUnique(key, newName))
 		{
-			name = name || "Player";
-			while(!checkNameIsUnique(key, newName))
-			{
-				count++;
-				newName = name + count;
-			}
-
-			logPlayerJoined();
+			count++;
+			newName = name + count;
 		}
 
+		
 		player.id = Math.floor(Math.random()*10**16)+1;
+
+
+		if(player.name == "")
+			logPlayerJoined();
+
 		player.name = newName;
 
 		socket.send("registered;" + player.id)
@@ -150,7 +150,7 @@ export function TsssfGameServer()
 		{
 			var socket = games[key].players[i].socket;
 
-			if(socket == thissocket || games[key].players[i].id == id)
+			if(socket == thissocket || Number(games[key].players[i].id) == Number(id))
 			{
 				if(socket != thissocket)
 					 games[key].players[i].socket = thissocket;
@@ -314,7 +314,7 @@ export function TsssfGameServer()
 		model.offsets = {};
 
 		model.isInGame = true;
-		model.isLobbyOpen = false;
+		model.isLobbyOpen = !!options.keepLobbyOpen;
 
 		model.cardLocations["Core.Start.FanficAuthorTwilight"] = "p,0,0";
 
@@ -471,7 +471,7 @@ export function TsssfGameServer()
 		{
 			socket.isAlive = false;
 
-			if(games[key].isLobbyOpen)
+			if(games[key].isLobbyOpen && !games[key].isInGame)
 			{
 				for(var i=0; i < games[key].players.length; i++)
 				{
@@ -583,16 +583,23 @@ export function TsssfGameServer()
 					var [_,id,name] = message.split(";");
 					name = (name || "").replace(/[^A-Za-z0-9 _]/g,"");
 					
-
 					registerPlayerName(key, socket, name);
-					sendLobbyList(key);
+					
+					if(model.isInGame)
+					{
+						socket.send("startgame;");
+						sendPlayerlistsToEachPlayer(key);
+					}
+					else
+					{
+						sendLobbyList(key);
+					}
 				}
 			}
 
 
 			if(!isRegistered(getPlayer(key, socket)))
 			{
-			//console.log("player isn't registered")
 				return;
 			}
  

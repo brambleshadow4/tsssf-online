@@ -37,6 +37,9 @@ var HTML = `
 			<div><input type='radio' name='gamerules' disabled><label for=''>Full rules - Coming soon!</label></div>
 			<div><input id='turnsOnly' type='radio' name='gamerules' checked><label for='turnsOnly'>Turns - Only one person can play at a time</label></div>
 			<div><input id='sandbox' type='radio' name='gamerules' ><label for='sandbox'>Sandbox - Everyone can play simultaneously</label></div>
+
+			<h2>Other options</h2>
+			<div><input type='checkbox' id='keepLobbyOpen'><label for='keepLobbyOpen'>Keep lobby open during game</label></div>
 		</div>
 
 		<div class='off' id='chooseCardsInfo'>
