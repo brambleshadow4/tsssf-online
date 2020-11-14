@@ -17,8 +17,7 @@ import * as Lobby from "/lobby.js"
 socket.addEventListener("open", function()
 {
 	console.log("Socket opened successfully!")
-	console.log("is this not running?")
-	socket.send("handshake; " + (localStorage["playerID"] || 0));
+	socket.send("handshake;" + (localStorage["playerID"] || 0));
 	//socket.send("requestmodel;" + (localStorage["playerID"] || 0))
 });
 

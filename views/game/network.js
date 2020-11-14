@@ -1,7 +1,14 @@
 import {
-	updateGame, moveCard, updatePonyDiscard, updateShipDiscard, updateGoalDiscard, updatePlayerList, isItMyTurn,
+	updateGame, moveCard, isItMyTurn,
 	updateTurnstate
 } from "/game/game.js";
+
+import {
+	updatePonyDiscard,
+	updateShipDiscard,
+	updateGoalDiscard,
+	updatePlayerList
+} from "/game/peripheralComponents.js";
 
 ///var socket;
 //var pendingRequests = [];
@@ -133,7 +140,7 @@ export function attachToSocket(socket)
 
 	socket.onCloseHandler = function(event)
 	{
-		
+		alert("Failed to connect to the server :(")
 	}
 
 	socket.send("requestmodel;" + (localStorage["playerID"] || 0))

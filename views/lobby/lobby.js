@@ -23,7 +23,6 @@ export function loadView(isOpen)
 		socket = window.socket;
 
 		socket.send("ishost;");
-		socket.send("register;");
 
 		socket.onMessageHandler = onMessage;
 
@@ -38,7 +37,6 @@ export function loadView(isOpen)
 		window.startGame = startGame;
 
 		var cardBoxes = document.getElementsByClassName('cardbox')
-
 
 		for(var i=1; i < cardBoxes.length; i++)
 		{
@@ -89,7 +87,7 @@ function onMessage()
 		window.location.href = window.location.origin + "/game" + window.location.search;
 	}*/
 
-	if(event.data.startsWith("playerlist;"))
+	if(event.data.startsWith("lobbylist;"))
 	{
 		var [_, ...names] = event.data.split(";");
 

@@ -64,17 +64,10 @@ export function TsssfGameServer()
 		return stats;
 	}
 
-	function isRegistered(key, socket)
+	function isRegistered(player)
 	{
-		for(var i=0; i < games[key].players.length; i++)
-		{
-			if(games[key].players[i].socket == socket)
-			{
-				return true;
-			}
-		}
+		return player != undefined && player.name != "";
 
-		return false;
 	}
 
 	function checkNameIsUnique(key, name)
@@ -90,60 +83,78 @@ export function TsssfGameServer()
 		return true;
 	}
 
-	function registerPlayer(key, socket, name)
+	function addPlayerConnection(key, socket)
+	{
+		var player = getPlayer(key,socket)
+
+		if(!player)
+		{
+			player = {
+				socket: socket,
+				hand: [],
+				winnings: [],
+				id: 0,
+				name: ""
+			}
+
+			games[key].players.push(player);
+		}
+
+		return player;
+	}
+
+	function registerPlayerName(key, socket, name)
 	{
 		var count = 0;
 		var newName = name;
 
 		var player = getPlayer(key,socket)
 
-		if(player)
-		{	
-			if(player.name == "")
-			{
-				name = name || "Player";
-				while(!checkNameIsUnique(key, newName))
-				{
-					count++;
-					newName = name + count;
-				}
-
-				logPlayerJoined();
-			}
-			
-			player.name = newName;
-			socket.send("registered;" + player.id)
-			return;
+		if(!player)
+		{
+			player = addPlayerConnection(key, socket);
 		}
 
-		var id = Math.floor(Math.random()*10**16);
+			
+		if(player.name == "")
+		{
+			name = name || "Player";
+			while(!checkNameIsUnique(key, newName))
+			{
+				count++;
+				newName = name + count;
+			}
 
-		games[key].players.push({
-			socket: socket,
-			hand: [],
-			winnings: [],
-			id: id,
-			name: ""
-		});
+			logPlayerJoined();
+		}
+
+		player.id = Math.floor(Math.random()*10**16)+1;
+		player.name = newName;
+
+		socket.send("registered;" + player.id)
+		return;
 	}
 
 
 
 	function sendLobbyList(key)
 	{
-		var msg = "playerlist;" + games[key].players.filter(x => x.socket.isAlive)
+		var msg = "lobbylist;" + games[key].players.filter(x => x.socket.isAlive)
 			.map(x => x.name).join(";");
 		toEveryone(key, msg);
 	}
 
-	function getPlayer(key, thissocket)
+	function getPlayer(key, thissocket, id)
 	{
 		for(var i=0; i < games[key].players.length; i++)
 		{
 			var socket = games[key].players[i].socket;
 
-			if(socket == thissocket)
+			if(socket == thissocket || games[key].players[i].id == id)
 			{
+				if(socket != thissocket)
+					 games[key].players[i].socket = thissocket;
+
 				return games[key].players[i] 
 			}
 		}
@@ -413,6 +424,9 @@ export function TsssfGameServer()
 
 	function changeTurnToNextPlayer(key, socket)
 	{
+		if(!games[key].turnstate)
+			return;
+
 		var k = getPlayerIndex(key, socket);
 		var nextPlayer = (k+1) % games[key].players.length;
 
@@ -429,7 +443,9 @@ export function TsssfGameServer()
 			{
 				nextPlayer = (nextPlayer+1) % games[key].players.length;
 			}
-		}			
+		}
+		games[key].turnstate.currentPlayer = getPlayer(key, socket).name;	
+
 	}
 
 
@@ -454,8 +470,6 @@ export function TsssfGameServer()
 		socket.on('close', () =>
 		{
 			socket.isAlive = false;
-			console.log(key);
-			console.log(games[key]);
 
 			if(games[key].isLobbyOpen)
 			{
@@ -499,31 +513,28 @@ export function TsssfGameServer()
 
 		socket.on('message', message => 
 		{
-			var isPlayerRegistered = isRegistered(key, socket);
 			var model = games[key];
-
-			console.log(message);
 
 			if(message.startsWith("handshake;"))
 			{
-				var id = message.split(";")[1];
+				var id = Number(message.split(";")[1]);
 
-				for(var i=0; i < games[key].players.length; i++)
+				var player = getPlayer(key, socket, id);
+
+				if(!player)
 				{
-					if(games[key].players[i].id == id)
-					{
-						games[key].players[i].socket = socket;
-						isPlayerRegistered = true;
-					}
+					player = addPlayerConnection(key, socket);
 				}
 
-				if(isPlayerRegistered && model.isInGame)
+				if(isRegistered(player) && model.isInGame)
 				{
 					socket.send("handshake;game");
+					sendPlayerlistsToEachPlayer(key)
 				}
 				else if(model.isLobbyOpen)
 				{
-					socket.send("handshake;lobby")
+					socket.send("handshake;lobby");
+					sendLobbyList(key);
 				}
 				else
 				{
@@ -573,34 +584,30 @@ export function TsssfGameServer()
 					name = (name || "").replace(/[^A-Za-z0-9 _]/g,"");
 					
 
-					registerPlayer(key, socket, name);
+					registerPlayerName(key, socket, name);
 					sendLobbyList(key);
 				}
 			}
 
 
-			if(message.startsWith("requestmodel;"))
+			if(!isRegistered(getPlayer(key, socket)))
 			{
-				var id = message.split(";")[1];
-				var updateAllPlayers = false;
-
-				if(!isPlayerRegistered)
-				{
-					return; 				
-				}
-		
-				sendCurrentState(key, socket);
-
-				// NOT HANDLED - weird edge case where everyone disconnects + then one person comes back
-				// make sure it's their turn
-
-				if(updateAllPlayers)
-					sendPlayerlistsToEachPlayer(key);
-
+			//console.log("player isn't registered")
 				return;
 			}
+ 
 
-			if(!isPlayerRegistered) return;
+			if(message.startsWith("requestmodel;"))
+			{	
+				// If a new player joins + there's no one else connected (rejoining a dead game), make sure it's their turn.
+				if(model.players.filter(x => x.socket.isAlive).length == 1)
+				{
+					changeTurnToNextPlayer(key, socket);
+				}
+
+				sendCurrentState(key, socket);
+				return;
+			}
 
 			if(message.startsWith("draw;"))
 			{
@@ -712,7 +719,7 @@ export function TsssfGameServer()
 					console.log("  P: " + player.name);
 
 					console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
-					//console.log("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
+					console.log("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
 					socket.send("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
 
 					return;
@@ -811,8 +818,6 @@ export function TsssfGameServer()
 			
 				// cant move to a goal location yet
 
-				//setTimeout(function(){
-
 				socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
 
 				if(startLocation == "hand" || startLocation == "winnings")
@@ -839,8 +844,6 @@ export function TsssfGameServer()
 						toEveryone(key, "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
 					}
 				}
-
-				//}, 5000)
 			}
 
 			if(message == "endturn")

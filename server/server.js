@@ -27,11 +27,15 @@ app.use(expressSession({
 app.get('/', file("./views/home.html"));
 app.get('/img/**', fmap("/img/**", "./img/**"));
 
-app.get("/game", file("./views/app.html"))
 app.get("/game/game.js", file("./views/game/game.js"))
 app.get("/game/gameView.js", file("./views/game/gameView.js"))
 app.get("/game/network.js", file("./views/game/network.js"))
 app.get("/game/game.css", file("./views/game/game.css"))
+app.get("/game/cardComponent.js", file("./views/game/cardComponent.js"))
+app.get("/game/peripheralComponents.js", file("./views/game/peripheralComponents.js"))
+app.get("/game/boardComponent.js", file("./views/game/boardComponent.js"))
+
+
 
 app.get("/viewSelector.js", file("./views/viewSelector.js"))
 
@@ -46,6 +50,20 @@ app.get("/rulebook.html", file("./views/rulebook.html"))
 app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
 
 app.get("/lobby", function(req,res)
+{
+	var key = Object.keys(req.query)[0];
+
+	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
+	{
+		sendIfExists("./views/app.html", res);
+	}
+	else
+	{
+		res.redirect("/");
+	}
+});
+
+app.get("/game", function(req,res)
 {
 	var key = Object.keys(req.query)[0];
 

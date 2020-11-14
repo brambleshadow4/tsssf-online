@@ -349,6 +349,8 @@ body
 .disconnected
 {
 	text-decoration: line-through;
+	text-decoration-thickness: 0.2em;
+	color: red;
 }
 
 .popup
