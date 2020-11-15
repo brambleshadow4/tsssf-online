@@ -33,7 +33,6 @@ import {
 
 export function attachToSocket(socket)
 {
-
 	var kicked = false;
 	socket.onMessageHandler = function(event)
 	{

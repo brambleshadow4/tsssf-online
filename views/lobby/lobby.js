@@ -136,6 +136,7 @@ function startGame()
 	var cardDecks = document.getElementsByClassName('cardbox');
 	var options = {cardDecks:[]};
 
+
 	// skip 0 because it's core
 	for(var i=1; i<cardDecks.length; i++)
 	{
