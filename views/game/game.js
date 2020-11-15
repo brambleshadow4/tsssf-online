@@ -1,5 +1,4 @@
 /**
-
 	model: {
 		board: {
 			[boardLocation]: {	
@@ -39,7 +38,6 @@ import {
 	isPlayerLoc,
 	isDiscardLoc,
 	isBlank,
-	isAnon,
 	isPonyOrStart
 } from "/lib.js";
 
@@ -63,15 +61,16 @@ import
 } from "/game/boardComponent.js"
 
 import {
-	makeCardElement,
-	updateCardElement,
-	isDeleteClick
+	makeCardElement
 } from "/game/cardComponent.js"
 
 import * as GameView from "/game/gameView.js" 
 
-import {broadcastMove, broadcast, requestDrawPony, requestDrawShip, requestSwapShuffle, requestDrawGoal, attachToSocket} from "/game/network.js";
-
+import {
+	broadcastMove,
+	broadcast,
+	attachToSocket
+} from "/game/network.js";
 
 var model = {};
 window.model = model;
@@ -84,11 +83,7 @@ var offsetId = 0;
 var hoverCard = "";
 var hoverCardDiv;
 
-
 var haveCardsLoaded = false;
-
-
-
 
 export function loadView()
 {
@@ -96,6 +91,10 @@ export function loadView()
 	{
 		history.replaceState(null, "", "/game" + window.location.search)
 	}
+
+	haveCardsLoaded = false;
+
+	window.cardLocations = cardLocations = {};
 
 	document.body.innerHTML = "";
 	document.head.innerHTML = GameView.HEAD;
@@ -111,7 +110,6 @@ export function loadView()
 	}
 
 	attachToSocket(window.socket);
-
 
 	window.updateGame = updateGame;
 }
@@ -146,26 +144,6 @@ function LoadCards()
 			preloadedImages.appendChild(img);
 		}
 	}
-}
-
-
-
-//LoadGame();
-
-function randomizeOrder(arr)
-{
-	var len = arr.length;
-
-	for(var i=0; i<len; i++)
-	{
-		var k = Math.floor(Math.random() * len);
-
-		var swap = arr[i];
-		arr[i] = arr[k];
-		arr[k] = swap;
-	}
-
-	return arr;
 }
 
 
@@ -217,8 +195,10 @@ export function updateTurnstate()
 	console.log("update turnstate");
 
 	var turnstate = model.turnstate
-	if(!turnstate)
+	if(!turnstate){
+		document.body.classList.remove("nomove");
 		return;
+	}
 
 	var div = document.getElementById('turnInfo');
 	if(isItMyTurn())
@@ -249,6 +229,12 @@ export function updateGame(newModel)
 {
 	if(newModel)
 		model = window.model = newModel;
+
+	
+	
+	console.log("update game");
+	console.log(model);
+
 
 	LoadCards();
 
@@ -565,20 +551,6 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	{
 		updateFun();
 	}
-}
-
-function getPlayerWithName(name)
-{
-	if(name == model.playerName)
-		return {ponies:0,ships:0,winnings:[]};
-
-	for(var player of model.players)
-	{
-		if(player.name == name)
-			return player;
-	}
-
-	return {ponies:0,ships:0,winnings:[]};
 }
 
 

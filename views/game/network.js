@@ -43,16 +43,25 @@ export function attachToSocket(socket)
 			updateTurnstate();
 		}
 
+		if(event.data.startsWith('keepLobbyOpen;'))
+		{
+			model.keepLobbyOpen = !!Number(event.data.split(";")[1]);
+		}
+
 		if(event.data.startsWith('closed;'))
 		{
 			window.location.href = location.protocol + "//" + window.location.host;
+		}
+
+		if(event.data.startsWith('ishost;1'))
+		{
+			document.getElementById('hostButton').style.display = "inline-block";
 		}
 
 		if(event.data.startsWith('registered;'))
 		{
 			var [_,id] = event.data.split(";");
 			localStorage["playerID"] = id;
-
 		}
 
 		if(event.data.startsWith("playerlist;"))

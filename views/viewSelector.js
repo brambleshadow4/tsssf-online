@@ -58,4 +58,9 @@ socket.addEventListener('message', function (event)
 	{
 		Game.loadView();
 	}
+
+	if(event.data.startsWith("startlobby"))
+	{
+		Lobby.loadView(true);
+	}
 });

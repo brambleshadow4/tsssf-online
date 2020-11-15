@@ -30,7 +30,8 @@ var HTML = `
 		<div id='topToolbar'>
 			<div id='playerList'></div>
 			<div id='actionButtons'>
-				<img  onclick="moveToStartCard()" src="/img/home.svg"/>
+				<img onclick="moveToStartCard()" src="/img/home.svg"/>
+				<img id='hostButton' style="display: none;" onclick="openSettings()" src="/img/settings.svg"/>
 				<img id='helpButton' onclick="createHelpPopup()" src="/img/help.svg"/>
 			</div>
 		</div>

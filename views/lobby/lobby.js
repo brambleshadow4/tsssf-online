@@ -62,15 +62,11 @@ export function loadView(isOpen)
 
 function onMessage()
 {
-	console.log(event.data);	
-	console.log("ishost " + ishost);
 	if(event.data.startsWith("registered;"))
 	{
 		var [_,id] = event.data.split(";")
 		localStorage["playerID"] = id;
-
-		if(sentName)
-			document.getElementById('chooseName').classList.add("off");
+		document.getElementById('chooseName').classList.add("off");
 	}
 
 	if(event.data.startsWith("ishost;"))
@@ -79,19 +75,25 @@ function onMessage()
 		ishost = val == "1"? true : false;
 
 		if(ishost)
+		{
 			document.getElementById('tabs').classList.remove('off');
+
+			if(sentName)
+			{
+				document.getElementById("chooseName").classList.add("off");
+				document.getElementById("startButtonArea").classList.remove("off");
+			}
+		}
 	}
 
-	/*if(event.data.startsWith("startgame;"))
-	{
-		window.location.href = window.location.origin + "/game" + window.location.search;
-	}*/
 
 	if(event.data.startsWith("lobbylist;"))
 	{
-		var [_, ...names] = event.data.split(";");
+		var [_, myName, names] = event.data.split(";");
 
+		var names = names.split(",");
 		var list = document.getElementById('playerList');
+		
 
 		list.innerHTML = "";
 
@@ -104,9 +106,20 @@ function onMessage()
 			list.innerHTML += "<div>" + name + "</div>"
 		}
 
-		if(ishost && sentName)
+		if(ishost && myName != "")
 		{
 			document.getElementById("startButtonArea").classList.remove("off");
+		}
+		
+		if(myName != "")
+		{
+			document.getElementById("chooseName").classList.add("off");
+			sentName = true;
+		}
+		else
+		{
+			document.getElementById("chooseName").classList.remove("off");
+			sentName = false;
 		}
 	}
 }
@@ -115,8 +128,6 @@ function onMessage()
 function register()
 {
 	var name = document.getElementById("playerName").value;
-
-	sentName = true;
 	socket.send("register;" + (localStorage["playerID"] || 0) + ";" + name);
 }
 
@@ -178,7 +189,6 @@ function chooseCardsTab()
 	document.getElementsByClassName('selected')[0].classList.remove('selected');
 	document.getElementById('chooseCardsTab').classList.add('selected')
 }
-
 
 
 var animCounter = 0;

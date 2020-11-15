@@ -171,7 +171,6 @@ export function updatePonyDiscard(cardOnTop)
 				broadcastMove(card, loc, "hand");
 			}
 		}
-
 	});
 }
 
@@ -467,13 +466,49 @@ function openCardSelect(title, cards)
 }
 
 
-function openOptions()
+window.openSettings = function()
 {
 	return createPopup([{
 		render: function()
 		{
 			var div = document.createElement('div')
 			div.className = "popupPage";
+
+			div.innerHTML = `
+
+			<h1>Host Settings</h1>
+
+			<div class='checkboxContainer'><input type='checkbox' id='keepLobbyOpen'/><label for='keepLobbyOpen'>Let players join mid-game</label></div>
+			<div><button id='newGameButton'>New Game</button><span>Ends the current game and returns everypony to the lobby.</span></div>
+
+			<h2>Kick players</h2>
+			<p>Kicking a player removes them from the lobby and releases any cards they have to the discard</p>
+
+			<div id='kickButtons'></div>
+			`
+
+			for(var player of model.players)
+			{
+				var button = document.createElement('button');
+				button.innerHTML = "Kick " + player.name;
+
+				div.querySelector("#kickButtons").appendChild(button);
+			}
+
+			div.querySelector("#newGameButton").onclick = function()
+			{
+				broadcast("startlobby;");
+			}	
+
+			if(model.keepLobbyOpen)
+			{
+				div.querySelector("#keepLobbyOpen").checked = true;
+			}
+
+			div.querySelector("#keepLobbyOpen").onclick = function()
+			{
+				broadcast("keepLobbyOpen;" + (this.checked ? 1 : 0));
+			}		
 
 			return div;
 		}
@@ -673,61 +708,6 @@ function createHelpPopup()
 		}
 
 	]);
-	/*var help = document.getElementById('help');
-
-	var closeButton = document.createElement('img');
-	closeButton.src = "/img/close.svg";
-	closeButton.id = "popupCloseButton";
-	closeButton.onclick = function()
-	{
-		var div = document.getElementsByClassName('popup')[0];
-		div.parentNode.removeChild(div);
-
-		this.parentNode.removeChild(this);
-	}
-
-	var div = document.createElement('div');
-	div.className = "popup";
-	
-	var initialContent;
-	
-
-	var tabs = document.createElement('div');
-	tabs.className = 'popupTabs';
-	for(let i =0; i < help.children.length; i++)
-	{
-		var tab = document.createElement('div');
-		let tabName = help.children[i].getAttribute("tab-name")
-		tab.innerHTML = tabName;
-		tabs.appendChild(tab);
-
-		tab.onclick = function()
-		{
-			for(let j=0; j<tabs.children.length; j++)
-			{
-				tabs.children[j].classList.remove('selected')
-			}
-
-			this.classList.add('selected');
-
-			var container = document.getElementById('popupContent');
-			if(tabName == "Card Reference")
-			{
-				container.innerHTML = "";
-				container.appendChild(window.addCardsToReferencePage())
-			}
-			else
-				container.innerHTML = help.children[i].innerHTML;
-		}
-	}
-
-	tabs.children[0].classList.add('selected');
-	div.innerHTML = "<div id='popupContent'>" + help.children[0].innerHTML + "</div>";
-
-	div.appendChild(tabs);
-
-	document.body.appendChild(closeButton);
-	document.body.appendChild(div);*/
 }
 
 window.createHelpPopup = createHelpPopup;
