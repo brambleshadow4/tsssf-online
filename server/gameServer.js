@@ -647,6 +647,68 @@ export function TsssfGameServer()
 			}
  
 
+			if(message.startsWith("kick;") && socket == model.host)
+			{
+				var [_, playerName] = message.split(";");
+
+				var playerIndex = -1;
+				for(var i=0; i< model.players.length; i++)
+				{
+					if(model.players[i].name == playerName)
+					{
+						playerIndex = i; 
+						break;
+					}
+				}
+
+				if(playerIndex != -1)
+				{
+					var hand = model.players[i].hand;
+					var winnings = model.players[i].winnings;
+
+					if(model.turnstate && model.turnstate.currentPlayer == playerName)
+						changeTurnToNextPlayer(key, model.players[i].socket);
+
+					model.players[i].socket.send("kick");
+					model.players[i].socket.close()
+					model.players.splice(i,1);
+
+					var ponies = hand.filter(x => isPony(x));
+					var ships = hand.filter(x => isShip(x));
+
+					model.shipDiscardPile = model.shipDiscardPile.concat(ships);
+					model.ponyDiscardPile = model.ponyDiscardPile.concat(ponies);
+					model.goalDiscardPile = model.goalDiscardPile.concat(winnings);
+
+					for(var card of ponies)
+					{
+						model.cardLocations[card] = "ponyDiscardPile,stack"
+					}
+
+					for(var card of ships)
+					{
+						model.cardLocations[card] = "shipDiscardPile,stack"
+					}
+
+					for(var card of winnings)
+					{
+						model.cardLocations[card] = "goalDiscardPile,stack"
+					}
+
+					model.cardLocations[model.shipDiscardPile[model.shipDiscardPile.length-1]] = "shipDiscardPile,top";
+					model.cardLocations[model.goalDiscardPile[model.goalDiscardPile.length-1]] = "goalDiscardPile,top";
+					model.cardLocations[model.ponyDiscardPile[model.ponyDiscardPile.length-1]] = "ponyDiscardPile,top";
+
+					// request model
+
+					for(var player of model.players)
+					{
+						sendCurrentState(key, player.socket);
+					}
+
+				}
+			}
+
 			if(message.startsWith("requestmodel;"))
 			{	
 				// If a new player joins + there's no one else connected (rejoining a dead game), make sure it's their turn.

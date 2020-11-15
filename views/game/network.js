@@ -33,9 +33,18 @@ import {
 
 export function attachToSocket(socket)
 {
+
+	var kicked = false;
 	socket.onMessageHandler = function(event)
 	{
 		var model = window.model;
+
+		if(event.data.startsWith('kick'))
+		{
+			alert("The game's host kicked you from the game");
+			kicked = true;
+
+		}
 
 		if(event.data.startsWith('turnstate;'))
 		{
@@ -149,7 +158,8 @@ export function attachToSocket(socket)
 
 	socket.onCloseHandler = function(event)
 	{
-		alert("Failed to connect to the server :(")
+		if(!kicked)
+			alert("Failed to connect to the server :(")
 	}
 
 	socket.send("requestmodel;" + (localStorage["playerID"] || 0))

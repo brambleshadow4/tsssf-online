@@ -310,17 +310,17 @@ export function removeCardElementFromBoard(key)
 	}
 }
 
-export function updateBoard(hardReset)
+
+export function clearBoard()
 {
-
-	if(hardReset)
+	for(var key in model.board)
 	{
-		for(var key in model.board)
-		{
-			removeCardElementFromBoard(key);
-		}
+		removeCardElementFromBoard(key);
 	}
+}
 
+export function updateBoard()
+{
 	var refPoint = document.getElementById('refPoint');
 
 	var baseDist = window.innerHeight/100;

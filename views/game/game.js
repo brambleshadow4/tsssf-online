@@ -57,7 +57,8 @@ import
 	removeCardFromBoard,
 	initBoard,
 	updateBoard,
-	offsetPonyCard
+	offsetPonyCard,
+	clearBoard
 } from "/game/boardComponent.js"
 
 import {
@@ -228,9 +229,11 @@ export function updateTurnstate()
 export function updateGame(newModel)
 {
 	if(newModel)
+	{
+		clearBoard();
 		model = window.model = newModel;
+	}
 
-	
 	
 	console.log("update game");
 	console.log(model);
@@ -245,7 +248,7 @@ export function updateGame(newModel)
 	
 	updateHand();
 	updateGoals();
-	updateBoard(true);
+	updateBoard();
 
 	updatePonyDiscard();
 	updateShipDiscard();

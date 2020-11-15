@@ -469,7 +469,7 @@ function openCardSelect(title, cards)
 window.openSettings = function()
 {
 	return createPopup([{
-		render: function()
+		render: function(closeFn)
 		{
 			var div = document.createElement('div')
 			div.className = "popupPage";
@@ -487,12 +487,19 @@ window.openSettings = function()
 			<div id='kickButtons'></div>
 			`
 
-			for(var player of model.players)
+			for(let player of model.players)
 			{
 				var button = document.createElement('button');
 				button.innerHTML = "Kick " + player.name;
+				button.onclick = function()
+				{
+					broadcast("kick;" + player.name);
+					closeFn();
+				}
 
-				div.querySelector("#kickButtons").appendChild(button);
+				var innerDiv = document.createElement('div')
+				innerDiv.appendChild(button)
+				div.querySelector("#kickButtons").appendChild(innerDiv);
 			}
 
 			div.querySelector("#newGameButton").onclick = function()
