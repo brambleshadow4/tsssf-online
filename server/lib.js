@@ -1,3 +1,5 @@
+
+
 export function isPony(card)
 {
 	return card.indexOf(".Pony.") >= 0 || card == "anon:pony";
@@ -11,6 +13,24 @@ export function isGoal(card)
 {
 	return card.indexOf(".Goal.") >= 0;
 }
+
+
+export function isPonyOrStart(card)
+{
+	return card.indexOf(".Pony.") >= 0 || card.indexOf(".Start.") >= 0;
+}
+
+export function isBlank(card)
+{
+	return card.startsWith("blank:");
+}
+
+export function isAnon(card)
+{
+	return card.startsWith("anon:");
+}
+
+
 
 export function randomizeOrder(arr)
 {
