@@ -215,7 +215,7 @@ export function TsssfGameServer()
 
 		model.currentGoals = games[key].currentGoals;
 
-		model.goalDrawPile = games[key].goalDrawPile.slice();
+		model.goalDrawPileLength = games[key].goalDrawPile.length;
 		model.ponyDrawPileLength = games[key].ponyDrawPile.length;
 		model.shipDrawPileLength = games[key].shipDrawPile.length;
 
