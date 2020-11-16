@@ -1,5 +1,10 @@
+var oldPopupAccept;
+
 export function createPopup(tabs)
 {
+
+	if(oldPopupAccept)
+		oldPopupAccept();
 
 	//each tab has a function render(closePopupWithVal)
 	// closePopupWithVal closes the popup and accepts the promise with val.
@@ -8,13 +13,9 @@ export function createPopup(tabs)
 		var closeButton = document.createElement('img');
 		closeButton.src = "/img/close.svg";
 		closeButton.id = "popupCloseButton";
-		closeButton.onclick = function()
-		{
-			var div = document.getElementsByClassName('popup')[0];
-			div.parentNode.removeChild(div);
-			this.parentNode.removeChild(this);
-			accept();
-		}
+		
+		var div = document.createElement('div');
+		div.className = "popup";
 
 		// When we call a tab's render function, we send it the newAccept function
 		// so that the render can close the popup with value val
@@ -22,12 +23,16 @@ export function createPopup(tabs)
 		{
 			div.parentNode.removeChild(div);
 			closeButton.parentNode.removeChild(closeButton);
+			oldPopupAccept = undefined;
 			accept(val);
 		}
 
+		closeButton.onclick = function(){newAccept();}
 
-		var div = document.createElement('div');
-		div.className = "popup";
+		oldPopupAccept = newAccept;
+
+
+		
 		
 		var initialContent;
 
