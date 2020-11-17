@@ -76,6 +76,7 @@ export function attachToSocket(socket)
 		{
 			model.players = JSON.parse(event.data.substring(11));
 			updatePlayerList();
+			updateTurnstate();
 		}
 
 		if(event.data.startsWith("model;"))
@@ -152,6 +153,7 @@ export function attachToSocket(socket)
 			}
 
 			updatePlayerList();
+
 		}
 	};
 

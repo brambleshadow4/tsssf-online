@@ -504,6 +504,7 @@ window.openSettings = function()
 
 			div.querySelector("#newGameButton").onclick = function()
 			{
+				closeFn();
 				broadcast("startlobby;");
 			}	
 

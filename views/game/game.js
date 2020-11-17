@@ -220,7 +220,12 @@ export function updateTurnstate()
 	{
 		document.body.classList.add("nomove");
 
-		div.innerHTML = `<div>It is currently ${turnstate.currentPlayer}'s turn`;
+		div.innerHTML = `<div>It is currently ${turnstate.currentPlayer}'s turn </div>`;
+
+		var thisPlayer = model.players.filter(x => x.name == turnstate.currentPlayer)[0];
+
+		if(thisPlayer.disconnected)
+			div.innerHTML += "<div>Their turn will end if they do not reconnect in < 15s</div>";
 	}
 
 	updatePlayerList();

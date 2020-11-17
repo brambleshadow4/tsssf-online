@@ -64,6 +64,8 @@ export function TsssfGameServer()
 		return stats;
 	}
 
+	var TEMP_DISCONNECT_TIME = 15*1000;
+
 	function isRegistered(player)
 	{
 		return player != undefined && player.name != "";
@@ -160,6 +162,17 @@ export function TsssfGameServer()
 				if(socket != thissocket)
 					 games[key].players[i].socket = thissocket;
 
+				return games[key].players[i] 
+			}
+		}
+	}
+
+	function getPlayerByName(key, name)
+	{
+		for(var i=0; i < games[key].players.length; i++)
+		{
+			if(name == games[key].players[i].name)
+			{
 				return games[key].players[i] 
 			}
 		}
@@ -440,30 +453,22 @@ export function TsssfGameServer()
 		toEveryoneElse(key, player.socket, args.join(";"));
 	}
 
-	function changeTurnToNextPlayer(key, socket)
+	function changeTurnToNextPlayer(key)
 	{
 		if(!games[key].turnstate)
 			return;
 
-		var k = getPlayerIndex(key, socket);
-		var nextPlayer = (k+1) % games[key].players.length;
+		
+		var rotation = games[key].players.filter(x => !x.socket.isDead && x.name != "");
 
-		while(nextPlayer != k)
-		{
-			if(games[key].players[nextPlayer].name != "" && games[key].players[nextPlayer].socket.isAlive )
-			{
-				games[key].turnstate.currentPlayer = games[key].players[nextPlayer].name;
-				//console.log("it is now " + games[key].players)
-				toEveryone(key, "turnstate;" + JSON.stringify(games[key].turnstate));
-				return;
-			}
-			else
-			{
-				nextPlayer = (nextPlayer+1) % games[key].players.length;
-			}
-		}
-		games[key].turnstate.currentPlayer = getPlayer(key, socket).name;	
+		if(rotation.length == 0)
+			return;
 
+		var k = rotation.map(x=> x.name).indexOf(games[key].turnstate.currentPlayer);
+		k = (k+1)%rotation.length;
+
+		games[key].turnstate.currentPlayer = rotation[k].name;
+		toEveryone(key, "turnstate;" + JSON.stringify(games[key].turnstate));
 	}
 
 
@@ -473,9 +478,10 @@ export function TsssfGameServer()
 	wsServer.on('connection', (socket, request, client) => 
 	{
 		socket.isAlive = true;
+		socket.isDead = false;
 
 
-		var key = request.url.substring(2);
+		let key = request.url.substring(2);
 		if(!games[key])
 		{
 			socket.send("closed;");
@@ -483,11 +489,34 @@ export function TsssfGameServer()
 			return;
 		}
 
+
 		sendLobbyList(key);	
 
 		socket.on('close', () =>
 		{
 			socket.isAlive = false;
+
+			let player = getPlayer(key, socket)
+			let deadName = player ? player.name : "";
+
+			// mark the socket as dead after 15 s. 
+			setTimeout(() => {
+				socket.isDead = true;
+				let player = getPlayerByName(key, deadName);
+
+				if(player == undefined || (player && player.socket == socket))
+				{
+					let curPlayerName = games[key] && games[key].turnstate && games[key].turnstate.currentPlayer;
+
+					if(curPlayerName == deadName)
+					{
+						changeTurnToNextPlayer(key);
+					}
+				}
+		
+				
+
+			}, TEMP_DISCONNECT_TIME); 
 
 			if(games[key].host == socket)
 			{
@@ -525,13 +554,6 @@ export function TsssfGameServer()
 			if(games[key].isInGame)
 			{
 				sendPlayerlistsToEachPlayer(key);
-
-				var player = getPlayer(key, socket);
-
-				if(player && games[key].turnstate && games[key].turnstate.currentPlayer == player.name)
-				{
-					changeTurnToNextPlayer(key, socket);
-				}
 			}
 		})
 
@@ -553,7 +575,11 @@ export function TsssfGameServer()
 				if(isRegistered(player) && model.isInGame)
 				{
 					socket.send("handshake;game");
-					sendPlayerlistsToEachPlayer(key)
+					sendPlayerlistsToEachPlayer(key);
+
+					if(model.players.filter(x => !x.socket.isDead).length == 1)
+						changeTurnToNextPlayer(key); // only one alive player. Make sure it's their turn.
+
 				}
 				else if(model.isLobbyOpen)
 				{
@@ -667,7 +693,7 @@ export function TsssfGameServer()
 					var winnings = model.players[i].winnings;
 
 					if(model.turnstate && model.turnstate.currentPlayer == playerName)
-						changeTurnToNextPlayer(key, model.players[i].socket);
+						changeTurnToNextPlayer(key);
 
 					model.players[i].socket.send("kick");
 					model.players[i].socket.close()
@@ -714,7 +740,6 @@ export function TsssfGameServer()
 				// If a new player joins + there's no one else connected (rejoining a dead game), make sure it's their turn.
 				if(model.players.filter(x => x.socket.isAlive).length == 1)
 				{
-					changeTurnToNextPlayer(key, socket);
 					model.host = socket;
 					socket.send("ishost;1");
 				}
@@ -969,7 +994,7 @@ export function TsssfGameServer()
 
 				if(player.name == model.turnstate.currentPlayer)
 				{
-					changeTurnToNextPlayer(key, socket);	
+					changeTurnToNextPlayer(key);	
 				}
 			}
 		});
