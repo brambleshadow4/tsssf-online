@@ -102,6 +102,9 @@ for line in txt:
 		if "{copy}" in instructionText:
 			card["action"] = "copy"
 
+		if "{goal}" in instructionText:
+			card["action"] = "newGoal"
+
 		if "{double pony}" in instructionText:
 			card["doublePony"] = "true"
 

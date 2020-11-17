@@ -17,6 +17,7 @@ var cards = {
 		        race: "earth",
 		        gender: "female",
 		        doublePony: "true",
+		        action: "newGoal",
 		        keywords: [
 		            "Aloe",
 		            "Lotus"
@@ -72,12 +73,20 @@ var cards = {
 				url:"Pony_Black Widow Rarity.png",
 				name: "Rarity",
 		        gender: "female",
+		        action: "newGoal",
 		        keywords: [
 		            "Mane 6"
 		        ]
 			},
 			"Core.Pony.Bloomberg":{
-				url:"Pony_Bloomberg.png"
+				url:"Pony_Bloomberg.png",
+				name: "Bloomberg",
+				gender: "male",
+				action: "newGoal",
+				keywords: [
+					"Apple",
+					"Object"
+				]
 			},
 			"Core.Pony.BonBon":{
 				url:"Pony_Bon Bon.png",
@@ -263,6 +272,7 @@ var cards = {
 				name: "Gilda",
 		        race: "pegasus",
 		        gender: "female",
+		        action: "newGoal",
 		        keywords: [
 		            "Griffon",
 		            "Villain"
@@ -332,6 +342,7 @@ var cards = {
 		        race: "pegasus",
 		        gender: "female",
 		        altTimeline: true,
+		        action: "newGoal",
 		        keywords: [
 		            "Mane 6",
 		            "Villain"
@@ -480,6 +491,7 @@ var cards = {
 				name: "Spike",
 		        race: "earth",
 		        gender: "male",
+		        action: "newGoal",
 		        altTimeline: true,
 		        keywords: [
 		            "Dragon"
@@ -567,7 +579,13 @@ var cards = {
 		        keywords: []
 			},
 			"Core.Pony.Tom":{
-				url:"Pony_Tom.png"
+				url:"Pony_Tom.png",
+				name: "Tom",
+				gender: "male",
+				action: "replace",
+				keywords: [
+					"Object"
+				]
 			},
 			"Core.Pony.TsundereRainbowDash":{
 				url:"Pony_Tsundere Rainbow Dash.png",
@@ -601,6 +619,7 @@ var cards = {
 				name: "Zecora",
 		        race: "earth",
 		        gender: "female",
+		        action: "newGoal",
 		        keywords: [
 		            "Zebra"
 		        ]
