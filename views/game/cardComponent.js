@@ -185,6 +185,9 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 					var [_,x,y] = location.split(",");
 					var offsetLoc = "offset," + x + "," + y;
 					let offsetCard = model.board[location].card;
+
+
+
 					moveCard(offsetCard, location, offsetLoc);
 					broadcastMove(offsetCard, location, offsetLoc);
 				}
@@ -258,8 +261,14 @@ export function updateCardElement(oldElement, card, location, isDraggable, isDro
 }
 
 
-
-
+export function setDisguise(element, disguiseCard)
+{
+	var img = document.createElement('img');
+	img.style.height = "100%";
+	img.src = cards[disguiseCard].thumbnail;
+	img.className = "changeling decoration";
+	element.appendChild(img);
+}
 
 function setCardBackground(element, card, useLarge)
 {

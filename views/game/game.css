@@ -483,3 +483,23 @@ iframe
 	background-color: #AAAAAA;
 	padding: 0px 5px;
 }
+
+
+.changeling
+{
+	animation-name: changeling;
+	animation-duration: 5s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+	filter: hue-rotate(180deg);
+	border-radius: 5px;
+}
+
+
+@keyframes changeling {
+  0% {opacity: 0}
+  25% {opacity: 1}
+  50% {opacity: 1}
+  75% {opacity: 0}
+  100% {opacity: 0}
+}

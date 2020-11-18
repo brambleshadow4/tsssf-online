@@ -49,7 +49,8 @@ import {
 	updatePlayerList,
 	updateGoals,
 	updateHand,
-	initPeripherals
+	initPeripherals,
+	openCardSelect
 } from "/game/peripheralComponents.js";
 
 import
@@ -62,7 +63,8 @@ import
 } from "/game/boardComponent.js"
 
 import {
-	makeCardElement
+	makeCardElement,
+	setDisguise
 } from "/game/cardComponent.js"
 
 import * as GameView from "/game/gameView.js" 
@@ -137,6 +139,8 @@ function LoadCards()
 			nodes.pop();
 			var urlToImg = "/img/" + nodes.join("/") + "/" + cards[key].url;
 
+			cards[key].keywords = new Set(cards[key].keywords);
+
 			cards[key].fullUrl = urlToImg;
 			cards[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
 
@@ -201,6 +205,11 @@ export function updateTurnstate()
 		return;
 	}
 
+	var decorations = document.getElementsByClassName('decoration');
+	while(decorations.length)
+		decorations[0].parentNode.removeChild(decorations[0]);
+
+
 	var div = document.getElementById('turnInfo');
 	if(isItMyTurn())
 	{
@@ -226,6 +235,28 @@ export function updateTurnstate()
 
 		if(thisPlayer.disconnected)
 			div.innerHTML += "<div>Their turn will end if they do not reconnect in < 15s</div>";
+	}
+
+
+	for(var card in model.turnstate.decorations)
+	{	
+		if(isBoardLoc(cardLocations[card]))
+		{
+			var element = model.board[cardLocations[card]].element;
+
+			for(var decoration of model.turnstate.decorations[card])
+			{
+				var [typ, value] = decoration.split(":");
+
+				console.log(typ);
+				console.log(value);
+
+				if(typ == "disguise")
+				{
+					setDisguise(element, value, card);
+				}
+			}
+		}	
 	}
 
 	updatePlayerList();
@@ -559,7 +590,58 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	{
 		updateFun();
 	}
+
+	if(!forceCardToMove)
+		doPlayEvent({card, startLocation, endLocation});
 }
 
+var playEventHandlers = [];
+
+function addPlayEvent(fn)
+{
+	playEventHandlers.push(fn);
+}
+
+function doPlayEvent(e)
+{
+	for(var fn of playEventHandlers)
+	{
+		fn(e);
+	}
+}
 
 window.moveCard = moveCard;
+
+addPlayEvent(async function(e){
+
+	var cardInfo = cards[e.card];
+	if(cardInfo.keywords.has("Changeling") && isBoardLoc(e.endLocation))
+	{
+
+		if(model.turnstate)
+		{
+			var cardNames = Object.keys(cards);
+			var disguises = cardNames.filter(x => cards[x].race == cardInfo.race && !cards[x].doublePony);
+
+			var newCard = await openCardSelect("Choose a pony to disguise as", disguises);
+
+			if(!newCard)
+				return;
+
+			var decs = model.turnstate.decorations[e.card];
+
+			if(!decs)
+				decs = [];
+
+			decs = decs.filter(x => !x.startsWith('disguise:'))
+			decs.push("disguise:" + newCard);
+
+			model.turnstate.decorations[e.card] = decs;
+
+			updateTurnstate();
+			
+		}
+	}
+
+
+});

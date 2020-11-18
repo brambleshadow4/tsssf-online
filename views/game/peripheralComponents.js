@@ -432,7 +432,7 @@ function updateCardRowHeight()
 }
 
 
-function openCardSelect(title, cards)
+export function openCardSelect(title, cards)
 {
 	return createPopup([{
 		render: function(closePopupWithVal, reject){

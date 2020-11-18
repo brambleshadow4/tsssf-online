@@ -416,7 +416,8 @@ export function TsssfGameServer()
 		if(options.ruleset == "turnsOnly")
 		{
 			model.turnstate = {
-				currentPlayer: model.players[0].name
+				currentPlayer: model.players[0].name,
+				decorations: {}
 			};
 		}
 		else
