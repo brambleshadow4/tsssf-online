@@ -417,7 +417,7 @@ export function TsssfGameServer()
 		{
 			model.turnstate = {
 				currentPlayer: model.players[0].name,
-				decorations: {}
+				overrides: {}
 			};
 		}
 		else

@@ -1,6 +1,6 @@
 var oldPopupAccept;
 
-export function createPopup(tabs)
+export function createPopup(tabs, miniMode)
 {
 
 	if(oldPopupAccept)
@@ -10,19 +10,27 @@ export function createPopup(tabs)
 	// closePopupWithVal closes the popup and accepts the promise with val.
 	function handler(accept, reject)
 	{
+
 		var closeButton = document.createElement('img');
 		closeButton.src = "/img/close.svg";
 		closeButton.id = "popupCloseButton";
+
+		var parent = document.createElement('div');
+		parent.className = "popupContainer";
+
 		
 		var div = document.createElement('div');
 		div.className = "popup";
+		if(miniMode)
+			div.className += " mini";
+		else
+			div.className += " normal"
 
 		// When we call a tab's render function, we send it the newAccept function
 		// so that the render can close the popup with value val
 		function newAccept(val)
 		{
-			div.parentNode.removeChild(div);
-			closeButton.parentNode.removeChild(closeButton);
+			parent.parentNode.removeChild(parent);
 			oldPopupAccept = undefined;
 			accept(val);
 		}
@@ -31,8 +39,6 @@ export function createPopup(tabs)
 
 		oldPopupAccept = newAccept;
 
-
-		
 		
 		var initialContent;
 
@@ -76,10 +82,13 @@ export function createPopup(tabs)
 
 		container.appendChild(tabs[0].render(newAccept));
 
-		document.body.appendChild(closeButton);
-		document.body.appendChild(div);
-	}
+		div.appendChild(closeButton);
 
+		parent.appendChild(div)
+
+		document.body.appendChild(parent);
+
+	}
 
 	return new Promise(handler);
 }

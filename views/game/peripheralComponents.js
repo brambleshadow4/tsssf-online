@@ -432,7 +432,7 @@ function updateCardRowHeight()
 }
 
 
-export function openCardSelect(title, cards)
+export function openCardSelect(title, cards, miniMode)
 {
 	return createPopup([{
 		render: function(closePopupWithVal, reject){
@@ -455,14 +455,13 @@ export function openCardSelect(title, cards)
 
 				cardElement.onclick = function()
 				{
-					console.log("calling accept method");
 					closePopupWithVal(card);
 				}
 			}
 
 			return div;
 		}
-	}]) 
+	}], miniMode) 
 }
 
 

@@ -270,6 +270,20 @@ export function setDisguise(element, disguiseCard)
 	element.appendChild(img);
 }
 
+export function addTempSymbol(element, symbol)
+{
+	if(symbol == undefined)
+		return;
+
+	var img = document.createElement('img');
+	//img.style.height = "100%";
+	img.src = "/img/sym/" + symbol + ".png";
+	img.className = "symbol decoration";
+	element.appendChild(img);
+}
+
+
+
 function setCardBackground(element, card, useLarge)
 {
 	if(isAnon(card))
