@@ -45,6 +45,18 @@ export function attachToSocket(socket)
 
 		}
 
+		if(event.data.startsWith("effects;"))
+		{
+			var data = event.data.substring(8)
+			try
+			{
+				data = JSON.parse(data);
+				model.turnstate.overrides = data;
+				updateTurnstate();
+			}
+			catch(e){}
+		}
+
 		if(event.data.startsWith('turnstate;'))
 		{
 			model.turnstate = JSON.parse(event.data.substring(10));	
@@ -170,6 +182,11 @@ export function attachToSocket(socket)
 export function broadcastMove(card, startLocation, endLocation)
 {
 	broadcast("move;" + card + ";" + startLocation + ";" + endLocation);
+}
+
+export function broadcastEffects()
+{
+	broadcast("effects;" + JSON.stringify(model.turnstate.overrides));
 }
 
 export function broadcast(message)

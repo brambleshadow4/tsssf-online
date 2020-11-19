@@ -749,6 +749,11 @@ export function TsssfGameServer()
 				return;
 			}
 
+			if(message.startsWith("effects;"))
+			{	
+				toEveryoneElse(key, socket, message);
+			}
+
 			if(message.startsWith("draw;"))
 			{
 				var [_, typ] = message.split(";");

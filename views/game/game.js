@@ -74,7 +74,8 @@ import * as GameView from "/game/gameView.js"
 import {
 	broadcastMove,
 	broadcast,
-	attachToSocket
+	attachToSocket,
+	broadcastEffects
 } from "/game/network.js";
 
 import {createPopup} from "/game/popupComponent.js";
@@ -667,7 +668,8 @@ addPlayEvent(async function(e){
 
 			
 			// reset overrides when changeling changes type.
-			model.turnstate.overrides[e.card] = {disguise: newCard};	
+			model.turnstate.overrides[e.card] = {disguise: newCard};
+			broadcastEffects();
 		}
 	}
 
@@ -764,6 +766,7 @@ async function executeShipAction(shipCard)
 					model.turnstate.overrides[ponyCard] = {};
 
 				model.turnstate.overrides[ponyCard].gender = newGender;
+				broadcastEffects();
 			}
 		}
 	}
@@ -781,6 +784,7 @@ async function executeShipAction(shipCard)
 				model.turnstate.overrides[ponyCard] = {};
 
 			model.turnstate.overrides[ponyCard].altTimeline = true;
+			broadcastEffects();
 		}
 	}
 
@@ -799,6 +803,7 @@ async function executeShipAction(shipCard)
 				model.turnstate.overrides[ponyCard] = {};
 
 			model.turnstate.overrides[ponyCard].race = newRace;
+			broadcastEffects();
 		}
 	}
 }
