@@ -456,8 +456,21 @@ button
 	position: absolute;
 	bottom: 0vh;
 	right: 0vh;
+}
 
-	background-color: red;
+#winnings .returnArrow
+{
+	display: none;
+	width: 5vh;
+	z-index: 5;
+	margin-right: 1vh;
+	margin-bottom: 1vh;
+	position: relative;
+	cursor: pointer;
+}
+#winnings:hover .returnArrow
+{
+	display: inline-block;
 }
 
 iframe

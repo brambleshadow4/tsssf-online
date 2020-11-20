@@ -378,34 +378,49 @@ export function isValidMove(cardDragged, targetCard, endLocation)
 	);
 }
 
+function getCardAtLoc(loc)
+{
+	if(isBoardLoc(loc))
+	{
+		return model.board[loc].card;
+	}
+	if(isGoalLoc(loc))
+	{
+		return model.currentGoals[Number(loc.split(",")[1])];
+	}
+}
+
+
 export function moveCard(card, startLocation, endLocation, forceCardToMove)
 {
 	var startPos;
 	const vh = window.innerHeight/100;
 
+	if(cardLocations[card] == endLocation)
+	{
+		return;
+	}
+
+
+
 	if(startLocation != cardLocations[card])
 	{
-		var shouldCardBeOnBoard = !(isPlayerLoc(startLocation) || ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1);
 
-		if(shouldCardBeOnBoard && !cardLocations[card])
+		// if another player moves card A to a goal/board location L at the same time as you move card B,
+		// you move B to L, then message arrives to move A to L,
+		// then message arives to move B back, but it's no longer at L.
+		// 
+		// Thus we check to make sure B is still at L to prevent moving A by accident
+		if(cardLocations[card] 
+			&& (isBoardLoc(cardLocations[card]) || isGoalLoc(cardLocations[card]))
+			&& getCardAtLoc(cardLocations[card]) != card)
 		{
-			// In this case, the card should be on the board, but the client thinks it isn't.
-			// We set the start position to limbo since there isn't a place on the board to move the card from.
-			startLocation = "limbo";
+			cardLocations[card] = undefined;
 		}
-		else if(cardLocations[card])
-		{
-			if(forceCardToMove)
-			{
-				//console.log("Synchronization issue: card not at " + startLocation + "; card at " + cardLocations[card]);
-				startLocation = cardLocations[card];
 
-			}
-			else
-			{
-				updateGame();
-				return;
-			}
+		if(cardLocations[card] != undefined)
+		{
+			startLocation = cardLocations[card];
 		}
 	}
 
@@ -448,7 +463,6 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 		model[pile].splice(i,1);
 
 
-
 		var newTopCard = model[pile][model[pile].length-1];
 		cardLocations[newTopCard] = pile + ",top";
 
@@ -457,6 +471,7 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 		var typ = startLocation.substring(0,4)
 		if(typ == "pony") updatePonyDiscard();
 		if(typ == "ship") updateShipDiscard();
+		if(typ == "goal") updateGoalDiscard();
 	}
 	else if(["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1)
 	{
@@ -542,7 +557,12 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 			"goal": updateGoalDiscard
 		}[endLocation.substring(0,4)];
 
-		updateFun = () => updateFun2(card);
+		updateFun = () => {
+			if(slot=="top")
+				updateFun2(card);
+			else
+				updateFun2();
+		}
 
 		endPos = getPosFromId(pile);
 	}
@@ -610,10 +630,11 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	
 
 	if(startLocation != "limbo" 
-		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation))
+		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation)) // not going from discard to discard
 		&& (isDiscardLoc(endLocation)
 			|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
 			|| endLocation == "winnings"
+			|| isGoalLoc(endLocation)
 			|| isPlayerLoc(endLocation))
 	)
 	{

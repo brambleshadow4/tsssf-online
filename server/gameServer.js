@@ -439,6 +439,15 @@ export function TsssfGameServer()
 		{
 			return (model.board[loc] != undefined)
 		}
+		if(isGoalLoc(loc))
+		{
+			var goalNo = Number(loc.split(",")[1]);
+
+			if(model.currentGoals[goalNo] == undefined)
+				return false;
+
+			return model.currentGoals[goalNo] != "blank:goal"
+		}
 
 		return false;
 	}
@@ -844,28 +853,28 @@ export function TsssfGameServer()
 				//console.log(message);
 
 				let serverStartLoc = startLocation;
-				if(startLocation == "hand")
+				if(startLocation == "hand" || startLocation == "winnings")
 					serverStartLoc = "player," + player.name;
 
 
 				// if the player has an incorrect position for a card, move it to where it actually should be.
 				if(model.cardLocations[card] != serverStartLoc || isLocOccupied(key, endLocation))
-				{
-					var whereThePlayerThinksTheCardIs = endLocation;
-						
-
-
+				{						
 					var whereTheCardActuallyIs = model.cardLocations[card];
 					if(whereTheCardActuallyIs == "player," + player.name)
-						whereTheCardActuallyIs = "hand";
-
+					{
+						if(isGoal(card))
+							whereTheCardActuallyIs = "winnings";
+						else
+							whereTheCardActuallyIs = "hand";
+					}
 
 					console.log("X " + message);
 					console.log("  P: " + player.name);
 
 					console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
-					console.log("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
-					socket.send("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
+					console.log("  move;" + card + ";limbo;" + whereTheCardActuallyIs);
+					socket.send("move;" + card + ";limbo;" + whereTheCardActuallyIs);
 
 					return;
 				}
@@ -884,9 +893,14 @@ export function TsssfGameServer()
 				if(startLocation == "hand")
 				{
 					var i = getPlayer(key, socket).hand.indexOf(card);
-					
 
 					getPlayer(key, socket).hand.splice(i, 1);
+				}
+
+				if(startLocation == "winnings")
+				{
+					var i = getPlayer(key, socket).winnings.indexOf(card);
+					getPlayer(key, socket).winnings.splice(i, 1);
 				}
 
 				if(isBoardLoc(startLocation))
@@ -941,6 +955,15 @@ export function TsssfGameServer()
 					var [_,x,y] = endLocation.split(",")
 					model.offsets[card + "," + x + "," + y] = "";
 				}
+
+				if(isGoalLoc(endLocation))
+				{
+					var [_,goalNo] = endLocation.split(",")
+					goalNo = Number(goalNo);
+					model.currentGoals[goalNo] = card;
+					model.cardLocations[card] = "goal," + goalNo;
+				}
+
 
 				if(endLocation == "winnings")
 				{
