@@ -391,7 +391,7 @@ function getCardAtLoc(loc)
 }
 
 
-export function moveCard(card, startLocation, endLocation, forceCardToMove)
+export async function moveCard(card, startLocation, endLocation, forceCardToMove)
 {
 	var startPos;
 	const vh = window.innerHeight/100;
@@ -647,8 +647,10 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 
 	if(!forceCardToMove)
 	{
-		doPlayEvent({card, startLocation, endLocation});
+		await doPlayEvent({card, startLocation, endLocation});
 	}
+
+	updateTurnstate();
 
 }
 
@@ -665,8 +667,6 @@ async function doPlayEvent(e)
 	{
 		var x = await fn(e);
 	}
-
-	updateTurnstate();
 }
 
 window.moveCard = moveCard;
@@ -800,7 +800,6 @@ async function executeShipAction(shipCard)
 
 		if(model.turnstate)
 		{
-
 			if(!model.turnstate.overrides[ponyCard])
 				model.turnstate.overrides[ponyCard] = {};
 
@@ -811,6 +810,13 @@ async function executeShipAction(shipCard)
 
 	if (shipInfo.action == "raceChange")
 	{
+		ponies = ponies.filter(x => !cards[x].keywords.has("Changeling"));
+
+		console.log(ponies);
+
+		if(ponies.length == 0)
+			return;
+
 		var pair = await raceChangePopup(ponies);
 
 		if(!pair) return;
@@ -837,7 +843,6 @@ addPlayEvent(async function(e){
 		{
 			for(var shipCard in model.turnstate.openShips)
 			{
-			
 				if(isShipClosed(shipCard))
 				{
 					delete model.turnstate.openShips[shipCard];
@@ -870,13 +875,18 @@ function raceChangePopup(ponies)
 		var card1 = makeCardElement(ponies[0]);
 		card1.setAttribute('value', ponies[0])
 
-		var card2 = makeCardElement(ponies[1]);
-		card2.setAttribute('value', ponies[1])
+		if(ponies.length == 2)
+		{
+			var card2 = makeCardElement(ponies[1]);
+			card2.setAttribute('value', ponies[1])
+		}
+		
 
 		function ponySelect()
 		{
 			card1.classList.remove('selected')
-			card2.classList.remove('selected')
+			if(card2)
+				card2.classList.remove('selected')
 			
 			this.classList.add('selected');
 			selectedPony = this.getAttribute('value');
@@ -889,12 +899,13 @@ function raceChangePopup(ponies)
 		}
 
 		card1.onclick = ponySelect;
-		card2.onclick = ponySelect;
-
-
-
 		buttonDiv.appendChild(card1);
-		buttonDiv.appendChild(card2);
+
+		if(card2)
+		{
+			card2.onclick = ponySelect;
+			buttonDiv.appendChild(card2);
+		}
 
 		var earth = document.createElement('img');
 		earth.className = 'raceButton';

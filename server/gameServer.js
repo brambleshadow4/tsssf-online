@@ -487,6 +487,8 @@ export function TsssfGameServer()
 		if(!games[key].turnstate)
 			return;
 
+		games[key].turnstate.overrides = {};
+
 		
 		var rotation = games[key].players.filter(x => !x.socket.isDead && x.name != "");
 
@@ -780,7 +782,16 @@ export function TsssfGameServer()
 
 			if(message.startsWith("effects;"))
 			{	
-				toEveryoneElse(key, socket, message);
+				try{
+					var overrides = JSON.parse(message.split(";")[1]);
+					model.turnstate.overrides = overrides;
+					toEveryoneElse(key, socket, message);
+				}
+				catch(e)
+				{
+
+				}
+				
 			}
 
 			if(message.startsWith("draw;"))
@@ -1043,6 +1054,7 @@ export function TsssfGameServer()
 
 				if(player.name == model.turnstate.currentPlayer)
 				{
+				
 					changeTurnToNextPlayer(key);	
 				}
 			}
