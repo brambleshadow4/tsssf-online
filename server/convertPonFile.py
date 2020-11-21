@@ -17,7 +17,7 @@ txt = txt.split("\n");
 txt.pop(0) # TSSSF is at the beginning of the file
 
 
-cards = []
+cards = {}
 
 for line in txt:
 
@@ -31,11 +31,20 @@ for line in txt:
 	#item 7 contains the quote text
 	items = line.split("`")
 
-	if len(items) != 7:
-		print("Problem with line: " + line)
-		continue 
+	
 
-	[cardType, imageFile, symbolList, cardName, keywords, instructionText, quoteText] = line.split("`")
+	if len(items) == 7:
+		[cardType, imageFile, symbolList, cardName, keywords, instructionText, quoteText] = line.split("`")
+	elif len(items) == 8:
+		[cardType, imageFile, symbolList, cardName, keywords, instructionText, quoteText, packSymbol] = line.split("`")
+	elif len(items) == 9:
+		[cardType, imageFile, symbolList, cardName, keywords, instructionText, quoteText, packSymbol, _] = line.split("`")
+	
+	else:
+		print("Problem with line: "  + str(len(items)) + " items")
+		for item in items:
+			print("  " + str(item))
+		continue 
 
 	symbolList = symbolList.split("!")
 
@@ -43,7 +52,13 @@ for line in txt:
 	keywords = list(map(lambda s : s.strip(), keywords.split(",")))
 
 	card = {}
+	cardName = cardName.replace("\\n", " ")
 	card["name"] = cardName
+
+	namespaceName = "PU." +  cardType + "." + re.sub("[^\\w]","",cardName)
+
+	card["url"] = imageFile
+
 
 	if "changelingunicorn" in symbolList:
 		card["race"] = "unicorn"
@@ -64,8 +79,8 @@ for line in txt:
 	if "Pegasus" in symbolList or "pegasus" in symbolList:
 		card["race"] = "pegasus"
 
-	if "Pegasus" in symbolList or "pegasus" in symbolList:
-		card["race"] = "pegasus"
+	if "Unicorn" in symbolList or "unicorn" in symbolList:
+		card["race"] = "unicorn"
 
 	if "Alicorn" in symbolList or "alicorn" in symbolList:
 		card["race"] = "alicorn"
@@ -123,6 +138,12 @@ for line in txt:
 		if "{gender change}" in instructionText:
 			card["action"] = "genderChange"
 
+		if "{clone}" in instructionText:
+			card["action"] = "clone"
+
+		if "{keyword change}" in instructionText:
+			card["action"] = "keywordChange"
+
 
 	if cardType == "Goal":
 		card["points"] = symbolList[1]
@@ -134,10 +155,15 @@ for line in txt:
 
 		card["keywords"] = keywords
 
-	cards.append(card)
+	cards[namespaceName] = card
 
+
+output = json.dumps(cards, indent=4)
+
+output = re.sub('"(\\w+)":', "\\1:", output)
+output = re.sub('    ', "\t", output)
 
 
 f = io.open(inputFile.replace(".pon",".json"), "w", encoding='utf8')
 
-f.write(json.dumps(cards, indent=4))
+f.write(output)

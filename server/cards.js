@@ -1009,316 +1009,589 @@ var cards = {
 
 		// Ship
 
-			"EC.Ship.ADarkandTerribleSecret":{
-				url:"Ship_A Dark and Terrible Secret.png"
+			"EC.Ship.OverACozyCampfire": {
+				name: "Over a Cozy Campfire",
+				url: "Ship_Over a Cozy Campfire.png"
 			},
-			"EC.Ship.AMurderMostFoul":{
-				url:"Ship_A Murder Most Foul!.png"
+			"EC.Ship.TheNoodleIncident": {
+				name: "The Noodle Incident",
+				url: "Ship_The Noodle Incident.png"
 			},
-			"EC.Ship.AwkwardDanceParty":{
-				url:"Ship_Awkward Dance Party.png"
+			"EC.Ship.BlindDate": {
+				name: "Blind Date",
+				url: "Ship_Blind Date.png",
+				action: "keywordChange"
 			},
-			"EC.Ship.BlindDate":{
-				url:"Ship_Blind Date.png"
+			"EC.Ship.ScienceExperiments": {
+				name: "Science Experiments!",
+				url: "Ship_Science Experiments!.png",
+				action: "clone"
 			},
-			"EC.Ship.BodyDouble":{
-				url:"Ship_Body Double.png"
+			"EC.Ship.HighSchoolSweethearts": {
+				name: "High School Sweethearts",
+				url: "Ship_High School Sweethearts.png"
 			},
-			"EC.Ship.ClashingOfWills":{
-				url:"Ship_Clashing of Wills.png"
+			"EC.Ship.PrettiestPonyOfTheYear": {
+				name: "Prettiest Pony of the Year",
+				url: "Ship_Prettiest Ponyof the Year.png"
 			},
-			"EC.Ship.FavorForAFriend":{
-				url:"Ship_Favor for a Friend.png"
+			"EC.Ship.FillyImFabulous": {
+				name: "Filly, I'm Fabulous",
+				url: "Ship_Filly I'm Fabulous.png"
 			},
-			"EC.Ship.FillyImFabulous":{
-				url:"Ship_Filly I'm Fabulous.png"
+			"EC.Ship.BodyDouble": {
+				name: "Body Double",
+				url: "Ship_Body Double.png",
+				action: "clone"
 			},
-			"EC.Ship.ForbiddenMagicMacguffin":{
-				url:"Ship_Forbidden Magic Macguffin.png"
+			"EC.Ship.FavorForAFriend": {
+				name: "Favor for a Friend",
+				url: "Ship_Favor for a Friend.png"
 			},
-			"EC.Ship.HighSchoolSweethearts":{
-				url:"Ship_High School Sweethearts.png"
+			"EC.Ship.AwkwardDanceParty": {
+				name: "Awkward Dance Party",
+				url: "Ship_Awkward Dance Party.png"
 			},
-			"EC.Ship.ImpendingDoom":{
-				url:"Ship_Impending Doom.png"
+			"EC.Ship.AMurderMostFoul": {
+				name: "A Murder Most Foul!",
+				url: "Ship_A Murder Most Foul!.png"
 			},
-			"EC.Ship.LongForgottenMemories":{
-				url:"Ship_Long-Forgotten Memories.png"
+			"EC.Ship.SlumberParty": {
+				name: "Slumber Party",
+				url: "Ship_Slumber Party.png"
 			},
-			"EC.Ship.Makeover":{
-				url:"Ship_Makeover!.png"
+			"EC.Ship.LongForgottenMemories": {
+				name: "Long-Forgotten Memories",
+				url: "Ship_Long-Forgotten Memories.png",
+				action: "keywordChange"
 			},
-			"EC.Ship.MayIHaveThisDance":{
-				url:"Ship_May I Have This Dance.png"
+			"EC.Ship.TheChosenOnes": {
+				name: "The Chosen Ones",
+				url: "Ship_The Chosen Ones.png"
 			},
-			"EC.Ship.OverACozyCampfire":{
-				url:"Ship_Over a Cozy Campfire.png"
+			"EC.Ship.Makeover": {
+				name: "Makeover!",
+				url: "Ship_Makeover!.png",
+				action: "genderChange"
 			},
-			"EC.Ship.PrettiestPonyOfTheYear":{
-				url:"Ship_Prettiest Ponyof the Year.png"
+			"EC.Ship.WackyTragicCircumstances": {
+				name: "Wacky Tragic Circumstances",
+				url: "Ship_Wacky TragicCircumstances.png"
 			},
-			"EC.Ship.ScienceExperiments":{
-				url:"Ship_Science Experiments!.png"
+			"EC.Ship.ForbiddenMagicMacguffin": {
+				name: "Forbidden Magic Macguffin",
+				url: "Ship_Forbidden Magic Macguffin.png",
+				action: "keywordChange"
 			},
-			"EC.Ship.SlumberParty":{
-				url:"Ship_Slumber Party.png"
+			"EC.Ship.ClashingOfWills": {
+				name: "Clashing of Wills",
+				url: "Ship_Clashing of Wills.png"
 			},
-			"EC.Ship.SnowfallStroll":{
-				url:"Ship_Snowfall Stroll.png"
+			"EC.Ship.SuddenUnexplainedOffspring": {
+				name: "Sudden Unexplained Offspring",
+				url: "Ship_SuddenUnexplained Offspring.png"
 			},
-			"EC.Ship.SpontaneousMusicalNumber":{
-				url:"Ship_SpontaneousMusical Number.png"
+			"EC.Ship.WebOfDeceit": {
+				name: "Web of Deceit",
+				url: "Ship_Web of Deceit.png",
+				action: "keywordChange"
 			},
-			"EC.Ship.SuddenUnexplainedOffspring":{
-				url:"Ship_SuddenUnexplained Offspring.png"
+			"EC.Ship.WhatHappensInLasPegasus": {
+				name: "What Happens In Las Pegasus...",
+				url: "Ship_What Happens InLas Pegasus....png"
 			},
-			"EC.Ship.TheChosenOnes":{
-				url:"Ship_The Chosen Ones.png"
+			"EC.Ship.ADarkAndTerribleSecret": {
+				name: "A Dark and Terrible Secret",
+				url: "Ship_A Dark and Terrible Secret.png"
 			},
-			"EC.Ship.TheNoodleIncident":{
-				url:"Ship_The Noodle Incident.png"
+			"EC.Ship.VisitToTheMirrorPool": {
+				name: "Visit to the Mirror Pool",
+				url: "Ship_Visit to the Mirror Pool.png",
+				action: "clone"
 			},
-			"EC.Ship.VisitToTheMirrorPool":{
-				url:"Ship_Visit to the Mirror Pool.png"
+			"EC.Ship.MayIHaveThisDance": {
+				name: "May I Have This Dance",
+				url: "Ship_May I Have This Dance.png"
 			},
-			"EC.Ship.WackyTragicCircumstances":{
-				url:"Ship_Wacky TragicCircumstances.png"
+			"EC.Ship.SnowfallStroll": {
+				name: "Snowfall Stroll",
+				url: "Ship_Snowfall Stroll.png"
 			},
-			"EC.Ship.WebOfDeceit":{
-				url:"Ship_Web of Deceit.png"
+			"EC.Ship.SpontaneousMusicalNumber": {
+				name: "Spontaneous Musical Number",
+				url: "Ship_SpontaneousMusical Number.png"
 			},
-			"EC.Ship.WhatHappensInLasPegasus":{
-				url:"Ship_What Happens InLas Pegasus....png"
+			"EC.Ship.ImpendingDoom": {
+				name: "Impending Doom",
+				url: "Ship_Impending Doom.png"
 			},
 
 		// Goal
-			"EC.Goal.ABlessingOfAlicorns":{
-				url:"Goal_A Blessing of Alicorns.png"
+			"EC.Goal.FamilyAppreciationDay": {
+				name: "Family Appreciation Day",
+				url: "Goal_Family Appreciation Day.png",
+				points: "2"
 			},
-			"EC.Goal.AintNoPartyLikeAPinkiePieParty":{
-				url:"Goal_Ain't No Party Likea Pinkie Pie Party.png"
+			"EC.Goal.BigMacIsBigMackin": {
+				name: "Big Mac is Big Mackin'",
+				url: "Goal_Big Mac is Big Mackin'.png",
+				points: "2"
 			},
-			"EC.Goal.BewareTheGroove":{
-				url:"Goal_Beware the Groove.png"
+			"EC.Goal.MyWaifu": {
+				name: "My Waifu",
+				url: "Goal_My Waifu.png",
+				points: "2"
 			},
-			"EC.Goal.BigMacIsBigMackin":{
-				url:"Goal_Big Mac is Big Mackin'.png"
+			"EC.Goal.BookClub": {
+				name: "Book Club",
+				url: "Goal_Book Club.png",
+				points: "3"
 			},
-			"EC.Goal.BookClub":{
-				url:"Goal_Book Club.png"
+			"EC.Goal.EnjoyingTheScenery": {
+				name: "Enjoying the Scenery",
+				url: "Goal_Enjoying the Scenery.png",
+				points: "1"
 			},
-			"EC.Goal.CiderSqueezin":{
-				url:"Goal_Cider Squeezin'.png"
+			"EC.Goal.IronPonyCompetition": {
+				name: "Iron Pony Competition",
+				url: "Goal_Iron Pony Competition.png",
+				points: "1"
 			},
-			"EC.Goal.CoupDetat":{
-				url:"Goal_Coup d'etat.png"
+			"EC.Goal.CiderSqueezin": {
+				name: "Cider Squeezin'",
+				url: "Goal_Cider Squeezin'.png",
+				points: "1"
 			},
-			"EC.Goal.EnjoyingTheScenery":{
-				url:"Goal_Enjoying the Scenery.png"
+			"EC.Goal.AintNoPartyLikeAPinkiePieParty": {
+				name: "Ain't No Party Like a Pinkie Pie Party",
+				url: "Goal_Ain't No Party Likea Pinkie Pie Party.png",
+				points: "1"
 			},
-			"EC.Goal.EvilSocietyOfEvil":{
-				url:"Goal_Evil Society of Evil.png"
+			"EC.Goal.Recruitment": {
+				name: "Recruitment",
+				url: "Goal_Recruitment.png",
+				points: "1"
 			},
-			"EC.Goal.FamilyAppreciationDay":{
-				url:"Goal_Family Appreciation Day.png"
+			"EC.Goal.PlayingTheGame": {
+				name: "Playing the Game",
+				url: "Goal_Playing the Game.png",
+				points: "1"
 			},
-			"EC.Goal.FleetAdmiral":{
-				url:"Goal_Fleet Admiral.png"
+			"EC.Goal.IReallyLikeHerMane": {
+				name: "I Really Like Her Mane!",
+				url: "Goal_I Really Like Her Mane!.png",
+				points: "2"
 			},
-			"EC.Goal.FluttershysHomeForRedeemedEvilDoers":{
-				url:"Goal_Fluttershy's Home forRedeemed Evil-Doers.png"
+			"EC.Goal.PickyPicky": {
+				name: "Picky Picky!",
+				url: "Goal_Picky Picky!.png",
+				points: "1"
 			},
-			"EC.Goal.FriendsInHighPlaces":{
-				url:"Goal_Friends in High Places.png"
+			"EC.Goal.BewareTheGroove": {
+				name: "Beware the Groove",
+				url: "Goal_Beware the Groove.png",
+				points: "2"
 			},
-			"EC.Goal.IReallyLikeHerMane":{
-				url:"Goal_I Really Like Her Mane!.png"
+			"EC.Goal.ABlessingOfAlicorns": {
+				name: "A Blessing of Alicorns",
+				url: "Goal_A Blessing of Alicorns.png",
+				points: "2"
 			},
-			"EC.Goal.IronPonyCompetition":{
-				url:"Goal_Iron Pony Competition.png"
+			"EC.Goal.TheresNoThrillLikeIronWill": {
+				name: "There's No ThrillLike Iron Will",
+				url: "Goal_There's No ThrillLike Iron Will.png",
+				points: "2"
 			},
-			"EC.Goal.Landslide":{
-				url:"Goal_Landslide.png"
+			"EC.Goal.OfPoniesAndPerilTheMagnumOpus": {
+				name: "Of Ponies and Peril: The Magnum Opus",
+				url: "Goal_Of Ponies and PerilThe Magnum Opus.png",
+				points: "2"
 			},
-			"EC.Goal.MyWaifu":{
-				url:"Goal_My Waifu.png"
+			"EC.Goal.Swinging": {
+				name: "Swinging",
+				url: "Goal_Swinging.png",
+				points: "3"
 			},
-			"EC.Goal.NoPoniesCanPonyTwoPoniesToPony":{
-				url:"Goal_No Ponies Can PonyTwo Ponies to Pony.png"
+			"EC.Goal.SpaDay": {
+				name: "Spa Day",
+				url: "Goal_Spa Day.png",
+				points: "2"
 			},
-			"EC.Goal.OfPoniesAndPerilTheMagnumOpus":{
-				url:"Goal_Of Ponies and PerilThe Magnum Opus.png"
+			"EC.Goal.NoPoniesCanPonyTwoPoniesToPony": {
+				name: "No Ponies Can Pony Two Ponies to Pony",
+				url: "Goal_No Ponies Can PonyTwo Ponies to Pony.png",
+				points: "4"
 			},
-			"EC.Goal.PickyPicky":{
-				url:"Goal_Picky Picky!.png"
+			"EC.Goal.EvilSocietyOfEvil": {
+				name: "Evil Society of Evil",
+				url: "Goal_Evil Society of Evil.png",
+				points: "3"
 			},
-			"EC.Goal.PlayingTheGame":{
-				url:"Goal_Playing the Game.png"
+			"EC.Goal.FluttershysHomeForRedeemedEvilDoers": {
+				name: "Fluttershy's Home for Redeemed Evil-Doers",
+				url: "Goal_Fluttershy's Home forRedeemed Evil-Doers.png",
+				points: "2"
 			},
-			"EC.Goal.Recolor":{
-				url:"Goal_Recolor.png"
+			"EC.Goal.Landslide": {
+				name: "Landslide",
+				url: "Goal_Landslide.png",
+				points: "0"
 			},
-			"EC.Goal.Recruitment":{
-				url:"Goal_Recruitment.png"
+			"EC.Goal.FleetAdmiral": {
+				name: "Fleet Admiral",
+				url: "Goal_Fleet Admiral.png",
+				points: "3"
 			},
-			"EC.Goal.SpaDay":{
-				url:"Goal_Spa Day.png"
+			"EC.Goal.CoupDetat": {
+				name: "Coup d'etat",
+				url: "Goal_Coup d'etat.png",
+				points: "3"
 			},
-			"EC.Goal.Swinging":{
-				url:"Goal_Swinging.png"
+			"EC.Goal.FriendsInHighPlaces": {
+				name: "Friends in High Places",
+				url: "Goal_Friends in High Places.png",
+				points: "3"
 			},
-			"EC.Goal.TheresNoThrillLikeIronWill":{
-				url:"Goal_There's No ThrillLike Iron Will.png"
+			"EC.Goal.Recolor": {
+				name: "Recolor",
+				url: "Goal_Recolor.png",
+				points: "2"
 			},
 
 
 	// Ponyville University
 
 		// Pony
-
-			"PU.Pony.AntiConfectioneryRebelPumpkinCake":{
-				url:"Pony_Anti-Confectionery RebelPumpkin Cake.png"
+			"PU.Pony.StarQuarterbackSnips": {
+				name: "Snips",
+				url: "Pony_Star Quarterback Snips.png",
+				race: "unicorn",
+				gender: "male",
+				action: "newGoal",
+				keywords: [
+					"Uni"
+				]
 			},
-			"PU.Pony.BabsSeedLifeOfTheParty":{
-				url:"Pony_Babs SeedLife of the Party.png"
+			"PU.Pony.FraternityBroSnails": {
+				name: "Snails",
+				url: "Pony_Fraternity Bro Snails.png",
+				race: "unicorn",
+				gender: "male",
+				action: "search",
+				keywords: [
+					"Uni"
+				]
 			},
-			"PU.Pony.CampusReporterFeatherweight":{
-				url:"Pony_Campus ReporterFeatherweight.png"
+			"PU.Pony.DragRacingChampionScootaloo": {
+				name: "Scootaloo",
+				url: "Pony_Drag Racing ChampionScootaloo.png",
+				race: "pegasus",
+				gender: "female",
+				action: "replace",
+				keywords: [
+					"CMC",
+					"Uni"
+				]
 			},
-			"PU.Pony.ChemistryGeniusTwist":{
-				url:"Pony_Chemistry Genius Twist.png"
+			"PU.Pony.ShoestringBudgetScootaloo": {
+				name: "Scootaloo",
+				url: "Pony_Shoestring BudgetScootaloo.png",
+				race: "pegasus",
+				gender: "female",
+				action: "search",
+				keywords: [
+					"CMC",
+					"PCC"
+				]
 			},
-			"PU.Pony.CollegeRadioHostSweetieBelle":{
-				url:"Pony_College Radio HostSweetie Belle.png"
+			"PU.Pony.MusicalMajorSweetieBelle": {
+				name: "Sweetie Belle",
+				url: "Pony_Musical MajorSweetie Belle.png",
+				race: "unicorn",
+				gender: "female",
+				action: "swap",
+				keywords: [
+					"CMC",
+					"Uni"
+				]
 			},
-			"PU.Pony.ComicArtistSpike":{
-				url:"Pony_Comic Artist Spike.png"
+			"PU.Pony.CollegeRadioHostSweetieBelle": {
+				name: "Sweetie Belle",
+				url: "Pony_College Radio HostSweetie Belle.png",
+				race: "unicorn",
+				gender: "female",
+				action: "newGoal",
+				keywords: [
+					"CMC",
+					"PCC"
+				]
 			},
-			"PU.Pony.ConspicuouslyBlankBabs":{
-				url:"Pony_Conspicuously Blank Babs.png"
+			"PU.Pony.MBAAppleBloom": {
+				name: "Apple Bloom",
+				url: "Pony_MBA Apple Bloom.png",
+				race: "earth",
+				gender: "female",
+				action: "search",
+				keywords: [
+					"Apple",
+					"CMC",
+					"Uni"
+				]
 			},
-			"PU.Pony.DragRacingChampionScootaloo":{
-				url:"Pony_Drag Racing ChampionScootaloo.png"
+			"PU.Pony.TeachersAssistantAppleBloom": {
+				name: "Apple Bloom",
+				url: "Pony_Teacher's AssistantApple Bloom.png",
+				race: "earth",
+				gender: "female",
+				action: "draw",
+				keywords: [
+					"Apple",
+					"CMC",
+					"PCC"
+				]
 			},
-			"PU.Pony.EveryponyLovesSpike":{
-				url:"Pony_Everypony Loves Spike.png"
+			"PU.Pony.ConspicuouslyBlankBabs": {
+				name: "Babs",
+				url: "Pony_Conspicuously Blank Babs.png",
+				race: "earth",
+				gender: "female",
+				action: "replace",
+				keywords: [
+					"Apple",
+					"CMC",
+					"PCC"
+				]
 			},
-			"PU.Pony.FledglingActivistPrincessSkyla":{
-				url:"Pony_Fledgling ActivistPrincess Skyla.png"
+			"PU.Pony.BabsSeedLifeOfTheParty": {
+				name: "Babs",
+				url: "Pony_Babs SeedLife of the Party.png",
+				race: "earth",
+				gender: "female",
+				action: "swap",
+				keywords: [
+					"Apple",
+					"CMC",
+					"Uni"
+				]
 			},
-			"PU.Pony.FraternityBroSnails":{
-				url:"Pony_Fraternity Bro Snails.png"
+			"PU.Pony.ChemistryGeniusTwist": {
+				name: "Twist",
+				url: "Pony_Chemistry Genius Twist.png",
+				race: "earth",
+				gender: "female",
+				keywords: [
+					"PCC"
+				]
 			},
-			"PU.Pony.IronLadyDiamondTiara":{
-				url:"Pony_Iron Lady Diamond Tiara.png"
+			"PU.Pony.ComicArtistSpike": {
+				name: "Spike",
+				url: "Pony_Comic Artist Spike.png",
+				race: "earth",
+				gender: "male",
+				action: "draw",
+				keywords: [
+					"Dragon",
+					"PCC"
+				]
 			},
-			"PU.Pony.MBAAppleBloom":{
-				url:"Pony_MBA Apple Bloom.png"
+			"PU.Pony.EveryponyLovesSpike": {
+				name: "Spike",
+				url: "Pony_Everypony Loves Spike.png",
+				race: "earth",
+				gender: "male",
+				keywords: [
+					"Dragon",
+					"Uni"
+				]
 			},
-			"PU.Pony.MrsRobinsonCheerilee":{
-				url:"Pony_Mrs. Robinson Cheerilee.png"
+			"PU.Pony.SororitySisterSilverSpoon": {
+				name: "Silver Spoon",
+				url: "Pony_Sorority SisterSilver Spoon.png",
+				race: "earth",
+				gender: "female",
+				action: "copy",
+				keywords: [
+					"Uni"
+				]
 			},
-			"PU.Pony.MusicalMajorSweetieBelle":{
-				url:"Pony_Musical MajorSweetie Belle.png"
+			"PU.Pony.IronLadyDiamondTiara": {
+				name: "Diamond Tiara",
+				url: "Pony_Iron Lady Diamond Tiara.png",
+				race: "earth",
+				gender: "female",
+				action: "draw",
+				keywords: [
+					"Uni"
+				]
 			},
-			"PU.Pony.PerformanceArtistPoundCake":{
-				url:"Pony_Performance ArtistPound Cake.png"
+			"PU.Pony.UltimateFrisbeeChampPipsqueak": {
+				name: "Pipsqueak",
+				url: "Pony_Ultimate Frisbee ChampPipsqueak.png",
+				race: "earth",
+				gender: "male",
+				action: "swap",
+				keywords: [
+					"PCC"
+				]
 			},
-			"PU.Pony.ShoestringBudgetScootaloo":{
-				url:"Pony_Shoestring BudgetScootaloo.png"
+			"PU.Pony.CampusReporterFeatherweight": {
+				name: "Featherweight",
+				url: "Pony_Campus ReporterFeatherweight.png",
+				race: "pegasus",
+				gender: "male",
+				action: "replace",
+				keywords: [
+					"PCC"
+				]
 			},
-			"PU.Pony.SororitySisterSilverSpoon":{
-				url:"Pony_Sorority SisterSilver Spoon.png"
+			"PU.Pony.PerformanceArtistPoundCake": {
+				name: "Pound Cake",
+				url: "Pony_Performance ArtistPound Cake.png",
+				race: "pegasus",
+				gender: "male",
+				action: "copy",
+				keywords: [
+					"Pound Cake"
+				]
 			},
-			"PU.Pony.StarQuarterbackSnips":{
-				url:"Pony_Star Quarterback Snips.png"
+			"PU.Pony.AntiConfectioneryRebelPumpkinCake": {
+				name: "Pumpkin Cake",
+				url: "Pony_Anti-Confectionery RebelPumpkin Cake.png",
+				race: "unicorn",
+				gender: "female",
+				action: "newGoal",
+				keywords: [
+					"PCC"
+				]
 			},
-			"PU.Pony.TeachersAssistantAppleBloom":{
-				url:"Pony_Teacher's AssistantApple Bloom.png"
+			"PU.Pony.MrsRobinsonCheerilee": {
+				name: "Cheerilee",
+				url: "Pony_Mrs. Robinson Cheerilee.png",
+				race: "earth",
+				gender: "female",
+				keywords: []
 			},
-			"PU.Pony.UltimateFrisbeeChampPipsqueak":{
-				url:"Pony_Ultimate Frisbee ChampPipsqueak.png"
+			"PU.Pony.FledglingActivistPrincessSkyla": {
+				name: "Skyla",
+				url: "Pony_Fledgling ActivistPrincess Skyla.png",
+				race: "alicorn",
+				gender: "female",
+				action: "copy",
+				keywords: [
+					"Princess",
+					"Uni"
+				]
 			},
 
 		// Ship
 
-			"PU.Ship.ATripToTheDarkRoom":{
-				url:"Ship_A Trip to the Dark Room.png"
+			"PU.Ship.MoreThanRoommates": {
+				name: "More Than Roommates",
+				url: "Ship_More than Roommates.png"
 			},
-			"PU.Ship.AdvancedMagicSeminar":{
-				url:"Ship_Advanced Magic Seminar.png"
+			"PU.Ship.SpringBreak": {
+				name: "Spring Break!",
+				url: "Ship_Spring Break!.png"
 			},
-			"PU.Ship.AfternoonVisiToTheLocalMilkshakeJoint":{
-				url:"Ship_Afternoon Visit tothe Local Milkshake Joint.png"
+			"PU.Ship.IsThisSeatTaken": {
+				name: "Is This Seat Taken?",
+				url: "Ship_Is This Seat Taken.png"
 			},
-			"PU.Ship.BattleOfTheBands":{
-				url:"Ship_Battle of the Bands.png"
+			"PU.Ship.CramSession": {
+				name: "Cram Session",
+				url: "Ship_Cram Session.png"
 			},
-			"PU.Ship.BrandNewRoommate":{
-				url:"Ship_Brand New Roommate.png"
+			"PU.Ship.BrandNewRoommate": {
+				name: "Brand New Roommate",
+				url: "Ship_Brand New Roommate.png"
 			},
-			"PU.Ship.ChemistryLabExplosion":{
-				url:"Ship_Chemistry Lab Explosion!.png"
+			"PU.Ship.AdvancedMagicSeminar": {
+				name: "Advanced Magic Seminar",
+				url: "Ship_Advanced Magic Seminar.png"
 			},
-			"PU.Ship.CramSession":{
-				url:"Ship_Cram Session.png"
+			"PU.Ship.MysteriousExchangeStudent": {
+				name: "Mysterious Exchange Student",
+				url: "Ship_MysteriousExchange Student.png"
 			},
-			"PU.Ship.HidingFromTheDeansSecretPolice":{
-				url:"Ship_Hiding fromthe Dean's Secret Police.png"
+			"PU.Ship.ServingCommunityService": {
+				name: "Serving Community Service",
+				url: "Ship_ServingCommunity Service.png"
 			},
-			"PU.Ship.InThisDimensionImAPromQueen":{
-				url:"Ship_In This DimensionI'm a Prom Queen.png"
+			"PU.Ship.ChemistryLabExplosion": {
+				name: "Chemistry Lab Explosion!",
+				url: "Ship_Chemistry Lab Explosion!.png",
+				action: "lovePoison"
 			},
-			"PU.Ship.IsThisSeatTaken":{
-				url:"Ship_Is This Seat Taken.png"
+			"PU.Ship.RightsRallyBakeSale": {
+				name: "Rights Rally Bake Sale",
+				url: "Ship_Rights Rally Bake Sale.png"
 			},
-			"PU.Ship.LoveAtFirstSight":{
-				url:"Ship_Love at First Sight.png"
+			"PU.Ship.HidingFromTheDeansSecretPolice": {
+				name: "Hiding from the Dean's Secret Police",
+				url: "Ship_Hiding fromthe Dean's Secret Police.png"
 			},
-			"PU.Ship.MetYouOnTheNightlyPatrol":{
-				url:"Ship_Met Youon the Nightly Patrol.png"
+			"PU.Ship.PreAssignedLabPartners": {
+				name: "Pre-Assigned Lab Partners",
+				url: "Ship_Pre-Assigned Lab Partners.png"
 			},
-			"PU.Ship.MoreThanRoommates":{
-				url:"Ship_More Than Roommates.png"
+			"PU.Ship.BattleOfTheBands": {
+				name: "Battle of the Bands",
+				url: "Ship_Battle of the Bands.png"
 			},
-			"PU.Ship.MostAdorableStalkingEver":{
-				url:"Ship_Most Adorable StalkingEver.png"
+			"PU.Ship.InThisDimensionImAPromQueen": {
+				name: "In This Dimension, I'm a Prom Queen",
+				url: "Ship_In This DimensionI'm a Prom Queen.png",
+				action: "keywordChange"
 			},
-			"PU.Ship.MysteriousExchangeStudent":{
-				url:"Ship_MysteriousExchange Student.png"
+			"PU.Ship.RomanticCultHazing": {
+				name: "Romantic Cult Hazing",
+				url: "Ship_Romantic Cult Hazing.png"
 			},
-			"PU.Ship.PreAssignedLabPartners":{
-				url:"Ship_Pre-Assigned Lab Partners.png"
+			"PU.Ship.WorstFieldTripEver": {
+				name: "Worst Field Trip Ever",
+				url: "Ship_Worst Field Trip Ever.png",
+				action: "keywordChange"
 			},
-			"PU.Ship.RadicalSelfExplorationExperiment":{
-				url:"Ship_Radical Self-ExplorationExperiment.png"
+			"PU.Ship.WalkOfShame": {
+				name: "Walk of Shame",
+				url: "Ship_Walk of Shame.png"
 			},
-			"PU.Ship.RightsRallyBakeSale":{
-				url:"Ship_Rights Rally Bake Sale.png"
+			"PU.Ship.MostAdorableStalkingEver": {
+				name: "Most Adorable Stalking Ever",
+				url: "Ship_Most Adorable StalkingEver.png"
 			},
-			"PU.Ship.RomanticCultHazing":{
-				url:"Ship_Romantic Cult Hazing.png"
+			"PU.Ship.RadicalSelfExplorationExperiment": {
+				name: "Radical Self-Exploration Experiment",
+				url: "Ship_Radical Self-ExplorationExperiment.png",
+				action: "keywordChange"
 			},
-			"PU.Ship.RushWeek":{
-				url:"Ship_Rush Week.png"
+			"PU.Ship.MetYouOnTheNightlyPatrol": {
+				name: "Met You on the Nightly Patrol",
+				url: "Ship_Met Youon the Nightly Patrol.png"
 			},
-			"PU.Ship.ServingCommunityService":{
-				url:"Ship_ServingCommunity Service.png"
+			"PU.Ship.ATripToTheDarkRoom": {
+				name: "A Trip to the Dark Room",
+				url: "Ship_A Trip to the Dark Room.png"
 			},
-			"PU.Ship.SordidLoveTriangle":{
-				url:"Ship_Sordid Love Triangle.png"
+			"PU.Ship.RushWeek": {
+				name: "Rush Week",
+				url: "Ship_Rush Week.png"
 			},
-			"PU.Ship.SplittingaMealPlan":{
-				url:"Ship_Splitting a Meal Plan.png"
+			"PU.Ship.AfternoonVisitToTheLocalMilkshakeJoint": {
+				name: "Afternoon Visit to the Local Milkshake Joint",
+				url: "Ship_Afternoon Visit tothe Local Milkshake Joint.png"
 			},
-			"PU.Ship.SpringBreak":{
-				url:"Ship_Spring Break!.png"
+			"PU.Ship.SordidLoveTriangle": {
+				name: "Sordid Love Triangle",
+				url: "Ship_Sordid Love Triangle.png"
 			},
-			"PU.Ship.WalkOfShame":{
-				url:"Ship_Walk of Shame.png"
+			"PU.Ship.LoveAtFirstSight": {
+				name: "Love at First Sight",
+				url: "Ship_Love at First Sight.png"
 			},
-			"PU.Ship.WorstFieldTripEver":{
-				url:"Ship_Worst Field Trip Ever.png"
+			"PU.Ship.SplittingAMealPlan": {
+				name: "Splitting a Meal Plan",
+				url: "Ship_Splitting a Meal Plan.png"
 			},
 
 		// Goal
@@ -1331,7 +1604,7 @@ var cards = {
 			"PU.Goal.Internship":{
 				url:"Goal_Internship.png"
 			},
-			"PU.Goal.RevengeoftheNerds":{
+			"PU.Goal.RevengeOfTheNerds":{
 				url:"Goal_Revenge of the Nerds.png"
 			},
 			"PU.Goal.SchoolwideFestivities":{
