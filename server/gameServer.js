@@ -55,11 +55,23 @@ export function TsssfGameServer()
 	wsServer.getStats = function()
 	{
 		var stats = {games:0, players:0}
+		var startTime
 		for(var key in games)
 		{
-			stats.games++;
-			stats.players += games[key].players.length;
+			if(games[key].isInGame)
+			{
+				stats.games++;
+				stats.players += games[key].players.filter(x => x.socket.isAlive).length;
+
+				if(startTime == undefined)
+					startTime = games[key].startTime;
+				else
+					startTime = Math.max(games[key].startTime, startTime);
+			}
 		}
+
+		if(startTime)
+			stats.startTime = startTime;
 
 		return stats;
 	}
@@ -128,8 +140,8 @@ export function TsssfGameServer()
 		player.id = Math.floor(Math.random()*10**16)+1;
 
 
-		if(player.name == "")
-			logPlayerJoined();
+		//if(player.name == "")
+		//	logPlayerJoined();
 
 		player.name = newName;
 
@@ -327,6 +339,8 @@ export function TsssfGameServer()
 	{	
 		var model = games[key];
 
+		model.startTime = new Date().getTime();
+
 		model.cardLocations = {};
 		model.board = {
 			"p,0,0":{
@@ -376,6 +390,11 @@ export function TsssfGameServer()
 
 
 		logGameHosted();
+
+		for(var i of model.players.filter(x => isRegistered(x)))
+		{
+			logPlayerJoined();
+		}
 
 		var re = new RegExp(model.cardDecks);
 
@@ -650,6 +669,7 @@ export function TsssfGameServer()
 					if(model.isInGame)
 					{
 						socket.send("startgame;");
+						logPlayerJoined();
 						sendPlayerlistsToEachPlayer(key);
 					}
 					else
