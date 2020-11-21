@@ -680,7 +680,7 @@ addPlayEvent(async function(e){
 		if(model.turnstate)
 		{
 			var cardNames = Object.keys(cards);
-			var disguises = cardNames.filter(x => cards[x].race == cardInfo.race && !cards[x].doublePony);
+			var disguises = cardNames.filter(x => cards[x].race == cardInfo.race && !cards[x].doublePony && !cards[x].keywords.has("Changeling"));
 
 			var newCard = await openCardSelect("Choose a pony to disguise as", disguises);
 
