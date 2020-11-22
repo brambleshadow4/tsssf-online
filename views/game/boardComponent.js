@@ -240,7 +240,7 @@ export function offsetPonyCard(key, card)
 }
 
 
-function getNeighborKeys(key)
+export function getNeighborKeys(key)
 {
 	var type, x,y;
 	[type,x,y] = key.split(",");

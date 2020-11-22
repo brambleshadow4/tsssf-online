@@ -49,7 +49,8 @@ import {
 	updatePlayerList,
 	updateGoals,
 	updateHand,
-	initPeripherals
+	initPeripherals,
+	openCardSelect
 } from "/game/peripheralComponents.js";
 
 import
@@ -58,11 +59,14 @@ import
 	initBoard,
 	updateBoard,
 	offsetPonyCard,
-	clearBoard
+	clearBoard,
+	getNeighborKeys
 } from "/game/boardComponent.js"
 
 import {
-	makeCardElement
+	makeCardElement,
+	setDisguise,
+	addTempSymbol
 } from "/game/cardComponent.js"
 
 import * as GameView from "/game/gameView.js" 
@@ -70,8 +74,11 @@ import * as GameView from "/game/gameView.js"
 import {
 	broadcastMove,
 	broadcast,
-	attachToSocket
+	attachToSocket,
+	broadcastEffects
 } from "/game/network.js";
+
+import {createPopup} from "/game/popupComponent.js";
 
 var model = {};
 window.model = model;
@@ -137,6 +144,8 @@ function LoadCards()
 			nodes.pop();
 			var urlToImg = "/img/" + nodes.join("/") + "/" + cards[key].url;
 
+			cards[key].keywords = new Set(cards[key].keywords);
+
 			cards[key].fullUrl = urlToImg;
 			cards[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
 
@@ -191,15 +200,26 @@ function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
 }
 
 
+var turnStateChangelings = {};
+
 export function updateTurnstate()
 {
-	console.log("update turnstate");
-
 	var turnstate = model.turnstate
 	if(!turnstate){
 		document.body.classList.remove("nomove");
 		return;
 	}
+
+	var decoration = document.getElementsByClassName('decoration');
+	var i = 0;
+	while(i < decoration.length)
+	{
+		if(decoration[i].classList.contains('changeling'))
+			i++;
+		else
+			decoration[i].parentNode.removeChild(decoration[i]);
+	}
+
 
 	var div = document.getElementById('turnInfo');
 	if(isItMyTurn())
@@ -220,8 +240,61 @@ export function updateTurnstate()
 	{
 		document.body.classList.add("nomove");
 
-		div.innerHTML = `<div>It is currently ${turnstate.currentPlayer}'s turn`;
+		div.innerHTML = `<div>It is currently ${turnstate.currentPlayer}'s turn </div>`;
+
+		var thisPlayer = model.players.filter(x => x.name == turnstate.currentPlayer)[0];
+
+		if(thisPlayer.disconnected)
+			div.innerHTML += "<div>Their turn will end if they do not reconnect in < 15s</div>";
 	}
+
+	// We don't want to update changelines always because that will mess up their animation
+	for(var card in turnStateChangelings)
+	{
+		let newDisguise = model.turnstate.overrides[card] && model.turnstate.overrides[card].disguise;
+
+		if(newDisguise != turnStateChangelings[card])
+		{	
+			var element = model.board[cardLocations[card]].element;
+			var div = element.getElementsByClassName('changeling')[0];
+			if(div)
+				div.parentNode.removeChild(div);
+
+			delete turnStateChangelings[card]	
+		}		
+	}
+
+
+	for(var card in model.turnstate.overrides)
+	{	
+		if(isBoardLoc(cardLocations[card]))
+		{
+			var element = model.board[cardLocations[card]].element;
+
+			var decs = model.turnstate.overrides[card];
+
+			if(decs.disguise && element.getElementsByClassName('changeling').length == 0)
+			{
+				setDisguise(element, decs.disguise);
+				turnStateChangelings[card] = decs.disguise;
+			}
+
+			if(decs.gender)
+			{
+				addTempSymbol(element, decs.gender);
+			}
+
+			if(decs.race)
+			{
+				addTempSymbol(element, decs.race);
+			}
+
+			if(decs.altTimeline)
+			{
+				addTempSymbol(element, "altTimeline");
+			}
+		}	
+	}	
 
 	updatePlayerList();
 }
@@ -233,10 +306,6 @@ export function updateGame(newModel)
 		clearBoard();
 		model = window.model = newModel;
 	}
-
-	
-	console.log("update game");
-	console.log(model);
 
 
 	LoadCards();
@@ -309,34 +378,49 @@ export function isValidMove(cardDragged, targetCard, endLocation)
 	);
 }
 
-export function moveCard(card, startLocation, endLocation, forceCardToMove)
+function getCardAtLoc(loc)
+{
+	if(isBoardLoc(loc))
+	{
+		return model.board[loc].card;
+	}
+	if(isGoalLoc(loc))
+	{
+		return model.currentGoals[Number(loc.split(",")[1])];
+	}
+}
+
+
+export async function moveCard(card, startLocation, endLocation, forceCardToMove)
 {
 	var startPos;
 	const vh = window.innerHeight/100;
 
+	if(cardLocations[card] == endLocation)
+	{
+		return;
+	}
+
+
+
 	if(startLocation != cardLocations[card])
 	{
-		var shouldCardBeOnBoard = !(isPlayerLoc(startLocation) || ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1);
 
-		if(shouldCardBeOnBoard && !cardLocations[card])
+		// if another player moves card A to a goal/board location L at the same time as you move card B,
+		// you move B to L, then message arrives to move A to L,
+		// then message arives to move B back, but it's no longer at L.
+		// 
+		// Thus we check to make sure B is still at L to prevent moving A by accident
+		if(cardLocations[card] 
+			&& (isBoardLoc(cardLocations[card]) || isGoalLoc(cardLocations[card]))
+			&& getCardAtLoc(cardLocations[card]) != card)
 		{
-			// In this case, the card should be on the board, but the client thinks it isn't.
-			// We set the start position to limbo since there isn't a place on the board to move the card from.
-			startLocation = "limbo";
+			cardLocations[card] = undefined;
 		}
-		else if(cardLocations[card])
-		{
-			if(forceCardToMove)
-			{
-				//console.log("Synchronization issue: card not at " + startLocation + "; card at " + cardLocations[card]);
-				startLocation = cardLocations[card];
 
-			}
-			else
-			{
-				updateGame();
-				return;
-			}
+		if(cardLocations[card] != undefined)
+		{
+			startLocation = cardLocations[card];
 		}
 	}
 
@@ -379,7 +463,6 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 		model[pile].splice(i,1);
 
 
-
 		var newTopCard = model[pile][model[pile].length-1];
 		cardLocations[newTopCard] = pile + ",top";
 
@@ -388,6 +471,7 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 		var typ = startLocation.substring(0,4)
 		if(typ == "pony") updatePonyDiscard();
 		if(typ == "ship") updateShipDiscard();
+		if(typ == "goal") updateGoalDiscard();
 	}
 	else if(["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1)
 	{
@@ -473,7 +557,12 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 			"goal": updateGoalDiscard
 		}[endLocation.substring(0,4)];
 
-		updateFun = () => updateFun2(card);
+		updateFun = () => {
+			if(slot=="top")
+				updateFun2(card);
+			else
+				updateFun2();
+		}
 
 		endPos = getPosFromId(pile);
 	}
@@ -541,10 +630,11 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	
 
 	if(startLocation != "limbo" 
-		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation))
+		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation)) // not going from discard to discard
 		&& (isDiscardLoc(endLocation)
 			|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
 			|| endLocation == "winnings"
+			|| isGoalLoc(endLocation)
 			|| isPlayerLoc(endLocation))
 	)
 	{
@@ -554,7 +644,314 @@ export function moveCard(card, startLocation, endLocation, forceCardToMove)
 	{
 		updateFun();
 	}
+
+	if(!forceCardToMove)
+	{
+		await doPlayEvent({card, startLocation, endLocation});
+	}
+
+	updateTurnstate();
+
+}
+
+var playEventHandlers = [];
+
+function addPlayEvent(fn)
+{
+	playEventHandlers.push(fn);
+}
+
+async function doPlayEvent(e)
+{
+	for(var fn of playEventHandlers)
+	{
+		var x = await fn(e);
+	}
+}
+
+window.moveCard = moveCard;
+
+addPlayEvent(async function(e){
+
+	var cardInfo = cards[e.card];
+	if(cardInfo.keywords.has("Changeling") && isBoardLoc(e.endLocation))
+	{
+
+		if(model.turnstate)
+		{
+			var cardNames = Object.keys(cards);
+			var disguises = cardNames.filter(x => cards[x].race == cardInfo.race && !cards[x].doublePony && !cards[x].keywords.has("Changeling"));
+
+			var newCard = await openCardSelect("Choose a pony to disguise as", disguises);
+
+			if(!newCard)
+				return
+
+			
+			// reset overrides when changeling changes type.
+			model.turnstate.overrides[e.card] = {disguise: newCard};
+			broadcastEffects();
+		}
+	}
+
+	return
+});
+
+addPlayEvent(async function(e){
+
+	var cardInfo = cards[e.card];
+	if(isShip(e.card) && isBoardLoc(e.endLocation))
+	{
+		if(model.turnstate)
+		{
+			if(!model.turnstate.openShips)
+				model.turnstate.openShips = {};
+
+			if(isShipClosed(e.card))
+				await executeShipAction(e.card);
+			else
+				model.turnstate.openShips[e.card] = true;
+		}
+	}
+});
+
+function isShipClosed(shipCard)
+{
+	return getShippedPonies(shipCard).length == 2;
+}
+
+function getShippedPonies(shipCard)
+{
+	var loc = cardLocations[shipCard];
+
+	var neighbors = getNeighborKeys(loc);
+
+	var shipClosed = true;
+	var ponies = [];
+	for(var n of neighbors)
+	{
+		if(!isBlank(model.board[n].card))
+		{
+			ponies.push(model.board[n].card)
+		}
+	}
+
+	return ponies;
 }
 
 
-window.moveCard = moveCard;
+function getCardProp(card, prop)
+{
+	if(model.turnstate && model.turnstate.overrides && model.turnstate.overrides[card])
+	{
+		if (model.turnstate.overrides[card][prop])
+		{
+			return model.turnstate.overrides[card][prop];
+		}
+
+		if(model.turnstate.overrides[card].disguise)
+		{
+			card = model.turnstate.overrides[card].disguise;
+		}
+	} 
+	
+	return cards[card][prop];
+}
+
+async function executeShipAction(shipCard)
+{
+
+	var ponies = getShippedPonies(shipCard);
+	var shipInfo = cards[shipCard]
+
+	if (shipInfo.action == "genderChange")
+	{
+		var ponyCard = await openCardSelect("Choose a pony to change gender", ponies, true);
+
+		if(!ponyCard) return;
+
+		if(model.turnstate)
+		{
+			var newGender = undefined;
+
+			switch(getCardProp(ponyCard, "gender"))
+			{
+				case "male": newGender = "female"; break;
+				case "female": newGender = "male"; break;
+				default: newGender = undefined;
+			}
+
+			if(newGender)
+			{
+				if(!model.turnstate.overrides[ponyCard])
+					model.turnstate.overrides[ponyCard] = {};
+
+				model.turnstate.overrides[ponyCard].gender = newGender;
+				broadcastEffects();
+			}
+		}
+	}
+
+	if (shipInfo.action == "timelineChange")
+	{
+		var ponyCard = await openCardSelect("Choose a pony to gain the <br> time traveller symbol", ponies, true);
+
+		if(!ponyCard) return;
+
+		if(model.turnstate)
+		{
+			if(!model.turnstate.overrides[ponyCard])
+				model.turnstate.overrides[ponyCard] = {};
+
+			model.turnstate.overrides[ponyCard].altTimeline = true;
+			broadcastEffects();
+		}
+	}
+
+	if (shipInfo.action == "raceChange")
+	{
+		ponies = ponies.filter(x => !cards[x].keywords.has("Changeling"));
+
+		console.log(ponies);
+
+		if(ponies.length == 0)
+			return;
+
+		var pair = await raceChangePopup(ponies);
+
+		if(!pair) return;
+
+		var [ponyCard, newRace] = pair;
+
+		if(model.turnstate)
+		{
+
+			if(!model.turnstate.overrides[ponyCard])
+				model.turnstate.overrides[ponyCard] = {};
+
+			model.turnstate.overrides[ponyCard].race = newRace;
+			broadcastEffects();
+		}
+	}
+}
+
+addPlayEvent(async function(e){
+
+	if(isPony(e.card) && isBoardLoc(e.endLocation))
+	{
+		if(model.turnstate)
+		{
+			for(var shipCard in model.turnstate.openShips)
+			{
+				if(isShipClosed(shipCard))
+				{
+					delete model.turnstate.openShips[shipCard];
+					await executeShipAction(shipCard);
+				}
+			}
+		}
+	}
+});
+
+
+function raceChangePopup(ponies)
+{
+	return createPopup([{render: function(acceptFn)
+	{
+		var selectedPony;
+		var selectedRace;
+
+		var div =document.createElement('div');
+		div.classList.add('popupPage');
+
+		var h1 = document.createElement('h1');
+		h1.innerHTML = "Choose a pony and select their new race";
+		div.appendChild(h1)
+
+		var buttonDiv = document.createElement('div')
+		buttonDiv.className = "raceButtonContainer"
+
+
+		var card1 = makeCardElement(ponies[0]);
+		card1.setAttribute('value', ponies[0])
+
+		if(ponies.length == 2)
+		{
+			var card2 = makeCardElement(ponies[1]);
+			card2.setAttribute('value', ponies[1])
+		}
+		
+
+		function ponySelect()
+		{
+			card1.classList.remove('selected')
+			if(card2)
+				card2.classList.remove('selected')
+			
+			this.classList.add('selected');
+			selectedPony = this.getAttribute('value');
+
+			if(selectedPony && selectedRace)
+				acceptFn([selectedPony, selectedRace]);
+
+			console.log(selectedPony + " " + selectedRace);
+
+		}
+
+		card1.onclick = ponySelect;
+		buttonDiv.appendChild(card1);
+
+		if(card2)
+		{
+			card2.onclick = ponySelect;
+			buttonDiv.appendChild(card2);
+		}
+
+		var earth = document.createElement('img');
+		earth.className = 'raceButton';
+		earth.setAttribute('value','earth')
+		earth.src = "/img/sym/earth.png";
+		buttonDiv.appendChild(earth)
+
+		var pegasus = document.createElement('img');
+		pegasus.className = 'raceButton';
+		pegasus.src = "/img/sym/pegasus.png";
+		pegasus.setAttribute('value','pegasus')
+		buttonDiv.appendChild(pegasus)
+
+		var unicorn = document.createElement('img');
+		unicorn.className = 'raceButton';
+		unicorn.src = "/img/sym/unicorn.png";
+		unicorn.setAttribute('value','unicorn')
+		buttonDiv.appendChild(unicorn)
+
+		var alicorn = document.createElement('img');
+		alicorn.className = 'raceButton';
+		alicorn.src = "/img/sym/alicorn.png";
+		alicorn.setAttribute('value','alicorn')
+		buttonDiv.appendChild(alicorn)
+
+		function raceSelect()
+		{
+			earth.classList.remove('selected')
+			pegasus.classList.remove('selected')
+			unicorn.classList.remove('selected')
+			alicorn.classList.remove('selected')
+			this.classList.add('selected');
+			selectedRace = this.getAttribute('value');
+
+			if(selectedPony && selectedRace)
+				acceptFn([selectedPony, selectedRace]);
+		}
+
+		earth.onclick = raceSelect;
+		pegasus.onclick = raceSelect;
+		unicorn.onclick = raceSelect;
+		alicorn.onclick = raceSelect;
+
+		div.appendChild(buttonDiv);
+
+		return div;
+
+	}}],true)
+}

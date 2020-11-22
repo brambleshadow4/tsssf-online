@@ -39,8 +39,6 @@ app.get("/game/popupComponent.js", file("./views/game/popupComponent.js"))
 
 
 app.get("/viewSelector.js", file("./views/viewSelector.js"))
-
-
 app.get("/lib.js", file("./server/lib.js"))
 
 
@@ -90,10 +88,12 @@ app.get("/stats", async function(req,res){
 
 	var liveStats = tsssfServer.getStats();
 	template = template.replace("$1", liveStats.players);
+
 	template = template.replace("$2", liveStats.games);
 
-	template = template.replace("$D", JSON.stringify(stats.gamesHostedThisWeek));
-	template = template.replace("$E", JSON.stringify(stats.playersJoinedThisWeek));
+	template = template.replace("$graph1.", JSON.stringify(stats.gamesHostedThisWeek));
+	template = template.replace("$graph2.", JSON.stringify(stats.playersJoinedThisWeek));
+	template = template.replace("$date.", liveStats.startTime);
 
 	res.send(template);
 })

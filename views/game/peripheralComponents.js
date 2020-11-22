@@ -135,8 +135,6 @@ function preRequestDrawGoal()
 }
 
 
-
-
 export function updatePonyDiscard(cardOnTop)
 {
 	if(model.ponyDrawPileLength == 0)
@@ -215,10 +213,12 @@ export function updateShipDiscard(tempCard)
 
 export function updateGoalDiscard(tempCard)
 {
+	var element = document.getElementById("goalDrawPile")
+
 	if(model.goalDrawPileLength == 0)
-		document.getElementById("goalDrawPile").classList.add('blank');
+		element.classList.add('blank');
 	else
-		document.getElementById("goalDrawPile").classList.remove('blank');
+		element.classList.remove('blank');
 
 	var l = model.goalDiscardPile.length;
 	var topCard = tempCard || (l ? model.goalDiscardPile[l-1] : "blank:goal");
@@ -228,7 +228,26 @@ export function updateGoalDiscard(tempCard)
 		topCard,
 		"goalDiscardPile,top",
 		false, false
-	)
+	);
+
+
+	element = document.getElementById("goalDiscardPile")
+	element.onclick = async function()
+	{
+		if(model.goalDiscardPile.length)
+		{
+			var card = await openCardSelect("Discarded goals", model.goalDiscardPile);
+			var openGoal = model.currentGoals.indexOf("blank:goal")
+			if(card && isItMyTurn() && openGoal > -1)
+			{
+				var i = model.goalDiscardPile.indexOf(card);
+				var area = (i+1 == model.goalDiscardPile.length ? "top" : "stack");
+				var loc = "goalDiscardPile," + area;
+				moveCard(card, loc, "goal," + openGoal);
+				broadcastMove(card, loc, "goal," + openGoal);
+			}
+		}
+	}
 }
 
 export function updateWinnings()
@@ -251,6 +270,29 @@ export function updateWinnings()
 		element.appendChild(card)
 	}
 
+	var arrow = document.createElement("img");
+	arrow.src = "/img/return.svg";
+	arrow.className = 'returnArrow';
+
+	arrow.onclick = function(e)
+	{
+		var goalSlot = model.currentGoals.indexOf("blank:goal");
+		if(goalSlot > -1)
+		{
+			if(model.winnings.length == 1)
+			{
+				console.log("deleting arrow")
+				this.parentNode.removeChild(this)
+			}
+
+
+			broadcastMove(model.winnings[model.winnings.length-1], "winnings","goal," + goalSlot)
+			moveCard(model.winnings[model.winnings.length-1], "winnings","goal," + goalSlot);
+		}
+	}
+
+	if(model.winnings.length)
+		element.appendChild(arrow);
 }
 
 export function updatePlayerList()
@@ -432,7 +474,7 @@ function updateCardRowHeight()
 }
 
 
-function openCardSelect(title, cards)
+export function openCardSelect(title, cards, miniMode)
 {
 	return createPopup([{
 		render: function(closePopupWithVal, reject){
@@ -455,14 +497,13 @@ function openCardSelect(title, cards)
 
 				cardElement.onclick = function()
 				{
-					console.log("calling accept method");
 					closePopupWithVal(card);
 				}
 			}
 
 			return div;
 		}
-	}]) 
+	}], miniMode) 
 }
 
 
@@ -504,6 +545,7 @@ window.openSettings = function()
 
 			div.querySelector("#newGameButton").onclick = function()
 			{
+				closeFn();
 				broadcast("startlobby;");
 			}	
 

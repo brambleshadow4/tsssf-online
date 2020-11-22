@@ -327,20 +327,7 @@ button
 	vertical-align: middle;
 }
 
-.popup
-{
-	font-size: initial;
-	border: solid 2px black;
-	z-index: 5;
-	position: absolute;
-	top: 10vh;
-	bottom: 10vh;
-	left: 10vh;
-	right: 10vh;
 
-	background-color: white;
-	overflow-y: auto;
-}
 
 #turnInfo
 {
@@ -349,17 +336,6 @@ button
 	text-align: center;
 }
 
-#popupCloseButton
-{
-	width: 10vh;
-	height: 10vh;
-	top: 7vh;
-	right: 7vh;
-	z-index: 6;
-
-	position: absolute;
-	cursor: pointer;
-}
 
 .disconnected
 {
@@ -368,9 +344,44 @@ button
 	color: red;
 }
 
+
 .popup
 {
+	font-size: initial;
+	border: solid 2px black;
+	z-index: 5;
+	background-color: white;
+	overflow-y: auto;
+
 	overflow: visible;
+}
+.popup.normal
+{
+	position: absolute;
+	top: 10vh;
+	bottom: 10vh;
+	left: 10vh;
+	right: 10vh;
+	text-align: left;
+}
+
+.popup.mini
+{
+	margin-top: 10vh;
+	position: relative;
+	display: inline-block;
+}
+
+#popupCloseButton
+{
+	width: 10vh;
+	height: 10vh;
+	top: -4vh;
+	right: -4vh;
+	z-index: 6;
+
+	position: absolute;
+	cursor: pointer;
 }
 
 .popupTabs
@@ -410,7 +421,7 @@ button
 	box-sizing: border-box;
 }
 
-.popupPage *:first-child
+.popupPage > *:first-child
 {
 	margin-top: 0px;
 }
@@ -419,6 +430,17 @@ button
 {
 	overflow-y: auto;
 	height: 100%;
+}
+
+.popupContainer
+{
+	width: 100%;
+	height: 100vh;
+	padding: 0px;
+	margin: 0px;
+	text-align: center;
+	box-sizing: content-box;
+
 }
 
 
@@ -434,8 +456,21 @@ button
 	position: absolute;
 	bottom: 0vh;
 	right: 0vh;
+}
 
-	background-color: red;
+#winnings .returnArrow
+{
+	display: none;
+	width: 5vh;
+	z-index: 5;
+	margin-right: 1vh;
+	margin-bottom: 1vh;
+	position: relative;
+	cursor: pointer;
+}
+#winnings:hover .returnArrow
+{
+	display: inline-block;
 }
 
 iframe
@@ -482,4 +517,62 @@ iframe
 	border: solid 1px black;
 	background-color: #AAAAAA;
 	padding: 0px 5px;
+}
+
+
+.changeling
+{
+	animation-name: changeling;
+	animation-duration: 5s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+	filter: hue-rotate(180deg);
+	border-radius: 5px;
+
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+.symbol.decoration
+{
+	width: 5vh;
+	height: 5vh;
+	padding: .7vh;
+	z-index: 1;
+	position: relative;
+}
+
+.raceButton
+{
+	width: 10vh;
+	height: 10vh;
+	cursor: pointer;
+	margin-top: 1vh;
+	margin-left: 1vh;
+	border-radius: 5vh;
+}
+
+.raceButtonContainer
+{
+	vertical-align: middle;
+}
+
+.raceButtonContainer > *
+{
+	vertical-align: middle;
+}
+
+.raceButtonContainer .selected
+{
+	box-shadow: 0 0 8px 8px blue;
+}
+
+
+@keyframes changeling {
+  0% {opacity: 0}
+  25% {opacity: 1}
+  50% {opacity: 1}
+  75% {opacity: 0}
+  100% {opacity: 0}
 }

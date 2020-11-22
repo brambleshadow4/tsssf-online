@@ -55,14 +55,28 @@ export function TsssfGameServer()
 	wsServer.getStats = function()
 	{
 		var stats = {games:0, players:0}
+		var startTime
 		for(var key in games)
 		{
-			stats.games++;
-			stats.players += games[key].players.length;
+			if(games[key].isInGame)
+			{
+				stats.games++;
+				stats.players += games[key].players.filter(x => x.socket.isAlive).length;
+
+				if(startTime == undefined)
+					startTime = games[key].startTime;
+				else
+					startTime = Math.max(games[key].startTime, startTime);
+			}
 		}
+
+		if(startTime)
+			stats.startTime = startTime;
 
 		return stats;
 	}
+
+	var TEMP_DISCONNECT_TIME = 15*1000;
 
 	function isRegistered(player)
 	{
@@ -126,8 +140,8 @@ export function TsssfGameServer()
 		player.id = Math.floor(Math.random()*10**16)+1;
 
 
-		if(player.name == "")
-			logPlayerJoined();
+		//if(player.name == "")
+		//	logPlayerJoined();
 
 		player.name = newName;
 
@@ -160,6 +174,17 @@ export function TsssfGameServer()
 				if(socket != thissocket)
 					 games[key].players[i].socket = thissocket;
 
+				return games[key].players[i] 
+			}
+		}
+	}
+
+	function getPlayerByName(key, name)
+	{
+		for(var i=0; i < games[key].players.length; i++)
+		{
+			if(name == games[key].players[i].name)
+			{
 				return games[key].players[i] 
 			}
 		}
@@ -314,6 +339,8 @@ export function TsssfGameServer()
 	{	
 		var model = games[key];
 
+		model.startTime = new Date().getTime();
+
 		model.cardLocations = {};
 		model.board = {
 			"p,0,0":{
@@ -364,6 +391,11 @@ export function TsssfGameServer()
 
 		logGameHosted();
 
+		for(var i of model.players.filter(x => isRegistered(x)))
+		{
+			logPlayerJoined();
+		}
+
 		var re = new RegExp(model.cardDecks);
 
 		for(var cardName in cards)
@@ -403,7 +435,8 @@ export function TsssfGameServer()
 		if(options.ruleset == "turnsOnly")
 		{
 			model.turnstate = {
-				currentPlayer: model.players[0].name
+				currentPlayer: model.players[0].name,
+				overrides: {}
 			};
 		}
 		else
@@ -425,6 +458,15 @@ export function TsssfGameServer()
 		{
 			return (model.board[loc] != undefined)
 		}
+		if(isGoalLoc(loc))
+		{
+			var goalNo = Number(loc.split(",")[1]);
+
+			if(model.currentGoals[goalNo] == undefined)
+				return false;
+
+			return model.currentGoals[goalNo] != "blank:goal"
+		}
 
 		return false;
 	}
@@ -440,30 +482,24 @@ export function TsssfGameServer()
 		toEveryoneElse(key, player.socket, args.join(";"));
 	}
 
-	function changeTurnToNextPlayer(key, socket)
+	function changeTurnToNextPlayer(key)
 	{
 		if(!games[key].turnstate)
 			return;
 
-		var k = getPlayerIndex(key, socket);
-		var nextPlayer = (k+1) % games[key].players.length;
+		games[key].turnstate.overrides = {};
 
-		while(nextPlayer != k)
-		{
-			if(games[key].players[nextPlayer].name != "" && games[key].players[nextPlayer].socket.isAlive )
-			{
-				games[key].turnstate.currentPlayer = games[key].players[nextPlayer].name;
-				//console.log("it is now " + games[key].players)
-				toEveryone(key, "turnstate;" + JSON.stringify(games[key].turnstate));
-				return;
-			}
-			else
-			{
-				nextPlayer = (nextPlayer+1) % games[key].players.length;
-			}
-		}
-		games[key].turnstate.currentPlayer = getPlayer(key, socket).name;	
+		
+		var rotation = games[key].players.filter(x => !x.socket.isDead && x.name != "");
 
+		if(rotation.length == 0)
+			return;
+
+		var k = rotation.map(x=> x.name).indexOf(games[key].turnstate.currentPlayer);
+		k = (k+1)%rotation.length;
+
+		games[key].turnstate.currentPlayer = rotation[k].name;
+		toEveryone(key, "turnstate;" + JSON.stringify(games[key].turnstate));
 	}
 
 
@@ -473,9 +509,10 @@ export function TsssfGameServer()
 	wsServer.on('connection', (socket, request, client) => 
 	{
 		socket.isAlive = true;
+		socket.isDead = false;
 
 
-		var key = request.url.substring(2);
+		let key = request.url.substring(2);
 		if(!games[key])
 		{
 			socket.send("closed;");
@@ -483,11 +520,34 @@ export function TsssfGameServer()
 			return;
 		}
 
+
 		sendLobbyList(key);	
 
 		socket.on('close', () =>
 		{
 			socket.isAlive = false;
+
+			let player = getPlayer(key, socket)
+			let deadName = player ? player.name : "";
+
+			// mark the socket as dead after 15 s. 
+			setTimeout(() => {
+				socket.isDead = true;
+				let player = getPlayerByName(key, deadName);
+
+				if(player == undefined || (player && player.socket == socket))
+				{
+					let curPlayerName = games[key] && games[key].turnstate && games[key].turnstate.currentPlayer;
+
+					if(curPlayerName == deadName)
+					{
+						changeTurnToNextPlayer(key);
+					}
+				}
+		
+				
+
+			}, TEMP_DISCONNECT_TIME); 
 
 			if(games[key].host == socket)
 			{
@@ -525,13 +585,6 @@ export function TsssfGameServer()
 			if(games[key].isInGame)
 			{
 				sendPlayerlistsToEachPlayer(key);
-
-				var player = getPlayer(key, socket);
-
-				if(player && games[key].turnstate && games[key].turnstate.currentPlayer == player.name)
-				{
-					changeTurnToNextPlayer(key, socket);
-				}
 			}
 		})
 
@@ -553,7 +606,11 @@ export function TsssfGameServer()
 				if(isRegistered(player) && model.isInGame)
 				{
 					socket.send("handshake;game");
-					sendPlayerlistsToEachPlayer(key)
+					sendPlayerlistsToEachPlayer(key);
+
+					if(model.players.filter(x => !x.socket.isDead).length == 1)
+						changeTurnToNextPlayer(key); // only one alive player. Make sure it's their turn.
+
 				}
 				else if(model.isLobbyOpen)
 				{
@@ -614,6 +671,7 @@ export function TsssfGameServer()
 					if(model.isInGame)
 					{
 						socket.send("startgame;");
+						logPlayerJoined();
 						sendPlayerlistsToEachPlayer(key);
 					}
 					else
@@ -667,7 +725,7 @@ export function TsssfGameServer()
 					var winnings = model.players[i].winnings;
 
 					if(model.turnstate && model.turnstate.currentPlayer == playerName)
-						changeTurnToNextPlayer(key, model.players[i].socket);
+						changeTurnToNextPlayer(key);
 
 					model.players[i].socket.send("kick");
 					model.players[i].socket.close()
@@ -714,13 +772,26 @@ export function TsssfGameServer()
 				// If a new player joins + there's no one else connected (rejoining a dead game), make sure it's their turn.
 				if(model.players.filter(x => x.socket.isAlive).length == 1)
 				{
-					changeTurnToNextPlayer(key, socket);
 					model.host = socket;
 					socket.send("ishost;1");
 				}
 
 				sendCurrentState(key, socket);
 				return;
+			}
+
+			if(message.startsWith("effects;"))
+			{	
+				try{
+					var overrides = JSON.parse(message.split(";")[1]);
+					model.turnstate.overrides = overrides;
+					toEveryoneElse(key, socket, message);
+				}
+				catch(e)
+				{
+
+				}
+				
 			}
 
 			if(message.startsWith("draw;"))
@@ -813,28 +884,28 @@ export function TsssfGameServer()
 				//console.log(message);
 
 				let serverStartLoc = startLocation;
-				if(startLocation == "hand")
+				if(startLocation == "hand" || startLocation == "winnings")
 					serverStartLoc = "player," + player.name;
 
 
 				// if the player has an incorrect position for a card, move it to where it actually should be.
 				if(model.cardLocations[card] != serverStartLoc || isLocOccupied(key, endLocation))
-				{
-					var whereThePlayerThinksTheCardIs = endLocation;
-						
-
-
+				{						
 					var whereTheCardActuallyIs = model.cardLocations[card];
 					if(whereTheCardActuallyIs == "player," + player.name)
-						whereTheCardActuallyIs = "hand";
-
+					{
+						if(isGoal(card))
+							whereTheCardActuallyIs = "winnings";
+						else
+							whereTheCardActuallyIs = "hand";
+					}
 
 					console.log("X " + message);
 					console.log("  P: " + player.name);
 
 					console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
-					console.log("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
-					socket.send("move;" + card + ";" + whereThePlayerThinksTheCardIs + ";" + whereTheCardActuallyIs);
+					console.log("  move;" + card + ";limbo;" + whereTheCardActuallyIs);
+					socket.send("move;" + card + ";limbo;" + whereTheCardActuallyIs);
 
 					return;
 				}
@@ -853,9 +924,14 @@ export function TsssfGameServer()
 				if(startLocation == "hand")
 				{
 					var i = getPlayer(key, socket).hand.indexOf(card);
-					
 
 					getPlayer(key, socket).hand.splice(i, 1);
+				}
+
+				if(startLocation == "winnings")
+				{
+					var i = getPlayer(key, socket).winnings.indexOf(card);
+					getPlayer(key, socket).winnings.splice(i, 1);
 				}
 
 				if(isBoardLoc(startLocation))
@@ -910,6 +986,15 @@ export function TsssfGameServer()
 					var [_,x,y] = endLocation.split(",")
 					model.offsets[card + "," + x + "," + y] = "";
 				}
+
+				if(isGoalLoc(endLocation))
+				{
+					var [_,goalNo] = endLocation.split(",")
+					goalNo = Number(goalNo);
+					model.currentGoals[goalNo] = card;
+					model.cardLocations[card] = "goal," + goalNo;
+				}
+
 
 				if(endLocation == "winnings")
 				{
@@ -969,7 +1054,8 @@ export function TsssfGameServer()
 
 				if(player.name == model.turnstate.currentPlayer)
 				{
-					changeTurnToNextPlayer(key, socket);	
+				
+					changeTurnToNextPlayer(key);	
 				}
 			}
 		});

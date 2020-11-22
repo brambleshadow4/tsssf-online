@@ -185,6 +185,9 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 					var [_,x,y] = location.split(",");
 					var offsetLoc = "offset," + x + "," + y;
 					let offsetCard = model.board[location].card;
+
+
+
 					moveCard(offsetCard, location, offsetLoc);
 					broadcastMove(offsetCard, location, offsetLoc);
 				}
@@ -258,6 +261,26 @@ export function updateCardElement(oldElement, card, location, isDraggable, isDro
 }
 
 
+export function setDisguise(element, disguiseCard)
+{
+	var img = document.createElement('img');
+	img.style.height = "100%";
+	img.src = cards[disguiseCard].thumbnail;
+	img.className = "changeling decoration";
+	element.appendChild(img);
+}
+
+export function addTempSymbol(element, symbol)
+{
+	if(symbol == undefined)
+		return;
+
+	var img = document.createElement('img');
+	//img.style.height = "100%";
+	img.src = "/img/sym/" + symbol + ".png";
+	img.className = "symbol decoration";
+	element.appendChild(img);
+}
 
 
 
@@ -301,13 +324,16 @@ function setCardBackground(element, card, useLarge)
 
 		element.style.backgroundImage = "url(\"" + src + "\")";
 
-		addShiftHover(card, element);
+		if(!useLarge)
+			addShiftHover(card, element);
 	}
 }
 
 function enlargeCard(cardDiv)
 {
 	if(document.getElementById('giantCard')) return;
+
+	
 
 	var giantCard = document.createElement('div');
 	giantCard.id = "giantCard"
