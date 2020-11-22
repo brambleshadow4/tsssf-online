@@ -1487,7 +1487,7 @@ var cards = {
 
 			"PU.Ship.MoreThanRoommates": {
 				name: "More Than Roommates",
-				url: "Ship_More than Roommates.png"
+				url: "Ship_More Than Roommates.png"
 			},
 			"PU.Ship.SpringBreak": {
 				name: "Spring Break!",
