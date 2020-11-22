@@ -324,13 +324,16 @@ function setCardBackground(element, card, useLarge)
 
 		element.style.backgroundImage = "url(\"" + src + "\")";
 
-		addShiftHover(card, element);
+		if(!useLarge)
+			addShiftHover(card, element);
 	}
 }
 
 function enlargeCard(cardDiv)
 {
 	if(document.getElementById('giantCard')) return;
+
+	
 
 	var giantCard = document.createElement('div');
 	giantCard.id = "giantCard"
