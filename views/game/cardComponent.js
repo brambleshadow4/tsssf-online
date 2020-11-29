@@ -292,7 +292,10 @@ export function addTempSymbol(element, symbol)
 
 	var img = document.createElement('img');
 	//img.style.height = "100%";
-	img.src = "/img/sym/" + symbol + ".png";
+
+	var extension = (symbol == "doublePony" ? ".svg" : ".png")
+
+	img.src = "/img/sym/" + symbol + extension;
 	img.className = "symbol decoration";
 	element.appendChild(img);
 }

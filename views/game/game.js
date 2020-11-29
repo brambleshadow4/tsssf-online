@@ -1,9 +1,38 @@
 /**
+	Some basic documentation of the implicit types of this file + the game
+
+	type Location is a string with the possible valid values:
+
+		"ponyDiscardPile,<area>" where <area> is "top" or "stack"
+		"goalDiscardPile,<area>" where <area> is "top" or "stack"
+		"shipDiscardPile,<area>" where <area> is "top" or "stack"
+		"ponyDrawPile" 
+		"goalDrawPile" 
+		"shipDrawPile"
+		"winnings"  - this client's winnings (completed goals)
+		"hand" - this client's hand
+		"player" - an opponent
+		"<placement>,<x>,<y>" is a board location where 
+			<placement> is "p" for pony or "sr" for ship right or "sd" for ship down
+			<x> is the x coordinate of the card on the board
+			<y> is the y coordinate of the card on the board
+
+		"offset,<x>,<y>" where
+			<x> is the x coordinate of the card on the board
+			<y> is the y coordinate of the card on the board
+
+		"goal",<pos>" where <pos> is 0, 1, or 2
+
+		"limbo" - used for cards which have disappeared from the board - see moveCard()
+
+	type CardID is a string used to represent what the card is. It looks something like "Core.Pony.SuperSpyTwilight"
+
+
 	model: {
 		board: {
 			[boardLocation]: {	
 				element: HtmlElement,
-				card: CardNamepspaceString
+				card: CardID
 			}
 		}
 
@@ -16,12 +45,21 @@
 			[id]:
 		]
 
-		playerName: string // the name of the player
+		playerName: string // the name of this playerplayer
 
 
 		// turnstate is undefined in sandbox mode
 		turnstate:{
 			currentPlayer: string // the name of the player whose turn it is
+			overrides:{
+				[CardID]: {
+					race:
+					gender: 
+					disguise:
+					doublePony:
+
+				}
+			}
 		}
 	}
 
@@ -215,7 +253,7 @@ function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
 }
 
 
-var turnStateChangelings = {};
+
 
 export function updateTurnstate()
 {
@@ -224,17 +262,6 @@ export function updateTurnstate()
 		document.body.classList.remove("nomove");
 		return;
 	}
-
-	var decoration = document.getElementsByClassName('decoration');
-	var i = 0;
-	while(i < decoration.length)
-	{
-		if(decoration[i].classList.contains('changeling'))
-			i++;
-		else
-			decoration[i].parentNode.removeChild(decoration[i]);
-	}
-
 
 	var div = document.getElementById('turnInfo');
 	if(isItMyTurn())
@@ -261,6 +288,25 @@ export function updateTurnstate()
 
 		if(thisPlayer.disconnected)
 			div.innerHTML += "<div>Their turn will end if they do not reconnect in < 15s</div>";
+	}
+
+	updateEffects();
+
+	updatePlayerList();
+}
+
+var turnStateChangelings = {};
+
+function updateEffects()
+{
+	var decoration = document.getElementsByClassName('decoration');
+	var i = 0;
+	while(i < decoration.length)
+	{
+		if(decoration[i].classList.contains('changeling'))
+			i++;
+		else
+			decoration[i].parentNode.removeChild(decoration[i]);
 	}
 
 	// We don't want to update changelines always because that will mess up their animation
@@ -309,6 +355,11 @@ export function updateTurnstate()
 				addTempSymbol(element, "altTimeline");
 			}
 
+			if(decs.doublePony)
+			{
+				addTempSymbol(element, "doublePony");
+			}
+
 			if(decs.keywords)
 			{
 				console.log("we have keywords")
@@ -316,8 +367,6 @@ export function updateTurnstate()
 			}
 		}	
 	}	
-
-	updatePlayerList();
 }
 
 export function updateGame(newModel)
@@ -834,6 +883,23 @@ async function executeShipAction(shipCard)
 				model.turnstate.overrides[ponyCard].gender = newGender;
 				broadcastEffects();
 			}
+		}
+	}
+
+	if (shipInfo.action == "clone")
+	{
+		var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !cards[x].doublePony), true);
+
+		if(!ponyCard) return;
+
+		if(model.turnstate)
+		{
+
+			if(!model.turnstate.overrides[ponyCard])
+				model.turnstate.overrides[ponyCard] = {};
+
+			model.turnstate.overrides[ponyCard].doublePony = true;
+			broadcastEffects();
 		}
 	}
 
