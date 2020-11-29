@@ -270,6 +270,21 @@ export function setDisguise(element, disguiseCard)
 	element.appendChild(img);
 }
 
+export function setCardKeywords(element, keywords)
+{
+
+	console.log(keywords)
+	var div = document.createElement('div');
+	div.className = "keywords decoration";
+
+	for(var word of keywords)
+	{
+		div.innerHTML += "<div>" + word + "</div>";
+	}
+
+	element.appendChild(div);
+}
+
 export function addTempSymbol(element, symbol)
 {
 	if(symbol == undefined)

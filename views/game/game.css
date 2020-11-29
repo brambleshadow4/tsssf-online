@@ -543,6 +543,17 @@ iframe
 	position: relative;
 }
 
+.keywords.decoration
+{
+	font-size: 2vh;
+	position: absolute;
+	bottom: 1vh;
+	left: 0px;
+	right: 0px;
+	background-color: white;
+	text-align: center;
+}
+
 .raceButton
 {
 	width: 10vh;
@@ -563,7 +574,7 @@ iframe
 	vertical-align: middle;
 }
 
-.raceButtonContainer .selected
+.popupPage .selected
 {
 	box-shadow: 0 0 8px 8px blue;
 }

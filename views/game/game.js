@@ -66,6 +66,7 @@ import
 import {
 	makeCardElement,
 	setDisguise,
+	setCardKeywords,
 	addTempSymbol
 } from "/game/cardComponent.js"
 
@@ -124,11 +125,15 @@ export function loadView()
 
 
 
+var allKeywords = [];
+
 // Preloading all the cards makes everything feel instant.
 function LoadCards()
 {
 	if(haveCardsLoaded)
 		return;
+
+	var keywordSet = new Set();
 
 	haveCardsLoaded = true;
 
@@ -138,6 +143,14 @@ function LoadCards()
 
 	for(var key in cards)
 	{
+		if(cards[key].keywords)
+		{
+			for(var keyword of cards[key].keywords)
+			{
+				keywordSet.add(keyword);
+			}
+		}
+
 		if(re.exec(key))
 		{
 			var nodes = key.split(".");
@@ -154,6 +167,8 @@ function LoadCards()
 			preloadedImages.appendChild(img);
 		}
 	}
+
+	allKeywords = [...keywordSet.keys()].sort();
 }
 
 
@@ -292,6 +307,12 @@ export function updateTurnstate()
 			if(decs.altTimeline)
 			{
 				addTempSymbol(element, "altTimeline");
+			}
+
+			if(decs.keywords)
+			{
+				console.log("we have keywords")
+				setCardKeywords(element, decs.keywords)
 			}
 		}	
 	}	
@@ -764,6 +785,30 @@ async function executeShipAction(shipCard)
 	var ponies = getShippedPonies(shipCard);
 	var shipInfo = cards[shipCard]
 
+	if(shipCard == "Core.Ship.YerAPrincessHarry")
+	{
+		var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !cards[x].keywords.has("Changeling")), true);
+
+		if(ponyCard)
+		{
+			if(!model.turnstate.overrides[ponyCard])
+				model.turnstate.overrides[ponyCard] = {};
+
+			model.turnstate.overrides[ponyCard].race = "alicorn";
+			model.turnstate.overrides[ponyCard].gender = "female";
+
+			if(model.turnstate.overrides[ponyCard].keywords)
+			{
+				model.turnstate.overrides[ponyCard].keywords = model.turnstate.overrides[ponyCard].keywords.filter(x => x != "Princess").concat("Princess");
+			}
+			else
+			{
+				model.turnstate.overrides[ponyCard].keywords = ["Princess"];
+			}
+		}
+	}
+
+
 	if (shipInfo.action == "genderChange")
 	{
 		var ponyCard = await openCardSelect("Choose a pony to change gender", ponies, true);
@@ -812,8 +857,6 @@ async function executeShipAction(shipCard)
 	{
 		ponies = ponies.filter(x => !cards[x].keywords.has("Changeling"));
 
-		console.log(ponies);
-
 		if(ponies.length == 0)
 			return;
 
@@ -833,11 +876,107 @@ async function executeShipAction(shipCard)
 			broadcastEffects();
 		}
 	}
+
+	if (shipInfo.action == "keywordChange")
+	{
+
+		var output = await createPopup([{"render":function(accept)
+		{
+
+			var element = document.createElement('div');
+			element.className = "popupPage"
+
+			var selectedPony;
+			var h1 = document.createElement('h1');
+			h1.innerHTML = "Pick a keyword";
+			element.appendChild(h1);
+
+			var card1 = makeCardElement(ponies[0]);
+			card1.setAttribute('value', ponies[0])
+
+	
+			var card2 = makeCardElement(ponies[1]);
+			card2.setAttribute('value', ponies[1])
+			
+
+			function ponySelect()
+			{
+				card1.classList.remove('selected')
+				card2.classList.remove('selected')
+				
+				this.classList.add('selected');
+				selectedPony = this.getAttribute('value');
+
+			}
+
+			card1.onclick = ponySelect;
+			element.appendChild(card1);
+
+
+			card2.onclick = ponySelect;
+			element.appendChild(card2);
+			
+			var row = document.createElement('div')
+			for(let i=0; i< allKeywords.length; i++)
+			{
+
+				var button = document.createElement("button");
+				button.innerHTML = allKeywords[i];
+				button.onclick = function(){
+
+					if(selectedPony)
+					{
+						accept([selectedPony, allKeywords[i]]);
+					}
+					
+				}
+
+				row.appendChild(button);
+
+
+				if(i%5 == 4)
+				{
+					element.appendChild(row);
+					row = document.createElement('div');
+				}
+			}
+
+			element.appendChild(row);
+
+			return element;
+
+
+		}}], true);
+
+		if(output && model.turnstate)
+		{
+			var [card, keyword] = output;
+
+			if(!model.turnstate.overrides[card])
+			{
+				model.turnstate.overrides[card] = {
+					keywords: [keyword]
+				};
+			}
+			else if(!model.turnstate.overrides[card].keywords)
+			{
+				model.turnstate.overrides[card].keywords = [keyword]
+			}
+			else
+			{
+				model.turnstate.overrides[card].keywords = model.turnstate.overrides[card].keywords.filter(x => x != keyword).concat([keyword])
+			}	
+
+			broadcastEffects();
+		}
+	}
+
+	
 }
 
 addPlayEvent(async function(e){
 
-	if(isPony(e.card) && isBoardLoc(e.endLocation))
+	if(isPonyOrStart(e.card) && isBoardLoc(e.endLocation))
 	{
 		if(model.turnstate)
 		{
