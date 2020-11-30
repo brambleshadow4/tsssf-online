@@ -315,6 +315,12 @@ export function updatePlayerList()
 			<span class='shipCount'>${player.ships}</span>
 			<span class='goalCount'>${player.winnings.length}</span>
 		`;
+
+		div.onclick = function()
+		{
+			openCardSelect(player.name + "'s won goals", player.winnings);
+		}
+
 		playerList.appendChild(div);
 	}
 }

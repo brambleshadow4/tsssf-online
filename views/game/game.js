@@ -141,7 +141,6 @@ export function loadView()
 		history.replaceState(null, "", "/game" + window.location.search)
 	}
 
-
 	turnStateChangelings = {};
 	haveCardsLoaded = false;
 
