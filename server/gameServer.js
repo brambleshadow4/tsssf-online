@@ -8,7 +8,8 @@ import {
 	isOffsetLoc,
 	isGoalLoc,
 	isDiscardLoc,
-	isPlayerLoc
+	isPlayerLoc,
+	isCardIncluded
 } from "./lib.js";
 
 import cards from "./cards.js";
@@ -256,6 +257,8 @@ export function TsssfGameServer()
 
 		model.keepLobbyOpen = games[key].isLobbyOpen;
 
+		model.startCard = games[key].startCard;
+
 		return model;
 	}
 
@@ -300,6 +303,20 @@ export function TsssfGameServer()
 		}
 	}
 
+	function sendHostMessage(key, socket, isHost)
+	{
+		if(!isHost)
+			var payload = "0"
+		else
+			var payload = JSON.stringify({
+				cardDecks: games[key].cardDecks,
+				ruleset: games[key].ruleset,
+				keepLobbyOpen: games[key].keepLobbyOpen
+			})
+
+		socket.send("ishost;" + payload)
+	}
+
 	function sendCurrentState(key, socket)
 	{
 		var model = getPlayerModel(key, socket);
@@ -341,10 +358,12 @@ export function TsssfGameServer()
 
 		model.startTime = new Date().getTime();
 
+		model.startCard = "Core.Start.FanficAuthorTwilight";
+
 		model.cardLocations = {};
 		model.board = {
 			"p,0,0":{
-				card: "Core.Start.FanficAuthorTwilight"
+				card: model.startCard
 			}
 		};
 		model.offsets = {};
@@ -356,18 +375,20 @@ export function TsssfGameServer()
 		}
 
 		model.isInGame = true;
-		model.isLobbyOpen = !!options.keepLobbyOpen;
 
-		model.cardLocations["Core.Start.FanficAuthorTwilight"] = "p,0,0";
+		model.isLobbyOpen = model.keepLobbyOpen = !!options.keepLobbyOpen;
 
-		var decks = "^Core\\.";
+		
+
+
+		model.cardLocations[model.startCard] = "p,0,0";
+
+		var decks = ["Core.*"];
 		if(options.cardDecks)
 		{
-			var allowedDecks = ["PU","EC"]
+			var allowedDecks = ["PU.*","EC.*"]
 			var decks = options.cardDecks.filter( x => allowedDecks.indexOf(x) > -1);
-			decks.push("Core");
-
-			decks = decks.map(x => "^" + x + "\\.").join("|");
+			decks.push("Core.*");
 		}
 
 		model.cardDecks = decks;
@@ -400,7 +421,7 @@ export function TsssfGameServer()
 
 		for(var cardName in cards)
 		{
-			if(!re.exec(cardName))
+			if(!isCardIncluded(cardName, model))
 				continue;
 
 			if(isGoal(cardName))
@@ -431,6 +452,8 @@ export function TsssfGameServer()
 		}
 
 		randomizeOrder(model.players);
+
+		model.ruleset = options.ruleset.substring(0,200);
 
 		if(options.ruleset == "turnsOnly")
 		{
@@ -559,7 +582,7 @@ export function TsssfGameServer()
 				if(connectedPlayers.length)
 				{
 					games[key].host = connectedPlayers[0].socket;
-					games[key].host.send("ishost;1");
+					sendHostMessage(key, games[key].host, true)
 				}
 				else
 				{
@@ -633,11 +656,11 @@ export function TsssfGameServer()
 					if(!model.host || model.host == socket)
 					{
 						model.host = socket;
-						socket.send("ishost;1");
+						sendHostMessage(key, socket, true)
 					}
 					else
 					{
-						socket.send("ishost;0");
+						sendHostMessage(key, socket, false)
 					}			
 				}
 
@@ -656,7 +679,7 @@ export function TsssfGameServer()
 						
 						startGame(key, options);
 						toEveryone(key, "startgame;");
-						model.host.send("ishost;1");
+						sendHostMessage(key, model.host, true)
 					}		
 				}
 
@@ -695,6 +718,7 @@ export function TsssfGameServer()
 				var [_, keepLobbyOpen] = message.split(";");
 				keepLobbyOpen = !!Number(keepLobbyOpen);
 				model.isLobbyOpen = keepLobbyOpen;
+				model.keepLobbyOpen = keepLobbyOpen;
 
 				toEveryone(key, "keepLobbyOpen;" + (keepLobbyOpen ? 1 : 0));
 			}
@@ -773,7 +797,7 @@ export function TsssfGameServer()
 				if(model.players.filter(x => x.socket.isAlive).length == 1)
 				{
 					model.host = socket;
-					socket.send("ishost;1");
+					sendHostMessage(key, model.host, true)
 				}
 
 				sendCurrentState(key, socket);

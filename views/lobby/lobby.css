@@ -32,6 +32,8 @@ body
 	padding-left: 20px;
 	border-left: solid 2px black;
 	width: 200px;
+
+	float: right;
 }
 
 #startButtonArea
@@ -51,9 +53,15 @@ input[type='text']
 	padding: 5px;
 }
 
+input
+{
+	vertical-align: top;
+}
+
 label
 {
 	cursor: pointer;
+	display: inline-block;
 }
 
 
@@ -62,9 +70,13 @@ button
 	font-size: 14pt;
 }
 
-h2:first-child
+.noTopMargin
 {
-	margin: 0px 0px 10px 0px;
+	margin-top: 0px;
+}
+
+h2
+{
 	font-size: 20pt;
 }
 

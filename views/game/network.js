@@ -73,9 +73,12 @@ export function attachToSocket(socket)
 			window.location.href = location.protocol + "//" + window.location.host;
 		}
 
-		if(event.data.startsWith('ishost;1'))
+		if(event.data.startsWith('ishost;'))
 		{
-			document.getElementById('hostButton').style.display = "inline-block";
+			var val = JSON.parse(event.data.split(";")[1])
+
+			if(val)
+				document.getElementById('hostButton').style.display = "inline-block";
 		}
 
 		if(event.data.startsWith('registered;'))

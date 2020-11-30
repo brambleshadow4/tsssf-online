@@ -76,7 +76,8 @@ import {
 	isPlayerLoc,
 	isDiscardLoc,
 	isBlank,
-	isPonyOrStart
+	isPonyOrStart,
+	isCardIncluded
 } from "/lib.js";
 
 import {
@@ -130,6 +131,7 @@ var offsetId = 0;
 var hoverCard = "";
 var hoverCardDiv;
 
+
 var haveCardsLoaded = false;
 
 export function loadView()
@@ -139,6 +141,8 @@ export function loadView()
 		history.replaceState(null, "", "/game" + window.location.search)
 	}
 
+
+	turnStateChangelings = {};
 	haveCardsLoaded = false;
 
 	window.cardLocations = cardLocations = {};
@@ -166,8 +170,13 @@ export function loadView()
 var allKeywords = [];
 
 // Preloading all the cards makes everything feel instant.
+var currentDeck;
+
+
 function LoadCards()
 {
+	console.log("Load Cards: " + model.cardDecks)
+
 	if(haveCardsLoaded)
 		return;
 
@@ -176,33 +185,45 @@ function LoadCards()
 	haveCardsLoaded = true;
 
 	var preloadedImages = document.getElementById('preloadedImages');
+
+
+	window.currentDeck = currentDeck = {};
 	
 	var re = new RegExp(model.cardDecks) 
 
 	for(var key in cards)
 	{
-		if(cards[key].keywords)
-		{
-			for(var keyword of cards[key].keywords)
-			{
-				keywordSet.add(keyword);
-			}
-		}
+		currentDeck[key] = cards[key];
+	}
 
-		if(re.exec(key))
+	for(var key in currentDeck)
+	{
+		if(isCardIncluded(key, model))
 		{
 			var nodes = key.split(".");
 			nodes.pop();
-			var urlToImg = "/img/" + nodes.join("/") + "/" + cards[key].url;
+			var urlToImg = "/img/" + nodes.join("/") + "/" + currentDeck[key].url;
 
-			cards[key].keywords = new Set(cards[key].keywords);
+			currentDeck[key].keywords = new Set(currentDeck[key].keywords);
 
-			cards[key].fullUrl = urlToImg;
-			cards[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
+			currentDeck[key].fullUrl = urlToImg;
+			currentDeck[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
 
 			var img = document.createElement('img');
-			img.src = cards[key].thumbnail;
+			img.src = currentDeck[key].thumbnail;
 			preloadedImages.appendChild(img);
+
+			if(currentDeck[key].keywords)
+			{
+				for(var keyword of currentDeck[key].keywords)
+				{
+					keywordSet.add(keyword);
+				}
+			}
+		}
+		else
+		{
+			delete currentDeck[key];
 		}
 	}
 

@@ -79,7 +79,7 @@ export function initBoard()
 		refPoint.style.transform = "scale(1,1)";
 		zoomScale = 1;
 
-		var loc = cardLocations["Core.Start.FanficAuthorTwilight"];
+		var loc = cardLocations[model.startCard];
 
 		var [_, x, y] = loc.split(",");
 

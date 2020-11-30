@@ -6,6 +6,8 @@ var joinGameDiv
 var ishost = false;
 var sentName = false;
 
+var cardBoxElements = {};
+
 
 export function loadView(isOpen)
 {
@@ -41,6 +43,8 @@ export function loadView(isOpen)
 		for(var i=1; i < cardBoxes.length; i++)
 		{
 			let box = cardBoxes[i];
+			cardBoxElements[box.getAttribute('value')] = box;
+
 			box.onclick = function()
 			{
 				if(this.classList.contains('selected'))
@@ -71,12 +75,38 @@ function onMessage()
 
 	if(event.data.startsWith("ishost;"))
 	{
-		var [_,val] = event.data.split(";")
-		ishost = val == "1"? true : false;
+		var [_,val] = event.data.split(";");
 
-		if(ishost)
+		console.log(event.data);
+		var options = JSON.parse(val);
+
+		console.log(options);
+
+		if(options)
 		{
+			ishost = true;
 			document.getElementById('tabs').classList.remove('off');
+
+			for(var key in cardBoxElements)
+			{
+				if(key != "Core.*")
+					cardBoxElements[key].classList.remove('selected')
+			}
+
+			if(options.cardDecks)
+				for(var key of options.cardDecks)
+				{
+					if(key != "Core.*")
+						cardBoxElements[key].classList.add('selected');
+				}
+
+			if(options.ruleset == "turnsOnly")
+				document.getElementById("turnsOnly").checked = true;
+			else if (options.ruleset == "sandbox")
+				document.getElementById("sandbox").checked = true;
+
+			if(options.keepLobbyOpen)
+				document.getElementById("keepLobbyOpen").checked = true;
 
 			if(sentName)
 			{
@@ -142,8 +172,7 @@ function startGame()
 	{
 		if(cardDecks[i].classList.contains('selected'))
 		{
-			var cardDeckName = cardDecks[i].id;
-			cardDeckName = cardDeckName.substring(0,cardDeckName.indexOf("-"))
+			var cardDeckName = cardDecks[i].getAttribute('value');
 			options.cardDecks.push(cardDeckName)
 		}
 	}
