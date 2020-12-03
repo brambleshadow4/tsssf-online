@@ -763,14 +763,14 @@ window.moveCard = moveCard;
 
 addPlayEvent(async function(e){
 
-	var cardInfo = cards[e.card];
+	var cardInfo = currentDeck[e.card];
 	if(cardInfo.keywords.has("Changeling") && isBoardLoc(e.endLocation))
 	{
 
 		if(model.turnstate)
 		{
-			var cardNames = Object.keys(cards);
-			var disguises = cardNames.filter(x => cards[x].race == cardInfo.race && !cards[x].doublePony && !cards[x].keywords.has("Changeling"));
+			var cardNames = Object.keys(currentDeck);
+			var disguises = cardNames.filter(x => currentDeck[x].race == cardInfo.race && !currentDeck[x].doublePony && !currentDeck[x].keywords.has("Changeling"));
 
 			var newCard = await openCardSelect("Choose a pony to disguise as", disguises);
 
@@ -789,7 +789,7 @@ addPlayEvent(async function(e){
 
 addPlayEvent(async function(e){
 
-	var cardInfo = cards[e.card];
+	var cardInfo = currentDeck[e.card];
 	if(isShip(e.card) && isBoardLoc(e.endLocation))
 	{
 		if(model.turnstate)
@@ -845,18 +845,18 @@ function getCardProp(card, prop)
 		}
 	} 
 	
-	return cards[card][prop];
+	return currentDeck[card][prop];
 }
 
 async function executeShipAction(shipCard)
 {
 
 	var ponies = getShippedPonies(shipCard);
-	var shipInfo = cards[shipCard]
+	var shipInfo = currentDeck[shipCard]
 
 	if(shipCard == "Core.Ship.YerAPrincessHarry")
 	{
-		var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !cards[x].keywords.has("Changeling")), true);
+		var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !currentDeck[x].keywords.has("Changeling")), true);
 
 		if(ponyCard)
 		{
@@ -908,7 +908,7 @@ async function executeShipAction(shipCard)
 
 	if (shipInfo.action == "clone")
 	{
-		var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !cards[x].doublePony), true);
+		var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !currentDeck[x].doublePony), true);
 
 		if(!ponyCard) return;
 
@@ -941,7 +941,7 @@ async function executeShipAction(shipCard)
 
 	if (shipInfo.action == "raceChange")
 	{
-		ponies = ponies.filter(x => !cards[x].keywords.has("Changeling"));
+		ponies = ponies.filter(x => !currentDeck[x].keywords.has("Changeling"));
 
 		if(ponies.length == 0)
 			return;
