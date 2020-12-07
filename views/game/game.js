@@ -874,6 +874,8 @@ async function executeShipAction(shipCard)
 			{
 				model.turnstate.overrides[ponyCard].keywords = ["Princess"];
 			}
+
+			broadcastEffects();
 		}
 	}
 
