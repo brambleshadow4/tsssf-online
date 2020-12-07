@@ -30,8 +30,6 @@ import {
 	isDeleteClick
 } from "/game/cardComponent.js"
 
-import cards from "/game/cards.js"
-
 import {
 	isItMyTurn,
 	getDataTransfer
@@ -317,6 +315,12 @@ export function updatePlayerList()
 			<span class='shipCount'>${player.ships}</span>
 			<span class='goalCount'>${player.winnings.length}</span>
 		`;
+
+		div.onclick = function()
+		{
+			openCardSelect(player.name + "'s won goals", player.winnings);
+		}
+
 		playerList.appendChild(div);
 	}
 }
@@ -520,7 +524,7 @@ window.openSettings = function()
 			<h1>Host Settings</h1>
 
 			<div class='checkboxContainer'><input type='checkbox' id='keepLobbyOpen'/><label for='keepLobbyOpen'>Let players join mid-game</label></div>
-			<div><button id='newGameButton'>New Game</button><span>Ends the current game and returns everypony to the lobby.</span></div>
+			<div><button id='newGameButton'>New Game</button><span class='buttonDescription'>Ends the current game and returns everypony to the lobby.</span></div>
 
 			<h2>Kick players</h2>
 			<p>Kicking a player removes them from the lobby and releases any cards they have to the discard</p>
@@ -574,12 +578,11 @@ function referencePageRender()
 	var shipReference = document.createElement('div');
 	var goalReference = document.createElement('div');
 
-	var keys = Object.keys(cards);
-	var re = new RegExp(model.cardDecks);
+	var keys = Object.keys(window.currentDeck);
+
 	keys.sort();
 	for(let key of keys)
 	{
-		if(!re.exec(key)) continue;
 
 		let cardDiv = makeCardElement(key)
 		

@@ -75,3 +75,27 @@ export function isDiscardLoc(location)
 		location.startsWith("ponyDiscardPile,") || 
 		location.startsWith('goalDiscardPile,')
 }
+
+
+export function isCardIncluded(card, model)
+{
+	if(isPonyOrStart(card) && !isPony(card))
+	{
+		return card == model.startCard;
+	}
+
+	for(var rule of model.cardDecks)
+	{
+		if(card == rule)
+			return true;
+
+		var i = rule.indexOf("*");
+
+		if(i != -1 && card.startsWith(rule.substring(0,i)))
+		{
+			return true
+		}
+	}
+
+	return false;
+}

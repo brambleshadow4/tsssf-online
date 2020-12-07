@@ -21,6 +21,12 @@ var HTML = `
 		<div id='chooseCardsTab' onclick="chooseCardsTab()">Choose cards</div>
 	</div>
 	<div class='innerMain'>
+
+		<div id='playerArea' class='playerArea'>
+			<h2 class="noTopMargin">Players</h2>
+			<div id='playerList'></div>
+		</div>
+
 		<div id='joinGameInfo'>
 			<p>Invite other players to join with this link</p>
 			<input type="text" id='inviteURL' readonly />
@@ -33,26 +39,26 @@ var HTML = `
 		</div>
 
 		<div class='off'  id='gameOptionsInfo'>
-			<h2>Rule Enforcement</h2>
+			<h2 class="noTopMargin">Rule Enforcement</h2>
 			<div><input type='radio' name='gamerules' disabled><label for=''>Full rules - Coming soon!</label></div>
 			<div><input id='turnsOnly' type='radio' name='gamerules' checked><label for='turnsOnly'>Turns - Only one person can play at a time</label></div>
 			<div><input id='sandbox' type='radio' name='gamerules' ><label for='sandbox'>Sandbox - Everyone can play simultaneously</label></div>
 
 			<h2>Other options</h2>
-			<div><input type='checkbox' id='keepLobbyOpen'><label for='keepLobbyOpen'>Keep lobby open during game</label></div>
+			<div><input type='checkbox' id='keepLobbyOpen'><label for='keepLobbyOpen'>Keep lobby open during game<br>You can also toggle this in game</label></div>
 		</div>
 
 		<div class='off' id='chooseCardsInfo'>
-			<h2>Expansions</h2>
-			<div class='cardbox selected' id='Core-deck-select'>
+			<h2 class="noTopMargin">Expansions</h2>
+			<div class='cardbox selected' id='Core-deck-select' value="Core.*">
 				<div class='shield'></div>
 				<img src="/img/core-box.png" />
 			</div>
-			<div class='cardbox' id='EC-deck-select'>
+			<div class='cardbox' id='EC-deck-select' value="EC.*">
 				<div class='shield'></div>
 				<img src="/img/ec-box.png" />
 			</div>
-			<div class='cardbox' id='PU-deck-select'>
+			<div class='cardbox' id='PU-deck-select' value="PU.*">
 				<div class='shield'></div>
 				<img src="/img/pu-box.png" />
 			</div>
@@ -68,11 +74,10 @@ var HTML = `
 
 		</div>
 
+
+
 	</div>
-	<div id='playerArea' class='playerArea'>
-		<h2>Players</h2>
-		<div id='playerList'></div>
-	</div>
+	
 </div>
 `
 export {HTML, HEAD}

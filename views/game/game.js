@@ -1,9 +1,38 @@
 /**
+	Some basic documentation of the implicit types of this file + the game
+
+	type Location is a string with the possible valid values:
+
+		"ponyDiscardPile,<area>" where <area> is "top" or "stack"
+		"goalDiscardPile,<area>" where <area> is "top" or "stack"
+		"shipDiscardPile,<area>" where <area> is "top" or "stack"
+		"ponyDrawPile" 
+		"goalDrawPile" 
+		"shipDrawPile"
+		"winnings"  - this client's winnings (completed goals)
+		"hand" - this client's hand
+		"player" - an opponent
+		"<placement>,<x>,<y>" is a board location where 
+			<placement> is "p" for pony or "sr" for ship right or "sd" for ship down
+			<x> is the x coordinate of the card on the board
+			<y> is the y coordinate of the card on the board
+
+		"offset,<x>,<y>" where
+			<x> is the x coordinate of the card on the board
+			<y> is the y coordinate of the card on the board
+
+		"goal",<pos>" where <pos> is 0, 1, or 2
+
+		"limbo" - used for cards which have disappeared from the board - see moveCard()
+
+	type CardID is a string used to represent what the card is. It looks something like "Core.Pony.SuperSpyTwilight"
+
+
 	model: {
 		board: {
 			[boardLocation]: {	
 				element: HtmlElement,
-				card: CardNamepspaceString
+				card: CardID
 			}
 		}
 
@@ -16,12 +45,21 @@
 			[id]:
 		]
 
-		playerName: string // the name of the player
+		playerName: string // the name of this playerplayer
 
 
 		// turnstate is undefined in sandbox mode
 		turnstate:{
 			currentPlayer: string // the name of the player whose turn it is
+			overrides:{
+				[CardID]: {
+					race:
+					gender: 
+					disguise:
+					doublePony:
+
+				}
+			}
 		}
 	}
 
@@ -38,7 +76,8 @@ import {
 	isPlayerLoc,
 	isDiscardLoc,
 	isBlank,
-	isPonyOrStart
+	isPonyOrStart,
+	isCardIncluded
 } from "/lib.js";
 
 import {
@@ -66,6 +105,7 @@ import
 import {
 	makeCardElement,
 	setDisguise,
+	setCardKeywords,
 	addTempSymbol
 } from "/game/cardComponent.js"
 
@@ -91,6 +131,7 @@ var offsetId = 0;
 var hoverCard = "";
 var hoverCardDiv;
 
+
 var haveCardsLoaded = false;
 
 export function loadView()
@@ -100,6 +141,7 @@ export function loadView()
 		history.replaceState(null, "", "/game" + window.location.search)
 	}
 
+	turnStateChangelings = {};
 	haveCardsLoaded = false;
 
 	window.cardLocations = cardLocations = {};
@@ -124,36 +166,67 @@ export function loadView()
 
 
 
+var allKeywords = [];
+
 // Preloading all the cards makes everything feel instant.
+var currentDeck;
+
+
 function LoadCards()
 {
+	console.log("Load Cards: " + model.cardDecks)
+
 	if(haveCardsLoaded)
 		return;
+
+	var keywordSet = new Set();
 
 	haveCardsLoaded = true;
 
 	var preloadedImages = document.getElementById('preloadedImages');
+
+
+	window.currentDeck = currentDeck = {};
 	
 	var re = new RegExp(model.cardDecks) 
 
 	for(var key in cards)
 	{
-		if(re.exec(key))
+		currentDeck[key] = cards[key];
+	}
+
+	for(var key in currentDeck)
+	{
+		if(isCardIncluded(key, model))
 		{
 			var nodes = key.split(".");
 			nodes.pop();
-			var urlToImg = "/img/" + nodes.join("/") + "/" + cards[key].url;
+			var urlToImg = "/img/" + nodes.join("/") + "/" + currentDeck[key].url;
 
-			cards[key].keywords = new Set(cards[key].keywords);
+			currentDeck[key].keywords = new Set(currentDeck[key].keywords);
 
-			cards[key].fullUrl = urlToImg;
-			cards[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
+			currentDeck[key].fullUrl = urlToImg;
+			currentDeck[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
 
 			var img = document.createElement('img');
-			img.src = cards[key].thumbnail;
+			img.src = currentDeck[key].thumbnail;
 			preloadedImages.appendChild(img);
+
+			if(currentDeck[key].keywords)
+			{
+				for(var keyword of currentDeck[key].keywords)
+				{
+					keywordSet.add(keyword);
+				}
+			}
+		}
+		else
+		{
+			delete currentDeck[key];
 		}
 	}
+
+	allKeywords = [...keywordSet.keys()].sort();
 }
 
 
@@ -200,7 +273,7 @@ function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
 }
 
 
-var turnStateChangelings = {};
+
 
 export function updateTurnstate()
 {
@@ -209,17 +282,6 @@ export function updateTurnstate()
 		document.body.classList.remove("nomove");
 		return;
 	}
-
-	var decoration = document.getElementsByClassName('decoration');
-	var i = 0;
-	while(i < decoration.length)
-	{
-		if(decoration[i].classList.contains('changeling'))
-			i++;
-		else
-			decoration[i].parentNode.removeChild(decoration[i]);
-	}
-
 
 	var div = document.getElementById('turnInfo');
 	if(isItMyTurn())
@@ -246,6 +308,25 @@ export function updateTurnstate()
 
 		if(thisPlayer.disconnected)
 			div.innerHTML += "<div>Their turn will end if they do not reconnect in < 15s</div>";
+	}
+
+	updateEffects();
+
+	updatePlayerList();
+}
+
+var turnStateChangelings = {};
+
+function updateEffects()
+{
+	var decoration = document.getElementsByClassName('decoration');
+	var i = 0;
+	while(i < decoration.length)
+	{
+		if(decoration[i].classList.contains('changeling'))
+			i++;
+		else
+			decoration[i].parentNode.removeChild(decoration[i]);
 	}
 
 	// We don't want to update changelines always because that will mess up their animation
@@ -293,10 +374,19 @@ export function updateTurnstate()
 			{
 				addTempSymbol(element, "altTimeline");
 			}
+
+			if(decs.doublePony)
+			{
+				addTempSymbol(element, "doublePony");
+			}
+
+			if(decs.keywords)
+			{
+				console.log("we have keywords")
+				setCardKeywords(element, decs.keywords)
+			}
 		}	
 	}	
-
-	updatePlayerList();
 }
 
 export function updateGame(newModel)
@@ -673,14 +763,14 @@ window.moveCard = moveCard;
 
 addPlayEvent(async function(e){
 
-	var cardInfo = cards[e.card];
+	var cardInfo = currentDeck[e.card];
 	if(cardInfo.keywords.has("Changeling") && isBoardLoc(e.endLocation))
 	{
 
 		if(model.turnstate)
 		{
-			var cardNames = Object.keys(cards);
-			var disguises = cardNames.filter(x => cards[x].race == cardInfo.race && !cards[x].doublePony && !cards[x].keywords.has("Changeling"));
+			var cardNames = Object.keys(currentDeck);
+			var disguises = cardNames.filter(x => currentDeck[x].race == cardInfo.race && !currentDeck[x].doublePony && !currentDeck[x].keywords.has("Changeling"));
 
 			var newCard = await openCardSelect("Choose a pony to disguise as", disguises);
 
@@ -699,7 +789,7 @@ addPlayEvent(async function(e){
 
 addPlayEvent(async function(e){
 
-	var cardInfo = cards[e.card];
+	var cardInfo = currentDeck[e.card];
 	if(isShip(e.card) && isBoardLoc(e.endLocation))
 	{
 		if(model.turnstate)
@@ -755,14 +845,40 @@ function getCardProp(card, prop)
 		}
 	} 
 	
-	return cards[card][prop];
+	return currentDeck[card][prop];
 }
 
 async function executeShipAction(shipCard)
 {
 
 	var ponies = getShippedPonies(shipCard);
-	var shipInfo = cards[shipCard]
+	var shipInfo = currentDeck[shipCard]
+
+	if(shipCard == "Core.Ship.YerAPrincessHarry")
+	{
+		var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !currentDeck[x].keywords.has("Changeling")), true);
+
+		if(ponyCard)
+		{
+			if(!model.turnstate.overrides[ponyCard])
+				model.turnstate.overrides[ponyCard] = {};
+
+			model.turnstate.overrides[ponyCard].race = "alicorn";
+			model.turnstate.overrides[ponyCard].gender = "female";
+
+			if(model.turnstate.overrides[ponyCard].keywords)
+			{
+				model.turnstate.overrides[ponyCard].keywords = model.turnstate.overrides[ponyCard].keywords.filter(x => x != "Princess").concat("Princess");
+			}
+			else
+			{
+				model.turnstate.overrides[ponyCard].keywords = ["Princess"];
+			}
+
+			broadcastEffects();
+		}
+	}
+
 
 	if (shipInfo.action == "genderChange")
 	{
@@ -792,6 +908,23 @@ async function executeShipAction(shipCard)
 		}
 	}
 
+	if (shipInfo.action == "clone")
+	{
+		var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !currentDeck[x].doublePony), true);
+
+		if(!ponyCard) return;
+
+		if(model.turnstate)
+		{
+
+			if(!model.turnstate.overrides[ponyCard])
+				model.turnstate.overrides[ponyCard] = {};
+
+			model.turnstate.overrides[ponyCard].doublePony = true;
+			broadcastEffects();
+		}
+	}
+
 	if (shipInfo.action == "timelineChange")
 	{
 		var ponyCard = await openCardSelect("Choose a pony to gain the <br> time traveller symbol", ponies, true);
@@ -810,9 +943,7 @@ async function executeShipAction(shipCard)
 
 	if (shipInfo.action == "raceChange")
 	{
-		ponies = ponies.filter(x => !cards[x].keywords.has("Changeling"));
-
-		console.log(ponies);
+		ponies = ponies.filter(x => !currentDeck[x].keywords.has("Changeling"));
 
 		if(ponies.length == 0)
 			return;
@@ -833,11 +964,107 @@ async function executeShipAction(shipCard)
 			broadcastEffects();
 		}
 	}
+
+	if (shipInfo.action == "keywordChange")
+	{
+
+		var output = await createPopup([{"render":function(accept)
+		{
+
+			var element = document.createElement('div');
+			element.className = "popupPage"
+
+			var selectedPony;
+			var h1 = document.createElement('h1');
+			h1.innerHTML = "Pick a keyword";
+			element.appendChild(h1);
+
+			var card1 = makeCardElement(ponies[0]);
+			card1.setAttribute('value', ponies[0])
+
+	
+			var card2 = makeCardElement(ponies[1]);
+			card2.setAttribute('value', ponies[1])
+			
+
+			function ponySelect()
+			{
+				card1.classList.remove('selected')
+				card2.classList.remove('selected')
+				
+				this.classList.add('selected');
+				selectedPony = this.getAttribute('value');
+
+			}
+
+			card1.onclick = ponySelect;
+			element.appendChild(card1);
+
+
+			card2.onclick = ponySelect;
+			element.appendChild(card2);
+			
+			var row = document.createElement('div')
+			for(let i=0; i< allKeywords.length; i++)
+			{
+
+				var button = document.createElement("button");
+				button.innerHTML = allKeywords[i];
+				button.onclick = function(){
+
+					if(selectedPony)
+					{
+						accept([selectedPony, allKeywords[i]]);
+					}
+					
+				}
+
+				row.appendChild(button);
+
+
+				if(i%5 == 4)
+				{
+					element.appendChild(row);
+					row = document.createElement('div');
+				}
+			}
+
+			element.appendChild(row);
+
+			return element;
+
+
+		}}], true);
+
+		if(output && model.turnstate)
+		{
+			var [card, keyword] = output;
+
+			if(!model.turnstate.overrides[card])
+			{
+				model.turnstate.overrides[card] = {
+					keywords: [keyword]
+				};
+			}
+			else if(!model.turnstate.overrides[card].keywords)
+			{
+				model.turnstate.overrides[card].keywords = [keyword]
+			}
+			else
+			{
+				model.turnstate.overrides[card].keywords = model.turnstate.overrides[card].keywords.filter(x => x != keyword).concat([keyword])
+			}	
+
+			broadcastEffects();
+		}
+	}
+
+	
 }
 
 addPlayEvent(async function(e){
 
-	if(isPony(e.card) && isBoardLoc(e.endLocation))
+	if(isPonyOrStart(e.card) && isBoardLoc(e.endLocation))
 	{
 		if(model.turnstate)
 		{

@@ -18,10 +18,7 @@ var cards = {
 				gender: "female",
 				doublePony: "true",
 				action: "newGoal",
-				keywords: [
-					"Aloe",
-					"Lotus"
-				]
+				keywords: []
 			},
 			"Core.Pony.ApplejackBackgroundPony":{
 				url:"Pony_Applejack the Cutest SmartestAll-Around-Best Background Pony.png",
@@ -260,8 +257,6 @@ var cards = {
 				action: "swap",
 				doublePony: "true",
 				keywords: [
-					"Flam",
-					"Flim",
 					"Villain"
 				]
 			},
@@ -448,7 +443,6 @@ var cards = {
 				gender: "male",
 				action: "replace",
 				keywords: [
-					"Blueblood",
 					"Villain"
 				]
 			},
@@ -469,7 +463,6 @@ var cards = {
 				gender: "female",
 				action: "search",
 				keywords: [
-					"Celestia",
 					"Elder",
 					"Princess"
 				]
@@ -502,7 +495,6 @@ var cards = {
 				gender: "female",
 				keywords: [
 					"Changeling",
-					"Chrysalis",
 					"Queen",
 					"Villain"
 				]
@@ -1450,9 +1442,7 @@ var cards = {
 				race: "pegasus",
 				gender: "male",
 				action: "copy",
-				keywords: [
-					"Pound Cake"
-				]
+				keywords: []
 			},
 			"PU.Pony.AntiConfectioneryRebelPumpkinCake": {
 				name: "Pumpkin Cake",

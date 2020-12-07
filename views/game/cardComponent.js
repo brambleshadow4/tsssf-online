@@ -270,6 +270,21 @@ export function setDisguise(element, disguiseCard)
 	element.appendChild(img);
 }
 
+export function setCardKeywords(element, keywords)
+{
+
+	console.log(keywords)
+	var div = document.createElement('div');
+	div.className = "keywords decoration";
+
+	for(var word of keywords)
+	{
+		div.innerHTML += "<div>" + word + "</div>";
+	}
+
+	element.appendChild(div);
+}
+
 export function addTempSymbol(element, symbol)
 {
 	if(symbol == undefined)
@@ -277,7 +292,10 @@ export function addTempSymbol(element, symbol)
 
 	var img = document.createElement('img');
 	//img.style.height = "100%";
-	img.src = "/img/sym/" + symbol + ".png";
+
+	var extension = (symbol == "doublePony" ? ".svg" : ".png")
+
+	img.src = "/img/sym/" + symbol + extension;
 	img.className = "symbol decoration";
 	element.appendChild(img);
 }

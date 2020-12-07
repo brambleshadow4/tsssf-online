@@ -1,8 +1,6 @@
 import express from "express";
 import fs from 'fs';
 import ws from 'ws';
-import cookieParser from "cookie-parser";
-import expressSession from "express-session";
 import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js"
@@ -12,16 +10,6 @@ let PORT = 80;
 
 if(process.argv[2] == "dev")
 	PORT = 8000;
-
-
-app.use(cookieParser());
-app.use(expressSession({
-	secret: "idk what this does",
-	unset: "destroy",
-	resave: false,
-	saveUninitialized: false,
-	secure: "idk"
-}));
 
 
 app.get('/', file("./views/home.html"));
