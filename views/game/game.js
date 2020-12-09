@@ -850,6 +850,9 @@ function getCardProp(card, prop)
 
 async function executeShipAction(shipCard)
 {
+	if(model.turnstate && model.turnstate.openShips)
+		delete model.turnstate.openShips[shipCard];
+
 
 	var ponies = getShippedPonies(shipCard);
 	var shipInfo = currentDeck[shipCard]
