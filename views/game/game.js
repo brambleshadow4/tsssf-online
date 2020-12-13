@@ -47,6 +47,10 @@
 
 		playerName: string // the name of this playerplayer
 
+		currentGoals: {
+			card: CardID,
+			achieved: boolean
+		}[]
 
 		// turnstate is undefined in sandbox mode
 		turnstate:{
@@ -304,9 +308,10 @@ export function updateTurnstate()
 
 		div.innerHTML = `<div>It is currently ${turnstate.currentPlayer}'s turn </div>`;
 
+
 		var thisPlayer = model.players.filter(x => x.name == turnstate.currentPlayer)[0];
 
-		if(thisPlayer.disconnected)
+		if(thisPlayer && thisPlayer.disconnected)
 			div.innerHTML += "<div>Their turn will end if they do not reconnect in < 15s</div>";
 	}
 
@@ -476,7 +481,7 @@ function getCardAtLoc(loc)
 	}
 	if(isGoalLoc(loc))
 	{
-		return model.currentGoals[Number(loc.split(",")[1])];
+		return model.currentGoals[Number(loc.split(",")[1]).card];
 	}
 }
 
@@ -594,7 +599,7 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 
 		startPos = getPosFromElement(document.getElementById('currentGoals').getElementsByClassName('card')[i]);
 
-		model.currentGoals[i] = "blank:goal";
+		model.currentGoals[i] = {card:"blank:goal", achieved: false};
 
 		updateGoals();
 	}
@@ -703,7 +708,7 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 
 		endPos = getPosFromElement(document.getElementById('currentGoals').getElementsByClassName('card')[i]);
 
-		model.currentGoals[i] = card;
+		model.currentGoals[i] = {card, achieved: false};
 		updateFun = () => updateGoals(i)
 	}
 	else if (isOffsetLoc(endLocation))

@@ -12,6 +12,8 @@ import {
 	isCardIncluded
 } from "./lib.js";
 
+import goalCriteria from "./goalCriteria.js";
+
 import cards from "./cards.js";
 import {logGameHosted, logPlayerJoined} from "./stats.js";
 
@@ -82,7 +84,6 @@ export function TsssfGameServer()
 	function isRegistered(player)
 	{
 		return player != undefined && player.name != "";
-
 	}
 
 	function checkNameIsUnique(key, name)
@@ -149,8 +150,6 @@ export function TsssfGameServer()
 		socket.send("registered;" + player.id)
 		return;
 	}
-
-
 
 	function sendLobbyList(key)
 	{
@@ -323,6 +322,31 @@ export function TsssfGameServer()
 		socket.send("model;" + JSON.stringify(model));
 	}
 
+	function checkIfGoalsWereAchieved(key)
+	{
+		var model = games[key];
+		var sendUpdate = false;
+
+		for(var card of model.currentGoals)
+		{
+			var achieved = false;
+			if(goalCriteria[card.card])
+				achieved = goalCriteria[card.card](model);
+
+			if(card.achieved != achieved)
+			{
+				sendUpdate = true;
+			}
+
+			card.achieved = achieved;
+		}
+
+		if(sendUpdate)
+		{
+			toEveryone(key, "goalachieved;" + model.currentGoals.map(x => x.achieved ? "1" : "").join(";"));
+		}
+	}
+
 
 	function openLobby(key)
 	{
@@ -378,8 +402,6 @@ export function TsssfGameServer()
 
 		model.isLobbyOpen = model.keepLobbyOpen = !!options.keepLobbyOpen;
 
-		
-
 
 		model.cardLocations[model.startCard] = "p,0,0";
 
@@ -398,7 +420,11 @@ export function TsssfGameServer()
 		model.ponyDiscardPile = [];
 		model.shipDiscardPile = [];
 
-		model.currentGoals = ["blank:goal","blank:goal","blank:goal"];
+		model.currentGoals = [
+			{card:"blank:goal", achieved: false},
+			{card:"blank:goal", achieved: false},
+			{card:"blank:goal", achieved: false}
+		];
 
 		// client only props
 		//     hand:
@@ -488,7 +514,7 @@ export function TsssfGameServer()
 			if(model.currentGoals[goalNo] == undefined)
 				return false;
 
-			return model.currentGoals[goalNo] != "blank:goal"
+			return model.currentGoals[goalNo].card != "blank:goal"
 		}
 
 		return false;
@@ -523,6 +549,8 @@ export function TsssfGameServer()
 
 		games[key].turnstate.currentPlayer = rotation[k].name;
 		toEveryone(key, "turnstate;" + JSON.stringify(games[key].turnstate));
+
+		checkIfGoalsWereAchieved(key);
 	}
 
 
@@ -810,6 +838,8 @@ export function TsssfGameServer()
 					var overrides = JSON.parse(message.split(";")[1]);
 					model.turnstate.overrides = overrides;
 					toEveryoneElse(key, socket, message);
+
+					checkIfGoalsWereAchieved(key);
 				}
 				catch(e)
 				{
@@ -829,17 +859,20 @@ export function TsssfGameServer()
 
 				if(typ == "goal")
 				{
-					var goalNo = model.currentGoals.indexOf("blank:goal")
+					var goalNo = model.currentGoals.map(x => x.card).indexOf("blank:goal")
 
 					if(len && goalNo > -1)
 					{
 						var card = model[typ + "DrawPile"].pop();
-						model.currentGoals[goalNo] = card;
+						model.currentGoals[goalNo] = {card, achieved: false};
 						model.cardLocations[card] = "goal," + goalNo;
 
 						var msg = "draw;" + typ + ";" + (len - 1);
+
 						toEveryone(key, msg);
 						toEveryone(key, "move;" + card + ";goalDrawPile;goal," + goalNo);
+
+						checkIfGoalsWereAchieved(key);
 					}
 					else
 						return ;//sendCurrentState(key, socket);
@@ -989,8 +1022,8 @@ export function TsssfGameServer()
 				if(isGoalLoc(startLocation))
 				{
 					var [_,i] = startLocation.split(",")
-					if(model.currentGoals[i] != "blank:goal")
-						model.currentGoals[i] = "blank:goal";
+					if(model.currentGoals[i].card != "blank:goal")
+						model.currentGoals[i].card = "blank:goal";
 					
 				}
 
@@ -1015,7 +1048,7 @@ export function TsssfGameServer()
 				{
 					var [_,goalNo] = endLocation.split(",")
 					goalNo = Number(goalNo);
-					model.currentGoals[goalNo] = card;
+					model.currentGoals[goalNo].card = card;
 					model.cardLocations[card] = "goal," + goalNo;
 				}
 
@@ -1038,7 +1071,6 @@ export function TsssfGameServer()
 					}
 				}
 
-			
 				// cant move to a goal location yet
 
 				socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
@@ -1067,6 +1099,8 @@ export function TsssfGameServer()
 						toEveryone(key, "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
 					}
 				}
+
+				checkIfGoalsWereAchieved(key);
 			}
 
 			if(message == "endturn")

@@ -570,7 +570,7 @@ var cards = {
 			},
 			"Core.Pony.SuperSpyTwilight":{
 				url:"Pony_Super Spy Twilight.png",
-				name: "Super Spy Twilight",
+				name: "Twilight Sparkle",
 				race: "unicorn",
 				gender: "female",
 				altTimeline: true,
