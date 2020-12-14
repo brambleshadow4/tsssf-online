@@ -951,7 +951,7 @@ var cards = {
 				url:"Goal_Princess Pile.png",
 				points:"2"
 			},
-			"Core.Goal.QueenPlatinum'sCourt":{
+			"Core.Goal.QueenPlatinumsCourt":{
 				url:"Goal_Queen Platinum's Court.png",
 				points:"2"
 			},

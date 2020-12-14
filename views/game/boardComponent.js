@@ -9,7 +9,8 @@ import {
 	isDiscardLoc,
 	isBlank,
 	isAnon,
-	isPonyOrStart
+	isPonyOrStart,
+	getNeighborKeys
 } from "/lib.js";
 
 import
@@ -240,39 +241,7 @@ export function offsetPonyCard(key, card)
 }
 
 
-export function getNeighborKeys(key)
-{
-	var type, x,y;
-	[type,x,y] = key.split(",");
-	x = Number(x);
-	y = Number(y)
 
-	if(type == "p")
-	{
-		return [
-			"sr," + x + "," + y,
-			"sr," + (x-1) + "," + y,
-			"sd," + x + "," + y,
-			"sd," + x + "," + (y-1)
-		];
-	}
-
-	if(type == "sr")
-	{
-		return [
-			"p," + x + "," + y,
-			"p," + (x+1) + "," + y,
-		]
-	}
-
-	if(type == "sd")
-	{
-		return [
-			"p," + x + "," + y,
-			"p," + x + "," + (y+1),
-		]
-	}
-}
 
 
 export function removeCardFromBoard(key)

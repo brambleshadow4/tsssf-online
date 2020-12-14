@@ -29,23 +29,16 @@
 
 
 	model: {
-		board: {
-			[boardLocation]: {	
-				element: HtmlElement,
-				card: CardID
-			}
-		}
+		board: map BoardLocation -> {element: HTMLElement, card: CardID}
 
 		offsets: {
 			// existence of the offset key signifies the card is offset
 			[offsetKey]: string // the string is the id of the card element added to the DOM
 		}
 		
-		players:[
-			[id]:
-		]
+		players: map int ->
 
-		playerName: string // the name of this playerplayer
+		playerName: string // the name of this player
 
 		currentGoals: {
 			card: CardID,
@@ -55,14 +48,11 @@
 		// turnstate is undefined in sandbox mode
 		turnstate:{
 			currentPlayer: string // the name of the player whose turn it is
-			overrides:{
-				[CardID]: {
-					race:
-					gender: 
-					disguise:
-					doublePony:
-
-				}
+			overrides: map CardID -> {
+				race?: string
+				gender?: string
+				disguise?: cardID 
+				doublePony?: boolean
 			}
 		}
 	}
@@ -81,7 +71,8 @@ import {
 	isDiscardLoc,
 	isBlank,
 	isPonyOrStart,
-	isCardIncluded
+	isCardIncluded,
+	getNeighborKeys
 } from "/lib.js";
 
 import {
@@ -102,8 +93,7 @@ import
 	initBoard,
 	updateBoard,
 	offsetPonyCard,
-	clearBoard,
-	getNeighborKeys
+	clearBoard
 } from "/game/boardComponent.js"
 
 import {
