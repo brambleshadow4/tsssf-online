@@ -4,6 +4,7 @@ var cards = {
 		"Core.Start.FanficAuthorTwilight":{
 			url:"START_Fanfic Author Twilight.png",
 			name:"Twilight Sparkle",
+			race: "unicorn",
 			gender: "female",
 			keywords:[
 				"Mane 6"

@@ -7,48 +7,47 @@ var Nope = () => false;
 var Yep = () => true;
 
 
-
-
-function getCardProp(model, card, prop)
+function getCardProp(model, cardFull, prop)
 {
+	var [card, substate] = cardFull.split(":");
+	var cardObj = model.turnstate.overrides[card];
+	var baseCard = card;
+
+	if(cardObj && cardObj.length)
+	{
+		if(substate && Number(substate) < cardObj.length)
+		{
+			cardObj = cardObj[Number(substate)];
+		}
+		else
+		{
+			cardObj = cardObj[cardObj.length-1];
+		}
+
+		baseCard = cardObj.disguise || card;
+	}
+
+	if(prop == "*")
+		return cardObj;
+
 
 	if(prop == "keywords")
 	{
-		var keywords = [];
+		let baseKeywords = (cardObj && cardObj[prop]) || [];
 
-		if(model.turnstate && model.turnstate.overrides && model.turnstate.overrides[card]) 
-		{
-			if(model.turnstate.overrides[card]["keywords"])
-			{
-				keywords = model.turnstate.overrides[card]["keywords"];
-			}
+		if(cardObj && cardObj.disguise)
+			baseKeywords.push("Changeling");
 
-			if(model.turnstate.overrides[card].disguise)
-			{
-				keywords = keywords.concat(cards[model.turnstate.overrides[card].disguise].keywords);
-			}
-		}
-
-		return new Set(keywords.concat(cards[card].keywords));
+		return new Set(cards[baseCard][prop].concat(baseKeywords));
 	}
 
-
-	if(model.turnstate && model.turnstate.overrides && model.turnstate.overrides[card])
+	if(cardObj && cardObj[prop])
 	{
-		if (model.turnstate.overrides[card][prop])
-		{
-			return model.turnstate.overrides[card][prop];
-		}
+		return cardObj[prop]
+	}
 
-		if(model.turnstate.overrides[card].disguise)
-		{
-			card = model.turnstate.overrides[card].disguise;
-		}
-	} 
-	
-	return cards[card][prop];
+	return cards[baseCard][prop];
 }
-
 
 function doesCardMatchSelector(model, card, selector)
 {
@@ -63,7 +62,7 @@ function doesCardMatchSelector(model, card, selector)
 			originalGender = cards[model.turnstate.overrides[card].disguise].gender
 		}
 
-		return getCardProp(model,card,"gender") != originalGender;
+		return getCardProp(model, card,"gender") != originalGender;
 	}
 
 	var clauses = selector.split("&&");
@@ -218,8 +217,6 @@ function ExistsChain(selector, count)
 
 				chained.add(key);	
 
-				console.log(key);
-
 				workList = workList.concat(getConnectedPonies(model, key));
 			}
 
@@ -248,21 +245,15 @@ function Select(selector, count)
 {
 	return function(model, ponyKeys)
 	{
-		console.log("select function run");
-
-		console.log(ponyKeys)
 
 		let centeredCount = 0;
 		for(var ponyKey of ponyKeys)
 		{
-			console.log(model.board[ponyKey].card);
 			if(doesCardMatchSelector(model, model.board[ponyKey].card, selector))
 			{
 				centeredCount++;
 			}
 		}
-
-		console.log(selector + " " + centeredCount)
 
 		return centeredCount >= count;
 	}
@@ -288,13 +279,10 @@ function ShippedWith2Versions(model, ponyKeys)
 
 	var ponyCards = ponyKeys.map(k => model.board[k].card);
 
-	//console.log("All matches " + ponyCards)
 	for(var card of ponyCards)
 	{
 
 		var match = ponyCards.filter(x => filterFun(card, x))
-
-		//console.log('match ' + card + " " + match)
 
 		if(match.length > 1)
 			return true;
@@ -336,9 +324,6 @@ function ShippedWithOppositeGenderedSelf(model, card1, card2)
 		var gender1 = getCardProp(model, card1, "gender");
 		var gender2 = getCardProp(model, card2, "gender");
 
-		console.log(card1 + ": " + gender1)
-		console.log(card2 + ": " + gender2)
-		console.log((gender1 == "male" && gender2 == "female") || (gender1 == "female" && gender2 == "male"));
 		return ((gender1 == "male" && gender2 == "female") || (gender1 == "female" && gender2 == "male"))
 	}
 
@@ -469,10 +454,9 @@ function ExistsShipGeneric(compareCardsFun, count)
 					if(compareCardsFun(model, card1, card2))
 						boardCount++;
 				}
-
-				
 			}
 		}
+
 
 		return boardCount >= count;
 	}

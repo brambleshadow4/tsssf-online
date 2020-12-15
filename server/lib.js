@@ -30,8 +30,6 @@ export function isAnon(card)
 	return card.startsWith("anon:");
 }
 
-
-
 export function randomizeOrder(arr)
 {
 	var len = arr.length;

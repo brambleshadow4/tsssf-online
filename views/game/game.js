@@ -168,8 +168,6 @@ var currentDeck;
 
 function LoadCards()
 {
-	console.log("Load Cards: " + model.cardDecks)
-
 	if(haveCardsLoaded)
 		return;
 
@@ -327,7 +325,7 @@ function updateEffects()
 	// We don't want to update changelines always because that will mess up their animation
 	for(var card in turnStateChangelings)
 	{
-		let newDisguise = model.turnstate.overrides[card] && model.turnstate.overrides[card].disguise;
+		let newDisguise = getCardProp(card, "disguise");
 
 		if(newDisguise != turnStateChangelings[card])
 		{	
@@ -347,7 +345,7 @@ function updateEffects()
 		{
 			var element = model.board[cardLocations[card]].element;
 
-			var decs = model.turnstate.overrides[card];
+			var decs = getCardProp(card, "*");
 
 			if(decs.disguise && element.getElementsByClassName('changeling').length == 0)
 			{
@@ -377,7 +375,6 @@ function updateEffects()
 
 			if(decs.keywords)
 			{
-				console.log("we have keywords")
 				setCardKeywords(element, decs.keywords)
 			}
 		}	
@@ -774,7 +771,7 @@ addPlayEvent(async function(e){
 
 			
 			// reset overrides when changeling changes type.
-			model.turnstate.overrides[e.card] = {disguise: newCard};
+			setCardProp(e.card, "disguise", newCard);
 			broadcastEffects();
 		}
 	}
@@ -827,20 +824,66 @@ function getShippedPonies(shipCard)
 
 function getCardProp(card, prop)
 {
-	if(model.turnstate && model.turnstate.overrides && model.turnstate.overrides[card])
+	var cardObj = model.turnstate.overrides[card];
+	var baseCard = card;
+
+	if(cardObj && cardObj.length)
 	{
-		if (model.turnstate.overrides[card][prop])
+		cardObj = cardObj[cardObj.length-1];
+		baseCard = cardObj.disguise || card;
+	}
+
+	if(prop == "*")
+		return cardObj;
+
+	if(cardObj && cardObj[prop])
+		return cardObj[prop]
+
+	return currentDeck[baseCard][prop];
+}
+
+function setCardProp(card, prop, value)
+{
+	let isChangeling = currentDeck[card].keywords.has("Changeling");
+
+	if(model.turnstate)
+	{
+		if (!model.turnstate.overrides[card])
 		{
-			return model.turnstate.overrides[card][prop];
+			if(isChangeling)
+			{
+				model.turnstate.overrides[card] = [{}];
+			}
+			else
+			{
+				model.turnstate.overrides[card] = {};
+			}
 		}
 
-		if(model.turnstate.overrides[card].disguise)
+		var propObj = model.turnstate.overrides[card]
+
+		if(isChangeling)
+			propObj = propObj[propObj.length-1];
+
+		if(prop == "keywords")
 		{
-			card = model.turnstate.overrides[card].disguise;
+			if(propObj.keywords == undefined)
+				propObj.keywords = [value];
+			else if(propObj.keywords.indexOf(value) == -1)
+				propObj.keywords.push(value);
 		}
-	} 
-	
-	return currentDeck[card][prop];
+		else if (prop == "disguise")
+		{
+			model.turnstate.overrides[card].push({
+				disguise: value
+			})
+		}
+		else
+		{
+			propObj[prop] = value;
+		}
+		
+	}
 }
 
 async function executeShipAction(shipCard)
@@ -858,20 +901,9 @@ async function executeShipAction(shipCard)
 
 		if(ponyCard)
 		{
-			if(!model.turnstate.overrides[ponyCard])
-				model.turnstate.overrides[ponyCard] = {};
-
-			model.turnstate.overrides[ponyCard].race = "alicorn";
-			model.turnstate.overrides[ponyCard].gender = "female";
-
-			if(model.turnstate.overrides[ponyCard].keywords)
-			{
-				model.turnstate.overrides[ponyCard].keywords = model.turnstate.overrides[ponyCard].keywords.filter(x => x != "Princess").concat("Princess");
-			}
-			else
-			{
-				model.turnstate.overrides[ponyCard].keywords = ["Princess"];
-			}
+			setCardProp(ponyCard, "race", "alicorn");
+			setCardProp(ponyCard, "gender", "female");
+			setCardProp(ponyCard, "keywords", "Princess");
 
 			broadcastEffects();
 		}
@@ -897,10 +929,7 @@ async function executeShipAction(shipCard)
 
 			if(newGender)
 			{
-				if(!model.turnstate.overrides[ponyCard])
-					model.turnstate.overrides[ponyCard] = {};
-
-				model.turnstate.overrides[ponyCard].gender = newGender;
+				setCardProp(ponyCard, "gender", newGender)
 				broadcastEffects();
 			}
 		}
@@ -914,11 +943,7 @@ async function executeShipAction(shipCard)
 
 		if(model.turnstate)
 		{
-
-			if(!model.turnstate.overrides[ponyCard])
-				model.turnstate.overrides[ponyCard] = {};
-
-			model.turnstate.overrides[ponyCard].doublePony = true;
+			setCardProp(ponyCard, "doublePony", true)
 			broadcastEffects();
 		}
 	}
@@ -931,10 +956,7 @@ async function executeShipAction(shipCard)
 
 		if(model.turnstate)
 		{
-			if(!model.turnstate.overrides[ponyCard])
-				model.turnstate.overrides[ponyCard] = {};
-
-			model.turnstate.overrides[ponyCard].altTimeline = true;
+			setCardProp(ponyCard, "altTimeline", true)
 			broadcastEffects();
 		}
 	}
@@ -954,11 +976,7 @@ async function executeShipAction(shipCard)
 
 		if(model.turnstate)
 		{
-
-			if(!model.turnstate.overrides[ponyCard])
-				model.turnstate.overrides[ponyCard] = {};
-
-			model.turnstate.overrides[ponyCard].race = newRace;
+			setCardProp(ponyCard, "race", newRace)
 			broadcastEffects();
 		}
 	}
@@ -1037,22 +1055,7 @@ async function executeShipAction(shipCard)
 		if(output && model.turnstate)
 		{
 			var [card, keyword] = output;
-
-			if(!model.turnstate.overrides[card])
-			{
-				model.turnstate.overrides[card] = {
-					keywords: [keyword]
-				};
-			}
-			else if(!model.turnstate.overrides[card].keywords)
-			{
-				model.turnstate.overrides[card].keywords = [keyword]
-			}
-			else
-			{
-				model.turnstate.overrides[card].keywords = model.turnstate.overrides[card].keywords.filter(x => x != keyword).concat([keyword])
-			}	
-
+			setCardProp(card, "keywords", keyword)
 			broadcastEffects();
 		}
 	}
@@ -1118,8 +1121,6 @@ function raceChangePopup(ponies)
 
 			if(selectedPony && selectedRace)
 				acceptFn([selectedPony, selectedRace]);
-
-			console.log(selectedPony + " " + selectedRace);
 
 		}
 

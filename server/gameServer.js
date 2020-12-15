@@ -398,6 +398,7 @@ export function TsssfGameServer()
 		this.playedPonies = [];
 		this.brokenShips = [];
 		this.brokenShipsNow = [];
+		this.morphCounters = {};
 		this.shipSet = null;
 
 		this.clientProps = function()
@@ -418,12 +419,24 @@ export function TsssfGameServer()
 	{
 		var neighbors = getNeighborKeys(shipLoc);
 
+		console.log("neighbors")
+		console.log(shipLoc);
+		console.log(neighbors)
+
 		var shipClosed = true;
 		var ponies = [];
 		for(var n of neighbors)
 		{
 			if(model.board[n] && !isBlank(model.board[n].card))
 			{
+				var card = model.board[n].card;
+
+				if(model.turnstate && isChangeling(model.board[n].card))
+				{
+					card = card + ":" + (model.turnstate.morphCounters[card] || 0);
+				}
+
+
 				ponies.push(model.board[n].card)
 			}
 		}
@@ -583,6 +596,11 @@ export function TsssfGameServer()
 		toEveryoneElse(key, player.socket, args.join(";"));
 	}
 
+	function isChangeling(card)
+	{
+		return isPony(card) && cards[card].keywords.indexOf("Changeling") > -1;
+	}
+
 	function getCurrentShipSet(model)
 	{
 		var s = new Set();
@@ -593,7 +611,9 @@ export function TsssfGameServer()
 				var pair = getShippedPonies(model, key);
 
 				if(pair.length == 2)
+				{	
 					s.add(shipString(pair[0], pair[1]));
+				}
 			}
 		}
 
@@ -678,6 +698,11 @@ export function TsssfGameServer()
 			if(model.turnstate.shipSet == undefined)
 			{
 				model.turnstate.shipSet = getCurrentShipSet(model);
+			}
+
+			if(isChangeling(card) && isBoardLoc(endLocation))
+			{
+				model.turnstate.morphCounters[card] = (model.turnstate.morphCounters[card] || 0) + 1;
 			}
 		}
 
@@ -789,7 +814,13 @@ export function TsssfGameServer()
 		{
 			if(model.turnstate)
 			{
-				model.turnstate.playedPonies.push(card);
+
+				var cardName = card;
+
+				if(isChangeling(card))
+					cardName = card + ":" + (model.turnstate.morphCounters[card] || 0);
+
+				model.turnstate.playedPonies.push(cardName);
 			}
 		}
 
@@ -800,6 +831,10 @@ export function TsssfGameServer()
 			var newlyBroken = getBrokenShips(model.turnstate.shipSet, newSet);
 
 			model.turnstate.brokenShipsNow = model.turnstate.brokenShips.concat(newlyBroken);
+
+			console.log("played ships");
+			console.log(model.turnstate.playedShips);
+
 
 			console.log("Broken ships ")
 			console.log(model.turnstate.brokenShipsNow);
