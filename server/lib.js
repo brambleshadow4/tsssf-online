@@ -49,7 +49,7 @@ export function randomizeOrder(arr)
 
 export function isBoardLoc(location)
 {
-	return location.startsWith("p,") || location.startsWith("sr,") || location.startsWith("sd,");
+	return location && (location.startsWith("p,") || location.startsWith("sr,") || location.startsWith("sd,"));
 }
 
 export function isOffsetLoc(location)

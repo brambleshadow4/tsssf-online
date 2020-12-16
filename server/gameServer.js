@@ -389,17 +389,24 @@ export function TsssfGameServer()
 		return card2 + "/" + card1;
 	}
 
-	function Turnstate(currentPlayerName)
+	function Turnstate(model, currentPlayerName)
 	{	
 		this.currentPlayer = currentPlayerName;
 		this.overrides = {};
 		this.tentativeShips = {};
 		this.playedShips = [];
 		this.playedPonies = [];
+
 		this.brokenShips = [];
 		this.brokenShipsNow = [];
+		this.shipSet = getCurrentShipSet(model);
+
+		this.positionMap = getCurrentPositionMap(model);
+		this.swaps = 0;
+		this.swapsNow = 0;
+
 		this.morphCounters = {};
-		this.shipSet = null;
+		
 
 		this.clientProps = function()
 		{
@@ -419,10 +426,6 @@ export function TsssfGameServer()
 	{
 		var neighbors = getNeighborKeys(shipLoc);
 
-		console.log("neighbors")
-		console.log(shipLoc);
-		console.log(neighbors)
-
 		var shipClosed = true;
 		var ponies = [];
 		for(var n of neighbors)
@@ -436,8 +439,7 @@ export function TsssfGameServer()
 					card = card + ":" + (model.turnstate.morphCounters[card] || 0);
 				}
 
-
-				ponies.push(model.board[n].card)
+				ponies.push(card)
 			}
 		}
 
@@ -551,7 +553,7 @@ export function TsssfGameServer()
 
 		if(options.ruleset == "turnsOnly")
 		{
-			model.turnstate = new Turnstate(model.players[0].name);
+			model.turnstate = new Turnstate(model, model.players[0].name);
 		}
 		else
 		{
@@ -620,6 +622,23 @@ export function TsssfGameServer()
 		return s;
 	}
 
+	function getCurrentPositionMap(model)
+	{
+		var map = {};
+
+		for(var key in model.board)
+		{
+			if (key.startsWith("p,") && !isBlank(model.board[key].card))
+			{
+				map[model.board[key].card] = key;
+			}
+		}
+
+		return map;
+
+	}
+
+
 	function getBrokenShips(startSet, endSet)
 	{
 		var broken = [];
@@ -635,6 +654,21 @@ export function TsssfGameServer()
 		return broken;
 	}
 
+	function getSwappedCount(startPositions, endPositions)
+	{
+		var count = 0;
+		for(var key in startPositions)
+		{
+			if(endPositions[key] && endPositions[key] != startPositions[key])
+			{
+				count++;
+			}
+		}
+
+		return count;
+	}
+
+
 	function changeTurnToNextPlayer(key)
 	{
 		if(!games[key].turnstate)
@@ -648,7 +682,7 @@ export function TsssfGameServer()
 		var k = rotation.map(x=> x.name).indexOf(games[key].turnstate.currentPlayer);
 		k = (k+1)%rotation.length;
 
-		games[key].turnstate = new Turnstate(rotation[k].name);
+		games[key].turnstate = new Turnstate(games[key], rotation[k].name);
 		toEveryone(key, "turnstate;" + JSON.stringify(games[key].turnstate.clientProps()));
 
 		checkIfGoalsWereAchieved(key);
@@ -660,7 +694,6 @@ export function TsssfGameServer()
 		var player = getPlayer(key, socket);
 
 		var model = games[key];
-		//console.log(message);
 
 		let serverStartLoc = startLocation;
 		if(startLocation == "hand" || startLocation == "winnings")
@@ -695,11 +728,6 @@ export function TsssfGameServer()
 
 		if(model.turnstate)
 		{
-			if(model.turnstate.shipSet == undefined)
-			{
-				model.turnstate.shipSet = getCurrentShipSet(model);
-			}
-
 			if(isChangeling(card) && isBoardLoc(endLocation))
 			{
 				model.turnstate.morphCounters[card] = (model.turnstate.morphCounters[card] || 0) + 1;
@@ -832,12 +860,15 @@ export function TsssfGameServer()
 
 			model.turnstate.brokenShipsNow = model.turnstate.brokenShips.concat(newlyBroken);
 
-			console.log("played ships");
-			console.log(model.turnstate.playedShips);
+
+			var curPositionMap = getCurrentPositionMap(model);
+			var newlySwapped = getSwappedCount(model.turnstate.positionMap, curPositionMap)
+
+			model.turnstate.swapsNow = model.turnstate.swaps + newlySwapped;
 
 
-			console.log("Broken ships ")
-			console.log(model.turnstate.brokenShipsNow);
+			console.log(model.turnstate.swapsNow);
+
 
 			if(startLocation == "hand" || 
 				startLocation == "shipDiscardPile,top" || startLocation == "ponyDiscardPile,top"
@@ -847,6 +878,8 @@ export function TsssfGameServer()
 
 				model.turnstate.brokenShips = model.turnstate.brokenShipsNow;
 				model.turnstate.shipSet = newSet;
+				model.turnstate.swaps = model.turnstate.swapsNow;
+				model.turnstate.positionMap = curPositionMap;
 			}
 
 			if(isShip(card)
@@ -962,8 +995,6 @@ export function TsssfGameServer()
 						changeTurnToNextPlayer(key);
 					}
 				}
-		
-				
 
 			}, TEMP_DISCONNECT_TIME); 
 
@@ -1008,6 +1039,8 @@ export function TsssfGameServer()
 
 		socket.on('message', message => 
 		{
+			console.log(message);
+
 			var model = games[key];
 
 			if(message.startsWith("handshake;"))

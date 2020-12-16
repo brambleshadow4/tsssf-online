@@ -51,8 +51,14 @@ function getCardProp(model, cardFull, prop)
 
 function doesCardMatchSelector(model, card, selector)
 {
+	let trueValue = 1;
+	let falseValue = 0;
+	if(getCardProp(model, card, "doublePony"))
+		trueValue = 2;
+
+
 	if(selector.trim() == "*")
-		return true;
+		return trueValue;
 
 	if(selector.trim() == "genderSwapped")
 	{
@@ -62,7 +68,7 @@ function doesCardMatchSelector(model, card, selector)
 			originalGender = cards[model.turnstate.overrides[card].disguise].gender
 		}
 
-		return getCardProp(model, card,"gender") != originalGender;
+		return (getCardProp(model, card,"gender") != originalGender ? trueValue : falseValue);
 	}
 
 	var clauses = selector.split("&&");
@@ -71,7 +77,7 @@ function doesCardMatchSelector(model, card, selector)
 	{
 		var criteria = clauses.map( clause => doesCardMatchSelector(model, card, clause.trim()));
 
-		return criteria.reduce((a,b) => a && b);
+		return (criteria.reduce((a,b) => a && b) ? trueValue : falseValue);
 	}
 
 	clauses = selector.split("||");
@@ -80,7 +86,7 @@ function doesCardMatchSelector(model, card, selector)
 	{
 		var criteria = clauses.map( clause => doesCardMatchSelector(model, card, clause.trim()));
 
-		return criteria.reduce((a,b) => a || b);
+		return ( criteria.reduce((a,b) => a || b) ? trueValue : falseValue);
 	}
 
 
@@ -98,9 +104,9 @@ function doesCardMatchSelector(model, card, selector)
 		var cardValue = getCardProp(model, card, prop);
 
 		if(prop == "gender" && cardValue == "malefemale")
-			return true;
+			return trueValue;
 
-		return getCardProp(model, card, prop) != value;
+		return (getCardProp(model, card, prop) != value ? trueValue : falseValue);
 	}
 
 	if(selector.indexOf("=") > -1)
@@ -118,9 +124,9 @@ function doesCardMatchSelector(model, card, selector)
 		var cardValue = getCardProp(model, card, prop);
 
 		if(prop == "gender" && cardValue == "malefemale")
-			return true;
+			return trueValue;
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
-		return getCardProp(model, card, prop) == value;
+		return (getCardProp(model, card, prop) == value ? trueValue : falseValue);
 	}
 
 	if(selector.indexOf(" in ") > -1)
@@ -132,10 +138,10 @@ function doesCardMatchSelector(model, card, selector)
 
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
 
-		return getCardProp(model, card, prop).has(value);
+		return (getCardProp(model, card, prop).has(value) ? trueValue : falseValue);
 	}
 
-	return false
+	return falseValue
 }
 
 
@@ -154,10 +160,7 @@ function ExistsPony(selector, count)
 			if(key.startsWith("p,"))
 			{
 				//console.log("checking card " + model.board[key].card);
-				if(doesCardMatchSelector(model, model.board[key].card, selector))
-				{
-					boardCount++;
-				}
+				boardCount += doesCardMatchSelector(model, model.board[key].card, selector)
 			}
 		}
 
@@ -228,12 +231,10 @@ function ExistsChain(selector, count)
 		{
 			if(key.startsWith("p") && !isBlank(model.board[key].card))
 			{
-
 				var chained = buildChain(key);
 				
 				if(chained.size >= count)
 					return true;
-
 			}
 		}
 
@@ -249,10 +250,7 @@ function Select(selector, count)
 		let centeredCount = 0;
 		for(var ponyKey of ponyKeys)
 		{
-			if(doesCardMatchSelector(model, model.board[ponyKey].card, selector))
-			{
-				centeredCount++;
-			}
+			centeredCount += doesCardMatchSelector(model, model.board[ponyKey].card, selector)
 		}
 
 		return centeredCount >= count;
@@ -351,6 +349,19 @@ function ExistsShip(selector1, selector2, count)
 	return ExistsShipGeneric(checkTwoSelectors, count)
 }
 
+function SwapCount(count)
+{
+	return function(model)
+	{
+		if(model.turnstate)
+		{
+			return model.turnstate.swapsNow >= count;
+		}
+
+		return false;
+	}
+}
+
 function PlayPonies(selector, count)
 {
 	return function(model)
@@ -364,6 +375,24 @@ function PlayPonies(selector, count)
 
 		return false;
 	}
+}
+
+function PlayLovePoisons(model)
+{
+	console.log(model.turnstate.playedShips);
+
+	if(model.turnstate)
+	{
+		var matchingPlays = model.turnstate.playedShips.filter(function(x)
+		{
+			var [ship, pony1, pony2] = x;
+			return cards[ship].action == "lovePoison";
+		});
+
+		return (matchingPlays.length >= 2);
+	}
+
+	return false;
 }
 
 function PlayShips(selector1, selector2, count)
@@ -472,14 +501,14 @@ var goalCriteria = {
 	"Core.Goal.CharityAuction": ExistsShip("genderSwapped", "genderSwapped"),
 	"Core.Goal.CommanderHurricanesArmy": PlayPonies("race=pegasus", 3),
 	"Core.Goal.DeepCover": ExistsShip("Changeling in keywords","Changeling in keywords"),
-	"Core.Goal.Epidemic": Nope,
+	"Core.Goal.Epidemic": PlayLovePoisons,
 	"Core.Goal.Fabulosity": ExistsShip("name=Rarity","name=Rarity"),
 	"Core.Goal.FriendshipIsBenefits": ExistsChain("Mane 6 in keywords", 6),
 	"Core.Goal.GoForthAndMultiply": PlayShips("gender=male","gender=female", 3),
 	"Core.Goal.GoodEnough": ExistsShip("name=Twilight Sparkle","name=Luna"),
 	"Core.Goal.HehPeasants": PlayPonies("race=alicorn", 3),
 	"Core.Goal.HelpImTrappedInAShippingCardGame": ExistsShip("name=Cheerilee","*"),
-	"Core.Goal.HoldOnINeedToMakeAFlowChart": Nope,
+	"Core.Goal.HoldOnINeedToMakeAFlowChart": SwapCount(6),
 	"Core.Goal.HostileTakeover": ExistsPony("Changeling in keywords", 3),
 	"Core.Goal.HotForTeacher": ExistsShip("name=Twilight Sparkle","name=Celestia"),
 	"Core.Goal.IGuessYoullDo": ExistsShip("name=Twilight Sparkle","name=Cheerilee"),

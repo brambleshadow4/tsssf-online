@@ -327,7 +327,12 @@ function updateEffects()
 	{
 		let newDisguise = getCardProp(card, "disguise");
 
-		if(newDisguise != turnStateChangelings[card])
+		if(!isBoardLoc(cardLocations[card]))
+		{
+			delete turnStateChangelings[card];
+		}
+
+		if(isBoardLoc(cardLocations[card]) && newDisguise != turnStateChangelings[card])
 		{	
 			var element = model.board[cardLocations[card]].element;
 			var div = element.getElementsByClassName('changeling')[0];
@@ -335,7 +340,9 @@ function updateEffects()
 				div.parentNode.removeChild(div);
 
 			delete turnStateChangelings[card]	
-		}		
+		}
+
+
 	}
 
 
