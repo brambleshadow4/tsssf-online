@@ -145,9 +145,6 @@ function doesCardMatchSelector(model, card, selector)
 }
 
 
-
-
-
 function ExistsPony(selector, count)
 {
 	count = count || 1;
@@ -536,6 +533,34 @@ var goalCriteria = {
 	"Core.Goal.TheQuietGame": ExistsShip("name=Fluttershy","name=Fluttershy"),
 	"Core.Goal.TimeTravelersAmongUs": ExistsPony("altTimeline=true", 5),
 	"Core.Goal.WellMaybe": ExistsShip("name=Twilight Sparkle","name=Zecora"),
+
+
+	"EC.Goal.FamilyAppreciationDay": ExistsChain("Apple in keywords",4),
+	"EC.Goal.BigMacIsBigMackin": ExistsPonyShippedTo("name=Big Macintosh", Select("gender=female",3)),
+	"EC.Goal.MyWaifu": ExistsShip("Oc in keywords","Mane 6 in keywords"),
+	"EC.Goal.BookClub": ExistsPonyShippedTo("name=Twilight Sparkle", Select("*",5)),
+	"EC.Goal.EnjoyingTheScenery": ExistsPonyShippedTo("name=Rarity", Select("*",4)),
+	"EC.Goal.IronPonyCompetition": ExistsPonyShippedTo("name=Rainbow Dash", Select("*",4)),
+	"EC.Goal.CiderSqueezin": ExistsPonyShippedTo("name=Applejack", Select("*",4)),
+	"EC.Goal.AintNoPartyLikeAPinkiePieParty": ExistsPonyShippedTo("name=Pinkie Pie", Select("*",4)),
+	"EC.Goal.Recruitment": ExistsPonyShippedTo("name=Fluttershy", Select("*",4)),
+	"EC.Goal.PlayingTheGame": ExistsShip("gender=male", Select("gender=female", 4)),
+	"EC.Goal.IReallyLikeHerMane": BreakShip("name=Smarty Pants","*"),
+	"EC.Goal.PickyPicky": Nope,
+	"EC.Goal.BewareTheGroove": BreakShip("Elder in keywords", "race=alicorn"),
+	"EC.Goal.ABlessingOfAlicorns": ExistsPony("Alicorn in keywords", 5),
+	"EC.Goal.TheresNoThrillLikeIronWill": ExistsShip("name=Iron Will","Villain in keywords"),
+	"EC.Goal.OfPoniesAndPerilTheMagnumOpus": ExistsChain("altTimeline=true",3),
+	"EC.Goal.Swinging": Nope,
+	"EC.Goal.SpaDay": ExistsShip("Mane 6 in keywords", "name=Aloe & Lotus"),
+	"EC.Goal.NoPoniesCanPonyTwoPoniesToPony": ExistsPonyShippedTo("*",Select("*",6)),
+	"EC.Goal.EvilSocietyOfEvil": ExistsChain("Villain in keywords", 6),
+	"EC.Goal.FluttershysHomeForRedeemedEvilDoers": ExistsPonyShippedTo("name=Fluttershy",Select("Villain in keywords",3)),
+	"EC.Goal.Landslide": Nope,
+	"EC.Goal.FleetAdmiral": PlayShips("*","*",7),
+	"EC.Goal.CoupDetat": Nope,
+	"EC.Goal.FriendsInHighPlaces": ExistsPonyShippedTo("OC in keywords", Select("Princess",2)),
+	"EC.Goal.Recolor": Nope,
 }
 	
 export default goalCriteria;
