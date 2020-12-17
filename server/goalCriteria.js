@@ -144,6 +144,33 @@ function doesCardMatchSelector(model, card, selector)
 	return falseValue
 }
 
+function getConnectedPonies(model, key)
+{
+	var [typ, x, y] = key.split(",");
+	x = Number(x)
+	y = Number(y)
+
+	var shipPonyPairs = [
+		["sr," + x + "," + y, "p," + (x+1) + "," + y],
+		["sd," + x + "," + y, "p," + x + "," + (y+1)],
+		["sr," + (x-1) + "," + y, "p," + (x-1) + "," + y],
+		["sd," + x + "," + (y-1), "p," + x + "," + (y-1)]
+	]
+
+	var connected = [];
+	for(var [shipKey, ponyKey] of shipPonyPairs)
+	{
+		if(model.board[shipKey] && model.board[ponyKey] 
+			&& !isBlank(model.board[shipKey].card) && !isBlank(model.board[ponyKey].card))
+		{
+			connected.push(model.board[ponyKey].card)
+		}
+	}	
+
+	return connected;
+
+}
+
 
 function ExistsPony(selector, count)
 {
@@ -166,32 +193,32 @@ function ExistsPony(selector, count)
 	}
 }
 
-function getConnectedPonies(model, key)
+
+function ExistsPonyGeneric(selectFun, count)
 {
-	var [typ, x, y] = key.split(",");
-	x = Number(x)
-	y = Number(y)
-
-	var shipPonyPairs = [
-		["sr," + x + "," + y, "p," + (x+1) + "," + y],
-		["sd," + x + "," + y, "p," + x + "," + (y+1)],
-		["sr," + (x-1) + "," + y, "p," + (x-1) + "," + y],
-		["sd," + x + "," + (y-1), "p," + x + "," + (y-1)]
-	]
-
-	var connected = [];
-	for(var [shipKey, ponyKey] of shipPonyPairs)
+	count = count || 1;
+	return function(model)
 	{
-		if(model.board[shipKey] && model.board[ponyKey] 
-			&& !isBlank(model.board[shipKey].card) && !isBlank(model.board[ponyKey].card))
+		var boardCount = 0;
+
+		for(var key in model.board)
 		{
-			connected.push(ponyKey)
+			if(key.startsWith("p,"))
+			{
+				//console.log("checking card " + model.board[key].card);
+				boardCount += selectFun(model, model.board[key].card)
+			}
 		}
-	}	
 
-	return connected;
+		console.log(boardCount)
 
+		//console.log(selector + " count " + boardCount);
+		return boardCount >= count;
+	}
 }
+
+
+
 
 function ExistsChain(selector, count)
 {
@@ -217,7 +244,9 @@ function ExistsChain(selector, count)
 
 				chained.add(key);	
 
-				workList = workList.concat(getConnectedPonies(model, key));
+
+				var ponyKeys = getConnectedPonies(model, key).map( x => model.cardLocations[x])
+				workList = workList.concat(ponyKeys);
 			}
 
 			return chained;
@@ -241,50 +270,20 @@ function ExistsChain(selector, count)
 
 function Select(selector, count)
 {
-	return function(model, ponyKeys)
+	return function(model, connectedPonies)
 	{
 
 		let centeredCount = 0;
-		for(var ponyKey of ponyKeys)
+		for(var card of connectedPonies)
 		{
-			centeredCount += doesCardMatchSelector(model, model.board[ponyKey].card, selector)
+			centeredCount += doesCardMatchSelector(model, card, selector)
 		}
 
 		return centeredCount >= count;
 	}
 }
 
-function ShippedWith2Versions(model, ponyKeys)
-{
 
-	function filterFun(card1, card2)
-	{
-		/*if(getCardProp(model,card2,"name") == getCardProp(model,card1,"name"))
-		{
-			var id1 = (model.turnstate && model.turnstate.overrides && model.turnstate.overrides[card1] && model.turnstate.overrides[card1].disguise) || card1;
-			var id2 = (model.turnstate && model.turnstate.overrides && model.turnstate.overrides[card2] && model.turnstate.overrides[card2].disguise) || card2;
-
-			return id1 != id2;
-		}*/
-
-		return getCardProp(model,card2,"name") == getCardProp(model,card1,"name")
-	}
-
-	let centeredCount = 0;
-
-	var ponyCards = ponyKeys.map(k => model.board[k].card);
-
-	for(var card of ponyCards)
-	{
-
-		var match = ponyCards.filter(x => filterFun(card, x))
-
-		if(match.length > 1)
-			return true;
-	}
-
-	return false;
-}
 
 function ExistsPonyShippedTo(mainPonySel, groupSelectionFn, count)
 {
@@ -300,9 +299,7 @@ function ExistsPonyShippedTo(mainPonySel, groupSelectionFn, count)
 				if(!doesCardMatchSelector(model, model.board[key].card, mainPonySel))
 					continue;
 
-				var connectedKeys = getConnectedPonies(model, key);
-
-				if(groupSelectionFn(model, connectedKeys))
+				if(groupSelectionFn(model, getConnectedPonies(model, key)))
 					return true;	
 			}
 		}
@@ -311,20 +308,6 @@ function ExistsPonyShippedTo(mainPonySel, groupSelectionFn, count)
 	}
 }
 
-
-function ShippedWithOppositeGenderedSelf(model, card1, card2)
-{
-	if(getCardProp(model, card1, "name") == getCardProp(model, card2, "name"))
-	{
-		var gender1 = getCardProp(model, card1, "gender");
-		var gender2 = getCardProp(model, card2, "gender");
-
-		return ((gender1 == "male" && gender2 == "female") || (gender1 == "female" && gender2 == "male"))
-	}
-
-	return false;
-
-}
 
 function ExistsShip(selector1, selector2, count)
 {
@@ -346,18 +329,7 @@ function ExistsShip(selector1, selector2, count)
 	return ExistsShipGeneric(checkTwoSelectors, count)
 }
 
-function SwapCount(count)
-{
-	return function(model)
-	{
-		if(model.turnstate)
-		{
-			return model.turnstate.swapsNow >= count;
-		}
 
-		return false;
-	}
-}
 
 function PlayPonies(selector, count)
 {
@@ -374,23 +346,7 @@ function PlayPonies(selector, count)
 	}
 }
 
-function PlayLovePoisons(model)
-{
-	console.log(model.turnstate.playedShips);
 
-	if(model.turnstate)
-	{
-		var matchingPlays = model.turnstate.playedShips.filter(function(x)
-		{
-			var [ship, pony1, pony2] = x;
-			return cards[ship].action == "lovePoison";
-		});
-
-		return (matchingPlays.length >= 2);
-	}
-
-	return false;
-}
 
 function PlayShips(selector1, selector2, count)
 {
@@ -489,6 +445,110 @@ function ExistsShipGeneric(compareCardsFun, count)
 }
 
 
+/************************** Custom Rules **************************/
+
+function GainOCKeyword(model, card)
+{
+	if(model.turnstate && model.turnstate.overrides[card] 
+		&& model.turnstate.overrides[card].keywords 
+		&& model.turnstate.overrides[card].keywords.indexOf("OC") > -1)
+	{
+
+		if(getCardProp(model, card, "doublePony"))
+			return 2;
+		return 1;
+
+	}
+
+	return 0
+}
+
+
+function PlayLovePoisons(model)
+{
+	console.log(model.turnstate.playedShips);
+
+	if(model.turnstate)
+	{
+		var matchingPlays = model.turnstate.playedShips.filter(function(x)
+		{
+			var [ship, pony1, pony2] = x;
+			return cards[ship].action == "lovePoison";
+		});
+
+		return (matchingPlays.length >= 2);
+	}
+
+	return false;
+}
+
+function SwapCount(count)
+{
+	return function(model)
+	{
+		if(model.turnstate)
+		{
+			return model.turnstate.swapsNow >= count;
+		}
+
+		return false;
+	}
+}
+
+function ShippedWithOppositeGenderedSelf(model, card1, card2)
+{
+	if(getCardProp(model, card1, "name") == getCardProp(model, card2, "name"))
+	{
+		var gender1 = getCardProp(model, card1, "gender");
+		var gender2 = getCardProp(model, card2, "gender");
+
+		return ((gender1 == "male" && gender2 == "female") || (gender1 == "female" && gender2 == "male"))
+	}
+
+	return false;
+}
+
+function ShippedWith2Versions(model, ponyKeys)
+{
+
+	function filterFun(card1, card2)
+	{
+		/*if(getCardProp(model,card2,"name") == getCardProp(model,card1,"name"))
+		{
+			var id1 = (model.turnstate && model.turnstate.overrides && model.turnstate.overrides[card1] && model.turnstate.overrides[card1].disguise) || card1;
+			var id2 = (model.turnstate && model.turnstate.overrides && model.turnstate.overrides[card2] && model.turnstate.overrides[card2].disguise) || card2;
+
+			return id1 != id2;
+		}*/
+
+		return getCardProp(model,card2,"name") == getCardProp(model,card1,"name")
+	}
+
+	let centeredCount = 0;
+
+	var ponyCards = ponyKeys.map(k => model.board[k].card);
+
+	for(var card of ponyCards)
+	{
+
+		var match = ponyCards.filter(x => filterFun(card, x))
+
+		if(match.length > 1)
+			return true;
+	}
+
+	return false;
+}
+
+
+function ShippedWithMrMrsCake(model, ponyCards)
+{
+
+	var mrs = ponyCards.filter( x => doesCardMatchSelector(model, x, "name=Mrs. Cake")).length;
+	var mr = ponyCards.filter( x => doesCardMatchSelector(model, x, "name=Mr. Cake")).length;
+
+	return (mr > 0 && mrs > 0 ? 1 : 0);
+}
 
 var goalCriteria = {
 
@@ -546,21 +606,29 @@ var goalCriteria = {
 	"EC.Goal.Recruitment": ExistsPonyShippedTo("name=Fluttershy", Select("*",4)),
 	"EC.Goal.PlayingTheGame": ExistsShip("gender=male", Select("gender=female", 4)),
 	"EC.Goal.IReallyLikeHerMane": BreakShip("name=Smarty Pants","*"),
-	"EC.Goal.PickyPicky": Nope,
+	"EC.Goal.PickyPicky": Nope, // custom stat
 	"EC.Goal.BewareTheGroove": BreakShip("Elder in keywords", "race=alicorn"),
 	"EC.Goal.ABlessingOfAlicorns": ExistsPony("Alicorn in keywords", 5),
 	"EC.Goal.TheresNoThrillLikeIronWill": ExistsShip("name=Iron Will","Villain in keywords"),
 	"EC.Goal.OfPoniesAndPerilTheMagnumOpus": ExistsChain("altTimeline=true",3),
-	"EC.Goal.Swinging": Nope,
+	"EC.Goal.Swinging": ExistsPonyShippedTo("*", ShippedWithMrMrsCake),
 	"EC.Goal.SpaDay": ExistsShip("Mane 6 in keywords", "name=Aloe & Lotus"),
 	"EC.Goal.NoPoniesCanPonyTwoPoniesToPony": ExistsPonyShippedTo("*",Select("*",6)),
 	"EC.Goal.EvilSocietyOfEvil": ExistsChain("Villain in keywords", 6),
 	"EC.Goal.FluttershysHomeForRedeemedEvilDoers": ExistsPonyShippedTo("name=Fluttershy",Select("Villain in keywords",3)),
-	"EC.Goal.Landslide": Nope,
+	"EC.Goal.Landslide": Nope, // custom stat
 	"EC.Goal.FleetAdmiral": PlayShips("*","*",7),
-	"EC.Goal.CoupDetat": Nope,
+	"EC.Goal.CoupDetat": Nope, // custom stat
 	"EC.Goal.FriendsInHighPlaces": ExistsPonyShippedTo("OC in keywords", Select("Princess",2)),
-	"EC.Goal.Recolor": Nope,
+	"EC.Goal.Recolor": ExistsPonyGeneric(GainOCKeyword, 1),
+
+
+	"PU.Goal.Besties": ExistsShip("Uni in keywords", "Uni in keywords"),
+	"PU.Goal.CutieMarkCourtship": ExistsShip("CMC in keywords", "CMC in keywords"),
+	"PU.Goal.Internship": ExistsShip("Uni in keywords or PCC in keywords", "Villain in keywords"),
+	"PU.Goal.RevengeOfTheNerds": ExistsShip("Uni in keywords or PCC in keywords", "Mane 6 in keywords")
+	"PU.Goal.SchoolwideFestivities": ExistsChain("Uni in keywords or PCC in keywords",6),
+	"PU.Goal.WhereforeArtThouPoneo": ExistsShip("Uni in keywords","PCC in keywords"),
 }
 	
 export default goalCriteria;
