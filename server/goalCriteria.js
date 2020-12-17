@@ -136,7 +136,8 @@ function doesCardMatchSelector(model, card, selector)
 		prop = prop.trim();
 		value = value.trim();
 
-		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
+		console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
+
 
 		return (getCardProp(model, card, prop).has(value) ? trueValue : falseValue);
 	}
@@ -508,7 +509,7 @@ function ShippedWithOppositeGenderedSelf(model, card1, card2)
 	return false;
 }
 
-function ShippedWith2Versions(model, ponyKeys)
+function ShippedWith2Versions(model, ponyCards)
 {
 
 	function filterFun(card1, card2)
@@ -525,8 +526,6 @@ function ShippedWith2Versions(model, ponyKeys)
 	}
 
 	let centeredCount = 0;
-
-	var ponyCards = ponyKeys.map(k => model.board[k].card);
 
 	for(var card of ponyCards)
 	{
@@ -597,7 +596,7 @@ var goalCriteria = {
 
 	"EC.Goal.FamilyAppreciationDay": ExistsChain("Apple in keywords",4),
 	"EC.Goal.BigMacIsBigMackin": ExistsPonyShippedTo("name=Big Macintosh", Select("gender=female",3)),
-	"EC.Goal.MyWaifu": ExistsShip("Oc in keywords","Mane 6 in keywords"),
+	"EC.Goal.MyWaifu": ExistsShip("OC in keywords","Mane 6 in keywords"),
 	"EC.Goal.BookClub": ExistsPonyShippedTo("name=Twilight Sparkle", Select("*",5)),
 	"EC.Goal.EnjoyingTheScenery": ExistsPonyShippedTo("name=Rarity", Select("*",4)),
 	"EC.Goal.IronPonyCompetition": ExistsPonyShippedTo("name=Rainbow Dash", Select("*",4)),
@@ -619,15 +618,15 @@ var goalCriteria = {
 	"EC.Goal.Landslide": Nope, // custom stat
 	"EC.Goal.FleetAdmiral": PlayShips("*","*",7),
 	"EC.Goal.CoupDetat": Nope, // custom stat
-	"EC.Goal.FriendsInHighPlaces": ExistsPonyShippedTo("OC in keywords", Select("Princess",2)),
+	"EC.Goal.FriendsInHighPlaces": ExistsPonyShippedTo("OC in keywords", Select("Princess in keywords",2)),
 	"EC.Goal.Recolor": ExistsPonyGeneric(GainOCKeyword, 1),
 
 
 	"PU.Goal.Besties": ExistsShip("Uni in keywords", "Uni in keywords"),
 	"PU.Goal.CutieMarkCourtship": ExistsShip("CMC in keywords", "CMC in keywords"),
-	"PU.Goal.Internship": ExistsShip("Uni in keywords or PCC in keywords", "Villain in keywords"),
-	"PU.Goal.RevengeOfTheNerds": ExistsShip("Uni in keywords or PCC in keywords", "Mane 6 in keywords"),
-	"PU.Goal.SchoolwideFestivities": ExistsChain("Uni in keywords or PCC in keywords",6),
+	"PU.Goal.Internship": ExistsShip("Uni in keywords || PCC in keywords", "Villain in keywords"),
+	"PU.Goal.RevengeOfTheNerds": ExistsShip("Uni in keywords || PCC in keywords", "Mane 6 in keywords"),
+	"PU.Goal.SchoolwideFestivities": ExistsChain("Uni in keywords || PCC in keywords",6),
 	"PU.Goal.WhereforeArtThouPoneo": ExistsShip("Uni in keywords","PCC in keywords"),
 }
 	
