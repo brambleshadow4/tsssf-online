@@ -626,7 +626,7 @@ var goalCriteria = {
 	"PU.Goal.Besties": ExistsShip("Uni in keywords", "Uni in keywords"),
 	"PU.Goal.CutieMarkCourtship": ExistsShip("CMC in keywords", "CMC in keywords"),
 	"PU.Goal.Internship": ExistsShip("Uni in keywords or PCC in keywords", "Villain in keywords"),
-	"PU.Goal.RevengeOfTheNerds": ExistsShip("Uni in keywords or PCC in keywords", "Mane 6 in keywords")
+	"PU.Goal.RevengeOfTheNerds": ExistsShip("Uni in keywords or PCC in keywords", "Mane 6 in keywords"),
 	"PU.Goal.SchoolwideFestivities": ExistsChain("Uni in keywords or PCC in keywords",6),
 	"PU.Goal.WhereforeArtThouPoneo": ExistsShip("Uni in keywords","PCC in keywords"),
 }
