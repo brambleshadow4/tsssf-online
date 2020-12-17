@@ -1078,6 +1078,13 @@ addPlayEvent(async function(e){
 		{
 			for(var shipCard in model.turnstate.openShips)
 			{
+				if(!cardLocations[shipCard] || !isBoardLoc(cardLocations[shipCard]))
+				{
+					// card has been removed from the board.
+					delete model.turnstate.openShips[shipCard];
+					continue
+				}
+
 				if(isShipClosed(shipCard))
 				{
 					delete model.turnstate.openShips[shipCard];

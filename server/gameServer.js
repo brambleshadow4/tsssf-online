@@ -887,6 +887,8 @@ export function TsssfGameServer()
 				&& isBoardLoc(endLocation))
 			{
 
+
+
 				if(isShipClosed(model, endLocation))
 				{
 					model.turnstate.playedShips.push([card].concat(getShippedPonies(model, endLocation)));
@@ -905,6 +907,13 @@ export function TsssfGameServer()
 				for(var tentativeShip in model.turnstate.tentativeShips)
 				{
 					var shipLoc = model.cardLocations[tentativeShip];
+
+					if(!shipLoc || !isBoardLoc(shipLoc))
+					{
+						delete model.turnstate.tentativeShips[tentativeShip];
+						continue;
+					}
+
 
 					if(isShipClosed(model, shipLoc))
 					{
