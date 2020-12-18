@@ -598,3 +598,12 @@ iframe
   75% {opacity: 0}
   100% {opacity: 0}
 }
+
+.noLogic
+{
+	height: 1vw;
+	width: 1vw;
+	position: absolute;
+	bottom: .5vh;
+	right: .3vw;
+}

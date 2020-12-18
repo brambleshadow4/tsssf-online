@@ -1178,7 +1178,8 @@ var cards = {
 			"EC.Goal.PickyPicky": {
 				name: "Picky Picky!",
 				url: "Goal_Picky Picky!.png",
-				points: "1"
+				points: "1",
+				noLogic: true,
 			},
 			"EC.Goal.BewareTheGroove": {
 				name: "Beware the Groove",
@@ -1228,7 +1229,8 @@ var cards = {
 			"EC.Goal.Landslide": {
 				name: "Landslide",
 				url: "Goal_Landslide.png",
-				points: "0"
+				points: "0",
+				noLogic: true
 			},
 			"EC.Goal.FleetAdmiral": {
 				name: "Fleet Admiral",
@@ -1238,7 +1240,8 @@ var cards = {
 			"EC.Goal.CoupDetat": {
 				name: "Coup d'etat",
 				url: "Goal_Coup d'etat.png",
-				points: "3"
+				points: "3",
+				noLogic: true,
 			},
 			"EC.Goal.FriendsInHighPlaces": {
 				name: "Friends in High Places",

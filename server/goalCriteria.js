@@ -10,40 +10,40 @@ var Yep = () => true;
 function getCardProp(model, cardFull, prop)
 {
 	var [card, substate] = cardFull.split(":");
-	var cardObj = model.turnstate.overrides[card];
+	var cardOverrides = model.turnstate.overrides[card];
 	var baseCard = card;
 
-	if(cardObj && cardObj.length)
+	if(cardOverrides && cardOverrides.length)
 	{
-		if(substate && Number(substate) < cardObj.length)
+		if(substate && Number(substate) < cardOverrides.length)
 		{
-			cardObj = cardObj[Number(substate)];
+			cardOverrides = cardOverrides[Number(substate)];
 		}
 		else
 		{
-			cardObj = cardObj[cardObj.length-1];
+			cardOverrides = cardOverrides[cardOverrides.length-1];
 		}
 
-		baseCard = cardObj.disguise || card;
+		baseCard = cardOverrides.disguise || card;
 	}
 
 	if(prop == "*")
-		return cardObj;
+		return cardOverrides;
 
 
 	if(prop == "keywords")
 	{
-		let baseKeywords = (cardObj && cardObj[prop]) || [];
+		let baseKeywords = (cardOverrides && cardOverrides.keywords) || [];
 
-		if(cardObj && cardObj.disguise)
-			baseKeywords.push("Changeling");
+		if(cardOverrides && cardOverrides.disguise)
+			baseKeywords = baseKeywords.concat(cards[card].keywords);
 
 		return new Set(cards[baseCard][prop].concat(baseKeywords));
 	}
 
-	if(cardObj && cardObj[prop])
+	if(cardOverrides && cardOverrides[prop])
 	{
-		return cardObj[prop]
+		return cardOverrides[prop]
 	}
 
 	return cards[baseCard][prop];
@@ -136,7 +136,7 @@ function doesCardMatchSelector(model, card, selector)
 		prop = prop.trim();
 		value = value.trim();
 
-		console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
+		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
 
 
 		return (getCardProp(model, card, prop).has(value) ? trueValue : falseValue);
@@ -211,8 +211,6 @@ function ExistsPonyGeneric(selectFun, count)
 			}
 		}
 
-		console.log(boardCount)
-
 		//console.log(selector + " count " + boardCount);
 		return boardCount >= count;
 	}
@@ -260,7 +258,11 @@ function ExistsChain(selector, count)
 			{
 				var chained = buildChain(key);
 				
-				if(chained.size >= count)
+				var shipCards = [...chained].map(x => model.board[key].card);
+
+				var chainCount = shipCards.map( x=> getCardProp(model, x, "doublePony") ? 2 : 1).reduce((a,b) => a + b, 0)
+
+				if(chainCount >= count)
 					return true;
 			}
 		}
@@ -467,8 +469,6 @@ function GainOCKeyword(model, card)
 
 function PlayLovePoisons(model)
 {
-	console.log(model.turnstate.playedShips);
-
 	if(model.turnstate)
 	{
 		var matchingPlays = model.turnstate.playedShips.filter(function(x)
@@ -603,11 +603,11 @@ var goalCriteria = {
 	"EC.Goal.CiderSqueezin": ExistsPonyShippedTo("name=Applejack", Select("*",4)),
 	"EC.Goal.AintNoPartyLikeAPinkiePieParty": ExistsPonyShippedTo("name=Pinkie Pie", Select("*",4)),
 	"EC.Goal.Recruitment": ExistsPonyShippedTo("name=Fluttershy", Select("*",4)),
-	"EC.Goal.PlayingTheGame": ExistsShip("gender=male", Select("gender=female", 4)),
+	"EC.Goal.PlayingTheGame": ExistsShip("gender=male", "gender=female", 4),
 	"EC.Goal.IReallyLikeHerMane": BreakShip("name=Smarty Pants","*"),
 	"EC.Goal.PickyPicky": Nope, // custom stat
 	"EC.Goal.BewareTheGroove": BreakShip("Elder in keywords", "race=alicorn"),
-	"EC.Goal.ABlessingOfAlicorns": ExistsPony("Alicorn in keywords", 5),
+	"EC.Goal.ABlessingOfAlicorns": ExistsPony("race=alicorn", 5),
 	"EC.Goal.TheresNoThrillLikeIronWill": ExistsShip("name=Iron Will","Villain in keywords"),
 	"EC.Goal.OfPoniesAndPerilTheMagnumOpus": ExistsChain("altTimeline=true",3),
 	"EC.Goal.Swinging": ExistsPonyShippedTo("*", ShippedWithMrMrsCake),
