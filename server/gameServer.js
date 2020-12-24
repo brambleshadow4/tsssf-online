@@ -1,4 +1,6 @@
 import ws from "ws";
+import * as util from 'util'
+import fs from "fs";
 import {
 	randomizeOrder, 
 	isGoal, 
@@ -371,6 +373,7 @@ export function TsssfGameServer()
 		}
 		
 		games[key] = {
+			messageHistory: [],
 			deathCount: 0,
 			isLobbyOpen: true,
 			isInGame: false,
@@ -963,14 +966,48 @@ export function TsssfGameServer()
 	}
 
 
+	function handleCrash(fun)
+	{
+		return function(...args)
+		{
+			try {
+				fun(...args) 
+			}
+			catch(e)
+			{
+				var now = new Date();
+
+				function pad(n)
+				{
+					if(n < 10)
+						return "0" + n
+					else 
+						return "" + n
+				}
+
+				var s = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + (now.getDate()) + " " + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds())
+
+				var data = [];
+
+				data.push(e.toString())
+				data.push(e.stack)
+				data.push("")
+				data.push("GAMES")
+				data.push(util.inspect(games, {depth:Infinity}))
+
+				fs.writeFileSync("CRASH " + s + ".txt", data.join("\n"))
+				throw e
+			}
+		}
+	}
+
 	//startGame("dev");
 	//games["dev"].allowInGameRegistration = true;
 
-	wsServer.on('connection', (socket, request, client) => 
+	function onConnection(socket, request, client)
 	{
 		socket.isAlive = true;
 		socket.isDead = false;
-
 
 		let key = request.url.substring(2);
 		if(!games[key])
@@ -980,10 +1017,9 @@ export function TsssfGameServer()
 			return;
 		}
 
-
 		sendLobbyList(key);	
 
-		socket.on('close', () =>
+		function onClose()
 		{
 			socket.isAlive = false;
 
@@ -1044,13 +1080,17 @@ export function TsssfGameServer()
 			{
 				sendPlayerlistsToEachPlayer(key);
 			}
-		})
+		}
 
-		socket.on('message', message => 
+		socket.on('close', handleCrash(onClose));
+
+		function onMessage(message)
 		{
 			console.log(message);
 
 			var model = games[key];
+
+			model.messageHistory.push(message);
 
 			if(message.startsWith("handshake;"))
 			{
@@ -1360,8 +1400,14 @@ export function TsssfGameServer()
 					changeTurnToNextPlayer(key);	
 				}
 			}
-		});
-	});
+		}
+
+		socket.on('message', handleCrash(onMessage))
+			
+	}
+
+	wsServer.on('connection', handleCrash(onConnection));
+	
 
 	return wsServer;
 }

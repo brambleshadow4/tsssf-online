@@ -1,5 +1,4 @@
 import cards from "./cards.js";
-
 import {isBlank} from "./lib.js";
 
 
