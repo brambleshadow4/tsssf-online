@@ -230,20 +230,20 @@ function ExistsChain(selector, count)
 
 			while (chained.size < count && workList.length)
 			{
-				var key = workList.shift();
+				var thisKey = workList.shift();
 
-				if(explored.has(key))
+				if(explored.has(thisKey))
 					continue;
 
-				explored.add(key);
+				explored.add(thisKey);
 
-				if(!doesCardMatchSelector(model, model.board[key].card, selector))
+				if(!doesCardMatchSelector(model, model.board[thisKey].card, selector))
 					continue;
 
-				chained.add(key);	
+				chained.add(thisKey);	
 
 
-				var ponyKeys = getConnectedPonies(model, key).map( x => model.cardLocations[x])
+				var ponyKeys = getConnectedPonies(model, thisKey).map( x => model.cardLocations[x])
 				workList = workList.concat(ponyKeys);
 			}
 
@@ -255,11 +255,10 @@ function ExistsChain(selector, count)
 		{
 			if(key.startsWith("p") && !isBlank(model.board[key].card))
 			{
-				var chained = buildChain(key);
-				
-				var shipCards = [...chained].map(x => model.board[key].card);
+				var chained = buildChain(key);				
+				var ponyCards = [...chained].map(x => model.board[x].card);
 
-				var chainCount = shipCards.map( x=> getCardProp(model, x, "doublePony") ? 2 : 1).reduce((a,b) => a + b, 0)
+				var chainCount = ponyCards.map( x=> getCardProp(model, x, "doublePony") ? 2 : 1).reduce((a,b) => a + b, 0)
 
 				if(chainCount >= count)
 					return true;
