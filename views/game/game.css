@@ -601,9 +601,9 @@ iframe
 
 .noLogic
 {
-	height: 1vw;
-	width: 1vw;
+	height: 2.5vh;
+	width: 2.5vh;
 	position: absolute;
-	bottom: .5vh;
-	right: .3vw;
+	bottom: .4vh;
+	right: .5vh;
 }

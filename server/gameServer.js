@@ -332,6 +332,10 @@ export function TsssfGameServer()
 	function checkIfGoalsWereAchieved(key)
 	{
 		var model = games[key];
+
+		if(model.turnstate == undefined)
+			return;
+
 		var sendUpdate = false;
 
 		for(var card of model.currentGoals)
@@ -960,8 +964,7 @@ export function TsssfGameServer()
 			}
 		}
 
-
-
+		
 		checkIfGoalsWereAchieved(key);
 	}
 
