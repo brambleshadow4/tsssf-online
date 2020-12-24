@@ -7,7 +7,8 @@ import {
 	updatePonyDiscard,
 	updateShipDiscard,
 	updateGoalDiscard,
-	updatePlayerList
+	updatePlayerList,
+	updateGoals
 } from "/game/peripheralComponents.js";
 
 ///var socket;
@@ -168,7 +169,17 @@ export function attachToSocket(socket)
 			}
 
 			updatePlayerList();
+		}
 
+		if(event.data.startsWith("goalachieved;"))
+		{
+			var [_, ...achievedCards] = event.data.split(";").map( x => !!x);
+
+			model.currentGoals[0].achieved = achievedCards[0];
+			model.currentGoals[1].achieved = achievedCards[1];
+			model.currentGoals[2].achieved = achievedCards[2];
+
+			updateGoals(undefined, true);
 		}
 	};
 

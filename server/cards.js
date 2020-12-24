@@ -4,6 +4,7 @@ var cards = {
 		"Core.Start.FanficAuthorTwilight":{
 			url:"START_Fanfic Author Twilight.png",
 			name:"Twilight Sparkle",
+			race: "unicorn",
 			gender: "female",
 			keywords:[
 				"Mane 6"
@@ -570,7 +571,7 @@ var cards = {
 			},
 			"Core.Pony.SuperSpyTwilight":{
 				url:"Pony_Super Spy Twilight.png",
-				name: "Super Spy Twilight",
+				name: "Twilight Sparkle",
 				race: "unicorn",
 				gender: "female",
 				altTimeline: true,
@@ -951,7 +952,7 @@ var cards = {
 				url:"Goal_Princess Pile.png",
 				points:"2"
 			},
-			"Core.Goal.QueenPlatinum'sCourt":{
+			"Core.Goal.QueenPlatinumsCourt":{
 				url:"Goal_Queen Platinum's Court.png",
 				points:"2"
 			},
@@ -1177,7 +1178,8 @@ var cards = {
 			"EC.Goal.PickyPicky": {
 				name: "Picky Picky!",
 				url: "Goal_Picky Picky!.png",
-				points: "1"
+				points: "1",
+				noLogic: true,
 			},
 			"EC.Goal.BewareTheGroove": {
 				name: "Beware the Groove",
@@ -1227,7 +1229,8 @@ var cards = {
 			"EC.Goal.Landslide": {
 				name: "Landslide",
 				url: "Goal_Landslide.png",
-				points: "0"
+				points: "0",
+				noLogic: true
 			},
 			"EC.Goal.FleetAdmiral": {
 				name: "Fleet Admiral",
@@ -1237,7 +1240,8 @@ var cards = {
 			"EC.Goal.CoupDetat": {
 				name: "Coup d'etat",
 				url: "Goal_Coup d'etat.png",
-				points: "3"
+				points: "3",
+				noLogic: true,
 			},
 			"EC.Goal.FriendsInHighPlaces": {
 				name: "Friends in High Places",

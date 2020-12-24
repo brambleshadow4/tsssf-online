@@ -5,6 +5,7 @@ import {
 	isDiscardLoc,
 	isPonyOrStart,
 	isBoardLoc,
+	isGoalLoc,
 	isPony,
 	isGoal
 } from "/lib.js";
@@ -32,6 +33,16 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 	imgElement.classList.add("card");
 
 	setCardBackground(imgElement, card);
+
+	if(!isBlank(card) && cards[card].noLogic && location != undefined && isGoalLoc(location))
+	{
+		var warningSym = document.createElement('img')
+		warningSym.src = "/img/warning.svg";
+		warningSym.className = "noLogic";
+		imgElement.appendChild(warningSym);
+
+		imgElement.title = "This card does not have any goal logic associated with it.\nIt will not highlight when achieved."
+	}
 
 	imgElement.onclick = function()
 	{	

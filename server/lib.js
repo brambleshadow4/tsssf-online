@@ -30,8 +30,6 @@ export function isAnon(card)
 	return card.startsWith("anon:");
 }
 
-
-
 export function randomizeOrder(arr)
 {
 	var len = arr.length;
@@ -51,7 +49,7 @@ export function randomizeOrder(arr)
 
 export function isBoardLoc(location)
 {
-	return location.startsWith("p,") || location.startsWith("sr,") || location.startsWith("sd,");
+	return location && (location.startsWith("p,") || location.startsWith("sr,") || location.startsWith("sd,"));
 }
 
 export function isOffsetLoc(location)
@@ -98,4 +96,38 @@ export function isCardIncluded(card, model)
 	}
 
 	return false;
+}
+
+export function getNeighborKeys(key)
+{
+	var type, x,y;
+	[type,x,y] = key.split(",");
+	x = Number(x);
+	y = Number(y)
+
+	if(type == "p")
+	{
+		return [
+			"sr," + x + "," + y,
+			"sr," + (x-1) + "," + y,
+			"sd," + x + "," + y,
+			"sd," + x + "," + (y-1)
+		];
+	}
+
+	if(type == "sr")
+	{
+		return [
+			"p," + x + "," + y,
+			"p," + (x+1) + "," + y,
+		]
+	}
+
+	if(type == "sd")
+	{
+		return [
+			"p," + x + "," + y,
+			"p," + x + "," + (y+1),
+		]
+	}
 }

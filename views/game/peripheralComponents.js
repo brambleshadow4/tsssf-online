@@ -122,7 +122,7 @@ function preRequestDrawGoal()
 	var i = 0;
 	while(i < model.currentGoals.length)
 	{
-		if(isBlank(model.currentGoals[i]))
+		if(isBlank(model.currentGoals[i].card))
 			break;
 		i++;
 	}
@@ -235,7 +235,9 @@ export function updateGoalDiscard(tempCard)
 		if(model.goalDiscardPile.length)
 		{
 			var card = await openCardSelect("Discarded goals", model.goalDiscardPile);
-			var openGoal = model.currentGoals.indexOf("blank:goal")
+			var openGoal = model.currentGoals.map(x => x.card).indexOf("blank:goal");
+
+
 			if(card && isItMyTurn() && openGoal > -1)
 			{
 				var i = model.goalDiscardPile.indexOf(card);
@@ -274,7 +276,7 @@ export function updateWinnings()
 
 	arrow.onclick = function(e)
 	{
-		var goalSlot = model.currentGoals.indexOf("blank:goal");
+		var goalSlot = model.currentGoals.map(x => x.card).indexOf("blank:goal");
 		if(goalSlot > -1)
 		{
 			if(model.winnings.length == 1)
@@ -325,8 +327,13 @@ export function updatePlayerList()
 	}
 }
 
-export function updateGoals(goalNo)
+
+export function updateGoals(goalNo, isSoftUpdate)
 {
+	if(isSoftUpdate)
+		console.log("soft updating goals!")
+
+
 	var goalDiv = document.getElementById('currentGoals');
 
 	var start = 0;
@@ -340,13 +347,34 @@ export function updateGoals(goalNo)
 
 	for(let i=start; i<end; i++)
 	{
+
+		var oldElement = goalDiv.getElementsByClassName('card')[i];
+
+		if(isSoftUpdate && oldElement.classList.contains("blank"))
+		{
+
+			continue;
+		}
+
+
 		let element = updateCardElement(
 			goalDiv.getElementsByClassName('card')[i],
-			model.currentGoals[i], "goal," + i, false, false);
+			model.currentGoals[i].card, "goal," + i, false, false);
 
-		cardLocations[model.currentGoals[i]] = "goal," + i;
+		cardLocations[model.currentGoals[i].card] = "goal," + i;
 
-		if(!isBlank(model.currentGoals[i]))
+		console.log("achieved " + model.currentGoals[i].achieved)
+
+		if(model.currentGoals[i].achieved)
+		{
+			element.classList.add('achieved');
+		}
+		else
+		{
+			element.classList.remove('achieved');
+		}
+
+		if(!isBlank(model.currentGoals[i].card))
 		{
 			element.addEventListener("mouseenter", function(e)
 			{
@@ -363,7 +391,7 @@ export function updateGoals(goalNo)
 		
 					if(isItMyTurn() && !isDeleteClick())
 					{
-						var card = model.currentGoals[i];
+						var card = model.currentGoals[i].card;
 						moveCard(card, "goal,"+i, "winnings")
 						broadcastMove(card, "goal,"+i, "winnings")
 					}

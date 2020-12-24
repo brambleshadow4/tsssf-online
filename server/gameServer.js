@@ -1,4 +1,6 @@
 import ws from "ws";
+import * as util from 'util'
+import fs from "fs";
 import {
 	randomizeOrder, 
 	isGoal, 
@@ -9,8 +11,12 @@ import {
 	isGoalLoc,
 	isDiscardLoc,
 	isPlayerLoc,
-	isCardIncluded
+	isBlank,
+	isCardIncluded,
+	getNeighborKeys
 } from "./lib.js";
+
+import goalCriteria from "./goalCriteria.js";
 
 import cards from "./cards.js";
 import {logGameHosted, logPlayerJoined} from "./stats.js";
@@ -82,7 +88,6 @@ export function TsssfGameServer()
 	function isRegistered(player)
 	{
 		return player != undefined && player.name != "";
-
 	}
 
 	function checkNameIsUnique(key, name)
@@ -149,8 +154,6 @@ export function TsssfGameServer()
 		socket.send("registered;" + player.id)
 		return;
 	}
-
-
 
 	function sendLobbyList(key)
 	{
@@ -253,7 +256,10 @@ export function TsssfGameServer()
 
 		model.players = getPlayerListForThisPlayer(key, socket)
 
-		model.turnstate = games[key].turnstate;
+		if(games[key].turnstate)
+		{
+			model.turnstate = games[key].turnstate.clientProps();
+		}
 
 		model.keepLobbyOpen = games[key].isLobbyOpen;
 
@@ -323,6 +329,35 @@ export function TsssfGameServer()
 		socket.send("model;" + JSON.stringify(model));
 	}
 
+	function checkIfGoalsWereAchieved(key)
+	{
+		var model = games[key];
+
+		if(model.turnstate == undefined)
+			return;
+
+		var sendUpdate = false;
+
+		for(var card of model.currentGoals)
+		{
+			var achieved = false;
+			if(goalCriteria[card.card])
+				achieved = goalCriteria[card.card](model);
+
+			if(card.achieved != achieved)
+			{
+				sendUpdate = true;
+			}
+
+			card.achieved = achieved;
+		}
+
+		if(sendUpdate)
+		{
+			toEveryone(key, "goalachieved;" + model.currentGoals.map(x => x.achieved ? "1" : "").join(";"));
+		}
+	}
+
 
 	function openLobby(key)
 	{
@@ -342,6 +377,7 @@ export function TsssfGameServer()
 		}
 		
 		games[key] = {
+			messageHistory: [],
 			deathCount: 0,
 			isLobbyOpen: true,
 			isInGame: false,
@@ -350,6 +386,71 @@ export function TsssfGameServer()
 		}
 
 		return key;
+	}
+
+	function shipString(card1,card2)
+	{
+		if(card1 < card2)
+			return card1 + "/" + card2
+
+		return card2 + "/" + card1;
+	}
+
+	function Turnstate(model, currentPlayerName)
+	{	
+		this.currentPlayer = currentPlayerName;
+		this.overrides = {};
+		this.tentativeShips = {};
+		this.playedShips = [];
+		this.playedPonies = [];
+
+		this.brokenShips = [];
+		this.brokenShipsNow = [];
+		this.shipSet = getCurrentShipSet(model);
+
+		this.positionMap = getCurrentPositionMap(model);
+		this.swaps = 0;
+		this.swapsNow = 0;
+
+		this.morphCounters = {};
+		
+
+		this.clientProps = function()
+		{
+			return {
+				overrides: this.overrides,
+				currentPlayer: this.currentPlayer
+			}
+		}
+	}
+
+	function isShipClosed(model, shipLoc)
+	{
+		return getShippedPonies(model, shipLoc).length == 2;
+	}
+
+	function getShippedPonies(model, shipLoc)
+	{
+		var neighbors = getNeighborKeys(shipLoc);
+
+		var shipClosed = true;
+		var ponies = [];
+		for(var n of neighbors)
+		{
+			if(model.board[n] && !isBlank(model.board[n].card))
+			{
+				var card = model.board[n].card;
+
+				if(model.turnstate && isChangeling(model.board[n].card))
+				{
+					card = card + ":" + (model.turnstate.morphCounters[card] || 0);
+				}
+
+				ponies.push(card)
+			}
+		}
+
+		return ponies;
 	}
 
 	function startGame(key, options)
@@ -378,8 +479,6 @@ export function TsssfGameServer()
 
 		model.isLobbyOpen = model.keepLobbyOpen = !!options.keepLobbyOpen;
 
-		
-
 
 		model.cardLocations[model.startCard] = "p,0,0";
 
@@ -398,7 +497,11 @@ export function TsssfGameServer()
 		model.ponyDiscardPile = [];
 		model.shipDiscardPile = [];
 
-		model.currentGoals = ["blank:goal","blank:goal","blank:goal"];
+		model.currentGoals = [
+			{card:"blank:goal", achieved: false},
+			{card:"blank:goal", achieved: false},
+			{card:"blank:goal", achieved: false}
+		];
 
 		// client only props
 		//     hand:
@@ -457,10 +560,7 @@ export function TsssfGameServer()
 
 		if(options.ruleset == "turnsOnly")
 		{
-			model.turnstate = {
-				currentPlayer: model.players[0].name,
-				overrides: {}
-			};
+			model.turnstate = new Turnstate(model, model.players[0].name);
 		}
 		else
 		{
@@ -488,7 +588,7 @@ export function TsssfGameServer()
 			if(model.currentGoals[goalNo] == undefined)
 				return false;
 
-			return model.currentGoals[goalNo] != "blank:goal"
+			return model.currentGoals[goalNo].card != "blank:goal"
 		}
 
 		return false;
@@ -505,14 +605,82 @@ export function TsssfGameServer()
 		toEveryoneElse(key, player.socket, args.join(";"));
 	}
 
+	function isChangeling(card)
+	{
+		return isPony(card) && cards[card].keywords.indexOf("Changeling") > -1;
+	}
+
+	function getCurrentShipSet(model)
+	{
+		var s = new Set();
+		for(var key in model.board)
+		{
+			if (key.startsWith("s"))
+			{
+				var pair = getShippedPonies(model, key);
+
+				if(pair.length == 2)
+				{	
+					s.add(shipString(pair[0], pair[1]));
+				}
+			}
+		}
+
+		return s;
+	}
+
+	function getCurrentPositionMap(model)
+	{
+		var map = {};
+
+		for(var key in model.board)
+		{
+			if (key.startsWith("p,") && !isBlank(model.board[key].card))
+			{
+				map[model.board[key].card] = key;
+			}
+		}
+
+		return map;
+
+	}
+
+
+	function getBrokenShips(startSet, endSet)
+	{
+		var broken = [];
+
+		for(var ship of startSet)
+		{
+			if(!endSet.has(ship))
+			{
+				broken.push(ship.split("/"));
+			}
+		}
+
+		return broken;
+	}
+
+	function getSwappedCount(startPositions, endPositions)
+	{
+		var count = 0;
+		for(var key in startPositions)
+		{
+			if(endPositions[key] && endPositions[key] != startPositions[key])
+			{
+				count++;
+			}
+		}
+
+		return count;
+	}
+
+
 	function changeTurnToNextPlayer(key)
 	{
 		if(!games[key].turnstate)
 			return;
 
-		games[key].turnstate.overrides = {};
-
-		
 		var rotation = games[key].players.filter(x => !x.socket.isDead && x.name != "");
 
 		if(rotation.length == 0)
@@ -521,19 +689,328 @@ export function TsssfGameServer()
 		var k = rotation.map(x=> x.name).indexOf(games[key].turnstate.currentPlayer);
 		k = (k+1)%rotation.length;
 
-		games[key].turnstate.currentPlayer = rotation[k].name;
-		toEveryone(key, "turnstate;" + JSON.stringify(games[key].turnstate));
+		games[key].turnstate = new Turnstate(games[key], rotation[k].name);
+		toEveryone(key, "turnstate;" + JSON.stringify(games[key].turnstate.clientProps()));
+
+		checkIfGoalsWereAchieved(key);
 	}
 
+	function moveCard(message, key, socket)
+	{
+		var [_,card,startLocation,endLocation] = message.split(";");
+		var player = getPlayer(key, socket);
+
+		var model = games[key];
+
+		let serverStartLoc = startLocation;
+		if(startLocation == "hand" || startLocation == "winnings")
+			serverStartLoc = "player," + player.name;
+
+
+		// if the player has an incorrect position for a card, move it to where it actually should be.
+		if(model.cardLocations[card] != serverStartLoc || isLocOccupied(key, endLocation))
+		{						
+			var whereTheCardActuallyIs = model.cardLocations[card];
+			if(whereTheCardActuallyIs == "player," + player.name)
+			{
+				if(isGoal(card))
+					whereTheCardActuallyIs = "winnings";
+				else
+					whereTheCardActuallyIs = "hand";
+			}
+
+			console.log("X " + message);
+			console.log("  P: " + player.name);
+
+			console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
+			console.log("  move;" + card + ";limbo;" + whereTheCardActuallyIs);
+			socket.send("move;" + card + ";limbo;" + whereTheCardActuallyIs);
+
+			return;
+		}
+
+		console.log("\u221A " + message);
+		console.log("  P: " + player.name);
+
+
+		if(model.turnstate)
+		{
+			if(isChangeling(card) && isBoardLoc(endLocation))
+			{
+				model.turnstate.morphCounters[card] = (model.turnstate.morphCounters[card] || 0) + 1;
+			}
+		}
+
+
+		let serverEndLoc = endLocation;
+		if(serverEndLoc == "hand" || serverEndLoc == "winnings")
+			serverEndLoc = "player," + player.name;
+
+		model.cardLocations[card] = serverEndLoc;
+
+		// remove from old location
+		if(startLocation == "hand")
+		{
+			var i = getPlayer(key, socket).hand.indexOf(card);
+
+			getPlayer(key, socket).hand.splice(i, 1);
+		}
+
+		if(startLocation == "winnings")
+		{
+			var i = getPlayer(key, socket).winnings.indexOf(card);
+			getPlayer(key, socket).winnings.splice(i, 1);
+		}
+
+		if(isBoardLoc(startLocation))
+		{
+			if(model.board[startLocation] && model.board[startLocation].card == card)
+				delete model.board[startLocation];
+		}
+
+		if(isDiscardLoc(startLocation))
+		{
+			var [pile,slot] = startLocation.split(",");
+			var i = model[pile].indexOf(card);
+			model[pile].splice(i,1);
+
+			if(model[pile].length)
+			{
+				var topCard = model[pile][model[pile].length-1]
+				model.cardLocations[topCard] = pile+",top";
+			}
+		}
+
+		if(isOffsetLoc(startLocation))
+		{
+			var [_,x,y] = startLocation.split(",")
+			if(model.offsets[card + "," + x + "," + y] != undefined)
+			{
+				delete model.offsets[card + "," + x + "," + y];
+			}
+		}
+
+		if(isGoalLoc(startLocation))
+		{
+			var [_,i] = startLocation.split(",")
+			if(model.currentGoals[i].card != "blank:goal")
+				model.currentGoals[i].card = "blank:goal";
+			
+		}
+
+		// move to end location
+
+		if(endLocation == "hand")
+		{
+			getPlayer(key, socket).hand.push(card)
+		}
+
+		if(isBoardLoc(endLocation))
+		{
+			model.board[endLocation] = {card: card}
+		}
+		if(isOffsetLoc(endLocation))
+		{
+			var [_,x,y] = endLocation.split(",")
+			model.offsets[card + "," + x + "," + y] = "";
+		}
+
+		if(isGoalLoc(endLocation))
+		{
+			var [_,goalNo] = endLocation.split(",")
+			goalNo = Number(goalNo);
+			model.currentGoals[goalNo].card = card;
+			model.cardLocations[card] = "goal," + goalNo;
+		}
+
+
+		if(endLocation == "winnings")
+		{
+			player.winnings.push(card)
+		}
+
+		if(isDiscardLoc(endLocation))
+		{
+			// the only valid placement is on top of the discard pile
+			var [pile,slot] = endLocation.split(",");
+			model[pile].push(card);
+
+			if(model[pile].length > 1)
+			{
+				var underCard = model[pile][model[pile].length-2];
+				model.cardLocations[underCard] = pile + ",stack";
+			}
+		}
+
+
+		if(isPony(card) 
+			&& (startLocation == "hand" || startLocation == "ponyDiscardPile,top")
+			&& isBoardLoc(endLocation))
+		{
+			if(model.turnstate)
+			{
+
+				var cardName = card;
+
+				if(isChangeling(card))
+					cardName = card + ":" + (model.turnstate.morphCounters[card] || 0);
+
+				model.turnstate.playedPonies.push(cardName);
+			}
+		}
+
+
+		if(model.turnstate)
+		{
+			var newSet = getCurrentShipSet(model);
+			var newlyBroken = getBrokenShips(model.turnstate.shipSet, newSet);
+
+			model.turnstate.brokenShipsNow = model.turnstate.brokenShips.concat(newlyBroken);
+
+
+			var curPositionMap = getCurrentPositionMap(model);
+			var newlySwapped = getSwappedCount(model.turnstate.positionMap, curPositionMap)
+
+			model.turnstate.swapsNow = model.turnstate.swaps + newlySwapped;
+
+
+			console.log(model.turnstate.swapsNow);
+
+
+			if(startLocation == "hand" || 
+				startLocation == "shipDiscardPile,top" || startLocation == "ponyDiscardPile,top"
+				|| endLocation == "shipDiscardPile,top" || endLocation == "ponyDiscardPile,top")
+			{
+				// update
+
+				model.turnstate.brokenShips = model.turnstate.brokenShipsNow;
+				model.turnstate.shipSet = newSet;
+				model.turnstate.swaps = model.turnstate.swapsNow;
+				model.turnstate.positionMap = curPositionMap;
+			}
+
+			if(isShip(card)
+				&& (startLocation == "hand" || startLocation == "shipDiscardPile,top")
+				&& isBoardLoc(endLocation))
+			{
+
+
+
+				if(isShipClosed(model, endLocation))
+				{
+					model.turnstate.playedShips.push([card].concat(getShippedPonies(model, endLocation)));
+					delete model.turnstate.tentativeShips[card];
+				}
+				else
+				{
+					model.turnstate.tentativeShips[card] = true;
+				}
+
+			}
+
+			if(isPony(card) && isBoardLoc(endLocation))
+			{
+
+				for(var tentativeShip in model.turnstate.tentativeShips)
+				{
+					var shipLoc = model.cardLocations[tentativeShip];
+
+					if(!shipLoc || !isBoardLoc(shipLoc))
+					{
+						delete model.turnstate.tentativeShips[tentativeShip];
+						continue;
+					}
+
+
+					if(isShipClosed(model, shipLoc))
+					{
+						model.turnstate.playedShips.push([tentativeShip].concat(getShippedPonies(model, shipLoc)));
+						delete model.turnstate.tentativeShips[tentativeShip];
+					}
+				}
+	
+			}
+
+			
+		}
+
+
+		// cant move to a goal location yet
+
+		socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
+
+		if(startLocation == "hand" || startLocation == "winnings")
+			startLocation = "player,"+player.name;
+
+		if(endLocation == "hand" || endLocation == "winnings")
+			endLocation = "player,"+player.name;
+
+		toEveryoneElse(key, socket, "move;" + card + ";" + startLocation + ";" + endLocation);
+
+
+		if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
+		{
+			sendPlayerCounts(key, player);
+		}
+
+
+		if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
+		{
+			var [pile,slot] = startLocation.split(",");
+			if(model[pile].length)
+			{
+				var topCard = model[pile][model[pile].length-1]
+				toEveryone(key, "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
+			}
+		}
+
+		
+		checkIfGoalsWereAchieved(key);
+	}
+
+
+	function handleCrash(fun)
+	{
+		return function(...args)
+		{
+			try {
+				fun(...args) 
+			}
+			catch(e)
+			{
+				var now = new Date();
+
+				function pad(n)
+				{
+					if(n < 10)
+						return "0" + n
+					else 
+						return "" + n
+				}
+
+				var s = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + (now.getDate()) + " " + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds())
+
+				var data = [];
+
+				data.push(e.toString())
+				data.push(e.stack)
+				data.push("")
+				data.push("GAMES")
+				data.push(util.inspect(games, {depth:Infinity}))
+
+				fs.writeFileSync("CRASH " + s + ".txt", data.join("\n"))
+				throw e
+			}
+		}
+	}
 
 	//startGame("dev");
 	//games["dev"].allowInGameRegistration = true;
 
-	wsServer.on('connection', (socket, request, client) => 
+	function onConnection(socket, request, client)
 	{
 		socket.isAlive = true;
 		socket.isDead = false;
-
 
 		let key = request.url.substring(2);
 		if(!games[key])
@@ -543,10 +1020,9 @@ export function TsssfGameServer()
 			return;
 		}
 
-
 		sendLobbyList(key);	
 
-		socket.on('close', () =>
+		function onClose()
 		{
 			socket.isAlive = false;
 
@@ -567,8 +1043,6 @@ export function TsssfGameServer()
 						changeTurnToNextPlayer(key);
 					}
 				}
-		
-				
 
 			}, TEMP_DISCONNECT_TIME); 
 
@@ -609,11 +1083,17 @@ export function TsssfGameServer()
 			{
 				sendPlayerlistsToEachPlayer(key);
 			}
-		})
+		}
 
-		socket.on('message', message => 
+		socket.on('close', handleCrash(onClose));
+
+		function onMessage(message)
 		{
+			console.log(message);
+
 			var model = games[key];
+
+			model.messageHistory.push(message);
 
 			if(message.startsWith("handshake;"))
 			{
@@ -810,6 +1290,8 @@ export function TsssfGameServer()
 					var overrides = JSON.parse(message.split(";")[1]);
 					model.turnstate.overrides = overrides;
 					toEveryoneElse(key, socket, message);
+
+					checkIfGoalsWereAchieved(key);
 				}
 				catch(e)
 				{
@@ -829,17 +1311,20 @@ export function TsssfGameServer()
 
 				if(typ == "goal")
 				{
-					var goalNo = model.currentGoals.indexOf("blank:goal")
+					var goalNo = model.currentGoals.map(x => x.card).indexOf("blank:goal")
 
 					if(len && goalNo > -1)
 					{
 						var card = model[typ + "DrawPile"].pop();
-						model.currentGoals[goalNo] = card;
+						model.currentGoals[goalNo] = {card, achieved: false};
 						model.cardLocations[card] = "goal," + goalNo;
 
 						var msg = "draw;" + typ + ";" + (len - 1);
+
 						toEveryone(key, msg);
 						toEveryone(key, "move;" + card + ";goalDrawPile;goal," + goalNo);
+
+						checkIfGoalsWereAchieved(key);
 					}
 					else
 						return ;//sendCurrentState(key, socket);
@@ -902,171 +1387,7 @@ export function TsssfGameServer()
 
 			if(message.startsWith("move;"))
 			{
-				var [_,card,startLocation,endLocation] = message.split(";");
-				var player = getPlayer(key, socket);
-
-				//console.log(message);
-
-				let serverStartLoc = startLocation;
-				if(startLocation == "hand" || startLocation == "winnings")
-					serverStartLoc = "player," + player.name;
-
-
-				// if the player has an incorrect position for a card, move it to where it actually should be.
-				if(model.cardLocations[card] != serverStartLoc || isLocOccupied(key, endLocation))
-				{						
-					var whereTheCardActuallyIs = model.cardLocations[card];
-					if(whereTheCardActuallyIs == "player," + player.name)
-					{
-						if(isGoal(card))
-							whereTheCardActuallyIs = "winnings";
-						else
-							whereTheCardActuallyIs = "hand";
-					}
-
-					console.log("X " + message);
-					console.log("  P: " + player.name);
-
-					console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
-					console.log("  move;" + card + ";limbo;" + whereTheCardActuallyIs);
-					socket.send("move;" + card + ";limbo;" + whereTheCardActuallyIs);
-
-					return;
-				}
-
-				console.log("\u221A " + message);
-				console.log("  P: " + player.name);
-
-
-				let serverEndLoc = endLocation;
-				if(serverEndLoc == "hand" || serverEndLoc == "winnings")
-					serverEndLoc = "player," + player.name;
-
-				model.cardLocations[card] = serverEndLoc;
-
-				// remove from old location
-				if(startLocation == "hand")
-				{
-					var i = getPlayer(key, socket).hand.indexOf(card);
-
-					getPlayer(key, socket).hand.splice(i, 1);
-				}
-
-				if(startLocation == "winnings")
-				{
-					var i = getPlayer(key, socket).winnings.indexOf(card);
-					getPlayer(key, socket).winnings.splice(i, 1);
-				}
-
-				if(isBoardLoc(startLocation))
-				{
-					if(model.board[startLocation] && model.board[startLocation].card == card)
-						delete model.board[startLocation];
-				}
-
-				if(isDiscardLoc(startLocation))
-				{
-					var [pile,slot] = startLocation.split(",");
-					var i = model[pile].indexOf(card);
-					model[pile].splice(i,1);
-
-					if(model[pile].length)
-					{
-						var topCard = model[pile][model[pile].length-1]
-						model.cardLocations[topCard] = pile+",top";
-					}
-				}
-
-				if(isOffsetLoc(startLocation))
-				{
-					var [_,x,y] = startLocation.split(",")
-					if(model.offsets[card + "," + x + "," + y] != undefined)
-					{
-						delete model.offsets[card + "," + x + "," + y];
-					}
-				}
-
-				if(isGoalLoc(startLocation))
-				{
-					var [_,i] = startLocation.split(",")
-					if(model.currentGoals[i] != "blank:goal")
-						model.currentGoals[i] = "blank:goal";
-					
-				}
-
-				// move to end location
-
-				if(endLocation == "hand")
-				{
-					getPlayer(key, socket).hand.push(card)
-				}
-
-				if(isBoardLoc(endLocation))
-				{
-					model.board[endLocation] = {card: card}
-				}
-				if(isOffsetLoc(endLocation))
-				{
-					var [_,x,y] = endLocation.split(",")
-					model.offsets[card + "," + x + "," + y] = "";
-				}
-
-				if(isGoalLoc(endLocation))
-				{
-					var [_,goalNo] = endLocation.split(",")
-					goalNo = Number(goalNo);
-					model.currentGoals[goalNo] = card;
-					model.cardLocations[card] = "goal," + goalNo;
-				}
-
-
-				if(endLocation == "winnings")
-				{
-					player.winnings.push(card)
-				}
-
-				if(isDiscardLoc(endLocation))
-				{
-					// the only valid placement is on top of the discard pile
-					var [pile,slot] = endLocation.split(",");
-					model[pile].push(card);
-
-					if(model[pile].length > 1)
-					{
-						var underCard = model[pile][model[pile].length-2];
-						model.cardLocations[underCard] = pile + ",stack";
-					}
-				}
-
-			
-				// cant move to a goal location yet
-
-				socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
-
-				if(startLocation == "hand" || startLocation == "winnings")
-					startLocation = "player,"+player.name;
-
-				if(endLocation == "hand" || endLocation == "winnings")
-					endLocation = "player,"+player.name;
-
-				toEveryoneElse(key, socket, "move;" + card + ";" + startLocation + ";" + endLocation);
-
-
-				if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
-				{
-					sendPlayerCounts(key, player);
-				}
-
-
-				if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
-				{
-					var [pile,slot] = startLocation.split(",");
-					if(model[pile].length)
-					{
-						var topCard = model[pile][model[pile].length-1]
-						toEveryone(key, "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
-					}
-				}
+				moveCard(message, key, socket);
 			}
 
 			if(message == "endturn")
@@ -1082,8 +1403,14 @@ export function TsssfGameServer()
 					changeTurnToNextPlayer(key);	
 				}
 			}
-		});
-	});
+		}
+
+		socket.on('message', handleCrash(onMessage))
+			
+	}
+
+	wsServer.on('connection', handleCrash(onConnection));
+	
 
 	return wsServer;
 }
