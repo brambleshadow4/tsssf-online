@@ -87,6 +87,17 @@
 	cursor: unset;
 }
 
+.card.achieved
+{
+	box-shadow: 0 0 8px 8px green;
+}
+
+
+.card.dragAccept
+{
+	box-shadow:  0 0 8px 8px blue;
+}
+
 #playingArea.draggingShip .ship.blank
 {
 	display: inline-block;
@@ -580,10 +591,6 @@ iframe
 }
 
 
-.card.achieved
-{
-	box-shadow: 0 0 8px 8px green;
-}
 
 .buttonDescription
 {

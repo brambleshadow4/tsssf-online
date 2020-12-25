@@ -170,22 +170,65 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 				e.preventDefault();
 		}
 
+		var offsetGhost = undefined;
+		var overOffsetGhost = false;
+		var overMainDiv = false;
+
 		imgElement.ondragenter= function(e)
 		{
 			var draggedCard = getDataTransfer().split(";")[0];
 
+			if(this == offsetGhost)
+			{
+				overOffsetGhost = true;
+				return;
+			}
+			else
+			{
+				overMainDiv = true;
+			}
 
 			if(isValidMove(draggedCard, card))
 			{
 				if (isBlank(card))
 					setCardBackground(imgElement, draggedCard)
 				else
-					imgElement.style.border = "solid 5px green";
+				{
+					let [_, x, y] = location.split(",");
+					x = Number(x);
+					y = Number(y);
+
+					var correspondingOffset = "offset," + x + "," + y;
+
+					if(!offsetGhost)
+					{
+						offsetGhost = makeCardElement(card, correspondingOffset, false, true);
+						offsetGhost.style.opacity = .2;
+
+						offsetGhost.ondragenter = imgElement.ondragenter;
+						offsetGhost.ondragleave = imgElement.ondragleave;
+						offsetGhost.ondrop = imgElement.ondrop;
+
+						const gridWidth = 22;
+
+						offsetGhost.style.top = y * gridWidth + 2 + "vh";
+						offsetGhost.style.left = x * gridWidth + 2 + "vh";
+						document.getElementById('refPoint').appendChild(offsetGhost)
+					}
+					
+					setCardBackground(imgElement, draggedCard)
+				}
 			}
 		}
 
 		imgElement.ondrop= function(e)
 		{	
+			if(offsetGhost)
+			{
+				offsetGhost.parentNode.removeChild(offsetGhost);
+				offsetGhost = undefined;
+			}	
+
 			e.preventDefault();
 			var [card, startLoc] = getDataTransfer().split(";")
 
@@ -196,8 +239,6 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 					var [_,x,y] = location.split(",");
 					var offsetLoc = "offset," + x + "," + y;
 					let offsetCard = model.board[location].card;
-
-
 
 					moveCard(offsetCard, location, offsetLoc);
 					broadcastMove(offsetCard, location, offsetLoc);
@@ -219,10 +260,30 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 
 		imgElement.ondragleave= function(e)
 		{
+			if(this == offsetGhost)
+			{
+				overOffsetGhost = false
+			}
+			else
+			{
+				overMainDiv = false;
+			}
+
+			if(overOffsetGhost || overMainDiv)
+			{
+				return;
+			}
+
 			if(isBlank(card))
 				imgElement.style.backgroundImage = "";
 			else
-				imgElement.style.border = "";
+				setCardBackground(imgElement, card)	
+
+			if(offsetGhost)
+			{
+				offsetGhost.parentNode.removeChild(offsetGhost);
+				offsetGhost = undefined;
+			}		
 		}
 	}
 
