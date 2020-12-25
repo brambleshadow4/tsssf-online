@@ -423,6 +423,14 @@ function setCardBackground(element, card, useLarge)
 		if(isShip(card))
 			element.classList.add('ship')
 
+		if(isGoal(card))
+			element.classList.add('goal');
+
+		if(isPony(card))
+			element.classList.add('pony')
+		else if (isPonyOrStart(card))
+			element.classList.add('start');
+
 		var src = cards[card].thumbnail;
 		if(useLarge)
 			src = cards[card].fullUrl;
@@ -441,7 +449,17 @@ function enlargeCard(cardDiv)
 	
 
 	var giantCard = document.createElement('div');
+	giantCard.classList.add('card');
 	giantCard.id = "giantCard"
+
+	if(isShip(hoverCard))
+	{
+		giantCard.classList.add('ship');
+	}
+	if(isPony(hoverCard))
+	{
+		giantCard.classList.add('pony');
+	}
 
 	var width = 13*3/100 * window.innerHeight;
 	var height = 18*3/100 * window.innerHeight;

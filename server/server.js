@@ -125,7 +125,10 @@ function fmap(routeUri, fileUrl)
 
 		url = url.replace(/%20/g," ");
 
+		//setTimeout(function(){
 		sendIfExists(url, res);
+		//},1000)
+		
 	}
 	
 }

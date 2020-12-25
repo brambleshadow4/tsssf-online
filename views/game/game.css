@@ -228,22 +228,31 @@ button
 
 .card.pony, .card.pony.flying
 {
+	background-color: #87599A;
 	background-image: url(/img/Pony-Back.png);
 }
 
 .card.ship, .card.ship.flying
 {
+	background-color: #C9305D;
 	background-image: url(/img/Ship-Back.png);
 	z-index: 1;
 }
 
+.card.start
+{
+	background-color: #3E3F3E;
+}
+
 .card.goal, .card.goal.flying
 {
+	background-color: #039AD0;
 	background-image: url(/img/Goal-Back.png);
 }
 
 .card.blank
 {
+	background-color: transparent;
 	background-image: url(/img/blank.svg);
 }
 
