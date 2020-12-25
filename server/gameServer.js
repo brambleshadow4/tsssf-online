@@ -237,7 +237,6 @@ export function TsssfGameServer()
 		model.board = games[key].board;
 		model.cardDecks = games[key].cardDecks;
 
-		model.offsets = games[key].offsets;
 		model.ponyDiscardPile = games[key].ponyDiscardPile;
 		model.shipDiscardPile = games[key].shipDiscardPile;
 		model.goalDiscardPile = games[key].goalDiscardPile;
@@ -467,7 +466,6 @@ export function TsssfGameServer()
 				card: model.startCard
 			}
 		};
-		model.offsets = {};
 
 		for(var player of model.players)
 		{
@@ -577,8 +575,9 @@ export function TsssfGameServer()
 	function isLocOccupied(key, loc)
 	{
 		var model = games[key];
-		if(isBoardLoc(loc))
+		if(isBoardLoc(loc) || isOffsetLoc(loc))
 		{
+
 			return (model.board[loc] != undefined)
 		}
 		if(isGoalLoc(loc))
@@ -762,7 +761,7 @@ export function TsssfGameServer()
 			getPlayer(key, socket).winnings.splice(i, 1);
 		}
 
-		if(isBoardLoc(startLocation))
+		if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
 		{
 			if(model.board[startLocation] && model.board[startLocation].card == card)
 				delete model.board[startLocation];
@@ -781,15 +780,6 @@ export function TsssfGameServer()
 			}
 		}
 
-		if(isOffsetLoc(startLocation))
-		{
-			var [_,x,y] = startLocation.split(",")
-			if(model.offsets[card + "," + x + "," + y] != undefined)
-			{
-				delete model.offsets[card + "," + x + "," + y];
-			}
-		}
-
 		if(isGoalLoc(startLocation))
 		{
 			var [_,i] = startLocation.split(",")
@@ -805,14 +795,9 @@ export function TsssfGameServer()
 			getPlayer(key, socket).hand.push(card)
 		}
 
-		if(isBoardLoc(endLocation))
+		if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
 		{
 			model.board[endLocation] = {card: card}
-		}
-		if(isOffsetLoc(endLocation))
-		{
-			var [_,x,y] = endLocation.split(",")
-			model.offsets[card + "," + x + "," + y] = "";
 		}
 
 		if(isGoalLoc(endLocation))

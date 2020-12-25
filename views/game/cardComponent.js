@@ -48,6 +48,13 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 	{	
 		if(isDkeyPressed && isItMyTurn())
 		{
+			if(location.startsWith("p,"))
+			{
+				var relativeOffset = location.replace("p,","offset,")
+				if(model.board[relativeOffset])
+					return;
+			}
+
 			if(isDiscardLoc(location) || location == "winnings")
 				return;
 
@@ -92,6 +99,14 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 
 		imgElement.ondragstart = function(e)
 		{
+			if(location.startsWith("p,"))
+			{
+				var offset = location.replace("p,","offset,");
+
+				if(model.board[offset])
+					return false;
+			}
+
 			if(isDkeyPressed || !isItMyTurn()){
 				e.preventDefault();
 				return;
@@ -166,7 +181,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 			var draggedCard = getDataTransfer().split(";")[0];
 
 
-			if(isValidMove(draggedCard, card))
+			if(isValidMove(draggedCard, card, location))
 				e.preventDefault();
 		}
 
@@ -188,7 +203,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 				overMainDiv = true;
 			}
 
-			if(isValidMove(draggedCard, card))
+			if(isValidMove(draggedCard, card, location))
 			{
 				if (isBlank(card))
 					setCardBackground(imgElement, draggedCard)

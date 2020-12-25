@@ -92,7 +92,6 @@ import
 	removeCardFromBoard,
 	initBoard,
 	updateBoard,
-	offsetPonyCard,
 	clearBoard
 } from "/game/boardComponent.js"
 
@@ -461,9 +460,14 @@ export function isValidMove(cardDragged, targetCard, endLocation)
 {
 	if(cardDragged == targetCard) return false;
 
+	if(isPonyOrStart(targetCard) && isPonyOrStart(cardDragged))
+	{
+		var offsetLoc = endLocation.replace("p,","offset,");
+		return !model.board[offsetLoc];
+	}
+
 	return (targetCard == "blank:ship" && isShip(cardDragged)
 		|| (targetCard == "blank:pony" && isPonyOrStart(cardDragged))
-		|| (isPonyOrStart(targetCard) && isPonyOrStart(cardDragged))
 	);
 }
 
@@ -570,18 +574,18 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	{
 		startPos = {top: "-18vh", left: "50vh"}
 	}
-	else if(isOffsetLoc(startLocation))
+	/*else if(isOffsetLoc(startLocation))
 	{
-		var [_,x,y] = startLocation.split(",")
-		var offsetKey = [card,x,y].join(",");
-		var element = model.offsets[offsetKey];
+		var element = model.board[startLocation].element;
 		startPos = getPosFromElement(element);
 		element.parentNode.removeChild(element);
 
-		delete model.offsets[offsetKey];
-	}
-	else if(isBoardLoc(startLocation))
+		delete model.board[startLocation];
+	}*/
+	else if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
 	{
+		console.log(startLocation);
+
 		startPos = getPosFromElement(model.board[startLocation].element);
 		removeCardFromBoard(startLocation);
 		updateBoard();
@@ -672,7 +676,7 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	{
 		endPos = {top: "-18vh", left: "50vh"};
 	}
-	else if(isBoardLoc(endLocation))
+	else if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
 	{
 		if(model.board[endLocation])
 		{
@@ -704,10 +708,6 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 
 		model.currentGoals[i] = {card, achieved: false};
 		updateFun = () => updateGoals(i)
-	}
-	else if (isOffsetLoc(endLocation))
-	{
-		offsetPonyCard(endLocation, card);
 	}
 
 	cardLocations[card] = endLocation;

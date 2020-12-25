@@ -200,6 +200,10 @@ function addCardToBoard(key, card)
 			imgElement.style.top = y * gridWidth + 22/2 + "vh";
 			imgElement.style.left = x * gridWidth + "vh";
 			break;
+		case "offset":
+			imgElement.style.top = y * gridWidth + 2 + "vh";
+			imgElement.style.left = x * gridWidth + 2 + "vh";
+			imgElement.style.zIndex = 3;
 	}
 	
 	refPoint.appendChild(imgElement);
@@ -210,37 +214,6 @@ function addCardToBoard(key, card)
 	}
 	model.board[key].element = imgElement;
 }
-
-
-export function offsetPonyCard(key, card)
-{
-	var pieces = key.split(",");
-	var x = Number(pieces[1]);
-	var y = Number(pieces[2]);
-
-	
-	var location = `offset,${x},${y}`;
-	var imgElement = makeCardElement(card, location, true);
-
-	model.offsets[card + "," + x + "," + y] = imgElement;
-
-	cardLocations[card] = "offset," + x + "," + y;
-
-
-	var refPoint = document.getElementById('refPoint');
-
-	
-	const gridWidth = 22;
-
-	imgElement.style.top = y * gridWidth + 2 + "vh";
-	imgElement.style.left = x * gridWidth + 2 + "vh";
-
-	imgElement.style.zIndex = 3;
-
-	refPoint.appendChild(imgElement);
-}
-
-
 
 
 
@@ -323,6 +296,16 @@ export function updateBoard()
 		cardLocations[card] = key;
 
 
+		if(isOffsetLoc(key))
+		{
+			if(!model.board[key].element)
+			{
+				addCardToBoard(key, card)
+			}
+
+			continue;
+		}
+
 		// remove detached blanks
 		if(isBlank(card))
 		{
@@ -367,15 +350,6 @@ export function updateBoard()
 			{
 				addCardToBoard(key, blankType);
 			}
-		}
-	}
-
-	for (var key in model.offsets)
-	{
-		if(model.offsets[key] === "")
-		{
-			var [card, _, _] = key.split(",");
-			offsetPonyCard(key, card) // key technically should be p,x,y, but is okay here
 		}
 	}
 }
