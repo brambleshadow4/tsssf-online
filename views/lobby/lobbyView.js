@@ -2,6 +2,7 @@ var HEAD = `
 	<link href="/lobby.css" type="text/css" rel="stylesheet" />
 
 	<title>Lobby: Twilight Sparkle's Secret Shipfic Folder Online</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<meta name="twitter:card" content="summary" />
 	<meta property="og:title" content="Join TSSSF Game">

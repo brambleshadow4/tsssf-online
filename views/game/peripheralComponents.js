@@ -376,36 +376,7 @@ export function updateGoals(goalNo, isSoftUpdate)
 
 		if(!isBlank(model.currentGoals[i].card))
 		{
-			element.addEventListener("mouseenter", function(e)
-			{
-				if(!isItMyTurn()) return;
-
-				var img = document.createElement('img');
-				img.id = "takeGoal"
-				img.src= "/img/check.svg";
-				img.style.width = "5vh";
-
-
-				img.onclick = function()
-				{
-		
-					if(isItMyTurn() && !isDeleteClick())
-					{
-						var card = model.currentGoals[i].card;
-						moveCard(card, "goal,"+i, "winnings")
-						broadcastMove(card, "goal,"+i, "winnings")
-					}
-					
-				}
-
-				element.appendChild(img);
-			});
-
-			element.addEventListener('mouseleave', function(e){
-				var div = document.getElementById('takeGoal')
-				if(div)
-					div.parentNode.removeChild(div);
-			})
+			
 		}
 	}
 }

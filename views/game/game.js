@@ -127,6 +127,21 @@ var hoverCardDiv;
 
 var haveCardsLoaded = false;
 
+function toggleFullScreen()
+{
+	if(document.fullscreenElement)
+	{
+		document.exitFullscreen();
+	}
+	else
+	{
+		if(document.documentElement.requestFullscreen)
+			document.documentElement.requestFullscreen();
+	}		
+}
+
+window.toggleFullScreen = toggleFullScreen;
+
 export function loadView()
 {
 	if(window.location.pathname != "/game")
@@ -1194,4 +1209,16 @@ function raceChangePopup(ponies)
 		return div;
 
 	}}],true)
+}
+
+window.onresize = function(e)
+{
+	if(document.fullscreenElement)
+	{
+		document.getElementById('fullscreenButton').src = "/img/smallscreen.svg";
+	}
+	else
+	{
+		document.getElementById('fullscreenButton').src = "/img/fullscreen.svg";
+	}
 }

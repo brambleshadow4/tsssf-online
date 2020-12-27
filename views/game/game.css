@@ -63,8 +63,8 @@
 
 #actionButtons img
 {
-	width: 3vh;
-	height: 3vh;
+	width: 25px;
+	height: 25px;
 
 	cursor: pointer;
 }
@@ -594,12 +594,10 @@ iframe
 	vertical-align: middle;
 }
 
-.popupPage .selected
+.card.selected
 {
 	box-shadow: 0 0 8px 8px blue;
 }
-
-
 
 .buttonDescription
 {
