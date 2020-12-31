@@ -138,8 +138,7 @@
 	background-position: center;
 
 	color: white;
-	height: 3vh;
-	min-width: 2vh;
+	width: 15px;
 	display: inline-block;
 	text-align: center;
 }
@@ -620,4 +619,19 @@ iframe
 	position: absolute;
 	bottom: .4vh;
 	right: .5vh;
+}
+
+@media only screen and (max-height: 400px)
+{
+	#turnInfo
+	{
+		font-size: 3vh;
+		margin-top: 0;
+	}
+
+	#turnInfo button
+	{
+		padding: 0px;
+		font-size: 3vh;
+	}
 }

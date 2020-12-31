@@ -117,7 +117,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 		imgElement.appendChild(img);
 	}
 
-	if(location && isGoalLoc(location))
+	if(location && isGoalLoc(location) && !isBlank(card))
 	{
 		imgElement.addEventListener("mouseenter", function(e)
 		{
@@ -191,12 +191,12 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 
 		var draggedCard = getDataTransfer().split(";")[0];
 
-		if(isDropTarget && draggedCard && isValidMove(draggedCard, card, location))
+		if(isItMyTurn() && isDropTarget && draggedCard && isValidMove(draggedCard, card, location))
 		{
 			completeMoveShared();
 			endMoveShared();
 		}
-		else if(isDraggable || (!isBlank(card) && isGoalLoc(location)))
+		else if(isItMyTurn() && (isDraggable || (!isBlank(card) && isGoalLoc(location))))
 		{
 			if(location.startsWith("p,"))
 			{
@@ -549,15 +549,17 @@ function addShiftHover(card, element)
 
 	element.onmouseleave = function()
 	{
-		unenlargeCard();
-		hoverCard = "";
+		// this can get triggered by mobile too
+		if(!isHoverTouch)
+		{
+			unenlargeCard();
+			hoverCard = "";
+		}
+		
 	}
 
 	element.addEventListener("touchstart", function(){
-
-		console.log("isHoverTouch = false")
 		
-
 		let thisNo = ++touchStartNum;
 
 		hoverCard = card;
@@ -565,14 +567,15 @@ function addShiftHover(card, element)
 		setTimeout(function(){
 			if(thisNo == touchStartNum && hoverCard)
 			{
-				console.log("isHoverTouch = true")
+				//console.log("isHoverTouch = true")
 				isHoverTouch = true;
 				enlargeCard();
 			}
 		}, 500);
 	});
 
-	element.addEventListener("touchend", function(){
+	element.addEventListener("touchend", function()
+	{
 		touchStartNum++;
 		unenlargeCard();
 		hoverCard = "";

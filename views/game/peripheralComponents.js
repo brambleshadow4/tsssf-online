@@ -27,12 +27,14 @@ import {broadcastMove,
 import {
 	makeCardElement,
 	updateCardElement,
-	isDeleteClick
+	isDeleteClick,
+	endMoveShared
 } from "/game/cardComponent.js"
 
 import {
 	isItMyTurn,
-	getDataTransfer
+	getDataTransfer,
+	isValidMove
 } from "/game/game.js"
 
 import {
@@ -79,6 +81,7 @@ export function initPeripherals()
 		var data = getDataTransfer().split(";")
 		var draggedCard = data[0];
 		var location = data[1];
+
 		if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
 		{
 			if(!document.getElementById('handDropzone'))
@@ -112,6 +115,20 @@ export function initPeripherals()
 
 				hand.appendChild(div);
 			}	
+		}
+	}
+
+	hand.ontouchstart = function(e)
+	{
+		var data = getDataTransfer().split(";")
+		var card = data[0];
+		var location = data[1];
+
+		if(location != "hand" && (isPony(card) || isShip(card)))
+		{
+			moveCard(card, location, "hand");
+			broadcastMove(card, location, "hand");
+			endMoveShared();
 		}
 	}
 

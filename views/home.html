@@ -5,6 +5,7 @@
 
 		<title>Twilight Sparkle's Secret Shipfic Folder Online</title>
 
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta name="twitter:card" content="summary" />
 		<meta property="og:title" content="Twilight Sparkle's Secret Shipfic Folder Online">
 		<meta property="og:description" content="Play and host TSSSF games through the magic of the internet">
@@ -85,6 +86,34 @@
 				margin: 0px 20px;
 			}
 
+			@media screen and (max-width: 600px)
+			{
+				.split
+				{
+					display: block;
+				}
+
+				#left,#right,footer
+				{
+					background-color: rgba(255,255,255,.5);
+				}
+
+				#left
+				{
+					width: 100%;
+				}
+
+				#right img
+				{
+					width: 50%;
+				}
+
+				.footerLinks a
+				{
+					display: block;
+				}
+			}
+
 		</style>
 	</head>
 
@@ -93,7 +122,7 @@
 			<div id="left">
 				<h1>Twilight Sparkle's<br>Secret Shipfic Folder<br>Online</h1>
 				<h2>Beta 0.6.0</h2>
-				<p>No mobile support yet (sorry)</p>
+				
 				<div>
 					<!--div><button onclick="join()">Join Game</button></div-->
 					<div><button onclick="host()">Host Game</button></div>
