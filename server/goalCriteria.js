@@ -601,7 +601,7 @@ var goalCriteria = {
 	"EC.Goal.CiderSqueezin": ExistsPonyShippedTo("name=Applejack", Select("*",4)),
 	"EC.Goal.AintNoPartyLikeAPinkiePieParty": ExistsPonyShippedTo("name=Pinkie Pie", Select("*",4)),
 	"EC.Goal.Recruitment": ExistsPonyShippedTo("name=Fluttershy", Select("*",4)),
-	"EC.Goal.PlayingTheGame": ExistsShip("gender=male", "gender=female", 4),
+	"EC.Goal.PlayingTheGame": ExistsPonyShippedTo("gender=male", Select("gender=female", 4)),
 	"EC.Goal.IReallyLikeHerMane": BreakShip("name=Smarty Pants","*"),
 	"EC.Goal.PickyPicky": Nope, // custom stat
 	"EC.Goal.BewareTheGroove": BreakShip("Elder in keywords", "race=alicorn"),
