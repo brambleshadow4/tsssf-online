@@ -405,13 +405,17 @@ export function TsssfGameServer()
 
 		this.brokenShips = [];
 		this.brokenShipsNow = [];
-		this.shipSet = getCurrentShipSet(model);
 
+		this.morphCounters = {};
+
+		//getCurrentShipSet is still using the old morphCounters, clear them first.
+		if(model.turnstate && model.turnstate.morphCounters)
+			model.turnstate.morphCounters = {};
+		
+		this.shipSet = getCurrentShipSet(model);
 		this.positionMap = getCurrentPositionMap(model);
 		this.swaps = 0;
 		this.swapsNow = 0;
-
-		this.morphCounters = {};
 		
 
 		this.clientProps = function()
@@ -858,8 +862,6 @@ export function TsssfGameServer()
 
 			model.turnstate.swapsNow = model.turnstate.swaps + newlySwapped;
 
-
-			console.log(model.turnstate.swapsNow);
 
 
 			if(startLocation == "hand" || 
