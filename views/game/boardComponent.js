@@ -62,12 +62,12 @@ export async function initBoard()
 
 	window.ontouchmove = function(e)
 	{
-		e.preventDefault();
+		//e.preventDefault();
 	}
 
 	document.body.ontouchmove = function(e)
 	{
-		e.preventDefault();
+		//e.preventDefault();
 	}
 
 	playingArea.ontouchend = function(e)
@@ -144,8 +144,6 @@ export async function initBoard()
 
 	window.moveToStartCard = function()
 	{
-		console.log("moving to start card");
-
 		var refPoint = document.getElementById('refPoint')
 		if(!refPoint)
 			return;

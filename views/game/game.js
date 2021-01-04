@@ -170,6 +170,19 @@ export function loadView()
 	attachToSocket(window.socket);
 
 	window.updateGame = updateGame;
+
+	window.onresize = function(e)
+	{
+		if(document.fullscreenElement)
+		{
+			document.getElementById('fullscreenButton').src = "/img/smallscreen.svg";
+		}
+		else
+		{
+			document.getElementById('fullscreenButton').src = "/img/fullscreen.svg";
+		}
+	}
+
 }
 
 
@@ -1211,14 +1224,3 @@ function raceChangePopup(ponies)
 	}}],true)
 }
 
-window.onresize = function(e)
-{
-	if(document.fullscreenElement)
-	{
-		document.getElementById('fullscreenButton').src = "/img/smallscreen.svg";
-	}
-	else
-	{
-		document.getElementById('fullscreenButton').src = "/img/fullscreen.svg";
-	}
-}

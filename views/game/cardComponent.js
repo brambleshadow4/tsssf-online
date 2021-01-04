@@ -172,8 +172,6 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 	{
 		inTouchEvent = false;
 
-		console.log("touchend")
-		console.log("isHoverTouch" + isHoverTouch)
 		if(isHoverTouch)
 		{
 			//endMoveShared();
@@ -614,8 +612,6 @@ export function setDisguise(element, disguiseCard)
 
 export function setCardKeywords(element, keywords)
 {
-
-	console.log(keywords)
 	var div = document.createElement('div');
 	div.className = "keywords decoration";
 

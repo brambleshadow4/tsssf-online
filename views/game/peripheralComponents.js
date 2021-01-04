@@ -59,6 +59,28 @@ export function initPeripherals()
 		let id = key+"Shuffle";
 
 		document.getElementById(id).onclick = () => requestSwapShuffle(key)
+
+		id = key + "DrawPile"
+		document.getElementById(id).ontouchstart = function(e)
+		{
+			var stillHeldDown = true;
+
+			this.ontouchend = function(e)
+			{
+				stillHeldDown = false;
+			}
+
+			setTimeout(function(){
+
+				if(stillHeldDown)
+				{
+					requestSwapShuffle(key);
+				}
+			}, 1000);
+		}
+
+		document.getElementById(id).oncontextmenu = (e) => { e.preventDefault();}
+
 	}
 
 	var hand = document.getElementById('hand')
@@ -293,12 +315,14 @@ export function updateWinnings()
 
 	arrow.onclick = function(e)
 	{
+		if(!isItMyTurn())
+			return;
+
 		var goalSlot = model.currentGoals.map(x => x.card).indexOf("blank:goal");
 		if(goalSlot > -1)
 		{
 			if(model.winnings.length == 1)
 			{
-				console.log("deleting arrow")
 				this.parentNode.removeChild(this)
 			}
 
@@ -347,9 +371,6 @@ export function updatePlayerList()
 
 export function updateGoals(goalNo, isSoftUpdate)
 {
-	if(isSoftUpdate)
-		console.log("soft updating goals!")
-
 
 	var goalDiv = document.getElementById('currentGoals');
 
@@ -380,8 +401,6 @@ export function updateGoals(goalNo, isSoftUpdate)
 
 		cardLocations[model.currentGoals[i].card] = "goal," + i;
 
-		console.log("achieved " + model.currentGoals[i].achieved)
-
 		if(model.currentGoals[i].achieved)
 		{
 			element.classList.add('achieved');
@@ -389,11 +408,6 @@ export function updateGoals(goalNo, isSoftUpdate)
 		else
 		{
 			element.classList.remove('achieved');
-		}
-
-		if(!isBlank(model.currentGoals[i].card))
-		{
-			
 		}
 	}
 }
@@ -641,37 +655,8 @@ function createHelpPopup()
 	createPopup([
 		{
 			name: "Quick Start",
-			render: htmlTab(`
-
-			<div class='popupPage tiles'>
-				<!-- the gifs are size 1923x1068 fyi. -->
-				<div>
-					<p>Draw pony, ship, and goal cards by clicking the decks on the left</p>
-					<img class='helpGif' src="/img/help/drawCards.gif" />
-				</div>
-
-				<div>
-					<p>Hold <span class='key'>Shift</span> and hover over a card to see the card in much more detail.</p>
-					<img class='helpGif' src="/img/help/shiftHover.gif" />
-				</div>
-
-				<div>
-					<p>Move cards onto the grid by dragging and dropping them from your hand.</p>
-					<img class='helpGif' src="/img/help/dragCards.gif" />
-				</div>
-
-				<div>
-					<p>Discard cards by holding down <span class='key'>D</span> and clicking them.</p>
-					<img class='helpGif' src="/img/help/discard.gif" />
-				</div>
-
-				<div>
-					<p>Swap cards around the grid by dragging and dropping them onto other cards.</p>
-					<img class='helpGif' src="/img/help/swapCards.gif" />
-				</div>
-
-			</div>
-		`)},
+			render: quickStartPage
+		},
 		{
 			name: "Quick Rules",
 			render: htmlTab(`
@@ -776,6 +761,91 @@ function createHelpPopup()
 		}
 
 	]);
+}
+
+function quickStartPage()
+{
+	var div = document.createElement('div');
+	var className = "desktop";
+
+	var len = Math.max(window.innerWidth, window.innerHeight);
+
+	if (len < 1000)
+		className = "mobile";
+
+	div.innerHTML = `<div class='desktopmobileswitch ${className}'>
+		<div class='mobile switchlink' onclick="parentNode.className='desktopmobileswitch desktop'">
+			See instructions for desktop computers
+		</div>
+		<div class='desktop switchlink' onclick="parentNode.className='desktopmobileswitch mobile'">
+			See instructions for touch devices
+		</div>
+		<div class='desktop popupPage tiles'>
+			<!-- the gifs are size 1923x1068 fyi. -->
+
+			<div>
+				<p>Draw pony, ship, and goal cards by clicking the decks on the left</p>
+				<img class='helpGif' src="/img/help/drawCards.gif" />
+			</div>
+
+			<div>
+				<p>Hold <span class='key'>Shift</span> and hover over a card to see the card in much more detail.</p>
+				<img class='helpGif' src="/img/help/shiftHover.gif" />
+			</div>
+
+			<div>
+				<p>Move cards onto the grid by dragging and dropping them from your hand.</p>
+				<img class='helpGif' src="/img/help/dragCards.gif" />
+			</div>
+
+			<div>
+				<p>Discard cards by holding down <span class='key'>D</span> and clicking them.</p>
+				<img class='helpGif' src="/img/help/discard.gif" />
+			</div>
+
+			<div>
+				<p>Swap cards around the grid by dragging and dropping them onto other cards.</p>
+				<img class='helpGif' src="/img/help/swapCards.gif" />
+			</div>
+
+		</div>
+		<div class='mobile popupPage tiles'>
+			<!-- the gifs are size 1923x1068 fyi. -->
+			<div>
+				<p>Draw pony, ship, and goal cards by tapping the decks on the left</p>
+				<img class='helpGif' src="/img/help/drawCards.gif" />
+			</div>
+
+			<div>
+				<p>Tap and hold a card to see the card in much more detail.</p>
+				<img class='helpGif' src="/img/help/shiftHover_m.gif" />
+			</div>
+
+			<div>
+				<p>Move cards onto the grid by tapping one in your hand, then selecting a spot on the grid</p>
+				<img class='helpGif' src="/img/help/dragCards_m.gif" />
+			</div>
+
+			<div>
+				<p>Discard cards by tapping one to select it and then tapping the discard pile</p>
+				<img class='helpGif' src="/img/help/discard_m.gif" />
+			</div>
+
+			<div>
+				<p>Swap cards around the grid by tapping one, then tapping the card to swap it with</p>
+				<img class='helpGif' src="/img/help/swapCards_m.gif" />
+			</div>
+
+			<div>
+				<p>Shuffle the draw + discard piles by tap and holding the draw pile until it shuffles</p>
+				<img class='helpGif' src="/img/help/swapCards_m.gif" />
+			</div>
+		</div>
+		<div></div>
+		<div></div>
+	</div>`;
+
+	return div;
 }
 
 window.createHelpPopup = createHelpPopup;

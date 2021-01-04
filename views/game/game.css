@@ -267,6 +267,18 @@ button
 	z-index: 0;
 }
 
+.desktopmobileswitch.desktop .mobile {display: none;}
+.desktopmobileswitch.mobile .desktop {display: none;}
+
+.switchlink
+{
+	margin-top: 10px;
+	text-align: center;
+	color: blue;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
 
 #cardRow
 {

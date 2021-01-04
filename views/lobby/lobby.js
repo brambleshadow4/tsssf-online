@@ -8,7 +8,6 @@ var sentName = false;
 
 var cardBoxElements = {};
 
-
 export function loadView(isOpen)
 {
 	if(window.location.pathname != "/lobby")
@@ -28,9 +27,6 @@ export function loadView(isOpen)
 
 		socket.onMessageHandler = onMessage;
 
-		gameOptionsDiv = document.getElementById('gameOptionsInfo');
-		chooseCardsDiv = document.getElementById('chooseCardsInfo');
-		joinGameDiv = document.getElementById('joinGameInfo');
 
 		window.joinGameTab = joinGameTab;
 		window.gameOptionsTab = gameOptionsTab;
@@ -56,11 +52,9 @@ export function loadView(isOpen)
 	}
 	else
 	{
-		document.getElementById('joinGameInfo').classList.add('off');
-		document.getElementById('playerArea').classList.add('off');
-
-		document.getElementById('closedLobby').classList.remove('off');
+		changePage(undefined, "pageClosed");
 	}
+	
 
 }
 
@@ -70,7 +64,9 @@ function onMessage()
 	{
 		var [_,id] = event.data.split(";")
 		localStorage["playerID"] = id;
-		document.getElementById('chooseName').classList.add("off");
+
+		document.getElementById('main').classList.add('registered');
+		document.getElementById('main').classList.remove('unregistered');
 	}
 
 	if(event.data.startsWith("ishost;"))
@@ -85,7 +81,7 @@ function onMessage()
 		if(options)
 		{
 			ishost = true;
-			document.getElementById('tabs').classList.remove('off');
+			document.getElementById('rightSide').classList.add('host')
 
 			for(var key in cardBoxElements)
 			{
@@ -107,12 +103,6 @@ function onMessage()
 
 			if(options.keepLobbyOpen)
 				document.getElementById("keepLobbyOpen").checked = true;
-
-			if(sentName)
-			{
-				document.getElementById("chooseName").classList.add("off");
-				document.getElementById("startButtonArea").classList.remove("off");
-			}
 		}
 	}
 
@@ -136,19 +126,15 @@ function onMessage()
 			list.innerHTML += "<div>" + name + "</div>"
 		}
 
-		if(ishost && myName != "")
-		{
-			document.getElementById("startButtonArea").classList.remove("off");
-		}
+		document.getElementById('playerList2').innerHTML = list.innerHTML
+
 		
 		if(myName != "")
 		{
-			document.getElementById("chooseName").classList.add("off");
 			sentName = true;
 		}
 		else
 		{
-			document.getElementById("chooseName").classList.remove("off");
 			sentName = false;
 		}
 	}
@@ -188,6 +174,26 @@ function startGame()
 }
 
 
+function changePage(el, pageCssClass)
+{
+	var main = document.getElementsByClassName('main')[0];
+
+	main.classList.remove("pageJoin")
+	main.classList.remove("pageOptions")
+	main.classList.remove("pageCards")
+	main.classList.remove("pageClosed")
+
+	main.classList.add(pageCssClass);
+
+	var selected = document.getElementsByClassName('selected');
+	if(selected.length)
+		selected[0].classList.remove('selected');
+	if(el)
+	el.classList.add('selected');
+}
+
+window.changePage = changePage
+
 
 function joinGameTab()
 {
@@ -195,8 +201,7 @@ function joinGameTab()
 	chooseCardsDiv.classList.add('off');
 	joinGameDiv.classList.remove("off");
 
-	document.getElementsByClassName('selected')[0].classList.remove('selected');
-	document.getElementById('joinGameTab').classList.add('selected')
+	
 }
 
 function gameOptionsTab()
