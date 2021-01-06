@@ -13,7 +13,6 @@ var HEAD = `
 	<meta property="og:type" content="website">
 `;
 
-
 var HTML = `
 
 <div id='playerArea' class='playerArea'>
