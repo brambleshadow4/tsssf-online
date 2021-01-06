@@ -52,13 +52,7 @@
 
 #actionButtons
 {
-	flex-grow: 0;
-	flex-shrink: 0;
-	position: absolute;
-	top: 0px;
-	right: 0px;
 	z-index: 3;
-
 }
 
 #actionButtons img

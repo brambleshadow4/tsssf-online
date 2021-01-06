@@ -54,8 +54,6 @@ export function loadView(isOpen)
 	{
 		changePage(undefined, "pageClosed");
 	}
-	
-
 }
 
 function onMessage()
@@ -109,6 +107,7 @@ function onMessage()
 
 	if(event.data.startsWith("lobbylist;"))
 	{
+		console.log('lobbylist');
 		var [_, myName, names] = event.data.split(";");
 
 		var names = names.split(",");

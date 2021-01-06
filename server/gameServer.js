@@ -1171,13 +1171,18 @@ export function TsssfGameServer()
 				}
 			}
 
-
 			if(model.isInGame && message.startsWith("startlobby") && socket == model.host)
 			{
 				model.isInGame = false;
 				model.isLobbyOpen = true;
 				toEveryone(key, "startlobby;");
 				sendLobbyList(key);
+
+				for(var player of model.players)
+				{
+					if(isRegistered(player))
+						player.socket.send("registered;" + player.id);
+				}
 			}
 
 			if(model.isInGame && socket == model.host && message.startsWith("keepLobbyOpen;"))

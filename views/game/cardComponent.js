@@ -71,7 +71,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 
 	setCardBackground(imgElement, card);
 
-	if(!isBlank(card) && cards[card].noLogic && location != undefined && isGoalLoc(location))
+	if(!isBlank(card) && cards[card] && cards[card].noLogic && location != undefined && isGoalLoc(location))
 	{
 		var warningSym = document.createElement('img')
 		warningSym.src = "/img/warning.svg";
