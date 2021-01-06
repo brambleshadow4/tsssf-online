@@ -86,8 +86,12 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 	{
 		if(!isItMyTurn()) return;
 
+
+		if(imgElement.getElementsByClassName('goalCheck').length > 0)
+			return;
+
 		var img = document.createElement('img');
-		img.id = "takeGoal"
+		img.className = "goalCheck";
 		img.src= "/img/check.svg";
 		img.style.width = "5vh";
 
@@ -105,15 +109,6 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 		}
 
 		img.ontouchstart = img.onclick;
-
-
-
-		imgElement.addEventListener('mouseleave', function(e){
-			var div = document.getElementById('takeGoal')
-			if(div)
-				div.parentNode.removeChild(div);
-		})
-
 		imgElement.appendChild(img);
 	}
 

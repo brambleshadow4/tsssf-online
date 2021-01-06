@@ -63,6 +63,8 @@ export function initPeripherals()
 		id = key + "DrawPile"
 		document.getElementById(id).ontouchstart = function(e)
 		{
+
+
 			var stillHeldDown = true;
 
 			this.ontouchend = function(e)
@@ -289,10 +291,20 @@ export function updateGoalDiscard(tempCard)
 	}
 }
 
+var lastArrowClick = 0;
+
 export function updateWinnings()
 {
 	var element = document.getElementById('winnings');
 	element.innerHTML = "";
+
+	var arrow = document.createElement("img");
+	arrow.src = "/img/return.svg";
+	arrow.className = 'returnArrow';
+
+	if(model.winnings.length)
+		element.appendChild(arrow);
+
 
 	var cardOffset = 2;
 	var offset = model.winnings.length * cardOffset;
@@ -309,14 +321,33 @@ export function updateWinnings()
 		element.appendChild(card)
 	}
 
-	var arrow = document.createElement("img");
-	arrow.src = "/img/return.svg";
-	arrow.className = 'returnArrow';
+	
 
-	arrow.onclick = function(e)
+	element.ontouchstart = function(e)
 	{
 		if(!isItMyTurn())
 			return;
+
+		e.stopPropagation();
+
+		if(element.classList.contains('selected'))
+		{
+			endMoveShared();
+		}
+		else
+		{
+			endMoveShared();
+			element.classList.add('selected');
+		}
+	}
+
+	arrow.onclick = function(e)
+	{
+		var newTime = new Date().getTime();
+		if(!isItMyTurn() || (newTime - lastArrowClick < 250))
+			return;
+
+		lastArrowClick = newTime;
 
 		var goalSlot = model.currentGoals.map(x => x.card).indexOf("blank:goal");
 		if(goalSlot > -1)
@@ -332,8 +363,9 @@ export function updateWinnings()
 		}
 	}
 
-	if(model.winnings.length)
-		element.appendChild(arrow);
+	arrow.ontouchstart = arrow.onclick;
+
+	
 }
 
 export function updatePlayerList()

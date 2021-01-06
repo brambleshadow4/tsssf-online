@@ -475,8 +475,14 @@ button
 }
 
 
-#takeGoal
+.card:hover .goalCheck, .card.selected .goalCheck
 {
+	display: block;
+}
+
+.goalCheck
+{
+	display: none;
 	position: absolute;
 	bottom: 1vh;
 	right: 1vh;
@@ -499,10 +505,17 @@ button
 	position: relative;
 	cursor: pointer;
 }
-#winnings:hover .returnArrow
+
+#winnings:hover .returnArrow, #winnings.selected .returnArrow
 {
 	display: inline-block;
 }
+
+#winnings.selected .card:last-child
+{
+	box-shadow: 0 0 8px 8px blue;
+}
+
 
 iframe
 {
