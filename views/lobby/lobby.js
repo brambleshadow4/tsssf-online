@@ -1,12 +1,24 @@
 import * as LobbyView from "/lobby/lobbyView.js";
 
+import {cardSelectComponent} from "/lobby/cardSelectComponent.js";
+
 var gameOptionsDiv 
 var chooseCardsDiv 
 var joinGameDiv 
 var ishost = false;
 var sentName = false;
-
 var cardBoxElements = {};
+
+var decks = {
+	"Core.*": new Set(),
+	"PU.*": new Set(),
+	"EC.*": new Set(),
+}
+
+var deckElements = {}
+
+window.decks = decks;
+
 
 export function loadView(isOpen)
 {
@@ -27,7 +39,6 @@ export function loadView(isOpen)
 
 		socket.onMessageHandler = onMessage;
 
-
 		window.joinGameTab = joinGameTab;
 		window.gameOptionsTab = gameOptionsTab;
 		window.chooseCardsTab = chooseCardsTab;
@@ -36,17 +47,51 @@ export function loadView(isOpen)
 
 		var cardBoxes = document.getElementsByClassName('cardbox')
 
-		for(var i=1; i < cardBoxes.length; i++)
+		
+
+		var deckInfo = [
+			["Core", "Core.*", cardBoxes[0]],
+			["Extra Credit", "EC.*", cardBoxes[1]],
+			["Ponyville University","PU.*", cardBoxes[2]]
+		];
+
+		var cardSelectors = document.getElementById('cardSelectors');
+
+		var deckElementList = [];
+		for(var info of deckInfo)
+		{
+			var el = cardSelectComponent(decks, ...info)
+			deckElementList.push(el)
+			deckElements[info[1]] = el;
+			cardSelectors.appendChild(el);
+		}
+
+		for(let i=0; i < cardBoxes.length; i++)
 		{
 			let box = cardBoxes[i];
 			cardBoxElements[box.getAttribute('value')] = box;
 
 			box.onclick = function()
 			{
+				console.log("box clicked " +this.className)
+				console.log(this)
+
+
+
 				if(this.classList.contains('selected'))
-					this.classList.remove("selected")
+				{
+					this.classList.remove("selected");
+					deckElementList[i].getElementsByTagName('button')[0].click();
+				}
 				else
+				{
 					this.classList.add('selected');
+					deckElementList[i].getElementsByTagName('button')[2].click();
+					//console.log(deckElements[i].getElementsByTagName('button')[2]);
+				}
+
+				
+
 			}
 		}
 	}
@@ -83,16 +128,46 @@ function onMessage()
 
 			for(var key in cardBoxElements)
 			{
-				if(key != "Core.*")
-					cardBoxElements[key].classList.remove('selected')
+				cardBoxElements[key].classList.remove('selected')
 			}
 
 			if(options.cardDecks)
-				for(var key of options.cardDecks)
+			{
+				var s = new Set(options.cardDecks);
+
+				var boxes = document.getElementsByClassName('cardbox');
+				for(var el of boxes)
 				{
-					if(key != "Core.*")
-						cardBoxElements[key].classList.add('selected');
+					if(s.has(el.getAttribute('deck')))
+					{
+						el.click();
+					}
 				}
+
+				var cardDivs = document.getElementsByClassName('card');
+				for(var el of cardDivs)
+				{
+					var card = el.getAttribute('card')
+					if(s.has(card))
+					{
+						el.classList.add('selected');
+
+						var deck = card.substring(0, card.indexOf('.')+1) + "*";
+
+						deckElements[deck].getElementsByTagName('button')[1].click();
+					}
+				}
+
+				var allButtons = document.getElementsByClassName('allButton');
+				for(var el of allButtons)
+				{
+					if(s.has(el.getAttribute('deck')))
+					{
+						el.click();
+					}
+				}
+			}
+				
 
 			if(options.ruleset == "turnsOnly")
 				document.getElementById("turnsOnly").checked = true;
@@ -153,14 +228,10 @@ function startGame()
 
 
 	// skip 0 because it's core
-	for(var i=1; i<cardDecks.length; i++)
-	{
-		if(cardDecks[i].classList.contains('selected'))
-		{
-			var cardDeckName = cardDecks[i].getAttribute('value');
-			options.cardDecks.push(cardDeckName)
-		}
-	}
+
+	options.cardDecks = Object.keys(decks).map(x => [...decks[x]]).reduce((a,b) => a.concat(b), []);
+
+	console.log(options.cardDecks);
 
 	if(document.getElementById('sandbox').checked)
 		options.ruleset = "sandbox";
@@ -188,7 +259,7 @@ function changePage(el, pageCssClass)
 	if(selected.length)
 		selected[0].classList.remove('selected');
 	if(el)
-	el.classList.add('selected');
+		el.classList.add('selected');
 }
 
 window.changePage = changePage

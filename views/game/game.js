@@ -218,14 +218,14 @@ function LoadCards()
 	{
 		if(isCardIncluded(key, model))
 		{
-			var nodes = key.split(".");
+			/*var nodes = key.split(".");
 			nodes.pop();
 			var urlToImg = "/img/" + nodes.join("/") + "/" + currentDeck[key].url;
 
 			currentDeck[key].keywords = new Set(currentDeck[key].keywords);
 
 			currentDeck[key].fullUrl = urlToImg;
-			currentDeck[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
+			currentDeck[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");*/
 
 			var img = document.createElement('img');
 			img.src = currentDeck[key].thumbnail;

@@ -377,6 +377,7 @@ export function TsssfGameServer()
 		
 		games[key] = {
 			messageHistory: [],
+			cardDecks: ["Core.*"],
 			deathCount: 0,
 			isLobbyOpen: true,
 			isInGame: false,
@@ -487,14 +488,13 @@ export function TsssfGameServer()
 		var decks = ["Core.*"];
 		if(options.cardDecks)
 		{
-			var allowedDecks = ["PU.*","EC.*"]
-			var decks = options.cardDecks.filter( x => allowedDecks.indexOf(x) > -1);
-			decks.push("Core.*");
+			//var allowedDecks = ["PU.*","EC.*"]
+			var decks = options.cardDecks; //.filter( x => allowedDecks.indexOf(x) > -1);
+			//decks.push("Core.*");
 		}
 
 		model.cardDecks = decks;
 		
-
 		model.goalDiscardPile = [];
 		model.ponyDiscardPile = [];
 		model.shipDiscardPile = [];

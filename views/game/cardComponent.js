@@ -69,6 +69,8 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 	var imgElement = document.createElement('div');
 	imgElement.classList.add("card");
 
+
+
 	setCardBackground(imgElement, card);
 
 	if(!isBlank(card) && cards[card] && cards[card].noLogic && location != undefined && isGoalLoc(location))
@@ -637,6 +639,18 @@ export function addTempSymbol(element, symbol)
 
 function setCardBackground(element, card, useLarge)
 {
+	if(cards[card] && !cards[card].fullUrl)
+	{
+		var nodes = card.split(".");
+		nodes.pop();
+
+		var urlToImg = "/img/" + nodes.join("/") + "/" + cards[card].url;
+
+		cards[card].keywords = new Set(cards[card].keywords);
+		cards[card].fullUrl = urlToImg;
+		cards[card].thumbnail = urlToImg.replace(".png",".thumb.jpg");
+	}
+
 	if(isAnon(card))
 	{
 		element.classList.remove('blank');
@@ -676,6 +690,9 @@ function setCardBackground(element, card, useLarge)
 			element.classList.add('pony')
 		else if (isPonyOrStart(card))
 			element.classList.add('start');
+
+
+		
 
 		var src = cards[card].thumbnail;
 		if(useLarge)
