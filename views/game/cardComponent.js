@@ -26,6 +26,43 @@ var hoverCard;
 var hoverCardDiv;
 var isShiftPressed = false;
 
+var ghostCard;
+var trashButton;
+
+var isHoverTouch = false;
+var inTouchEvent = false;
+
+export function endMoveShared()
+{
+	setDataTransfer("");
+
+	var selected = document.getElementsByClassName('selected');
+	while(selected.length)
+		selected[0].classList.remove('selected');
+
+	if(ghostCard)
+	{
+		ghostCard.parentNode.removeChild(ghostCard);
+		ghostCard = undefined
+	}
+
+	if(trashButton)
+	{
+		trashButton.parentNode.removeChild(trashButton);
+		trashButton = undefined;
+	}
+
+	var takeGoal = document.getElementById('takeGoal');
+	if(takeGoal)
+	{
+		takeGoal.parentNode.removeChild(takeGoal);
+	}
+
+	var playingArea = document.getElementById('playingArea');
+	playingArea.classList.remove("draggingPony")
+	playingArea.classList.remove("draggingShip")
+}
+
 
 export function makeCardElement(card, location, isDraggable, isDropTarget)
 {
@@ -34,7 +71,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 
 	setCardBackground(imgElement, card);
 
-	if(!isBlank(card) && cards[card].noLogic && location != undefined && isGoalLoc(location))
+	if(!isBlank(card) && cards[card] && cards[card].noLogic && location != undefined && isGoalLoc(location))
 	{
 		var warningSym = document.createElement('img')
 		warningSym.src = "/img/warning.svg";
@@ -44,10 +81,57 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 		imgElement.title = "This card does not have any goal logic associated with it.\nIt will not highlight when achieved."
 	}
 
+
+	function addGoalCheck(imgElement, goalNo)
+	{
+		if(!isItMyTurn()) return;
+
+
+		if(imgElement.getElementsByClassName('goalCheck').length > 0)
+			return;
+
+		var img = document.createElement('img');
+		img.className = "goalCheck";
+		img.src= "/img/check.svg";
+		img.style.width = "5vh";
+
+		img.onclick = function(e)
+		{
+			if(isItMyTurn() && !isDeleteClick())
+			{
+				e.preventDefault();
+				e.stopPropagation();
+
+				var card = model.currentGoals[goalNo].card;
+				moveCard(card, "goal,"+goalNo, "winnings")
+				broadcastMove(card, "goal,"+goalNo, "winnings")
+			}
+		}
+
+		img.ontouchstart = img.onclick;
+		imgElement.appendChild(img);
+	}
+
+	if(location && isGoalLoc(location) && !isBlank(card))
+	{
+		imgElement.addEventListener("mouseenter", function(e)
+		{
+			addGoalCheck(imgElement, Number(location.split(',')[1]))
+		});
+	}
+
+
 	imgElement.onclick = function()
 	{	
 		if(isDkeyPressed && isItMyTurn())
 		{
+			if(location.startsWith("p,"))
+			{
+				var relativeOffset = location.replace("p,","offset,")
+				if(model.board[relativeOffset])
+					return;
+			}
+
 			if(isDiscardLoc(location) || location == "winnings")
 				return;
 
@@ -73,7 +157,157 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 		}
 	}
 
+	imgElement.ontouchstart = function(e)
+	{
+		isHoverTouch = false;
+		inTouchEvent = true;
+	}
 	
+	imgElement.ontouchend = function(e)
+	{
+		inTouchEvent = false;
+
+		if(isHoverTouch)
+		{
+			//endMoveShared();
+			return;
+		}
+
+		if(!location)
+			return;
+
+		if(isBoardLoc(location) || location.startsWith("shipDiscardPile,") || location.startsWith("ponyDiscardPile"))
+		{
+			e.preventDefault();
+			e.stopPropagation();
+		}
+
+		var draggedCard = getDataTransfer().split(";")[0];
+
+		if(isItMyTurn() && isDropTarget && draggedCard && isValidMove(draggedCard, card, location))
+		{
+			completeMoveShared();
+			endMoveShared();
+		}
+		else if(isItMyTurn() && (isDraggable || (!isBlank(card) && isGoalLoc(location))))
+		{
+			if(location.startsWith("p,"))
+			{
+				var offset = location.replace("p,","offset,");
+				if(model.board[offset])
+					return false;
+			}
+
+			if(imgElement.classList.contains('selected'))
+			{
+				endMoveShared();
+
+				if(location.startsWith("shipDiscardPile,"))
+				{
+					document.getElementById('shipDiscardPile').click();
+				}
+
+				if(location.startsWith("ponyDiscardPile,"))
+				{
+					document.getElementById('ponyDiscardPile').click();
+				}
+
+				return;
+			}
+
+			endMoveShared();
+
+			imgElement.classList.add('selected');
+
+			if(isGoalLoc(location))
+			{
+				addGoalCheck(imgElement, Number(location.split(',')[1]));
+			}
+
+			var trashTarget;
+			if(isPony(card))
+				trashTarget = "ponyDiscardPile";
+			else if (isShip(card))
+				trashTarget = "shipDiscardPile";
+			else if(isGoal(card))
+				trashTarget = "goalDiscardPile";
+
+			if(trashTarget && !location.startsWith(trashTarget))
+			{
+				var trashTargetEl = document.getElementById(trashTarget);
+
+
+
+				var top = trashTargetEl.getBoundingClientRect().top
+				var left = trashTargetEl.getBoundingClientRect().left
+
+				//alert(window.innerHeight + " " + top + " " + trashTargetEl.getBoundingClientRect().top);
+
+				trashButton = document.createElement('img');
+				trashButton.src = "/img/trash.svg";
+				trashButton.style.position = "absolute";
+				trashButton.style.top = top + "px";
+				trashButton.style.left = left + "px"
+				trashButton.style.width = "13vh";
+
+				trashButton.style.zIndex = 3;
+
+
+				document.body.appendChild(trashButton);
+
+				trashButton.ontouchstart = function(e)
+				{
+					e.preventDefault();
+					e.stopPropagation();
+
+					endMoveShared();
+					moveCard(card, location, trashTarget + ",top");
+					broadcastMove(card, location, trashTarget + ",top");
+				}
+			}
+
+			if(isPonyOrStart(card))
+			{
+				document.getElementById('playingArea').classList.add('draggingPony');
+			}
+
+			if(isShip(card))
+			{
+				document.getElementById('playingArea').classList.add('draggingShip');
+			}
+
+			setDataTransfer(card + ";" + location)
+		}	
+	}
+
+	function completeMoveShared()
+	{
+		var [card, startLoc] = getDataTransfer().split(";")
+
+		if(isBoardLoc(location))
+		{
+			if(model.board[location] && model.board[location].card && isPonyOrStart(model.board[location].card))
+			{
+				var [_,x,y] = location.split(",");
+				var offsetLoc = "offset," + x + "," + y;
+				let offsetCard = model.board[location].card;
+
+				moveCard(offsetCard, location, offsetLoc);
+				broadcastMove(offsetCard, location, offsetLoc);
+			}
+			else
+			{
+				// delete drop zone card;
+				//this.parentNode.removeChild(this);
+			}
+		}
+
+		moveCard(card, startLoc, location);
+		broadcastMove(card, startLoc, location);
+	}
+
+
+
 
 	if(isDraggable)
 	{
@@ -86,23 +320,40 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 
 		imgElement.classList.add('grab');
 
-		var ghostCard;
+		
 		var ghostCardDragHandler;
 		var ghostCardDragEndHandler;
 
+	
 		imgElement.ondragstart = function(e)
 		{
-			if(isDkeyPressed || !isItMyTurn()){
+			if(inTouchEvent)
+			{
+				e.preventDefault();
+				e.stopPropagation();
+				return;
+			}
+
+			if (isDkeyPressed || !isItMyTurn())
+			{
 				e.preventDefault();
 				return;
+			}
+
+			if(location.startsWith("p,"))
+			{
+				var offset = location.replace("p,","offset,");
+
+				if(model.board[offset])
+					return false;
 			}
 
 			//e.preventDefault();
 
 			e.stopPropagation()
-			//draggingBoard = false;
 
 			setDataTransfer(card + ";" + location)
+			//draggingBoard = false;
 
 
 			var img = document.createElement('span')
@@ -119,7 +370,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 				document.getElementById('playingArea').classList.add('draggingShip');
 			}
 
-			var ghostCard = makeCardElement(card);
+			ghostCard = makeCardElement(card);
 			ghostCard.style.opacity = ".5";
 			ghostCard.style.position = "absolute";
 			ghostCard.style.top = e.pageY + "px";
@@ -138,12 +389,8 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 				window.removeEventListener("dragend", ghostCardDragEndHandler);
 				window.removeEventListener("drop", ghostCardDragEndHandler);
 
-				if(ghostCard)
-					ghostCard.parentNode.removeChild(ghostCard);
-
-				var playingArea = document.getElementById('playingArea');
-				playingArea.classList.remove("draggingPony")
-				playingArea.classList.remove("draggingShip")
+				endMoveShared();
+				
 			}
 
 			window.addEventListener('dragover', ghostCardDragHandler);
@@ -152,6 +399,8 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 
 			document.body.appendChild(ghostCard);
 		}
+
+
 	}
 	else
 	{
@@ -165,64 +414,104 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 		{
 			var draggedCard = getDataTransfer().split(";")[0];
 
-
-			if(isValidMove(draggedCard, card))
+			if(isValidMove(draggedCard, card, location))
 				e.preventDefault();
 		}
+
+		var offsetGhost = undefined;
+		var overOffsetGhost = false;
+		var overMainDiv = false;
 
 		imgElement.ondragenter= function(e)
 		{
 			var draggedCard = getDataTransfer().split(";")[0];
 
+			if(this == offsetGhost)
+			{
+				overOffsetGhost = true;
+				return;
+			}
+			else
+			{
+				overMainDiv = true;
+			}
 
-			if(isValidMove(draggedCard, card))
+			if(isValidMove(draggedCard, card, location))
 			{
 				if (isBlank(card))
 					setCardBackground(imgElement, draggedCard)
 				else
-					imgElement.style.border = "solid 5px green";
+				{
+					let [_, x, y] = location.split(",");
+					x = Number(x);
+					y = Number(y);
+
+					var correspondingOffset = "offset," + x + "," + y;
+
+					if(!offsetGhost)
+					{
+						offsetGhost = makeCardElement(card, correspondingOffset, false, true);
+						offsetGhost.style.opacity = .2;
+
+						offsetGhost.ondragenter = imgElement.ondragenter;
+						offsetGhost.ondragleave = imgElement.ondragleave;
+						offsetGhost.ondrop = imgElement.ondrop;
+
+						const gridWidth = 22;
+
+						offsetGhost.style.top = y * gridWidth + 2 + "vh";
+						offsetGhost.style.left = x * gridWidth + 2 + "vh";
+						document.getElementById('refPoint').appendChild(offsetGhost)
+					}
+					
+					setCardBackground(imgElement, draggedCard)
+				}
 			}
 		}
 
-		imgElement.ondrop= function(e)
+		
+
+		imgElement.ondrop = function(e)
 		{	
-			e.preventDefault();
-			var [card, startLoc] = getDataTransfer().split(";")
-
-			if(isBoardLoc(location))
+			if(offsetGhost)
 			{
-				if(model.board[location] && model.board[location].card && isPonyOrStart(model.board[location].card))
-				{
-					var [_,x,y] = location.split(",");
-					var offsetLoc = "offset," + x + "," + y;
-					let offsetCard = model.board[location].card;
+				offsetGhost.parentNode.removeChild(offsetGhost);
+				offsetGhost = undefined;
+			}	
 
+			e.preventDefault();
 
-
-					moveCard(offsetCard, location, offsetLoc);
-					broadcastMove(offsetCard, location, offsetLoc);
-				}
-				else
-				{
-					// delete drop zone card;
-					//this.parentNode.removeChild(this);
-				}
-			}
-
+			completeMoveShared();
 			
-
-			moveCard(card, startLoc, location);
-			broadcastMove(card, startLoc, location);
 			return false;
 		}
 
-
 		imgElement.ondragleave= function(e)
 		{
+			if(this == offsetGhost)
+			{
+				overOffsetGhost = false
+			}
+			else
+			{
+				overMainDiv = false;
+			}
+
+			if(overOffsetGhost || overMainDiv)
+			{
+				return;
+			}
+
 			if(isBlank(card))
 				imgElement.style.backgroundImage = "";
 			else
-				imgElement.style.border = "";
+				setCardBackground(imgElement, card)	
+
+			if(offsetGhost)
+			{
+				offsetGhost.parentNode.removeChild(offsetGhost);
+				offsetGhost = undefined;
+			}		
 		}
 	}
 
@@ -230,6 +519,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 }
 
 
+var touchStartNum = 0;
 
 function addShiftHover(card, element)
 {
@@ -244,11 +534,45 @@ function addShiftHover(card, element)
 		}
 	}
 
+	element.oncontextmenu = function(e)
+	{
+		e.preventDefault();
+		e.stopPropagation();
+	}
+
 	element.onmouseleave = function()
 	{
+		// this can get triggered by mobile too
+		if(!isHoverTouch)
+		{
+			unenlargeCard();
+			hoverCard = "";
+		}
+		
+	}
+
+	element.addEventListener("touchstart", function(){
+		
+		let thisNo = ++touchStartNum;
+
+		hoverCard = card;
+		hoverCardDiv = element;
+		setTimeout(function(){
+			if(thisNo == touchStartNum && hoverCard)
+			{
+				//console.log("isHoverTouch = true")
+				isHoverTouch = true;
+				enlargeCard();
+			}
+		}, 500);
+	});
+
+	element.addEventListener("touchend", function()
+	{
+		touchStartNum++;
 		unenlargeCard();
 		hoverCard = "";
-	}
+	});
 }
 
 function removeShiftHover(element)
@@ -283,8 +607,6 @@ export function setDisguise(element, disguiseCard)
 
 export function setCardKeywords(element, keywords)
 {
-
-	console.log(keywords)
 	var div = document.createElement('div');
 	div.className = "keywords decoration";
 
@@ -347,6 +669,14 @@ function setCardBackground(element, card, useLarge)
 		if(isShip(card))
 			element.classList.add('ship')
 
+		if(isGoal(card))
+			element.classList.add('goal');
+
+		if(isPony(card))
+			element.classList.add('pony')
+		else if (isPonyOrStart(card))
+			element.classList.add('start');
+
 		var src = cards[card].thumbnail;
 		if(useLarge)
 			src = cards[card].fullUrl;
@@ -358,17 +688,38 @@ function setCardBackground(element, card, useLarge)
 	}
 }
 
-function enlargeCard(cardDiv)
+function enlargeCard()
 {
 	if(document.getElementById('giantCard')) return;
-
+	if(!hoverCard) return;
 	
-
 	var giantCard = document.createElement('div');
+	giantCard.classList.add('card');
 	giantCard.id = "giantCard"
+
+	if(isShip(hoverCard))
+	{
+		giantCard.classList.add('ship');
+	}
+	if(isPony(hoverCard))
+	{
+		giantCard.classList.add('pony');
+	}
 
 	var width = 13*3/100 * window.innerHeight;
 	var height = 18*3/100 * window.innerHeight;
+
+	if(height < 400)
+	{
+		var ratio1 = 400/height;
+		var ratio2 = window.innerHeight / height;
+		var ratio3 = window.innerWidth / width;
+
+		var ratio = Math.min(ratio1, Math.min(ratio2, ratio3));
+
+		width *= ratio;
+		height *= ratio;
+	}
 
 	
 	giantCard.style.position = "absolute";

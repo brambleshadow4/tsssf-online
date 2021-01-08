@@ -52,19 +52,13 @@
 
 #actionButtons
 {
-	flex-grow: 0;
-	flex-shrink: 0;
-	position: absolute;
-	top: 0px;
-	right: 0px;
 	z-index: 3;
-
 }
 
 #actionButtons img
 {
-	width: 3vh;
-	height: 3vh;
+	width: 25px;
+	height: 25px;
 
 	cursor: pointer;
 }
@@ -85,6 +79,17 @@
 .card.blank
 {
 	cursor: unset;
+}
+
+.card.achieved
+{
+	box-shadow: 0 0 8px 8px green;
+}
+
+
+.card.dragAccept
+{
+	box-shadow:  0 0 8px 8px blue;
 }
 
 #playingArea.draggingShip .ship.blank
@@ -127,8 +132,7 @@
 	background-position: center;
 
 	color: white;
-	height: 3vh;
-	min-width: 2vh;
+	width: 15px;
 	display: inline-block;
 	text-align: center;
 }
@@ -217,22 +221,31 @@ button
 
 .card.pony, .card.pony.flying
 {
+	background-color: #87599A;
 	background-image: url(/img/Pony-Back.png);
 }
 
 .card.ship, .card.ship.flying
 {
+	background-color: #C9305D;
 	background-image: url(/img/Ship-Back.png);
 	z-index: 1;
 }
 
+.card.start
+{
+	background-color: #3E3F3E;
+}
+
 .card.goal, .card.goal.flying
 {
+	background-color: #039AD0;
 	background-image: url(/img/Goal-Back.png);
 }
 
 .card.blank
 {
+	background-color: transparent;
 	background-image: url(/img/blank.svg);
 }
 
@@ -246,6 +259,18 @@ button
 {
 	transform: rotate(90deg);
 	z-index: 0;
+}
+
+.desktopmobileswitch.desktop .mobile {display: none;}
+.desktopmobileswitch.mobile .desktop {display: none;}
+
+.switchlink
+{
+	margin-top: 10px;
+	text-align: center;
+	color: blue;
+	text-decoration: underline;
+	cursor: pointer;
 }
 
 
@@ -444,8 +469,14 @@ button
 }
 
 
-#takeGoal
+.card:hover .goalCheck, .card.selected .goalCheck
 {
+	display: block;
+}
+
+.goalCheck
+{
+	display: none;
 	position: absolute;
 	bottom: 1vh;
 	right: 1vh;
@@ -468,10 +499,17 @@ button
 	position: relative;
 	cursor: pointer;
 }
-#winnings:hover .returnArrow
+
+#winnings:hover .returnArrow, #winnings.selected .returnArrow
 {
 	display: inline-block;
 }
+
+#winnings.selected .card:last-child
+{
+	box-shadow: 0 0 8px 8px blue;
+}
+
 
 iframe
 {
@@ -574,15 +612,9 @@ iframe
 	vertical-align: middle;
 }
 
-.popupPage .selected
+.card.selected
 {
 	box-shadow: 0 0 8px 8px blue;
-}
-
-
-.card.achieved
-{
-	box-shadow: 0 0 8px 8px green;
 }
 
 .buttonDescription
@@ -606,4 +638,19 @@ iframe
 	position: absolute;
 	bottom: .4vh;
 	right: .5vh;
+}
+
+@media only screen and (max-height: 400px)
+{
+	#turnInfo
+	{
+		font-size: 3vh;
+		margin-top: 0;
+	}
+
+	#turnInfo button
+	{
+		padding: 0px;
+		font-size: 3vh;
+	}
 }

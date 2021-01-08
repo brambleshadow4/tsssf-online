@@ -4,6 +4,7 @@ var HEAD = `
 	<meta property="og:title" content="Game in Progress">
 	<meta property="og:description" content="Play and host TSSSF games through the magic of the internet">
 	<meta property="og:image" content="http://tsssf.net/img/tsssf-box.png">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 `
 
 var HTML = `
@@ -18,7 +19,9 @@ var HTML = `
 		<div class='shuffleContainer'>
 			<img id='shipShuffle' class='shuffle' src="/img/shuffle.svg"/>
 		</div>
-		<div id="shipDiscardPile" class='card discard'></div>
+		<div id="shipDiscardPile" class='card discard'>
+			<img class="discardPileTrash" id='shipDiscardPileTrash' src="/img/trash.svg"/>
+		</div>
 		<div id="goalDrawPile" class='card goal'></div>
 		<div class='shuffleContainer'>
 			<img id='goalShuffle' class='shuffle' src="/img/shuffle.svg"/>
@@ -32,6 +35,7 @@ var HTML = `
 			<div id='actionButtons'>
 				<img onclick="moveToStartCard()" src="/img/home.svg"/>
 				<img id='hostButton' style="display: none;" onclick="openSettings()" src="/img/settings.svg"/>
+				<img id='fullscreenButton' onclick="toggleFullScreen()" src="/img/fullscreen.svg"/>
 				<img id='helpButton' onclick="createHelpPopup()" src="/img/help.svg"/>
 			</div>
 		</div>

@@ -16,7 +16,10 @@ import {
 import
 {
 	makeCardElement,
+	endMoveShared
 } from "/game/cardComponent.js";
+
+import {createPopup} from "/game/popupComponent.js";
 
 
 
@@ -25,13 +28,78 @@ var draggingBoard = false;
 
 var x;
 var y;
+var dist;
 
 const gridWidth = 22;
 
 
-export function initBoard()
+export async function initBoard()
 {
 	var playingArea = document.getElementById('playingArea');
+
+	playingArea.ontouchstart = function(e)
+	{
+		//endMoveShared();
+
+		if(e.touches.length == 1)
+		{
+			draggingBoard = true;
+			x = e.touches[0].clientX;
+			y = e.touches[0].clientY;
+		}
+
+		if (e.touches.length == 2)
+		{
+			draggingBoard = true;
+
+			var dx = e.touches[0].clientX - e.touches[1].clientX;
+			var dy = e.touches[0].clientY - e.touches[1].clientY;
+			dist = Math.sqrt(dx*dx + dy*dy);
+			x = (e.touches[0].clientX + e.touches[1].clientX)/2
+			y = (e.touches[0].clientY + e.touches[1].clientY)/2
+		}
+	}
+
+	window.ontouchmove = function(e)
+	{
+		//e.preventDefault();
+	}
+
+	document.body.ontouchmove = function(e)
+	{
+		//e.preventDefault();
+	}
+
+	playingArea.ontouchend = function(e)
+	{
+		draggingBoard = false;
+	}
+
+	playingArea.ontouchmove = function(e)
+	{
+		e.preventDefault();
+
+		if(e.touches.length == 1 && draggingBoard)
+		{
+			updateBoardPos(e.touches[0].clientX, e.touches[0].clientY);
+		}
+		if(e.touches.length == 2 && draggingBoard)
+		{
+			updateBoardPos((e.touches[0].clientX + e.touches[1].clientX)/2, (e.touches[0].clientY + e.touches[1].clientY)/2);
+
+			var dx = e.touches[0].clientX - e.touches[1].clientX;
+			var dy = e.touches[0].clientY - e.touches[1].clientY;
+			var newDist = Math.sqrt(dx*dx + dy*dy);
+
+			zoomScale *= newDist/dist;
+			zoomScale = Math.max(zoomScale, .2);
+			zoomScale = Math.min(zoomScale, 2);
+			refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
+
+
+			dist = newDist;
+		}
+	}
 
 
 	playingArea.onmousedown = function(e)
@@ -46,24 +114,29 @@ export function initBoard()
 		draggingBoard = false;
 	}
 
+	function updateBoardPos(newX, newY)
+	{
+		var difX = x - newX;
+		var difY = y - newY;
+		x = newX
+		y = newY
+
+		var refPoint = document.getElementById('refPoint');
+		if(!refPoint)
+			return;
+
+		var curX = Number(refPoint.style.left.substring(0, refPoint.style.left.length-2));
+		var curY = Number(refPoint.style.top.substring(0, refPoint.style.top.length-2));
+
+		refPoint.style.left = curX - difX + "px";
+		refPoint.style.top = curY - difY + "px";
+	}
+
 	playingArea.onmousemove = function(e)
 	{
 		if(draggingBoard)
 		{
-			var difX = x - e.clientX;
-			var difY = y - e.clientY;
-			x = e.clientX;
-			y = e.clientY;
-
-			var refPoint = document.getElementById('refPoint');
-			if(!refPoint)
-				return;
-
-			var curX = Number(refPoint.style.left.substring(0, refPoint.style.left.length-2));
-			var curY = Number(refPoint.style.top.substring(0, refPoint.style.top.length-2));
-
-			refPoint.style.left = curX - difX + "px"
-			refPoint.style.top = curY - difY + "px"
+			updateBoardPos(e.clientX, e.clientY)
 		}
 	}
 
@@ -71,8 +144,6 @@ export function initBoard()
 
 	window.moveToStartCard = function()
 	{
-		console.log("moving to start card");
-
 		var refPoint = document.getElementById('refPoint')
 		if(!refPoint)
 			return;
@@ -200,6 +271,10 @@ function addCardToBoard(key, card)
 			imgElement.style.top = y * gridWidth + 22/2 + "vh";
 			imgElement.style.left = x * gridWidth + "vh";
 			break;
+		case "offset":
+			imgElement.style.top = y * gridWidth + 2 + "vh";
+			imgElement.style.left = x * gridWidth + 2 + "vh";
+			imgElement.style.zIndex = 3;
 	}
 	
 	refPoint.appendChild(imgElement);
@@ -210,37 +285,6 @@ function addCardToBoard(key, card)
 	}
 	model.board[key].element = imgElement;
 }
-
-
-export function offsetPonyCard(key, card)
-{
-	var pieces = key.split(",");
-	var x = Number(pieces[1]);
-	var y = Number(pieces[2]);
-
-	
-	var location = `offset,${x},${y}`;
-	var imgElement = makeCardElement(card, location, true);
-
-	model.offsets[card + "," + x + "," + y] = imgElement;
-
-	cardLocations[card] = "offset," + x + "," + y;
-
-
-	var refPoint = document.getElementById('refPoint');
-
-	
-	const gridWidth = 22;
-
-	imgElement.style.top = y * gridWidth + 2 + "vh";
-	imgElement.style.left = x * gridWidth + 2 + "vh";
-
-	imgElement.style.zIndex = 3;
-
-	refPoint.appendChild(imgElement);
-}
-
-
 
 
 
@@ -323,6 +367,16 @@ export function updateBoard()
 		cardLocations[card] = key;
 
 
+		if(isOffsetLoc(key))
+		{
+			if(!model.board[key].element)
+			{
+				addCardToBoard(key, card)
+			}
+
+			continue;
+		}
+
 		// remove detached blanks
 		if(isBlank(card))
 		{
@@ -367,15 +421,6 @@ export function updateBoard()
 			{
 				addCardToBoard(key, blankType);
 			}
-		}
-	}
-
-	for (var key in model.offsets)
-	{
-		if(model.offsets[key] === "")
-		{
-			var [card, _, _] = key.split(",");
-			offsetPonyCard(key, card) // key technically should be p,x,y, but is okay here
 		}
 	}
 }

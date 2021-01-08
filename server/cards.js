@@ -1446,7 +1446,9 @@ var cards = {
 				race: "pegasus",
 				gender: "male",
 				action: "copy",
-				keywords: []
+				keywords: [
+					"Uni"
+				]
 			},
 			"PU.Pony.AntiConfectioneryRebelPumpkinCake": {
 				name: "Pumpkin Cake",
