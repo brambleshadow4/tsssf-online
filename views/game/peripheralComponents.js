@@ -870,7 +870,7 @@ function quickStartPage()
 
 			<div>
 				<p>Shuffle the draw + discard piles by tap and holding the draw pile until it shuffles</p>
-				<img class='helpGif' src="/img/help/shuffle_.gif" />
+				<img class='helpGif' src="/img/help/shuffle_m.gif" />
 			</div>
 		</div>
 		<div></div>
