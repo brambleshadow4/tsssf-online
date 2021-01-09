@@ -3,8 +3,8 @@ import sys
 import io
 import json
 
-if len(sys.argv) < 2:
-	print("Usage: convertPonFile filename")
+if len(sys.argv) < 3:
+	print("Usage: convertPonFile filename prefix")
 	exit()
 
 
@@ -12,6 +12,8 @@ inputFile = sys.argv[1]
 
 f = io.open(inputFile, "r", encoding="utf8")
 txt = f.read();
+
+prefix = sys.argv[2]
 
 txt = txt.split("\n");
 txt.pop(0) # TSSSF is at the beginning of the file
@@ -39,6 +41,8 @@ for line in txt:
 		[cardType, imageFile, symbolList, cardName, keywords, instructionText, quoteText, packSymbol] = line.split("`")
 	elif len(items) == 9:
 		[cardType, imageFile, symbolList, cardName, keywords, instructionText, quoteText, packSymbol, _] = line.split("`")
+	elif len(items) == 10:
+		[cardType, imageFile, symbolList, cardName, keywords, instructionText, quoteText, packSymbol, _, _] = line.split("`")
 	
 	else:
 		print("Problem with line: "  + str(len(items)) + " items")
@@ -55,7 +59,7 @@ for line in txt:
 	cardName = cardName.replace("\\n", " ")
 	card["name"] = cardName
 
-	namespaceName = "PU." +  cardType + "." + re.sub("[^\\w]","",cardName)
+	namespaceName = prefix + "." +  cardType + "." + re.sub("[^\\w]","",cardName)
 
 	card["url"] = imageFile
 

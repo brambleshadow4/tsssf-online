@@ -29,6 +29,9 @@ function getCardProp(model, cardFull, prop)
 	if(prop == "*")
 		return cardOverrides;
 
+	if(prop == "card")
+		return card;
+
 
 	if(prop == "keywords")
 	{
@@ -105,7 +108,10 @@ function doesCardMatchSelector(model, card, selector)
 		if(prop == "gender" && cardValue == "malefemale")
 			return trueValue;
 
-		return (getCardProp(model, card, prop) != value ? trueValue : falseValue);
+		if(prop == "race" && cardValue == "earth/unicorn")
+			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
+
+		return (cardValue != value ? trueValue : falseValue);
 	}
 
 	if(selector.indexOf("=") > -1)
@@ -122,8 +128,13 @@ function doesCardMatchSelector(model, card, selector)
 
 		var cardValue = getCardProp(model, card, prop);
 
+		//if(prop == "race")
+
 		if(prop == "gender" && cardValue == "malefemale")
 			return trueValue;
+		
+		if(prop == "race" && cardValue == "earth/unicorn")
+			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
 		return (getCardProp(model, card, prop) == value ? trueValue : falseValue);
 	}
@@ -537,15 +548,21 @@ function ShippedWith2Versions(model, ponyCards)
 	return false;
 }
 
-
-function ShippedWithMrMrsCake(model, ponyCards)
+function AllOf(...selectors)
 {
+	return function(model, ponyCards)
+	{
+		for(var selector of selectors)
+		{
+			if(ponyCards.filter(x => doesCardMatchSelector(model, x, selector)).length == 0)
+				return 0;
+		}
 
-	var mrs = ponyCards.filter( x => doesCardMatchSelector(model, x, "name=Mrs. Cake")).length;
-	var mr = ponyCards.filter( x => doesCardMatchSelector(model, x, "name=Mr. Cake")).length;
-
-	return (mr > 0 && mrs > 0 ? 1 : 0);
+		return 1;
+	}
+	
 }
+
 
 var goalCriteria = {
 
@@ -608,7 +625,7 @@ var goalCriteria = {
 	"EC.Goal.ABlessingOfAlicorns": ExistsPony("race=alicorn", 5),
 	"EC.Goal.TheresNoThrillLikeIronWill": ExistsShip("name=Iron Will","Villain in keywords"),
 	"EC.Goal.OfPoniesAndPerilTheMagnumOpus": ExistsChain("altTimeline=true",3),
-	"EC.Goal.Swinging": ExistsPonyShippedTo("*", ShippedWithMrMrsCake),
+	"EC.Goal.Swinging": ExistsPonyShippedTo("*", AllOf("name=Mr. Cake", "name=Mrs. Cake")),
 	"EC.Goal.SpaDay": ExistsShip("Mane 6 in keywords", "name=Aloe & Lotus"),
 	"EC.Goal.NoPoniesCanPonyTwoPoniesToPony": ExistsPonyShippedTo("*",Select("*",6)),
 	"EC.Goal.EvilSocietyOfEvil": ExistsChain("Villain in keywords", 6),
@@ -626,6 +643,17 @@ var goalCriteria = {
 	"PU.Goal.RevengeOfTheNerds": ExistsShip("Uni in keywords || PCC in keywords", "Mane 6 in keywords"),
 	"PU.Goal.SchoolwideFestivities": ExistsChain("Uni in keywords || PCC in keywords",6),
 	"PU.Goal.WhereforeArtThouPoneo": ExistsShip("Uni in keywords","PCC in keywords"),
+
+
+	"NoHoldsBarred.Goal.ThisShipIsDelicious": ExistsPonyShippedTo("name=Pinkie Pie", AllOf("name=Luna","name=Twilight Sparkle","name=Applejack")),
+	"NoHoldsBarred.Goal.FromForeignLands": ExistsShip("Zebra in keywords || Batpony in keywords || Changeling in keywords|| Dragon in keywords",
+		 "Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords"),
+	"NoHoldsBarred.Goal.FateBreakers": ExistsShip("name=Logic Gate", "name=Flickering Oracle"),
+	"NoHoldsBarred.Goal.DarkHorseDanceCard": PlayShips("OC in keywords", "OC in keywords", 2),
+	"NoHoldsBarred.Goal.OMiGoshBugHug": ExistsShip("name=Starlit Dreams","card=Core.Start.FanficAuthorTwilight"),
+	"NoHoldsBarred.Goal.AfterThisWellNeedRehab": ExistsShip("#horsefamous in keywords","#horsefamous in keywords"),
+	"NoHoldsBarred.Goal.WhyIsEveryThingGlowing": ExistsPonyShippedTo("*", Select("OC in keywords", 4))
+
 }
 	
 export default goalCriteria;

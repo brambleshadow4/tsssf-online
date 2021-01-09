@@ -138,6 +138,7 @@ var cards = {
 				url:"Pony_Changeling.png",
 				name: "Changeling",
 				race: "earth",
+				action: "standardChangeling",
 				keywords: [
 					"Changeling",
 					"Villain"
@@ -147,6 +148,7 @@ var cards = {
 				url:"Pony_Changeling_001.png",
 				name: "Changeling",
 				race: "unicorn",
+				action: "standardChangeling",
 				keywords: [
 					"Changeling",
 					"Villain"
@@ -156,6 +158,7 @@ var cards = {
 				url:"Pony_Changeling_002.png",
 				name: "Changeling",
 				race: "pegasus",
+				action: "standardChangeling",
 				keywords: [
 					"Changeling",
 					"Villain"
@@ -494,6 +497,7 @@ var cards = {
 				name: "Chrysalis",
 				race: "alicorn",
 				gender: "female",
+				action: "standardChangeling",
 				keywords: [
 					"Changeling",
 					"Queen",
@@ -1609,6 +1613,503 @@ var cards = {
 			"PU.Goal.WhereforeArtThouPoneo":{
 				url:"Goal_Wherefore Art ThouPoneo.png"
 			},
+
+	// No Holds Barred
+
+		// Pony
+
+			"NoHoldsBarred.Pony.CobaltdeCoeur": {
+				name: "Cobalt de Coeur",
+				url: "Pony - Cobalt de Coeur.png",
+				race: "unicorn",
+				gender: "male",
+				action: "replace",
+				keywords: [
+					"Nurse",
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.Steel": {
+				name: "Steel",
+				url: "Pony - Steel.png",
+				race: "alicorn",
+				gender: "male",
+				keywords: [
+					"OC"
+				]
+			},
+
+			"NoHoldsBarred.Pony.Raven": {
+				name: "Raven",
+				url: "Pony - Raven.png",
+				race: "unicorn",
+				gender: "female",
+				keywords: [
+					"OC"
+				]
+			},
+
+			"NoHoldsBarred.Pony.ShaiNiShipficFanfilly": {
+				name: "Shai Ni",
+				url: "Pony - Shai Ni Shipfic Fanfilly.png",
+				race: "unicorn",
+				gender: "female",
+				keywords: [
+					"OC"
+				]
+			},
+
+			"NoHoldsBarred.Pony.ChrysanthemumRose": {
+				name: "Chrysanthemum Rose",
+				url: "Pony - Chrysanthemum Rose.png",
+				race: "pegasus",
+				gender: "female",
+				keywords: [
+					"OC"
+				]
+			},
+
+			"NoHoldsBarred.Pony.RainbowPowerMaudPie": {
+				name: "Maud Pie",
+				url: "Pony - Rainbow Powered Maud Pie.png",
+				race: "earth",
+				gender: "female",
+				keywords: [
+					"Rainbow Power"
+				]
+			},
+
+			"NoHoldsBarred.Pony.TimmoPony": {
+				name: "Timmo Pony",
+				url: "Pony - Timmo Pony.png",
+				gender: "male",
+				keywords: [
+					"Not a Pony",
+					"OC"
+				]
+			},
+
+			"NoHoldsBarred.Pony.LogicGate": {
+				name: "Logic Gate",
+				url: "Pony - Logic Gate.png",
+				race: "unicorn",
+				gender: "male",
+				keywords: [
+					"OC"
+				]
+			},
+
+			"NoHoldsBarred.Pony.FlickeringOracle": {
+				name: "Flickering Oracle",
+				url: "Pony - Flickering Oracle.png",
+				race: "unicorn",
+				gender: "female",
+				keywords: [
+					"Changeling",
+					"OC"
+				]
+			},
+
+			"NoHoldsBarred.Pony.Adjutant": {
+				name: "Logic Gate",
+				url: "Pony - Adjutant.png",
+				race: "alicorn",
+				gender: "male",
+				altTimeline: true,
+				keywords: [
+					"OC"
+				]
+			},
+
+			"NoHoldsBarred.Pony.Aeterna": {
+				name: "Flickering Oracle",
+				url: "Pony - Aeterna.png",
+				race: "alicorn",
+				gender: "female",
+				altTimeline: true,
+				keywords: [
+					"Changeling",
+					"OC"
+				]
+			},
+
+			"NoHoldsBarred.Pony.Sleight": {
+				name: "Sleight",
+				url: "Pony - Sleight.png",
+				race: "pegasus",
+				//changeling: true,
+				gender: "female",
+				keywords: [
+					"Changeling",
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.Makuru": {
+				name: "Makuru",
+				url: "Pony - Makuru.png",
+				race: "earth",
+				gender: "male",
+				keywords: [
+					"OC",
+					"Zebra"
+				]
+			},
+			"NoHoldsBarred.Pony.Ahcyknnt": {
+				name: "Ahcyknnt",
+				url: "Pony - Ahcyknnt.png",
+				race: "alicorn",
+				//changeling: true,
+				gender: "female",
+				keywords: [
+					"Cltrxrlirz",
+					"ST"
+				]
+			},
+			"NoHoldsBarred.Pony.Clipcord": {
+				name: "Clipcord",
+				url: "Pony - Clipcord.png",
+				race: "unicorn",
+				gender: "female",
+				action: "copy",
+				keywords: [
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.SgtBrony": {
+				name: "Sgt. Brony",
+				url: "Pony - Sgt Brony.png",
+				race: "alicorn",
+				gender: "male",
+				keywords: [
+					"Hero",
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.LadykillerGyroTech": {
+				name: "Ladykiller Gyro Tech",
+				url: "Pony - Ladykiller Gyro Tech.png",
+				race: "unicorn",
+				gender: "male",
+				keywords: [
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.ImpyThree": {
+				name: "Impy Three",
+				url: "Pony - Impy Three.png",
+				race: "pegasus",
+				gender: "female",
+				keywords: [
+					"Batpony",
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.LotusHeatPetalSpark": {
+				name: "Lotus Heat & Petal Spark",
+				url: "Pony - Lotus Heat and Petal Spark.png",
+				race: "pegasus",
+				doublePony: true,
+				gender: "female",
+				keywords: [
+					"OC",
+					"Twins"
+				]
+			},
+			"NoHoldsBarred.Pony.SkyeCandi": {
+				name: "SkyeCandi",
+				url: "Pony - SkyeCandi.png",
+				race: "earth",
+				gender: "malefemale",
+				keywords: [
+					"OC",
+					"#horsefamous"
+				]
+			},
+			"NoHoldsBarred.Pony.BlownWing": {
+				name: "Blown Wing",
+				url: "Pony - Blown Wing.png",
+				race: "pegasus",
+				gender: "female",
+				keywords: [
+					"Object",
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.Sassaflash": {
+				name: "Sassaflash",
+				url: "Pony - Sassaflash.png",
+				race: "pegasus",
+				gender: "female",
+				action: "replace",
+				keywords: []
+			},
+			"NoHoldsBarred.Pony.PrinceArtemis": {
+				name: "Luna",
+				url: "Pony - Prince Artemis.png",
+				race: "alicorn",
+				gender: "male",
+				keywords: [
+					"Elder",
+					"Prince"
+				]
+			},
+			"NoHoldsBarred.Pony.FirefighterCelestia": {
+				name: "Celestia",
+				url: "Pony - Firefighter Celestia.png",
+				race: "alicorn",
+				gender: "female",
+				action: "replace",
+				keywords: [
+					"Elder",
+					"Princess"
+				]
+			},
+			"NoHoldsBarred.Pony.SoftShipping": {
+				name: "Soft Shipping",
+				url: "Pony - Soft Shipping.png",
+				race: "pegasus",
+				gender: "male",
+				keywords: [
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.SpacePrincePercy": {
+				name: "Space Prince Percy",
+				url: "Pony - Space Prince Percy.png",
+				race: "earth",
+				gender: "male",
+				keywords: [
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.RubyBlossom": {
+				// unimplemented
+				name: "Ruby Blossom",
+				url: "Pony - Ruby Blossom.png",
+				race: "earth/unicorn",
+				gender: "female",
+				action: "replace",
+				keywords: [
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.Abarenbou": {
+				// unimplemented
+				name: "Abarenbou",
+				url: "Pony - Abarenbou.png",
+				race: "unicorn",
+				gender: "male",
+				keywords: [
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.WaifuThiefFlashSentry": {
+				// unimplemented
+				name: "Waifu Thief Flash Sentry",
+				url: "Pony - Waifu Stealer Flash Sentry.png",
+				race: "pegasus",
+				gender: "male",
+				keywords: [
+					"Flash Sentry",
+					"Villain"
+				]
+			},
+			"NoHoldsBarred.Pony.VigilantWatch": {
+				name: "Vigilant Watch",
+				url: "Pony - Vigilant Watch.png",
+				race: "pegasus",
+				gender: "male",
+				keywords: [
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.LunarOverlordTwilight": {
+				name: "Twilight Sparkle",
+				url: "Pony - Lunar Overlord Twilight Sparkle.png",
+				race: "alicorn",
+				gender: "female",
+				keywords: [
+					"Villain",
+					"Mane 6"
+				]
+			},
+			"NoHoldsBarred.Pony.InkyBrushstroke": {
+				name: "Inky Brushstroke",
+				url: "Pony - Inky Brushstroke.png",
+				race: "pegasus",
+				gender: "female",
+				keywords: [
+					"Batpony",
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.PixelPrism": {
+				// unimplemented
+				name: "Pixel Prism",
+				url: "Pony - Pixel Prism.png",
+				race: "unicorn",
+				gender: "female",
+				keywords: [
+					"Dragon",
+					"OC",
+					"#horsefamous"
+				]
+			},
+			"NoHoldsBarred.Pony.CaptainMwai": {
+				name: "Captain Mwai",
+				url: "Pony - Captain Mwai.png",
+				race: "earth",
+				gender: "male",
+				keywords: [
+					"Zebra",
+					"OC",
+					"#horsefamous"
+				]
+			},
+			"NoHoldsBarred.Pony.TrickCandle": {
+				// unimplemented
+				name: "Trick Candle",
+				url: "Pony - Trick Candle.png",
+				race: "earth",
+				gender: "male",
+				keywords: [
+					"OC",
+					"#horsefamous"
+				]
+			},
+			"NoHoldsBarred.Pony.Aria": {
+				name: "Aria",
+				url: "Pony - Aria.png",
+				gender: "female",
+				keywords: [
+					"Dragon",
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.ValveGear": {
+				name: "Valve Gear",
+				url: "Pony - Valve Gear.png",
+				race: "earth",
+				gender: "female",
+				keywords: [
+					"OC",
+					"Object"
+				]
+			},
+			"NoHoldsBarred.Pony.Plushling": {
+				// unimplemented
+				name: "Plushling",
+				url: "Pony - Plushling.png",
+				gender: "malefemale",
+				keywords: [
+					"Changeling",
+					"Object",
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.Zero": {
+				name: "Zero",
+				url: "Pony - Zero.png",
+				race: "pegasus",
+				gender: "male",
+				action: "newGoal",
+				keywords: [
+					"Batpony",
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.SwiftSketch": {
+				name: "Swift Sketch",
+				url: "Pony - Swift Sketch.png",
+				race: "unicorn",
+				gender: "female",
+				keywords: [
+					"OC",
+					"#horsefamous"
+				]
+			},
+			"NoHoldsBarred.Pony.KingVespid": {
+				// unimplemented
+				name: "King Vespid",
+				url: "Pony - King Vespid.png",
+				gender: "male",
+				keywords: [
+					"Changeling",
+					"OC"
+				]
+			},
+			"NoHoldsBarred.Pony.StarlitDreams": {
+				name: "Starlit Dreams",
+				url: "Pony - Starlit Dreams.png",
+				race: "earth",
+				gender: "female",
+				keywords: [
+					"Changeling",
+					"OC"
+				]
+			},
+
+
+		// Ship
+			"NoHoldsBarred.Ship.ASnugglebytheFire": {
+				name: "A Snuggle by the Fire",
+				url: "Ship - Snuggle by the Fire.png"
+			},
+			"NoHoldsBarred.Ship.LoveontheFriendshipExpress": {
+				name: "Love on the Friendship Express",
+				url: "Ship - Love on the Friendship Express.png"
+			},
+			"NoHoldsBarred.Ship.MurderTurnsMeOn": {
+				name: "Murder Turns Me On",
+				url: "Ship - Murder Turns Me On.png"
+			},
+			"NoHoldsBarred.Ship.CoffeeIntensifies": {
+				name: "[Coffee Intensifies]",
+				url: "Ship - Coffee Intensifies.png"
+			},
+			"NoHoldsBarred.Ship.Infestivities": {
+				// unimplemented
+				name: "Infestivities",
+				url: "Ship - Infestivities.png"
+			},
+
+		// Goal
+
+			"NoHoldsBarred.Goal.ThisShipIsDelicious": {
+				name: "This Ship is DELICIOUS!",
+				url: "Goal - This Ship is DELICIOUS.png",
+				points: "4"
+			},
+			"NoHoldsBarred.Goal.FromForeignLands": {
+				name: "From Foreign Lands",
+				url: "Goal - From Foreign Lands.png",
+				points: "2"
+			},
+			"NoHoldsBarred.Goal.FateBreakers": {
+				name: "Fate Breakers",
+				url: "Goal - Fate Breakers.png",
+				points: "2"
+			},
+			"NoHoldsBarred.Goal.DarkHorseDanceCard": {
+				name: "Dark Horse Dance Card",
+				url: "Goal - Dark Horse Dance Card.png",
+				points: "3"
+			},
+			"NoHoldsBarred.Goal.OMiGoshBugHug": {
+				name: "Omigosh #bughug!",
+				url: "Goal - omigosh bughug.png",
+				points: "2"
+			},
+			"NoHoldsBarred.Goal.AfterThisWellNeedRehab": {
+				name: "After This, We'll Need Rehab",
+				url: "Goal - After This We're Gonna Need Rehab.png",
+				points: "2"
+			},
+			"NoHoldsBarred.Goal.WhyIsEveryThingGlowing": {
+				name: "WHY IS EVERYTHING GLOWING??",
+				url: "Goal - WHY IS EVERYTHING GLOWING.png",
+				points: "1"
+			}
 }
 
 export default cards;

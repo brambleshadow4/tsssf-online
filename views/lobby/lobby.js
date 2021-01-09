@@ -52,7 +52,8 @@ export function loadView(isOpen)
 		var deckInfo = [
 			["Core", "Core.*", cardBoxes[0]],
 			["Extra Credit", "EC.*", cardBoxes[1]],
-			["Ponyville University","PU.*", cardBoxes[2]]
+			["Ponyville University","PU.*", cardBoxes[2]],
+			["No Holds Barred", "NoHoldsBarred.*", undefined]
 		];
 
 		var cardSelectors = document.getElementById('cardSelectors');

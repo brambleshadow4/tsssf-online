@@ -16,3 +16,4 @@ def process(files):
 process(glob.glob('./Core/*/*.png'))
 process(glob.glob('./EC/*/*.png'))
 process(glob.glob('./PU/*/*.png'))
+process(glob.glob('./NoHoldsBarred/*/*.png'))
