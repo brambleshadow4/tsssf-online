@@ -812,7 +812,6 @@ export function TsssfGameServer()
 			model.cardLocations[card] = "goal," + goalNo;
 		}
 
-
 		if(endLocation == "winnings")
 		{
 			player.winnings.push(card)

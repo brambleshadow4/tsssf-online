@@ -53,7 +53,18 @@ export function loadView(isOpen)
 			["Core", "Core.*", cardBoxes[0]],
 			["Extra Credit", "EC.*", cardBoxes[1]],
 			["Ponyville University","PU.*", cardBoxes[2]],
-			["No Holds Barred", "NoHoldsBarred.*", undefined]
+			["No Holds Barred", "NoHoldsBarred.*", cardBoxes[3]],
+			["2014 Con Exclusives", "HorriblePeople.2014ConExclusives.*"],
+			["2015 Con Exclusives", "HorriblePeople.2015ConExclusives.*"],
+			["2015 Workshop Panels", "HorriblePeople.2015Workshop.*"],
+			["Adventure Pack", "HorriblePeople.AdventurePack.*"],
+			["Dungeon Delvers", "HorriblePeople.DungeonDelvers.*"],
+			["Fluffle Puff", "HorriblePeople.FlufflePuff.*"],
+			["Gracious Givers", "HorriblePeople.GraciousGivers.*"],
+			["Hearthswarming", "HorriblePeople.Hearthswarming.*"],
+			["The Mean 6", "HorriblePeople.Mean6.*"],
+			["Weaboo Paradaisu", "HorriblePeople.WeeabooParadaisu.*"],
+			["NewNewCore / Misc", "HorriblePeople.Misc.*"]
 		];
 
 		var cardSelectors = document.getElementById('cardSelectors');
@@ -75,9 +86,6 @@ export function loadView(isOpen)
 			box.onclick = function()
 			{
 				console.log("box clicked " +this.className)
-				console.log(this)
-
-
 
 				if(this.classList.contains('selected'))
 				{
@@ -90,9 +98,6 @@ export function loadView(isOpen)
 					deckElementList[i].getElementsByTagName('button')[2].click();
 					//console.log(deckElements[i].getElementsByTagName('button')[2]);
 				}
-
-				
-
 			}
 		}
 	}
@@ -101,6 +106,13 @@ export function loadView(isOpen)
 		changePage(undefined, "pageClosed");
 	}
 }
+
+function getPackString(card)
+{
+	var dotPos = card.substring(0, card.lastIndexOf(".")).lastIndexOf(".")
+	return card.substring(0, dotPos+1) + "*";
+}
+
 
 function onMessage()
 {
@@ -153,7 +165,7 @@ function onMessage()
 					{
 						el.classList.add('selected');
 
-						var deck = card.substring(0, card.indexOf('.')+1) + "*";
+						var deck = getPackString(card);
 
 						deckElements[deck].getElementsByTagName('button')[1].click();
 					}

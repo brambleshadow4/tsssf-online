@@ -52,7 +52,7 @@ var HTML = `
 
 			<div id='gameOptionsInfo'>
 				<h2>Rule Enforcement</h2>
-				<div><input type='radio' name='gamerules' disabled><label for=''>Full rules - Coming soon!</label></div>
+				<!-- div><input type='radio' name='gamerules' disabled><label for=''>Full rules - Coming soon!</label></div -->
 				<div><input id='turnsOnly' type='radio' name='gamerules' checked><label for='turnsOnly'>Turns - Only one person can play at a time</label></div>
 				<div><input id='sandbox' type='radio' name='gamerules' ><label for='sandbox'>Sandbox - Everyone can play simultaneously</label></div>
 
@@ -73,6 +73,10 @@ var HTML = `
 				<div class='cardbox' id='PU-deck-select' deck="PU.*">
 					<div class='shield'></div>
 					<img src="/img/pu-box.png" />
+				</div>
+				<div class='cardbox' deck="NoHoldsBarred.*">
+					<div class='shield'></div>
+					<img src="/img/noholds-box.png" />
 				</div>
 				<h2>Individual cards</h2>
 				<div id='cardSelectors'>

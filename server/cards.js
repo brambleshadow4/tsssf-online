@@ -1001,7 +1001,6 @@ var cards = {
 				points:"2"
 			},
 
-
 	// Extra Credit
 
 		// Ship
@@ -1257,7 +1256,6 @@ var cards = {
 				url: "Goal_Recolor.png",
 				points: "2"
 			},
-
 
 	// Ponyville University
 
@@ -1734,10 +1732,10 @@ var cards = {
 			},
 
 			"NoHoldsBarred.Pony.Sleight": {
+				// unimplemented
 				name: "Sleight",
 				url: "Pony - Sleight.png",
 				race: "pegasus",
-				//changeling: true,
 				gender: "female",
 				keywords: [
 					"Changeling",
@@ -1758,11 +1756,10 @@ var cards = {
 				name: "Ahcyknnt",
 				url: "Pony - Ahcyknnt.png",
 				race: "alicorn",
-				//changeling: true,
 				gender: "female",
 				keywords: [
-					"Cltrxrlirz",
-					"ST"
+					"Changeling",
+					"OC"
 				]
 			},
 			"NoHoldsBarred.Pony.Clipcord": {
@@ -1808,7 +1805,7 @@ var cards = {
 				name: "Lotus Heat & Petal Spark",
 				url: "Pony - Lotus Heat and Petal Spark.png",
 				race: "pegasus",
-				doublePony: true,
+				doublePony: "true",
 				gender: "female",
 				keywords: [
 					"OC",
@@ -1883,7 +1880,6 @@ var cards = {
 				]
 			},
 			"NoHoldsBarred.Pony.RubyBlossom": {
-				// unimplemented
 				name: "Ruby Blossom",
 				url: "Pony - Ruby Blossom.png",
 				race: "earth/unicorn",
@@ -2109,7 +2105,716 @@ var cards = {
 				name: "WHY IS EVERYTHING GLOWING??",
 				url: "Goal - WHY IS EVERYTHING GLOWING.png",
 				points: "1"
-			}
+			},
+
+	// Horrible People Mini Expansiosn
+
+		// 2014 Con Exclusives
+
+			"HorriblePeople.2014ConExclusives.Pony.MaudPieReallyLikesRocks": {
+				name: "Maud Pie",
+				url: "Pony_Maud Pie Really Likes Rocks.png",
+				race: "earth",
+				gender: "female",
+				keywords: []
+			},
+			"HorriblePeople.2014ConExclusives.Pony.QueenBeeSunsetShimmer": {
+				name: "Sunset Shimmer",
+				url: "Pony_Queen Bee Sunset Shimmer.png",
+				race: "unicorn",
+				gender: "female",
+				keywords: [
+					"Villain"
+				]
+			},
+			"HorriblePeople.2014ConExclusives.Pony.BlazinHotWildFire": {
+				name: "Wild Fire",
+				url: "Pony_Blazin Hot Wild Fire.png",
+				race: "pegasus",
+				gender: "female",
+				keywords: [
+					"OC"
+				]
+			},
+			"HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee": {
+				//unimplemented
+				name: "Cheerilee",
+				url: "Pony_Test Subject Cheerilee.png",
+				race: "earth",
+				gender: "female",
+				keywords:[]
+			},
+			"HorriblePeople.2014ConExclusives.Pony.LunaQueenOfTheBats": {
+				name: "Luna",
+				url: "Pony_Luna Queen of the Bats.png",
+				race: "alicorn",
+				gender: "female",
+				keywords: [
+					"Batpony",
+					"Elder",
+					"Princess",
+					"Villain"
+				]
+			},
+			"HorriblePeople.2014ConExclusives.Pony.CiderMatronAppleBloom": {
+				//unimplemented
+				name: "Apple Bloom",
+				url: "Pony_Cider Matron Apple Bloom.png",
+				race: "earth",
+				gender: "female",
+				keywords: [
+					"Apple",
+					"CMC"
+				]
+			},
+
+		// 2015 Con Exclusives
+			"HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord": {
+				name: "Discord",
+				url: "START_Fanfic Author Discord.png",
+				race: "alicorn",
+				gender: "male"
+			},
+
+			"HorriblePeople.2015ConExclusives.Pony.DreamboatBrad": {
+				name: "Flash Sentry",
+				url: "Pony_Dreamboat Brad.png",
+				race: "pegasus",
+				gender: "male",
+				keywords: []
+			},
+			"HorriblePeople.2015ConExclusives.Pony.AnEntireSwarmOfBreezies": {
+				// unimplemented
+				name: "An Entire Swarm of Breezies",
+				url: "Pony_An Entire Swarm of Breezies.png",
+				race: "pegasus",
+				gender: "malefemale",
+				keywords: [
+					"Breezy"
+				]
+			},
+			
+			"HorriblePeople.2015ConExclusives.Pony.FashionIconStevenMagnet": {
+				name: "Steven Magnet",
+				url: "Pony_Fashion Icon Steven Magnet.png",
+				race: "earth",
+				gender: "male",
+				action: "copy",
+				keywords: [
+					"Dragon"
+				]
+			},
+
+			"HorriblePeople.2015ConExclusives.Pony.MistressOfEqualityStarlightGlimmer": {
+				name: "Starlight Glimmer",
+				url: "Pony_Mistress of Equality Starlight Glimmer.png",
+				race: "unicorn",
+				gender: "female",
+				keywords: [
+					"Villain"
+				]
+			},
+			"HorriblePeople.2015ConExclusives.Pony.TheTantabus": {
+				name: "The Tantabus",
+				url: "Pony_The Tantabus.png",
+				keywords: [
+					"Villain"
+				]
+			},
+
+			"HorriblePeople.2015ConExclusives.Ship.ObjectofAdoration": {
+				//unimplemented
+				name: "Object of Adoration",
+				url: "Ship_Object of Adoration.png"
+			},
+
+		// 2015 workshop
+
+			"HorriblePeople.2015Workshop.Pony.Batmare": {
+				name: "Applejack",
+				url: "Pony_Batmare.png",
+				race: "pegasus",
+				gender: "female",
+				keywords: [
+					"Batpony",
+					"Hero"
+				]
+			},
+			"HorriblePeople.2015Workshop.Pony.SonataDusk": {
+				name: "Sonata Dusk",
+				url: "Pony_Sonata Dusk.png",
+				race: "earth",
+				gender: "female",
+				keywords: [
+					"Siren",
+					"Villain"
+				]
+			},
+			"HorriblePeople.2015Workshop.Pony.MLGProButtonMash": {
+				//unimplemented
+				name: "Button Mash",
+				url: "Pony_MLG Pro Button Mash.png",
+				race: "earth",
+				gender: "male",
+				keywords: [
+					"Dropout",
+					"Gamer"
+				]
+			},
+			"HorriblePeople.2015Workshop.Pony.ShiaLeBeouffalo": {
+				//unimplemented
+				name: "Shia LeBeouffalo",
+				url: "Pony_Shia LeBeouffalo.png",
+				race: "earth",
+				gender: "male",
+				keywords: [
+					"Actual Cannibal",
+					"Buffalo",
+					"Meme"
+				]
+			},
+			"HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh": {
+				//unimplemented
+				name: "Big Macintosh",
+				url: "Pony_Alicorn Big Macintosh.png",
+				race: "alicorn",
+				gender: "male",
+				keywords: [
+					"Apple",
+					"Princess"
+				]
+			},
+
+		// Adventure Pack
+			"HorriblePeople.AdventurePack.Pony.AdventureExpertDaringDo": {
+				name: "Daring Do",
+				url: "Pony_Adventure Expert Daring Do.png",
+				race: "pegasus",
+				gender: "female",
+				keywords: []
+			},
+			"HorriblePeople.AdventurePack.Pony.WritingMentorAKYearling": {
+				name: "Daring Do",
+				url: "Pony_Writing Mentor A K Yearling.png",
+				race: "pegasus",
+				gender: "female",
+				keywords: []
+			},
+
+			"HorriblePeople.AdventurePack.Goal.DaringDont": {
+				name: "Daring Don't",
+				url: "Goal_Daring Don't.png",
+				points: "2",
+				noLogic: true,
+			},
+
+		// Dungeon Delvers
+
+			"HorriblePeople.DungeonDelvers.Pony.ArchmageTwilightSparkle": {
+				name: "Twilight Sparkle",
+				url: "Pony_Archmage Twilight Sparkle.png",
+				race: "alicorn",
+				gender: "female",
+				action: "search",
+				keywords: [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"HorriblePeople.DungeonDelvers.Pony.MagicalMaestroPinkiePie": {
+				name: "Pinkie Pie",
+				url: "Pony_Magical Maestro Pinkie Pie.png",
+				race: "earth",
+				gender: "female",
+				action: "draw",
+				keywords: [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"HorriblePeople.DungeonDelvers.Pony.RagingRogueRainbowDash": {
+				name: "Rainbow Dash",
+				url: "Pony_Raging Rogue Rainbow Dash.png",
+				race: "pegasus",
+				gender: "female",
+				action: "newGoal",
+				keywords: [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"HorriblePeople.DungeonDelvers.Pony.EnchantressRarity": {
+				name: "Rarity",
+				url: "Pony_Enchantress Rarity.png",
+				race: "unicorn",
+				gender: "female",
+				action: "copy",
+				keywords: [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"HorriblePeople.DungeonDelvers.Pony.BrawlingBruiserApplejack": {
+				name: "Applejack",
+				url: "Pony_Brawling Bruiser Applejack.png",
+				race: "earth",
+				gender: "female",
+				action: "replace",
+				keywords: [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"HorriblePeople.DungeonDelvers.Pony.Level1Fluttershy": {
+				name: "Fluttershy",
+				url: "Pony_Level 1 Fluttershy.png",
+				race: "pegasus",
+				gender: "female",
+				action: "swap",
+				keywords: [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"HorriblePeople.DungeonDelvers.Goal.YouMeetinaTavern": {
+				name: "You Meet in a Tavern",
+				url: "Goal_You Meet in a Tavern.png",
+				points: "1"
+			},
+			"HorriblePeople.DungeonDelvers.Ship.PitTrap": {
+				name: "Pit Trap!",
+				url: "Ship_Pit Trap.png"
+			},
+			"HorriblePeople.DungeonDelvers.Ship.TakingIttotheNextLevel": {
+				name: "Taking It to the Next Level",
+				url: "Ship_Taking It to the Next Level.png"
+			},
+
+		// Fluffle Puff
+			"HorriblePeople.FlufflePuff.Pony.FlufflePuff": {
+				name: "Fluffle Puff",
+				url: "Pony_Fluffle Puff.png",
+				race: "earth",
+				gender: "female",
+				keywords: [
+					"Fluffy Pony",
+					"OC"
+				]
+			},
+			"HorriblePeople.FlufflePuff.Pony.Chryssi": {
+				name: "Chrysalis",
+				url: "Pony_Chryssi.png",
+				race: "alicorn",
+				gender: "female",
+				keywords: [
+					"Changeling",
+					"Queen",
+					"Villain"
+				]
+			},
+			"HorriblePeople.FlufflePuff.Goal.TheFunCave": {
+				name: "The Fun Cave",
+				url: "Goal_The Fun Cave.png",
+				points: "3"
+			},
+			"HorriblePeople.FlufflePuff.Ship.AShockingRelationship": {
+				name: "A Shocking Relationship",
+				url: "Ship_A Shocking Relationship.png"
+			},
+			"HorriblePeople.FlufflePuff.Ship.GettingDownToBusiness": {
+				name: "Getting Down to Business",
+				url: "Ship_Getting Down to Business.png"
+			},
+
+		// Gracious Givers
+
+			"HorriblePeople.GraciousGivers.Pony.WishyWashy": {
+				name: "Wishy-Washy",
+				url: "Pony_Wishy-Washy.png",
+				race: "unicorn",
+				gender: "female",
+				keywords: [
+					"OC"
+				]
+			},
+			"HorriblePeople.GraciousGivers.Pony.NightwatchduCoeur": {
+				name: "Nightwatch du Coeur",
+				url: "Pony_Nightwatch du Coeur.png",
+				race: "pegasus",
+				gender: "male",
+				keywords: [
+					"Guard",
+					"OC"
+				]
+			},
+			"HorriblePeople.GraciousGivers.Pony.Manyara": {
+				name: "Manyara",
+				url: "Pony_Manyara.png",
+				race: "unicorn",
+				gender: "female",
+				keywords: [
+					"Abada",
+					"Elder",
+					"OC"
+				]
+			},
+			"HorriblePeople.GraciousGivers.Pony.PrettyPrincess": {
+				name: "Pretty Princess",
+				url: "Pony_Pretty Princess.png",
+				race: "earth",
+				gender: "female",
+				action: "replace",
+				keywords: [
+					"OC",
+					"Object",
+					"Pooltoy"
+				]
+			},
+			"HorriblePeople.GraciousGivers.Pony.WonderboltsCaptainSpitfire": {
+				name: "Spitfire",
+				url: "Pony_Wonderbolts Captain Spitfire.png",
+				race: "pegasus",
+				gender: "female",
+				keywords: [
+					"Wonderbolt"
+				]
+			},
+			"HorriblePeople.GraciousGivers.Pony.PrincessBigMacintosh": {
+				name: "Big Macintosh",
+				url: "Pony_Princess Big Macintosh.png",
+				race: "alicorn",
+				gender: "male",
+				keywords: [
+					"Apple",
+					"Princess"
+				]
+			},
+			"HorriblePeople.GraciousGivers.Pony.BunnyHareRabbit": {
+				name: "Bunny Hare Rabbit",
+				url: "Pony_Bunny Hare Rabbit.png",
+				race: "earth",
+				gender: "male",
+				keywords: [
+					"OC"
+				]
+			},
+			"HorriblePeople.GraciousGivers.Pony.JumpinJackFlashSentry": {
+				name: "Flash Sentry",
+				url: "Pony_Jumpin Jack Flash Sentry.png",
+				race: "pegasus",
+				gender: "male",
+				keywords: [
+					"Jerk"
+				]
+			},
+			
+			"HorriblePeople.GraciousGivers.Pony.LunarGuardFrank": {
+				name: "Lunar Guard Frank",
+				url: "Pony_Lunar Guard Frank.png",
+				race: "pegasus",
+				gender: "male",
+				action: "search",
+				keywords: [
+					"Batpony"
+				]
+			},
+			"HorriblePeople.GraciousGivers.Pony.TheSmooze": {
+				//unimplemented
+				name: "The Smooze",
+				url: "Pony_The Smooze.png",
+				keywords: [
+					"Elder",
+					"Object",
+					"Villain"
+				]
+			},
+			"HorriblePeople.GraciousGivers.Pony.DuchessChrysalis": {
+				name: "Chrysalis",
+				url: "Pony_Duchess Chrysalis.png",
+				gender: "female",
+				action: "swap",
+				keywords: [
+					"Elder",
+					"Changeling"
+				]
+			},
+			"HorriblePeople.GraciousGivers.Pony.PrincessCelestAI": {
+				// unimplemented
+				name: "Celestia",
+				url: "Pony_Princess CelestAI.png",
+				race: "alicorn",
+				gender: "female",
+				keywords: [
+					"AI",
+					"Princess",
+				]
+			},
+			"HorriblePeople.GraciousGivers.Ship.InItforthePlot": {
+				name: "In It for the Plot",
+				url: "Ship_In it for the plot.png"
+			},
+			"HorriblePeople.GraciousGivers.Ship.BestFriends": {
+				name: "Best Friends",
+				url: "Ship_Best Friends.png"
+			},
+			"HorriblePeople.GraciousGivers.Ship.DunkedInTheDatingPool": {
+				//unimplemented
+				name: "Dunked in the Dating Pool",
+				url: "Ship_Dunked in the Dating Pool.png"
+			},
+			"HorriblePeople.GraciousGivers.Goal.AHoardOfPrincesses": {
+				name: "A Hoard of Princesses",
+				url: "Goal_A Hoard of Princesses.png",
+				points: "3"
+			},
+			"HorriblePeople.GraciousGivers.Goal.MaterialGirl": {
+				name: "Material Girl",
+				url: "Goal_Material Girl.png",
+				points: "0"
+			},
+
+		// Hearthswarming
+
+			"HorriblePeople.Hearthswarming.Pony.HondoFlanks": {
+				name: "Hondo Flanks",
+				url: "Pony_Hondo Flanks.png",
+				race: "unicorn",
+				gender: "male",
+				action: "draw",
+				keywords: []
+			},
+			"HorriblePeople.Hearthswarming.Pony.CookieCrumbles": {
+				name: "Cookie Crumbles",
+				url: "Pony_Cookie Crumbles.png",
+				race: "unicorn",
+				gender: "female",
+				action: "swap",
+				keywords: []
+			},
+			"HorriblePeople.Hearthswarming.Pony.ApplejacksParents": {
+				name: "Applejack's Parents",
+				url: "Pony_Applejack's Parents.png",
+				race: "earth",
+				gender: "malefemale",
+				doublePony: "true",
+				keywords: [
+					"Apple"
+				]
+			},
+			"HorriblePeople.Hearthswarming.Pony.CloudyQuartz": {
+				name: "Cloudy Quartz",
+				url: "Pony_Cloudy Quartz.png",
+				race: "earth",
+				gender: "female",
+				keywords: []
+			},
+			"HorriblePeople.Hearthswarming.Pony.IgneousRock": {
+				name: "Igneous Rock",
+				url: "Pony_Igneous Rock.png",
+				race: "earth",
+				gender: "male",
+				keywords: []
+			},
+			"HorriblePeople.Hearthswarming.Pony.TwilightVelvet": {
+				name: "Twilight Velvet",
+				url: "Pony_Twilight Velvet.png",
+				race: "unicorn",
+				gender: "female",
+				action: "swap",
+				keywords: []
+			},
+			"HorriblePeople.Hearthswarming.Pony.NightLight": {
+				name: "Night Light",
+				url: "Pony_Night Light.png",
+				race: "unicorn",
+				gender: "male",
+				action: "draw",
+				keywords: []
+			},
+			"HorriblePeople.Hearthswarming.Pony.RainbowBlaze": {
+				name: "Rainbow Blaze",
+				url: "Pony_Rainbow Blaze.png",
+				race: "pegasus",
+				gender: "male",
+				action: "replace",
+				keywords: []
+			},
+
+		// Misc
+			"HorriblePeople.Misc.Pony.Kefentse": {
+				name: "Kefentse",
+				url: "Pony_Kefentse.png",
+				race: "alicorn",
+				gender: "female",
+				action: "copy",
+				keywords: [
+					"OC"
+				]
+			},
+			"HorriblePeople.Misc.Pony.MajorGeneralDashHugInspector": {
+				name: "Rainbow Dash",
+				url: "Pony_Major General Dash Hug Inspector.png",
+				race: "pegasus",
+				gender: "female",
+				altTimeline: true,
+				action: "newGoal",
+				keywords: [
+					"Mane 6",
+					"Rainbow Dash",
+					"Villain"
+				]
+			},
+			"HorriblePeople.Misc.Pony.Minty": {
+				name: "Minty",
+				url: "Pony_Minty.png",
+				race: "earth",
+				gender: "female",
+				keywords: []
+			},
+			"HorriblePeople.Misc.Pony.StarCatcher": {
+				name: "Celestia",
+				url: "Pony_Star Catcher.png",
+				race: "pegasus",
+				gender: "female",
+				action: "search",
+				keywords: []
+			},
+
+			"HorriblePeople.Misc.Ship.AllGoodThingsMustEnd": {
+				name: "All Good Things Must End",
+				url: "Ship_All Good Things Must End.png"
+			},
+
+			"HorriblePeople.Misc.Ship.GiftOnTheDoorstep": {
+				name: "Gift on the Doorstep",
+				url: "Ship_Found a Gift.png"
+			},
+
+		// Mean 6
+
+			"HorriblePeople.Mean6.Pony.NightlightSparkle": {
+				name: "Twilight Sparkle",
+				url: "Pony_Nightlight Sparkle.png",
+				race: "alicorn",
+				gender: "female",
+				action: "search",
+				keywords: [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"HorriblePeople.Mean6.Pony.Nightjack": {
+				name: "Applejack",
+				url: "Pony_Nightjack.png",
+				race: "earth",
+				gender: "female",
+				keywords: [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"HorriblePeople.Mean6.Pony.NightmarePie": {
+				name: "Pinkie Pie",
+				url: "Pony_Nightmare Pie.png",
+				race: "earth",
+				gender: "female",
+				action: "draw",
+				keywords: [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"HorriblePeople.Mean6.Pony.Nightmarity": {
+				name: "Rarity",
+				url: "Pony_Nightmarity.png",
+				race: "unicorn",
+				gender: "female",
+				action: "copy",
+				keywords: [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"HorriblePeople.Mean6.Pony.NightmareDash": {
+				name: "Rainbow Dash",
+				url: "Pony_Nightmare Dash.png",
+				race: "pegasus",
+				gender: "female",
+				action: "swap",
+				keywords: [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"HorriblePeople.Mean6.Pony.NightmareShy": {
+				name: "Fluttershy",
+				url: "Pony_Nightmare Shy.png",
+				race: "pegasus",
+				gender: "female",
+				keywords: [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"HorriblePeople.Mean6.Pony.Spikemare": {
+				name: "Spike",
+				url: "Pony_Spikemare.png",
+				race: "earth",
+				gender: "male",
+				action: "newGoal",
+				keywords: [
+					"Nightmare",
+					"Villain",
+					"Dragon"
+				]
+			},
+			"HorriblePeople.Mean6.Ship.TheNightmareBecomesYou": {
+				// unimplemented
+				name: "The Nightmare Becomes You",
+				url: "Ship_The Nightmare Becomes You.png"
+			},
+
+			"HorriblePeople.Mean6.Goal.DarkestDay": {
+				name: "Darkest Day",
+				url: "Goal_Darkest Day.png",
+				points: "2"
+			},
+
+		// Weeaboo Paradaisu
+			"HorriblePeople.WeeabooParadaisu.Pony.NihonponniNaritaiTwilightSparkle": {
+				name: "Twilight Sparkle",
+				url: "Pony_Weeaboo Twilight.png",
+				race: "unicorn",
+				gender: "female",
+				keywords: [
+					"Twilight"
+				]
+			},
+			"HorriblePeople.WeeabooParadaisu.Pony.SenpaiFlashSentrykun": {
+				name: "Flash Sentry",
+				url: "Pony_Senpai Flash Sentry-kun.png",
+				race: "pegasus",
+				gender: "male",
+				keywords: []
+			},
+			"HorriblePeople.WeeabooParadaisu.Ship.HanabiMatsuri": {
+				name: "Hanabi Matsuri",
+				url: "Ship_Hanabi Matsuri.png"
+			},
+			"HorriblePeople.WeeabooParadaisu.Ship.OnsenFieldTrip": {
+				name: "Onsen Field Trip",
+				url: "Ship_Onsen Field Trip.png"
+			},
+			"HorriblePeople.WeeabooParadaisu.Ship.BeautifulHenshin": {
+				name: "Beautiful Henshin",
+				url: "Ship_Beautiful Henshin.png"
+	}
 }
 
 export default cards;

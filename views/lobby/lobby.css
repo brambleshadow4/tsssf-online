@@ -272,8 +272,8 @@ h2
 .cardbox
 {
 	display: inline-block;
-	margin: 5px;
-	padding: 15px;
+	margin: 2px;
+	padding: 10px;
 }
 
 #chooseCardsInfo
@@ -291,7 +291,7 @@ h2
 }
 .cardbox img
 {
-	height: 170px;
+	height: 160px;
 	position: relative;
 	z-index: 0;
 
