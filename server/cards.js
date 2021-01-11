@@ -838,166 +838,207 @@ var cards = {
 		// Goals
 			"Core.Goal.BuddingCuriosity":{
 				url:"Goal_Budding Curiosity.png",
+				goalLogic: "ExistsShipGeneric(ShippedWithOppositeGenderedSelf)",
 				points:"3"
 			},
 			"Core.Goal.CargoShip":{
 				url:"Goal_Cargo Ship.png",
+				goalLogic: "ExistsShip(Object in keywords,Object in keywords)",
 				points:"3"
 			},
 			"Core.Goal.ChancellorPuddingheadsEntourage":{
 				url:"Goal_Chancellor Puddinghead'sEntourage.png",
+				goalLogic: "PlayPonies(race=earth, 3)",
 				points:"2"
 			},
 			"Core.Goal.CharityAuction":{
 				url:"Goal_Charity Auction.png",
+				goalLogic: "ExistsShip(genderSwapped, genderSwapped)",
 				points:"3"
 			},
 			"Core.Goal.CommanderHurricanesArmy":{
 				url:"Goal_Commander Hurricane'sArmy.png",
+				goalLogic: "PlayPonies(race=pegasus, 3)",
 				points:"2"
 			},
 			"Core.Goal.DeepCover":{
 				url:"Goal_Deep Cover.png",
+				goalLogic: "ExistsShip(Changeling in keywords,Changeling in keywords)",
 				points:"3"
 			},
 			"Core.Goal.Epidemic":{
 				url:"Goal_Epidemic.png",
+				goalLogic: "PlayLovePoisons",
 				points:"3"
 			},
 			"Core.Goal.Fabulosity":{
 				url:"Goal_Fabulosity.png",
+				goalLogic: "ExistsShip(name=Rarity,name=Rarity)",
 				points:"2"
 			},
 			"Core.Goal.FriendshipIsBenefits":{
 				url:"Goal_Friendship is Benefits.png",
+				goalLogic: "ExistsChain(Mane 6 in keywords, 6)",
 				points:"3-4"
 			},
 			"Core.Goal.GoForthAndMultiply":{
 				url:"Goal_Go Forth and Multiply.png",
+				goalLogic: "PlayShips(gender=male,gender=female, 3)",
 				points:"1"
 			},
 			"Core.Goal.GoodEnough":{
 				url:"Goal_Good Enough.png",
+				goalLogic: "ExistsShip(name=Twilight Sparkle,name=Luna)",
 				points:"2"
 			},
 			"Core.Goal.HehPeasants":{
 				url:"Goal_Heh. Peasants..png",
+				goalLogic: "PlayPonies(race=alicorn, 3)",
 				points:"3"
 			},
 			"Core.Goal.HelpImTrappedInAShippingCardGame":{
 				url:"Goal_Help! I'm Trapped in aShipping Card Game!.png",
+				goalLogic: "ExistsShip(name=Cheerilee,*)",
 				points:"0"
 			},
 			"Core.Goal.HoldOnINeedToMakeAFlowChart":{
 				url:"Goal_Hold On; I Need toMake a Flow Chart.png",
+				goalLogic: "SwapCount(6)",
 				points:"3"
 			},
 			"Core.Goal.HostileTakeover":{
 				url:"Goal_Hostile Takeover.png",
+				goalLogic: "ExistsPony(Changeling in keywords, 3)",
 				points:"3"
 			},
 			"Core.Goal.HotForTeacher":{
 				url:"Goal_Hot for Teacher.png",
+				goalLogic: "ExistsShip(name=Twilight Sparkle, name=Celestia)",
 				points:"2"
 			},
 			"Core.Goal.IGuessYoullDo":{
 				url:"Goal_I Guess You'll Do.png",
+				goalLogic: "ExistsShip(name=Twilight Sparkle, name=Cheerilee)",
 				points:"2"
 			},
 			"Core.Goal.ISwearImNotGay":{
 				url:"Goal_I Swear I'm Not Gay!.png",
+				goalLogic: "ExistsPonyShippedTo(gender=male, Select(gender=male, 3))",
 				points:"1"
 			},
 			"Core.Goal.InvasiveSpecies":{
 				url:"Goal_Invasive Species.png",
+				goalLogic: "ExistsShip(race=earth,race=earth,6)",
 				points:"3"
 			},
 			"Core.Goal.ItsMagicalHornsAreTouching":{
 				url:"Goal_It's MagicalHorns Are Touching.png",
+				goalLogic: "ExistsShip(race=unicorn || race=alicorn,race=unicorn || race=alicorn,3)",
 				points:"1"
 			},
 			"Core.Goal.ItsNotCreepy":{
 				url:"Goal_It's Not Creepy!.png",
+				goalLogic: "ExistsShip(name=Twilight Sparkle,name=Shining Armor)",
 				points:"2"
 			},
 			"Core.Goal.ItsNotEvil":{
 				url:"Goal_It's Not Evil!.png",
+				goalLogic: "BreakShip(name=Shining Armor, gender=female && name != Twilight Sparkle)",
 				points:"1"
 			},
 			"Core.Goal.ItsNotExactlyCheating":{
 				url:"Goal_It's NotEXACTLY Cheating....png",
+				goalLogic: "ExistsPonyShippedTo(*, ShippedWith2Versions)",
 				points:"2"
 			},
 			"Core.Goal.JustExperimenting":{
 				url:"Goal_Just Experimenting.png",
+				goalLogic: "ExistsPonyShippedTo(name=Rainbow Dash, Select(gender=female,3))",
 				points:"2"
 			},
 			"Core.Goal.MyFirstSlash":{
 				url:"Goal_My First Slash.png",
+				goalLogic: "ExistsShip(name=Shining Armor,gender=male)",
 				points:"1"
 			},
 			"Core.Goal.NeedsMoreLesbians":{
 				url:"Goal_Needs More Lesbians.png",
+				goalLogic: "PlayShips(gender=female, gender=female, 3)",
 				points:"1"
 			},
 			"Core.Goal.Paradox":{
 				url:"Goal_Paradox.png",
+				goalLogic: "ExistsShip(name=Pinkie Pie,name=Pinkie Pie)",
 				points:"2"
 			},
 			"Core.Goal.Pomf":{
 				url:"Goal_Pomf!.png",
+				goalLogic: "ExistsShip(race=pegasus || race=alicorn, race=pegasus || race=alicorn,3)",
 				points:"1"
 			},
 			"Core.Goal.PrettyPrettyPrincess":{
 				url:"Goal_Pretty Pretty Princess.png",
+				goalLogic: "ExistsPony(name=Twilight Sparkle && race=alicorn)",
 				points:"3"
 			},
 			"Core.Goal.PrincessPile":{
 				url:"Goal_Princess Pile.png",
+				goalLogic: "ExistsChain(Princess in keywords, 3)",
 				points:"2"
 			},
 			"Core.Goal.QueenPlatinumsCourt":{
 				url:"Goal_Queen Platinum's Court.png",
+				goalLogic: "PlayPonies(race=unicorn, 3)",
 				points:"2"
 			},
 			"Core.Goal.Quite":{
 				url:"Goal_Quite..png",
+				goalLogic: "PlayShips(gender=male,gender=male, 3)",
 				points:"2"
 			},
 			"Core.Goal.RainbowDashFanClub":{
 				url:"Goal_Rainbow Dash Fan Club.png",
+				goalLogic: "ExistsShip(name=Rainbow Dash, name=Rainbow Dash)",
 				points:"2"
 			},
 			"Core.Goal.Rodeo":{
 				url:"Goal_Rodeo.png",
+				goalLogic: "ExistsShip(name=Applejack, name=Applejack)",
 				points:"2"
 			},
 			"Core.Goal.Sadfic":{
 				url:"Goal_Sadfic.png",
+				goalLogic: "BreakShip(name=Twilight Sparkle,*)",
 				points:"1"
 			},
 			"Core.Goal.SelfInsertion":{
 				url:"Goal_Self-Insertion.png",
+				goalLogic: "ExistsChain(name=Twilight Sparkle, 3)",
 				points:"2"
 			},
 			"Core.Goal.ShiningArmorApprovesofThisExperiment":{
 				url:"Goal_Shining Armor Approvesof This Experiment!.png",
+				goalLogic: "ExistsShip(name=Cadance, gender=female)",
 				points:"1"
 			},
 			"Core.Goal.Shipwrecker":{
 				url:"Goal_Shipwrecker.png",
+				goalLogic: "BreakShip(*, *, 12)",
 				points:"2"
 			},
 			"Core.Goal.TheQuietGame":{
 				url:"Goal_The Quiet Game.png",
+				goalLogic: "ExistsShip(name=Fluttershy, name=Fluttershy)",
 				points:"2"
 			},
 			"Core.Goal.TimeTravelersAmongUs":{
 				url:"Goal_Time Travelers Among Us.png",
+				goalLogic: "ExistsPony(altTimeline=true, 5)",
 				points:"3"
 			},
 			"Core.Goal.WellMaybe":{
 				url:"Goal_Well...Maybe.png",
+				goalLogic: "ExistsShip(name=Twilight Sparkle, name=Zecora)",
 				points:"2"
 			},
 
@@ -1126,134 +1167,158 @@ var cards = {
 			"EC.Goal.FamilyAppreciationDay": {
 				name: "Family Appreciation Day",
 				url: "Goal_Family Appreciation Day.png",
+				goalLogic: "ExistsChain(Apple in keywords,4)",
 				points: "2"
 			},
 			"EC.Goal.BigMacIsBigMackin": {
 				name: "Big Mac is Big Mackin'",
 				url: "Goal_Big Mac is Big Mackin'.png",
+				goalLogic: "ExistsPonyShippedTo(name=Big Macintosh, Select(gender=female,3))",
 				points: "2"
 			},
 			"EC.Goal.MyWaifu": {
 				name: "My Waifu",
 				url: "Goal_My Waifu.png",
+				goalLogic: "ExistsShip(OC in keywords,Mane 6 in keywords)",
 				points: "2"
 			},
 			"EC.Goal.BookClub": {
 				name: "Book Club",
 				url: "Goal_Book Club.png",
+				goalLogic: "ExistsPonyShippedTo(name=Twilight Sparkle, Select(*,5))",
 				points: "3"
 			},
 			"EC.Goal.EnjoyingTheScenery": {
 				name: "Enjoying the Scenery",
 				url: "Goal_Enjoying the Scenery.png",
+				goalLogic: "ExistsPonyShippedTo(name=Rarity, Select(*,4))",
 				points: "1"
 			},
 			"EC.Goal.IronPonyCompetition": {
 				name: "Iron Pony Competition",
 				url: "Goal_Iron Pony Competition.png",
+				goalLogic: "ExistsPonyShippedTo(name=Rainbow Dash, Select(*,4))",
 				points: "1"
 			},
 			"EC.Goal.CiderSqueezin": {
 				name: "Cider Squeezin'",
 				url: "Goal_Cider Squeezin'.png",
+				goalLogic: "ExistsPonyShippedTo(name=Applejack, Select(*,4))",
 				points: "1"
 			},
 			"EC.Goal.AintNoPartyLikeAPinkiePieParty": {
 				name: "Ain't No Party Like a Pinkie Pie Party",
 				url: "Goal_Ain't No Party Likea Pinkie Pie Party.png",
+				goalLogic: "ExistsPonyShippedTo(name=Pinkie Pie, Select(*,4))",
 				points: "1"
 			},
 			"EC.Goal.Recruitment": {
 				name: "Recruitment",
 				url: "Goal_Recruitment.png",
+				goalLogic: "ExistsPonyShippedTo(name=Fluttershy, Select(*,4))",
 				points: "1"
 			},
 			"EC.Goal.PlayingTheGame": {
 				name: "Playing the Game",
 				url: "Goal_Playing the Game.png",
+				goalLogic: "ExistsPonyShippedTo(gender=male, Select(gender=female, 4))",
 				points: "1"
 			},
 			"EC.Goal.IReallyLikeHerMane": {
 				name: "I Really Like Her Mane!",
 				url: "Goal_I Really Like Her Mane!.png",
+				goalLogic: "BreakShip(name=Smarty Pants,*)",
 				points: "2"
 			},
 			"EC.Goal.PickyPicky": {
+				// unimplemented
 				name: "Picky Picky!",
 				url: "Goal_Picky Picky!.png",
 				points: "1",
-				noLogic: true,
 			},
 			"EC.Goal.BewareTheGroove": {
 				name: "Beware the Groove",
 				url: "Goal_Beware the Groove.png",
+				goalLogic: "BreakShip(Elder in keywords, race=alicorn)",
 				points: "2"
 			},
 			"EC.Goal.ABlessingOfAlicorns": {
 				name: "A Blessing of Alicorns",
 				url: "Goal_A Blessing of Alicorns.png",
+				goalLogic: "ExistsPony(race=alicorn, 5)",
 				points: "2"
 			},
 			"EC.Goal.TheresNoThrillLikeIronWill": {
 				name: "There's No ThrillLike Iron Will",
 				url: "Goal_There's No ThrillLike Iron Will.png",
+				goalLogic: "ExistsShip(name=Iron Will,Villain in keywords)",
 				points: "2"
 			},
 			"EC.Goal.OfPoniesAndPerilTheMagnumOpus": {
 				name: "Of Ponies and Peril: The Magnum Opus",
 				url: "Goal_Of Ponies and PerilThe Magnum Opus.png",
+				goalLogic: "ExistsChain(altTimeline=true,3)",
 				points: "2"
 			},
 			"EC.Goal.Swinging": {
 				name: "Swinging",
 				url: "Goal_Swinging.png",
+				goalLogic: "ExistsPonyShippedTo(*, AllOf(name=Mr. Cake, name=Mrs. Cake))",
 				points: "3"
 			},
 			"EC.Goal.SpaDay": {
 				name: "Spa Day",
 				url: "Goal_Spa Day.png",
+				goalLogic: "ExistsShip(Mane 6 in keywords, name=Aloe & Lotus)",
 				points: "2"
 			},
 			"EC.Goal.NoPoniesCanPonyTwoPoniesToPony": {
 				name: "No Ponies Can Pony Two Ponies to Pony",
 				url: "Goal_No Ponies Can PonyTwo Ponies to Pony.png",
+				goalLogic: "ExistsPonyShippedTo(*, Select(*, 6))",
 				points: "4"
 			},
 			"EC.Goal.EvilSocietyOfEvil": {
 				name: "Evil Society of Evil",
 				url: "Goal_Evil Society of Evil.png",
+				goalLogic: "ExistsChain(Villain in keywords, 6)",
 				points: "3"
 			},
 			"EC.Goal.FluttershysHomeForRedeemedEvilDoers": {
 				name: "Fluttershy's Home for Redeemed Evil-Doers",
 				url: "Goal_Fluttershy's Home forRedeemed Evil-Doers.png",
+				goalLogic: "ExistsPonyShippedTo(name=Fluttershy, Select(Villain in keywords, 3))",
 				points: "2"
 			},
 			"EC.Goal.Landslide": {
+				//unimplemented
 				name: "Landslide",
 				url: "Goal_Landslide.png",
-				points: "0",
-				noLogic: true
+				points: "0"
 			},
 			"EC.Goal.FleetAdmiral": {
 				name: "Fleet Admiral",
 				url: "Goal_Fleet Admiral.png",
+				goalLogic: "PlayShips(*, *, 7)",
 				points: "3"
 			},
 			"EC.Goal.CoupDetat": {
+				//unimplemented
 				name: "Coup d'etat",
 				url: "Goal_Coup d'etat.png",
-				points: "3",
-				noLogic: true,
+				points: "3"
+				
 			},
 			"EC.Goal.FriendsInHighPlaces": {
 				name: "Friends in High Places",
 				url: "Goal_Friends in High Places.png",
+				goalLogic: "ExistsPonyShippedTo(OC in keywords, Select(Princess in keywords,2))",
 				points: "3"
 			},
 			"EC.Goal.Recolor": {
 				name: "Recolor",
 				url: "Goal_Recolor.png",
+				goalLogic: "ExistsPonyGeneric(GainOCKeyword, 1)",
 				points: "2"
 			},
 
@@ -1594,22 +1659,28 @@ var cards = {
 
 		// Goal
 			"PU.Goal.Besties":{
-				url:"Goal_Besties!.png"
+				url:"Goal_Besties!.png",
+				goalLogic: "ExistsShip(Uni in keywords, Uni in keywords)",
 			},
 			"PU.Goal.CutieMarkCourtship":{
-				url:"Goal_Cutie Mark Courtship.png"
+				url:"Goal_Cutie Mark Courtship.png",
+				goalLogic: "ExistsShip(CMC in keywords, CMC in keywords)",
 			},
 			"PU.Goal.Internship":{
-				url:"Goal_Internship.png"
+				url:"Goal_Internship.png",
+				goalLogic: "ExistsShip(Uni in keywords || PCC in keywords, Villain in keywords)",
 			},
 			"PU.Goal.RevengeOfTheNerds":{
-				url:"Goal_Revenge of the Nerds.png"
+				url:"Goal_Revenge of the Nerds.png",
+				goalLogic: "ExistsShip(Uni in keywords || PCC in keywords, Mane 6 in keywords)",
 			},
 			"PU.Goal.SchoolwideFestivities":{
-				url:"Goal_Schoolwide Festivities.png"
+				url:"Goal_Schoolwide Festivities.png",
+				goalLogic: "ExistsChain(Uni in keywords || PCC in keywords, 6)",
 			},
 			"PU.Goal.WhereforeArtThouPoneo":{
-				url:"Goal_Wherefore Art ThouPoneo.png"
+				url:"Goal_Wherefore Art ThouPoneo.png",
+				goalLogic: "ExistsShip(Uni in keywords, PCC in keywords)",
 			},
 
 	// No Holds Barred
@@ -2045,7 +2116,6 @@ var cards = {
 				]
 			},
 
-
 		// Ship
 			"NoHoldsBarred.Ship.ASnugglebytheFire": {
 				name: "A Snuggle by the Fire",
@@ -2074,36 +2144,44 @@ var cards = {
 			"NoHoldsBarred.Goal.ThisShipIsDelicious": {
 				name: "This Ship is DELICIOUS!",
 				url: "Goal - This Ship is DELICIOUS.png",
+				goalLogic: "ExistsPonyShippedTo(name=Pinkie Pie, AllOf(name=Luna,name=Twilight Sparkle,name=Applejack))",
 				points: "4"
 			},
 			"NoHoldsBarred.Goal.FromForeignLands": {
 				name: "From Foreign Lands",
 				url: "Goal - From Foreign Lands.png",
+				goalLogic: `ExistsShip(Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords,
+					Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords)`,
 				points: "2"
 			},
 			"NoHoldsBarred.Goal.FateBreakers": {
 				name: "Fate Breakers",
 				url: "Goal - Fate Breakers.png",
+				goalLogic: "ExistsShip(name=Logic Gate, name=Flickering Oracle)",
 				points: "2"
 			},
 			"NoHoldsBarred.Goal.DarkHorseDanceCard": {
 				name: "Dark Horse Dance Card",
 				url: "Goal - Dark Horse Dance Card.png",
+				goalLogic: "PlayShips(OC in keywords, OC in keywords, 2)",
 				points: "3"
 			},
 			"NoHoldsBarred.Goal.OMiGoshBugHug": {
 				name: "Omigosh #bughug!",
 				url: "Goal - omigosh bughug.png",
+				goalLogic: "ExistsShip(name=Starlit Dreams, card=Core.Start.FanficAuthorTwilight)",
 				points: "2"
 			},
 			"NoHoldsBarred.Goal.AfterThisWellNeedRehab": {
 				name: "After This, We'll Need Rehab",
 				url: "Goal - After This We're Gonna Need Rehab.png",
+				goalLogic: "ExistsShip(#horsefamous in keywords,#horsefamous in keywords)",
 				points: "2"
 			},
 			"NoHoldsBarred.Goal.WhyIsEveryThingGlowing": {
 				name: "WHY IS EVERYTHING GLOWING??",
 				url: "Goal - WHY IS EVERYTHING GLOWING.png",
+				goalLogic: "ExistsPonyShippedTo(*, Select(OC in keywords, 4))",
 				points: "1"
 			},
 

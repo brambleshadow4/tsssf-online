@@ -16,7 +16,7 @@ import {
 	getNeighborKeys
 } from "./lib.js";
 
-import goalCriteria from "./goalCriteria.js";
+import evalGoalCard from "./goalCriteria.js";
 
 import cards from "./cards.js";
 import {logGameHosted, logPlayerJoined} from "./stats.js";
@@ -337,18 +337,20 @@ export function TsssfGameServer()
 
 		var sendUpdate = false;
 
-		for(var card of model.currentGoals)
+		for(var goalInfo of model.currentGoals)
 		{
 			var achieved = false;
-			if(goalCriteria[card.card])
-				achieved = goalCriteria[card.card](model);
 
-			if(card.achieved != achieved)
+			if(!isBlank(goalInfo.card))
+				achieved = evalGoalCard(goalInfo.card, model)
+
+
+			if(goalInfo.achieved != achieved)
 			{
 				sendUpdate = true;
 			}
 
-			card.achieved = achieved;
+			goalInfo.achieved = achieved;
 		}
 
 		if(sendUpdate)
