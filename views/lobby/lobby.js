@@ -54,6 +54,7 @@ export function loadView(isOpen)
 			["Extra Credit", "EC.*", cardBoxes[1]],
 			["Ponyville University","PU.*", cardBoxes[2]],
 			["No Holds Barred", "NoHoldsBarred.*", cardBoxes[3]],
+			["<h3>Mini Expansions</h3>"],
 			["2014 Con Exclusives", "HorriblePeople.2014ConExclusives.*"],
 			["2015 Con Exclusives", "HorriblePeople.2015ConExclusives.*"],
 			["2015 Workshop Panels", "HorriblePeople.2015Workshop.*"],
@@ -72,6 +73,14 @@ export function loadView(isOpen)
 		var deckElementList = [];
 		for(var info of deckInfo)
 		{
+			if(info.length == 1)
+			{
+				var el = document.createElement('div');
+				el.innerHTML = info[0];
+				cardSelectors.appendChild(el);
+				continue;
+			}
+
 			var el = cardSelectComponent(decks, ...info)
 			deckElementList.push(el)
 			deckElements[info[1]] = el;

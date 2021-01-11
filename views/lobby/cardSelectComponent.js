@@ -111,6 +111,27 @@ export function cardSelectComponent(decks, name, deckPrefix, cardBox)
 		return newSet;
 	}
 
+	var isShiftDown = false;
+
+	function shiftDown(e)
+	{
+		if(e.key == "Shift")
+		{
+			isShiftDown = true;
+		}
+	}
+
+	function shiftUp(e)
+	{
+		if(e.key == "Shift")
+		{
+			isShiftDown = false;
+		}
+	}
+
+	window.addEventListener("keydown", shiftDown);
+	window.addEventListener("keyup", shiftUp);
+
 	img.onclick = toggle;
 	nameSpan.onclick = toggle;
 
@@ -127,6 +148,9 @@ export function cardSelectComponent(decks, name, deckPrefix, cardBox)
 	body.className = "cardSelect-body";
 
 	var match = deckPrefix.substring(0,deckPrefix.length - 1);
+	var no = 0;
+	var shiftSelect = -1;
+
 	for (var card in cards)
 	{
 		
@@ -136,11 +160,35 @@ export function cardSelectComponent(decks, name, deckPrefix, cardBox)
 			var shield = document.createElement('div');
 
 			cardEl.setAttribute('card', card);
+			cardEl.setAttribute('no', no++);
 			shield.className ='shield';
 			cardEl.appendChild(shield);
 
-			cardEl.onclick = function()
+			cardEl.onclick = function(e)
 			{
+				if(isShiftDown && shiftSelect > -1)
+				{
+					var hasSelected = this.parentNode.children[shiftSelect].classList.contains('selected');
+
+					var thisNo = Number(this.getAttribute("no"));
+					var start = Math.min(shiftSelect, thisNo);
+					var end = Math.max(shiftSelect, thisNo);
+
+					for(var i=start; i <= end; i++)
+					{
+						if(hasSelected)
+							this.parentNode.children[i].classList.add('selected')
+						else
+							this.parentNode.children[i].classList.remove('selected');
+					}
+					someButton.click();
+					return;
+				}
+				else
+				{
+					shiftSelect = Number(this.getAttribute("no"));
+				}
+
 				if(this.classList.contains('selected'))
 				{
 					this.classList.remove('selected');

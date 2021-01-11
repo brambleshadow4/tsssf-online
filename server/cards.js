@@ -2382,6 +2382,7 @@ var cards = {
 			"HorriblePeople.AdventurePack.Goal.DaringDont": {
 				name: "Daring Don't",
 				url: "Goal_Daring Don't.png",
+				goalLogic: "ExistsPonyShippedTo(name=Daring Do, AllOf(name=Rainbow Dash, name=Twilight Sparkle))",
 				points: "2",
 				noLogic: true,
 			},
@@ -2454,9 +2455,10 @@ var cards = {
 					"RPG"
 				]
 			},
-			"HorriblePeople.DungeonDelvers.Goal.YouMeetinaTavern": {
+			"HorriblePeople.DungeonDelvers.Goal.YouMeetInATavern": {
 				name: "You Meet in a Tavern",
 				url: "Goal_You Meet in a Tavern.png",
+				goalLogic: "ExistsShip(RPG in keywords || card=Core.Pony.DruidFluttershy, RPG in keywords || card=Core.Pony.DruidFluttershy)",
 				points: "1"
 			},
 			"HorriblePeople.DungeonDelvers.Ship.PitTrap": {
@@ -2493,6 +2495,7 @@ var cards = {
 			"HorriblePeople.FlufflePuff.Goal.TheFunCave": {
 				name: "The Fun Cave",
 				url: "Goal_The Fun Cave.png",
+				goalLogic: "ExistsShip(name=Fluffle Puff, name=Chrysalis)",
 				points: "3"
 			},
 			"HorriblePeople.FlufflePuff.Ship.AShockingRelationship": {
@@ -2643,11 +2646,13 @@ var cards = {
 			"HorriblePeople.GraciousGivers.Goal.AHoardOfPrincesses": {
 				name: "A Hoard of Princesses",
 				url: "Goal_A Hoard of Princesses.png",
+				goalLogic: "ExistsPonyShippedTo(Dragon in keywords, Select(Princess in keywords, 3))",
 				points: "3"
 			},
 			"HorriblePeople.GraciousGivers.Goal.MaterialGirl": {
 				name: "Material Girl",
 				url: "Goal_Material Girl.png",
+				goalLogic: "ExistsPonyShippedTo(name=Twilight Sparkle, Select(Object in keywords, 3))",
 				points: "0"
 			},
 
@@ -2738,7 +2743,6 @@ var cards = {
 				action: "newGoal",
 				keywords: [
 					"Mane 6",
-					"Rainbow Dash",
 					"Villain"
 				]
 			},
@@ -2861,6 +2865,7 @@ var cards = {
 			"HorriblePeople.Mean6.Goal.DarkestDay": {
 				name: "Darkest Day",
 				url: "Goal_Darkest Day.png",
+				goalLogic: "ExistsChain(Nightmare in keywords, 3)",
 				points: "2"
 			},
 
@@ -2870,9 +2875,7 @@ var cards = {
 				url: "Pony_Weeaboo Twilight.png",
 				race: "unicorn",
 				gender: "female",
-				keywords: [
-					"Twilight"
-				]
+				keywords: ["Mane 6"]
 			},
 			"HorriblePeople.WeeabooParadaisu.Pony.SenpaiFlashSentrykun": {
 				name: "Flash Sentry",
