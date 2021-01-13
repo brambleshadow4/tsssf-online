@@ -47,8 +47,6 @@ export function loadView(isOpen)
 
 		var cardBoxes = document.getElementsByClassName('cardbox')
 
-		
-
 		var deckInfo = [
 			["Core", "Core.*", cardBoxes[0]],
 			["Extra Credit", "EC.*", cardBoxes[1]],

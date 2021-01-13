@@ -78,7 +78,7 @@ var HTML = `
 					<div class='shield'></div>
 					<img src="/img/noholds-box.png" />
 				</div>
-				<h2>Individual cards</h2>
+				<h2 class="bothMargins">Individual cards</h2>
 				<div id='cardSelectors'>
 				</div>
 			</div>

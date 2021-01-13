@@ -173,14 +173,19 @@ export function loadView()
 
 	window.onresize = function(e)
 	{
-		if(document.fullscreenElement)
+		var fullscreenButton = document.getElementById('fullscreenButton')
+		if(fullscreenButton)
 		{
-			document.getElementById('fullscreenButton').src = "/img/smallscreen.svg";
+			if(document.fullscreenElement)
+			{
+				fullscreenButton.src = "/img/smallscreen.svg";
+			}
+			else
+			{
+				fullscreenButton.src = "/img/fullscreen.svg";
+			}
 		}
-		else
-		{
-			document.getElementById('fullscreenButton').src = "/img/fullscreen.svg";
-		}
+		
 	}
 
 }

@@ -38,6 +38,14 @@ function getCardProp(model, cardFull, prop)
 		return new Set(cards[baseCard][prop].concat(baseKeywords));
 	}
 
+	if(prop == "name")
+	{
+		var s = new Set();
+		s.add(cards[baseCard].name);
+		s.add(cards[card].name);
+		return s;
+	}
+
 	if(cardOverrides && cardOverrides[prop])
 	{
 		return cardOverrides[prop]
@@ -100,6 +108,9 @@ function doesCardMatchSelector(model, card, selector)
 
 		var cardValue = getCardProp(model, card, prop);
 
+		if(prop == "name")
+			return cardValue.has(value) ? falseValue : trueValue;
+
 		if(prop == "gender" && cardValue == "malefemale")
 			return trueValue;
 
@@ -125,13 +136,16 @@ function doesCardMatchSelector(model, card, selector)
 
 		//if(prop == "race")
 
+		if(prop == "name")
+			return cardValue.has(value) ? trueValue : falseValue;
+
 		if(prop == "gender" && cardValue == "malefemale")
 			return trueValue;
 		
 		if(prop == "race" && cardValue == "earth/unicorn")
 			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
-		return (getCardProp(model, card, prop) == value ? trueValue : falseValue);
+		return (cardValue == value ? trueValue : falseValue);
 	}
 
 	if(selector.indexOf(" in ") > -1)
