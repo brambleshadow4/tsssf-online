@@ -112,6 +112,7 @@ h2
 #chooseName {display: none;}
 #gameOptionsInfo {display: none;}
 #chooseCardsInfo {display: none;}
+#startCardInfo {display: none;}
 #closedLobby { display: none;}
 
 
@@ -119,6 +120,7 @@ h2
 .pageJoin #joinGameInfo {display: block;}
 .pageOptions #gameOptionsInfo {display: block;}
 .pageCards #chooseCardsInfo {display: block;}
+.pageStartCard #startCardInfo {display: block;}
 .pageClosed #closedLobby { display: block;}
 
 .pageJoin.registered #chooseName {display: none;}

@@ -27,6 +27,7 @@ var HTML = `
 			<div id='joinGameTab' onclick="changePage(this, 'pageJoin')" class="selected">Join Game</div>
 			<div id='gameOptionsTab' onclick="changePage(this, 'pageOptions')">Game Options</div>
 			<div id='chooseCardsTab' onclick="changePage(this, 'pageCards')">Choose cards</div>
+			<div onclick="changePage(this, 'pageStartCard')">Start card</div>
 		</div>
 		<div id='main' class='main pageJoin unregistered'>
 			
@@ -58,6 +59,11 @@ var HTML = `
 
 				<h2 class='bothMargins'>Other options</h2>
 				<div><input type='checkbox' id='keepLobbyOpen'><label for='keepLobbyOpen'>Keep lobby open during game<br>You can also toggle this in game</label></div>
+			</div>
+
+			<div id='startCardInfo'>
+				<h2>Pick a start card</h2>
+				<div id='startCards'></div>
 			</div>
 
 			<div id='chooseCardsInfo'>

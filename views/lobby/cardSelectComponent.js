@@ -1,5 +1,5 @@
 import cards from "/game/cards.js";
-
+import {isStart} from "/lib.js" 
 import {makeCardElement} from "/game/cardComponent.js";
 
 export function cardSelectComponent(decks, name, deckPrefix, cardBox)
@@ -154,7 +154,7 @@ export function cardSelectComponent(decks, name, deckPrefix, cardBox)
 	for (var card in cards)
 	{
 		
-		if(card.startsWith(match) && card.indexOf('.Start.') == -1)
+		if(card.startsWith(match) && !isStart(card))
 		{
 			var cardEl = makeCardElement(card);
 			var shield = document.createElement('div');

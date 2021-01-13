@@ -1,6 +1,9 @@
 import * as LobbyView from "/lobby/lobbyView.js";
 
 import {cardSelectComponent} from "/lobby/cardSelectComponent.js";
+import {makeCardElement} from "/game/cardComponent.js";
+import {isStart} from "/lib.js";
+import cards from "/game/cards.js";
 
 var gameOptionsDiv 
 var chooseCardsDiv 
@@ -85,6 +88,8 @@ export function loadView(isOpen)
 			cardSelectors.appendChild(el);
 		}
 
+
+
 		for(let i=0; i < cardBoxes.length; i++)
 		{
 			let box = cardBoxes[i];
@@ -107,11 +112,33 @@ export function loadView(isOpen)
 				}
 			}
 		}
+
+		var startCards = document.getElementById('startCards');
+		console.log(cards);
+		for(var card of Object.keys(cards).filter(x => isStart(x)))
+		{
+			var cardEl = makeCardElement(card);
+			var shield = document.createElement('div');
+
+			cardEl.setAttribute('card', card);
+			//cardEl.setAttribute('no', no++);
+			shield.className ='shield';
+			cardEl.appendChild(shield);
+
+			startCards.appendChild(cardEl);
+		}
+
+
 	}
 	else
 	{
 		changePage(undefined, "pageClosed");
 	}
+}
+
+function addStartCardSelectors()
+{
+
 }
 
 function getPackString(card)
@@ -272,6 +299,7 @@ function changePage(el, pageCssClass)
 	main.classList.remove("pageOptions")
 	main.classList.remove("pageCards")
 	main.classList.remove("pageClosed")
+	main.classList.remove("pageStartCard")
 
 	main.classList.add(pageCssClass);
 
