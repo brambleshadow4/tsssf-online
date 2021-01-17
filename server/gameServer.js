@@ -315,6 +315,7 @@ export function TsssfGameServer()
 		else
 			var payload = JSON.stringify({
 				cardDecks: games[key].cardDecks,
+				startCard: games[key].startCard,
 				ruleset: games[key].ruleset,
 				keepLobbyOpen: games[key].keepLobbyOpen
 			})
@@ -380,6 +381,7 @@ export function TsssfGameServer()
 		games[key] = {
 			messageHistory: [],
 			cardDecks: ["Core.*"],
+			startCard: "Core.Start.FanficAuthorTwilight",
 			deathCount: 0,
 			isLobbyOpen: true,
 			isInGame: false,
@@ -465,7 +467,7 @@ export function TsssfGameServer()
 
 		model.startTime = new Date().getTime();
 
-		model.startCard = "Core.Start.FanficAuthorTwilight";
+		model.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
 
 		model.cardLocations = {};
 		model.board = {

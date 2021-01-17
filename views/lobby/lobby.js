@@ -120,10 +120,26 @@ export function loadView(isOpen)
 			var cardEl = makeCardElement(card);
 			var shield = document.createElement('div');
 
+
+			if(card == "Core.Start.FanficAuthorTwilight")
+				cardEl.classList.add('selected');
+
 			cardEl.setAttribute('card', card);
 			//cardEl.setAttribute('no', no++);
 			shield.className ='shield';
 			cardEl.appendChild(shield);
+
+			cardEl.onclick = function(e)
+			{
+				var cards = this.parentNode.getElementsByClassName('card');
+
+				for(el of cards)
+				{
+					el.classList.remove('selected');
+				}
+
+				this.classList.add('selected');
+			}
 
 			startCards.appendChild(cardEl);
 		}
@@ -170,6 +186,8 @@ function onMessage()
 
 		if(options)
 		{
+
+
 			ishost = true;
 			document.getElementById('rightSide').classList.add('host')
 
@@ -209,6 +227,16 @@ function onMessage()
 				for(var el of allButtons)
 				{
 					if(s.has(el.getAttribute('deck')))
+					{
+						el.click();
+					}
+				}
+
+				cardDivs = document.getElementById('startCards').getElementsByClassName('card')
+
+				for(var el of cardDivs)
+				{
+					if(el.getAttribute('card') == options.startCard)
 					{
 						el.click();
 					}
@@ -277,6 +305,11 @@ function startGame()
 	// skip 0 because it's core
 
 	options.cardDecks = Object.keys(decks).map(x => [...decks[x]]).reduce((a,b) => a.concat(b), []);
+
+	var startCard = document.getElementById('startCards').getElementsByClassName('selected')[0];
+	options.startCard = startCard ? startCard.getAttribute('card') : "Core.Start.FanficAuthorTwilight";
+
+
 
 	console.log(options.cardDecks);
 

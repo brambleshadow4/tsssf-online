@@ -372,7 +372,7 @@ export function updatePlayerList()
 {
 	var playerList = document.getElementById('playerList');
 	playerList.innerHTML = "";
-	for(var player of model.players)
+	for(let player of model.players)
 	{
 		var div = document.createElement('div');
 		div.className = "player";
