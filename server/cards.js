@@ -2894,8 +2894,26 @@ var cards = {
 			},
 			"HorriblePeople.WeeabooParadaisu.Ship.BeautifulHenshin": {
 				name: "Beautiful Henshin",
-				url: "Ship_Beautiful Henshin.png"
-	}
+				url: "Ship_Beautiful Henshin.png",
+			},
+	
+	// Extra start cards
+
+		"ChildrenOfKefentse.Promo.Start.FanficEditorStarlight":{
+			url: "FanficEditorStarlight.png",
+			name: "Starlight Glimmer",
+			race: "unicorn",
+			gender: "female",
+			keywords: []
+		},
+
+		"ChildrenOfKefentse.Promo.Start.DizzyFrizzyPatronSaintOfShippers":{
+			url: "DizzyFrizzyPatronSaintOfShippers.png",
+			name: "Dizzy Frizzy",
+			race: "earth",
+			gender: "female",
+			keywords: ["OC"]
+		}
 }
 
 export default cards;

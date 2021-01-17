@@ -5,6 +5,8 @@ import {makeCardElement} from "/game/cardComponent.js";
 import {isStart} from "/lib.js";
 import cards from "/game/cards.js";
 
+console.log(Object.keys(cards));
+
 var gameOptionsDiv 
 var chooseCardsDiv 
 var joinGameDiv 
@@ -114,9 +116,13 @@ export function loadView(isOpen)
 		}
 
 		var startCards = document.getElementById('startCards');
-		console.log(cards);
+		console.log('cards')
+		console.log(Object.keys(cards).filter(x => isStart(x)));
+		console.log(Object.keys(cards));
 		for(var card of Object.keys(cards).filter(x => isStart(x)))
 		{
+			console.log()
+
 			var cardEl = makeCardElement(card);
 			var shield = document.createElement('div');
 
