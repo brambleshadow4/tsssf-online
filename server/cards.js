@@ -2632,7 +2632,7 @@ var cards = {
 			},
 			"HorriblePeople.GraciousGivers.Ship.InItforthePlot": {
 				name: "In It for the Plot",
-				url: "Ship_In it for the Plot.png"
+				url: "Ship_In It for the Plot.png"
 			},
 			"HorriblePeople.GraciousGivers.Ship.BestFriends": {
 				name: "Best Friends",
