@@ -1,12 +1,29 @@
 import * as LobbyView from "/lobby/lobbyView.js";
 
+import {cardSelectComponent} from "/lobby/cardSelectComponent.js";
+import {makeCardElement} from "/game/cardComponent.js";
+import {isStart} from "/lib.js";
+import cards from "/game/cards.js";
+
+console.log(Object.keys(cards));
+
 var gameOptionsDiv 
 var chooseCardsDiv 
 var joinGameDiv 
 var ishost = false;
 var sentName = false;
-
 var cardBoxElements = {};
+
+var decks = {
+	"Core.*": new Set(),
+	"PU.*": new Set(),
+	"EC.*": new Set(),
+}
+
+var deckElements = {}
+
+window.decks = decks;
+
 
 export function loadView(isOpen)
 {
@@ -27,7 +44,6 @@ export function loadView(isOpen)
 
 		socket.onMessageHandler = onMessage;
 
-
 		window.joinGameTab = joinGameTab;
 		window.gameOptionsTab = gameOptionsTab;
 		window.chooseCardsTab = chooseCardsTab;
@@ -36,25 +52,135 @@ export function loadView(isOpen)
 
 		var cardBoxes = document.getElementsByClassName('cardbox')
 
-		for(var i=1; i < cardBoxes.length; i++)
+		var deckInfo = [
+			["Core", "Core.*", cardBoxes[0]],
+			["Extra Credit", "EC.*", cardBoxes[1]],
+			["Ponyville University","PU.*", cardBoxes[2]],
+			["No Holds Barred", "NoHoldsBarred.*", cardBoxes[3]],
+
+			["<h3>Mini Expansions</h3>"],
+
+			["2014 Con Exclusives", "HorriblePeople.2014ConExclusives.*"],
+			["2015 Con Exclusives", "HorriblePeople.2015ConExclusives.*"],
+			["2015 Workshop Panels", "HorriblePeople.2015Workshop.*"],
+			["Adventure Pack", "HorriblePeople.AdventurePack.*"],
+			["Dungeon Delvers", "HorriblePeople.DungeonDelvers.*"],
+			["Fluffle Puff", "HorriblePeople.FlufflePuff.*"],
+			["Gracious Givers", "HorriblePeople.GraciousGivers.*"],
+			["Hearthswarming", "HorriblePeople.Hearthswarming.*"],
+			["The Mean 6", "HorriblePeople.Mean6.*"],
+			["Weaboo Paradaisu", "HorriblePeople.WeeabooParadaisu.*"],
+			["NewNewCore / Misc", "HorriblePeople.Misc.*"]
+		];
+
+		var cardSelectors = document.getElementById('cardSelectors');
+
+		var deckElementList = [];
+		for(var info of deckInfo)
+		{
+			if(info.length == 1)
+			{
+				var el = document.createElement('div');
+				el.innerHTML = info[0];
+				cardSelectors.appendChild(el);
+				continue;
+			}
+
+			var el = cardSelectComponent(decks, ...info)
+			deckElementList.push(el)
+			deckElements[info[1]] = el;
+			cardSelectors.appendChild(el);
+		}
+
+
+
+		for(let i=0; i < cardBoxes.length; i++)
 		{
 			let box = cardBoxes[i];
 			cardBoxElements[box.getAttribute('value')] = box;
 
 			box.onclick = function()
 			{
+				console.log("box clicked " +this.className)
+
 				if(this.classList.contains('selected'))
-					this.classList.remove("selected")
+				{
+					this.classList.remove("selected");
+					deckElementList[i].getElementsByTagName('button')[0].click();
+				}
 				else
+				{
 					this.classList.add('selected');
+					deckElementList[i].getElementsByTagName('button')[2].click();
+					//console.log(deckElements[i].getElementsByTagName('button')[2]);
+				}
 			}
 		}
+
+		var startCards = document.getElementById('startCards');
+		console.log('cards')
+		console.log(Object.keys(cards).filter(x => isStart(x)));
+		console.log(Object.keys(cards));
+		for(var card of Object.keys(cards).filter(x => isStart(x)))
+		{
+			console.log(card);
+
+			var cardEl = makeCardElement(card);
+			var shield = document.createElement('div');
+
+
+			if(card == "Core.Start.FanficAuthorTwilight")
+				cardEl.classList.add('selected');
+
+			cardEl.setAttribute('card', card);
+			//cardEl.setAttribute('no', no++);
+			shield.className ='shield';
+			cardEl.appendChild(shield);
+
+			cardEl.onclick = function(e)
+			{
+				var cards = this.parentNode.getElementsByClassName('card');
+
+				for(el of cards)
+				{
+					el.classList.remove('selected');
+				}
+
+				this.classList.add('selected');
+
+				var infoText = "";
+				switch(this.getAttribute('card'))
+				{	
+					case "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord":
+						infoText = "Goals will not automatically turn green if you use this start card";
+						break;
+				}
+
+				document.getElementById('startCardDetails').innerHTML = infoText;
+			}
+
+			startCards.appendChild(cardEl);
+		}
+
+
 	}
 	else
 	{
 		changePage(undefined, "pageClosed");
 	}
 }
+
+function addStartCardSelectors()
+{
+
+}
+
+function getPackString(card)
+{
+	var dotPos = card.substring(0, card.lastIndexOf(".")).lastIndexOf(".")
+	return card.substring(0, dotPos+1) + "*";
+}
+
 
 function onMessage()
 {
@@ -78,21 +204,63 @@ function onMessage()
 
 		if(options)
 		{
+
+
 			ishost = true;
 			document.getElementById('rightSide').classList.add('host')
 
 			for(var key in cardBoxElements)
 			{
-				if(key != "Core.*")
-					cardBoxElements[key].classList.remove('selected')
+				cardBoxElements[key].classList.remove('selected')
 			}
 
 			if(options.cardDecks)
-				for(var key of options.cardDecks)
+			{
+				var s = new Set(options.cardDecks);
+
+				var boxes = document.getElementsByClassName('cardbox');
+				for(var el of boxes)
 				{
-					if(key != "Core.*")
-						cardBoxElements[key].classList.add('selected');
+					if(s.has(el.getAttribute('deck')))
+					{
+						el.click();
+					}
 				}
+
+				var cardDivs = document.getElementsByClassName('card');
+				for(var el of cardDivs)
+				{
+					var card = el.getAttribute('card')
+					if(s.has(card))
+					{
+						el.classList.add('selected');
+
+						var deck = getPackString(card);
+
+						deckElements[deck].getElementsByTagName('button')[1].click();
+					}
+				}
+
+				var allButtons = document.getElementsByClassName('allButton');
+				for(var el of allButtons)
+				{
+					if(s.has(el.getAttribute('deck')))
+					{
+						el.click();
+					}
+				}
+
+				cardDivs = document.getElementById('startCards').getElementsByClassName('card')
+
+				for(var el of cardDivs)
+				{
+					if(el.getAttribute('card') == options.startCard)
+					{
+						el.click();
+					}
+				}
+			}
+				
 
 			if(options.ruleset == "turnsOnly")
 				document.getElementById("turnsOnly").checked = true;
@@ -153,14 +321,15 @@ function startGame()
 
 
 	// skip 0 because it's core
-	for(var i=1; i<cardDecks.length; i++)
-	{
-		if(cardDecks[i].classList.contains('selected'))
-		{
-			var cardDeckName = cardDecks[i].getAttribute('value');
-			options.cardDecks.push(cardDeckName)
-		}
-	}
+
+	options.cardDecks = Object.keys(decks).map(x => [...decks[x]]).reduce((a,b) => a.concat(b), []);
+
+	var startCard = document.getElementById('startCards').getElementsByClassName('selected')[0];
+	options.startCard = startCard ? startCard.getAttribute('card') : "Core.Start.FanficAuthorTwilight";
+
+
+
+	console.log(options.cardDecks);
 
 	if(document.getElementById('sandbox').checked)
 		options.ruleset = "sandbox";
@@ -181,6 +350,7 @@ function changePage(el, pageCssClass)
 	main.classList.remove("pageOptions")
 	main.classList.remove("pageCards")
 	main.classList.remove("pageClosed")
+	main.classList.remove("pageStartCard")
 
 	main.classList.add(pageCssClass);
 
@@ -188,7 +358,7 @@ function changePage(el, pageCssClass)
 	if(selected.length)
 		selected[0].classList.remove('selected');
 	if(el)
-	el.classList.add('selected');
+		el.classList.add('selected');
 }
 
 window.changePage = changePage

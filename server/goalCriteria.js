@@ -1,11 +1,6 @@
 import cards from "./cards.js";
 import {isBlank} from "./lib.js";
 
-
-var Nope = () => false;
-var Yep = () => true;
-
-
 function getCardProp(model, cardFull, prop)
 {
 	var [card, substate] = cardFull.split(":");
@@ -29,6 +24,9 @@ function getCardProp(model, cardFull, prop)
 	if(prop == "*")
 		return cardOverrides;
 
+	if(prop == "card")
+		return card;
+
 
 	if(prop == "keywords")
 	{
@@ -38,6 +36,14 @@ function getCardProp(model, cardFull, prop)
 			baseKeywords = baseKeywords.concat(cards[card].keywords);
 
 		return new Set(cards[baseCard][prop].concat(baseKeywords));
+	}
+
+	if(prop == "name")
+	{
+		var s = new Set();
+		s.add(cards[baseCard].name);
+		s.add(cards[card].name);
+		return s;
 	}
 
 	if(cardOverrides && cardOverrides[prop])
@@ -102,10 +108,16 @@ function doesCardMatchSelector(model, card, selector)
 
 		var cardValue = getCardProp(model, card, prop);
 
+		if(prop == "name")
+			return cardValue.has(value) ? falseValue : trueValue;
+
 		if(prop == "gender" && cardValue == "malefemale")
 			return trueValue;
 
-		return (getCardProp(model, card, prop) != value ? trueValue : falseValue);
+		if(prop == "race" && cardValue == "earth/unicorn")
+			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
+
+		return (cardValue != value ? trueValue : falseValue);
 	}
 
 	if(selector.indexOf("=") > -1)
@@ -122,10 +134,18 @@ function doesCardMatchSelector(model, card, selector)
 
 		var cardValue = getCardProp(model, card, prop);
 
+		//if(prop == "race")
+
+		if(prop == "name")
+			return cardValue.has(value) ? trueValue : falseValue;
+
 		if(prop == "gender" && cardValue == "malefemale")
 			return trueValue;
+		
+		if(prop == "race" && cardValue == "earth/unicorn")
+			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
-		return (getCardProp(model, card, prop) == value ? trueValue : falseValue);
+		return (cardValue == value ? trueValue : falseValue);
 	}
 
 	if(selector.indexOf(" in ") > -1)
@@ -174,6 +194,11 @@ function getConnectedPonies(model, key)
 
 function ExistsPony(selector, count)
 {
+	if (typeof selector != "string") 
+		throw new Error("Arg 1 of ExistsPonyGeneric needs to be a function");
+	if (typeof count != "number" && typeof count != "undefined") 
+		throw new Error("Arg 2 of ExistsPonyGeneric needs to be a number");
+
 	count = count || 1;
 	return function(model)
 	{
@@ -196,6 +221,11 @@ function ExistsPony(selector, count)
 
 function ExistsPonyGeneric(selectFun, count)
 {
+	if (typeof selectFun != "function") 
+		throw new Error("Arg 1 of ExistsPonyGeneric needs to be a function");
+	if (typeof count != "number" && typeof count != "undefined") 
+		throw new Error("Arg 2 of ExistsPonyGeneric needs to be a number");
+
 	count = count || 1;
 	return function(model)
 	{
@@ -220,6 +250,11 @@ function ExistsPonyGeneric(selectFun, count)
 
 function ExistsChain(selector, count)
 {
+	if (typeof selector != "string") 
+		throw new Error("Arg 1 of ExistsChain needs to be a string");
+	if (typeof count != "number") 
+		throw new Error("Arg 2 of ExistsChain needs to be a number");
+
 	return function(model)
 	{
 		function buildChain(key)
@@ -271,9 +306,13 @@ function ExistsChain(selector, count)
 
 function Select(selector, count)
 {
+	if (typeof selector != "string") 
+		throw new Error("Arg 1 of Select needs to be a string");
+	if (typeof count != "number" && typeof count != "undefined") 
+		throw new Error("Arg 2 of Select needs to be a number");
+
 	return function(model, connectedPonies)
 	{
-
 		let centeredCount = 0;
 		for(var card of connectedPonies)
 		{
@@ -284,10 +323,15 @@ function Select(selector, count)
 	}
 }
 
-
-
 function ExistsPonyShippedTo(mainPonySel, groupSelectionFn, count)
 {
+	if (typeof mainPonySel != "string") 
+		throw new Error("Arg 1 of ExistsPonyShippedTo needs to be a string");
+	if (typeof groupSelectionFn != "function") 
+		throw new Error("Arg 2 of ExistsPonyShippedTo needs to be a function");
+	if (typeof count != "number" && typeof count != "undefined") 
+		throw new Error("Arg 3 of ExistsPonyShippedTo needs to be a number");
+
 	count = count || 1;
 	return function(model)
 	{
@@ -312,6 +356,13 @@ function ExistsPonyShippedTo(mainPonySel, groupSelectionFn, count)
 
 function ExistsShip(selector1, selector2, count)
 {
+	if (typeof selector1 != "string") 
+		throw new Error("Arg 1 of ExistsShip needs to be a string");
+	if (typeof selector2 != "string") 
+		throw new Error("Arg 2 of ExistsShip needs to be a string");
+	if (typeof count != "number" && typeof count != "undefined") 
+		throw new Error("Arg 3 of ExistsShip needs to be a number");
+
 	var checkTwoSelectors = function(model, card1, card2)
 	{
 		if(doesCardMatchSelector(model, card1, selector1) && doesCardMatchSelector(model, card2, selector2))
@@ -334,6 +385,11 @@ function ExistsShip(selector1, selector2, count)
 
 function PlayPonies(selector, count)
 {
+	if (typeof selector != "string") 
+		throw new Error("Arg 1 of PlayPonies needs to be a string");
+	if (typeof count != "number" && typeof count != "undefined") 
+		throw new Error("Arg 2 of PlayPonies needs to be a number");
+
 	return function(model)
 	{
 		if(model.turnstate)
@@ -351,6 +407,13 @@ function PlayPonies(selector, count)
 
 function PlayShips(selector1, selector2, count)
 {
+	if (typeof selector1 != "string") 
+		throw new Error("Arg 1 of PlayShips needs to be a string");
+	if (typeof selector2 != "string") 
+		throw new Error("Arg 2 of PlayShips needs to be a string");
+	if (typeof count != "number" && typeof count != "undefined") 
+		throw new Error("Arg 3 of PlayShips needs to be a number");
+
 	count = count || 1;
 	return function(model)
 	{
@@ -377,6 +440,13 @@ function PlayShips(selector1, selector2, count)
 
 function BreakShip(selector1, selector2, count)
 {
+	if (typeof selector1 != "string") 
+		throw new Error("Arg 1 of BreakShip needs to be a string");
+	if (typeof selector2 != "string") 
+		throw new Error("Arg 2 of BreakShip needs to be a string");
+	if (typeof count != "number" && typeof count != "undefined") 
+		throw new Error("Arg 3 of BreakShip needs to be a number");
+
 	count = count || 1;
 	return function(model)
 	{
@@ -403,6 +473,11 @@ function BreakShip(selector1, selector2, count)
 
 function ExistsShipGeneric(compareCardsFun, count)
 {
+	if (typeof compareCardsFun != "function") 
+		throw new Error("Arg 1 of ExistsShipGeneric needs to be a function");
+	if (typeof count != "number" && typeof count != "undefined") 
+		throw new Error("Arg 2 of ExistsShipGeneric needs to be a number");
+
 	count = count || 1;
 	return function(model)
 	{
@@ -537,17 +612,200 @@ function ShippedWith2Versions(model, ponyCards)
 	return false;
 }
 
-
-function ShippedWithMrMrsCake(model, ponyCards)
+function AllOf(...selectors)
 {
+	return function(model, ponyCards)
+	{
+		for(var selector of selectors)
+		{
+			if(ponyCards.filter(x => doesCardMatchSelector(model, x, selector)).length == 0)
+				return 0;
+		}
 
-	var mrs = ponyCards.filter( x => doesCardMatchSelector(model, x, "name=Mrs. Cake")).length;
-	var mr = ponyCards.filter( x => doesCardMatchSelector(model, x, "name=Mr. Cake")).length;
-
-	return (mr > 0 && mrs > 0 ? 1 : 0);
+		return 1;
+	}
+	
 }
 
-var goalCriteria = {
+function typecheckAllGoals()
+{
+	for(var card in cards)
+	{
+		try
+		{
+			if(cards[card].goalLogic)
+			{
+				var fun = goalLogicParser(cards[card].goalLogic, []);
+				cards[card].goalFun = fun;
+			}
+		}
+		catch(e)
+		{
+			console.error(`Error in logic of ${card}: ${cards[card].goalLogic}\n${e.message}`);
+		}
+	}
+}
+
+typecheckAllGoals(cards);
+
+function evalGoalCard(card, model)
+{
+	try
+	{
+		if(cards[card].goalFun)
+		{
+			return cards[card].goalFun(model);
+		}
+
+		/*if(cards[card].goalLogic)
+		{
+			var fun = goalLogicParser(cards[card].goalLogic, []);
+			cards[card].goalFun = fun;
+			return cards[card].goalFun(model);
+		}*/
+
+		return false;
+	}
+	catch(e)
+	{
+		console.error(e);
+		return false;
+	}
+}
+
+
+function goalLogicParser(text, stack)
+{
+	function getFunFromName(name)
+	{
+		switch(name)
+		{
+			case "AllOf": return AllOf;
+			case "BreakShip": return BreakShip;
+			case "ExistsChain": return ExistsChain;
+			case "ExistsPony": return ExistsPony;
+			case "ExistsPonyGeneric": return ExistsPonyGeneric;
+			case "ExistsPonyShippedTo": return ExistsPonyShippedTo;
+			case "ExistsShip": return ExistsShip;
+			case "ExistsShipGeneric": return ExistsShipGeneric;
+			case "GainOCKeyword": return GainOCKeyword;
+			case "PlayLovePoisons": return PlayLovePoisons;
+			case "PlayPonies": return PlayPonies;
+			case "PlayShips": return PlayShips;
+			case "Select": return Select;
+			case "ShippedWithOppositeGenderedSelf": return ShippedWithOppositeGenderedSelf;
+			case "ShippedWith2Versions": return ShippedWith2Versions;
+			case "SwapCount": return SwapCount;
+			default: return undefined
+		}
+	}
+
+	var funNames = new Set([])
+
+	function inf(x)
+	{
+		return x == -1 ? Infinity : x;
+	}
+
+
+	var parIndex = inf(text.indexOf("("));
+	var commaIndex = inf(text.indexOf(","));
+	var endparIndex = inf(text.indexOf(")"));
+
+	var end = Math.min(parIndex, Math.min(commaIndex, endparIndex));
+
+	var token = text.substring(0,end);
+	var text = text.substring(end);
+
+	//console.log("stack " + stack);
+
+	switch(text[0])
+	{
+		case "(":
+			stack.push(token);
+			stack.push("(");
+
+			return goalLogicParser(text.substring(1), stack);
+
+		case ")":
+			
+			if(token.trim() != "")
+			{
+				stack.push(token.trim());
+			}
+
+			var openPar = stack.lastIndexOf("(")
+			openPar--;
+
+			var params = [];
+
+			var param = stack.pop();
+			while(param != "(")
+			{
+				if(typeof param == "function")
+					params.unshift(param)
+				else if (getFunFromName(param))
+				{
+					params.unshift(getFunFromName(param))
+				}
+				else if (!isNaN(Number(param)))
+				{
+					params.unshift(Number(param))
+				}
+				else
+				{
+					params.unshift(param.trim());
+				}
+
+				param = stack.pop();
+			}
+
+			param = stack.pop().trim();
+
+			var fun = getFunFromName(param);
+
+			if(!fun)
+				throw new Error("A function named " + param + " does not exists. stack=" + stack);
+
+			//console.log("params: " + params)
+
+			stack.push(fun(...params));
+
+			return goalLogicParser(text.substring(1), stack);
+		case ",":
+
+			if(token.trim() != "")
+				stack.push(token)
+
+			return goalLogicParser(text.substring(1), stack);
+
+		default:
+
+			if(token.trim() == "" && stack.length == 1)
+			{
+				return stack[0];
+			}
+			else if(stack.length == 0 && token.trim() != "")
+			{
+				var fun = getFunFromName(token);
+				if(fun)
+					return fun;
+				else
+					throw new Error("A function named " + token + " does not exists.");
+			}
+			else
+			{
+				throw new Error("Bad stack " + stack);
+			}
+			
+	}
+	
+
+}
+
+
+
+/*var goalCriteria = {
 
 	"Core.Goal.BuddingCuriosity": ExistsShipGeneric(ShippedWithOppositeGenderedSelf),
 	"Core.Goal.CargoShip": ExistsShip("Object in keywords","Object in keywords"),
@@ -608,7 +866,7 @@ var goalCriteria = {
 	"EC.Goal.ABlessingOfAlicorns": ExistsPony("race=alicorn", 5),
 	"EC.Goal.TheresNoThrillLikeIronWill": ExistsShip("name=Iron Will","Villain in keywords"),
 	"EC.Goal.OfPoniesAndPerilTheMagnumOpus": ExistsChain("altTimeline=true",3),
-	"EC.Goal.Swinging": ExistsPonyShippedTo("*", ShippedWithMrMrsCake),
+	"EC.Goal.Swinging": ExistsPonyShippedTo("*", AllOf("name=Mr. Cake", "name=Mrs. Cake")),
 	"EC.Goal.SpaDay": ExistsShip("Mane 6 in keywords", "name=Aloe & Lotus"),
 	"EC.Goal.NoPoniesCanPonyTwoPoniesToPony": ExistsPonyShippedTo("*",Select("*",6)),
 	"EC.Goal.EvilSocietyOfEvil": ExistsChain("Villain in keywords", 6),
@@ -626,6 +884,17 @@ var goalCriteria = {
 	"PU.Goal.RevengeOfTheNerds": ExistsShip("Uni in keywords || PCC in keywords", "Mane 6 in keywords"),
 	"PU.Goal.SchoolwideFestivities": ExistsChain("Uni in keywords || PCC in keywords",6),
 	"PU.Goal.WhereforeArtThouPoneo": ExistsShip("Uni in keywords","PCC in keywords"),
-}
+
+
+	"NoHoldsBarred.Goal.ThisShipIsDelicious": ExistsPonyShippedTo("name=Pinkie Pie", AllOf("name=Luna","name=Twilight Sparkle","name=Applejack")),
+	"NoHoldsBarred.Goal.FromForeignLands": ExistsShip("Zebra in keywords || Batpony in keywords || Changeling in keywords|| Dragon in keywords",
+		 "Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords"),
+	"NoHoldsBarred.Goal.FateBreakers": ExistsShip("name=Logic Gate", "name=Flickering Oracle"),
+	"NoHoldsBarred.Goal.DarkHorseDanceCard": PlayShips("OC in keywords", "OC in keywords", 2),
+	"NoHoldsBarred.Goal.OMiGoshBugHug": ExistsShip("name=Starlit Dreams","card=Core.Start.FanficAuthorTwilight"),
+	"NoHoldsBarred.Goal.AfterThisWellNeedRehab": ExistsShip("#horsefamous in keywords","#horsefamous in keywords"),
+	"NoHoldsBarred.Goal.WhyIsEveryThingGlowing": ExistsPonyShippedTo("*", Select("OC in keywords", 4))
+
+}*/
 	
-export default goalCriteria;
+export default evalGoalCard;

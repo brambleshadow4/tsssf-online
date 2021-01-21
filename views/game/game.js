@@ -173,14 +173,19 @@ export function loadView()
 
 	window.onresize = function(e)
 	{
-		if(document.fullscreenElement)
+		var fullscreenButton = document.getElementById('fullscreenButton')
+		if(fullscreenButton)
 		{
-			document.getElementById('fullscreenButton').src = "/img/smallscreen.svg";
+			if(document.fullscreenElement)
+			{
+				fullscreenButton.src = "/img/smallscreen.svg";
+			}
+			else
+			{
+				fullscreenButton.src = "/img/fullscreen.svg";
+			}
 		}
-		else
-		{
-			document.getElementById('fullscreenButton').src = "/img/fullscreen.svg";
-		}
+		
 	}
 
 }
@@ -218,14 +223,14 @@ function LoadCards()
 	{
 		if(isCardIncluded(key, model))
 		{
-			var nodes = key.split(".");
+			/*var nodes = key.split(".");
 			nodes.pop();
 			var urlToImg = "/img/" + nodes.join("/") + "/" + currentDeck[key].url;
 
 			currentDeck[key].keywords = new Set(currentDeck[key].keywords);
 
 			currentDeck[key].fullUrl = urlToImg;
-			currentDeck[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");
+			currentDeck[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");*/
 
 			var img = document.createElement('img');
 			img.src = currentDeck[key].thumbnail;
@@ -791,13 +796,17 @@ window.moveCard = moveCard;
 addPlayEvent(async function(e){
 
 	var cardInfo = currentDeck[e.card];
-	if(cardInfo.keywords.has("Changeling") && isBoardLoc(e.endLocation))
+	
+	//if(cardInfo.keywords.has("Changeling") && isBoardLoc(e.endLocation))
+	if(cardInfo.action == "standardChangeling" && isBoardLoc(e.endLocation))
 	{
 
 		if(model.turnstate)
 		{
 			var cardNames = Object.keys(currentDeck);
 			var disguises = cardNames.filter(x => currentDeck[x].race == cardInfo.race && !currentDeck[x].doublePony && !currentDeck[x].keywords.has("Changeling"));
+
+			//if(e.card == "")
 
 			var newCard = await openCardSelect("Choose a pony to disguise as", disguises);
 

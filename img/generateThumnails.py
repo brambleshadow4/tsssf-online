@@ -13,6 +13,9 @@ def process(files):
 		image.save(outFile)
 
 
-process(glob.glob('./Core/*/*.png'))
-process(glob.glob('./EC/*/*.png'))
-process(glob.glob('./PU/*/*.png'))
+#process(glob.glob('./Core/*/*.png'))
+#process(glob.glob('./EC/*/*.png'))
+#process(glob.glob('./PU/*/*.png'))
+#process(glob.glob('./NoHoldsBarred/*/*.png'))
+#process(glob.glob('./HorriblePeople/*/*/*.png'))
+process(glob.glob('./ChildrenOfKefentse/*/*/*.png'))

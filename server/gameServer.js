@@ -16,7 +16,7 @@ import {
 	getNeighborKeys
 } from "./lib.js";
 
-import goalCriteria from "./goalCriteria.js";
+import evalGoalCard from "./goalCriteria.js";
 
 import cards from "./cards.js";
 import {logGameHosted, logPlayerJoined} from "./stats.js";
@@ -315,6 +315,7 @@ export function TsssfGameServer()
 		else
 			var payload = JSON.stringify({
 				cardDecks: games[key].cardDecks,
+				startCard: games[key].startCard,
 				ruleset: games[key].ruleset,
 				keepLobbyOpen: games[key].keepLobbyOpen
 			})
@@ -332,23 +333,24 @@ export function TsssfGameServer()
 	{
 		var model = games[key];
 
-		if(model.turnstate == undefined)
+		if(!model.runGoalLogic)
 			return;
 
 		var sendUpdate = false;
 
-		for(var card of model.currentGoals)
+		for(var goalInfo of model.currentGoals)
 		{
 			var achieved = false;
-			if(goalCriteria[card.card])
-				achieved = goalCriteria[card.card](model);
 
-			if(card.achieved != achieved)
+			if(!isBlank(goalInfo.card))
+				achieved = evalGoalCard(goalInfo.card, model)
+
+			if(goalInfo.achieved != achieved)
 			{
 				sendUpdate = true;
 			}
 
-			card.achieved = achieved;
+			goalInfo.achieved = achieved;
 		}
 
 		if(sendUpdate)
@@ -377,6 +379,8 @@ export function TsssfGameServer()
 		
 		games[key] = {
 			messageHistory: [],
+			cardDecks: ["Core.*"],
+			startCard: "Core.Start.FanficAuthorTwilight",
 			deathCount: 0,
 			isLobbyOpen: true,
 			isInGame: false,
@@ -460,9 +464,23 @@ export function TsssfGameServer()
 	{	
 		var model = games[key];
 
+		// remove players which disconnected before the games started
+		for(var i=0; i<model.players.length; i++)
+		{
+			if(model.players[i].name == "" || !model.players[i].socket.isAlive)
+			{
+				model.players.splice(i,1);
+				i--;
+			}
+		}
+
+		if(model.players.length == 0)
+			return false;
+
+
 		model.startTime = new Date().getTime();
 
-		model.startCard = "Core.Start.FanficAuthorTwilight";
+		model.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
 
 		model.cardLocations = {};
 		model.board = {
@@ -479,6 +497,8 @@ export function TsssfGameServer()
 
 		model.isInGame = true;
 
+		model.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
+
 		model.isLobbyOpen = model.keepLobbyOpen = !!options.keepLobbyOpen;
 
 
@@ -487,14 +507,13 @@ export function TsssfGameServer()
 		var decks = ["Core.*"];
 		if(options.cardDecks)
 		{
-			var allowedDecks = ["PU.*","EC.*"]
-			var decks = options.cardDecks.filter( x => allowedDecks.indexOf(x) > -1);
-			decks.push("Core.*");
+			//var allowedDecks = ["PU.*","EC.*"]
+			var decks = options.cardDecks; //.filter( x => allowedDecks.indexOf(x) > -1);
+			//decks.push("Core.*");
 		}
 
 		model.cardDecks = decks;
 		
-
 		model.goalDiscardPile = [];
 		model.ponyDiscardPile = [];
 		model.shipDiscardPile = [];
@@ -514,6 +533,9 @@ export function TsssfGameServer()
 		model.ponyDrawPile = [];
 		model.shipDrawPile = [];
 
+
+
+		
 
 		logGameHosted();
 
@@ -546,15 +568,7 @@ export function TsssfGameServer()
 			}
 		}
 
-		// remove players which disconnected before the games started
-		for(var i=0; i<model.players.length; i++)
-		{
-			if(model.players[i].name == "" || !model.players[i].socket.isAlive)
-			{
-				model.players.splice(i,1);
-				i--;
-			}
-		}
+		
 
 		randomizeOrder(model.players);
 
@@ -811,7 +825,6 @@ export function TsssfGameServer()
 			model.currentGoals[goalNo].card = card;
 			model.cardLocations[card] = "goal," + goalNo;
 		}
-
 
 		if(endLocation == "winnings")
 		{
@@ -1079,6 +1092,8 @@ export function TsssfGameServer()
 			console.log(message);
 
 			var model = games[key];
+			if(!model) // not quite sure how this happens, but this crashed one time.
+				return;
 
 			model.messageHistory.push(message);
 
@@ -1136,7 +1151,10 @@ export function TsssfGameServer()
 					if(model.host == socket)
 					{
 
-						var options = {cardDecks:[]};
+						var options = {
+							cardDecks:["Core.*"],
+							ruleset: "turnsOnly",
+						};
 						try 
 						{
 							options = JSON.parse(message.substring(10))
@@ -1144,9 +1162,13 @@ export function TsssfGameServer()
 						catch(e){ }
 
 						
-						startGame(key, options);
-						toEveryone(key, "startgame;");
-						sendHostMessage(key, model.host, true)
+						if(startGame(key, options))
+						{
+							toEveryone(key, "startgame;");
+							sendHostMessage(key, model.host, true)
+						}
+
+						return;
 					}		
 				}
 

@@ -27,6 +27,7 @@ var HTML = `
 			<div id='joinGameTab' onclick="changePage(this, 'pageJoin')" class="selected">Join Game</div>
 			<div id='gameOptionsTab' onclick="changePage(this, 'pageOptions')">Game Options</div>
 			<div id='chooseCardsTab' onclick="changePage(this, 'pageCards')">Choose cards</div>
+			<div onclick="changePage(this, 'pageStartCard')">Start card</div>
 		</div>
 		<div id='main' class='main pageJoin unregistered'>
 			
@@ -52,7 +53,7 @@ var HTML = `
 
 			<div id='gameOptionsInfo'>
 				<h2>Rule Enforcement</h2>
-				<div><input type='radio' name='gamerules' disabled><label for=''>Full rules - Coming soon!</label></div>
+				<!-- div><input type='radio' name='gamerules' disabled><label for=''>Full rules - Coming soon!</label></div -->
 				<div><input id='turnsOnly' type='radio' name='gamerules' checked><label for='turnsOnly'>Turns - Only one person can play at a time</label></div>
 				<div><input id='sandbox' type='radio' name='gamerules' ><label for='sandbox'>Sandbox - Everyone can play simultaneously</label></div>
 
@@ -60,19 +61,32 @@ var HTML = `
 				<div><input type='checkbox' id='keepLobbyOpen'><label for='keepLobbyOpen'>Keep lobby open during game<br>You can also toggle this in game</label></div>
 			</div>
 
+			<div id='startCardInfo'>
+				<h2>Pick a start card</h2>
+				<div id='startCards'></div>
+				<p id='startCardDetails'></p>
+			</div>
+
 			<div id='chooseCardsInfo'>
 				<h2>Expansions</h2>
-				<div class='cardbox selected' id='Core-deck-select' value="Core.*">
+				<div class='cardbox' id='Core-deck-select' deck="Core.*">
 					<div class='shield'></div>
 					<img src="/img/core-box.png" />
 				</div>
-				<div class='cardbox' id='EC-deck-select' value="EC.*">
+				<div class='cardbox' id='EC-deck-select' deck="EC.*">
 					<div class='shield'></div>
 					<img src="/img/ec-box.png" />
 				</div>
-				<div class='cardbox' id='PU-deck-select' value="PU.*">
+				<div class='cardbox' id='PU-deck-select' deck="PU.*">
 					<div class='shield'></div>
 					<img src="/img/pu-box.png" />
+				</div>
+				<div class='cardbox' deck="NoHoldsBarred.*">
+					<div class='shield'></div>
+					<img src="/img/noholds-box.png" />
+				</div>
+				<h2 class="bothMargins">Individual cards</h2>
+				<div id='cardSelectors'>
 				</div>
 			</div>
 

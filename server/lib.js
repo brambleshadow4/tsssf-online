@@ -20,6 +20,11 @@ export function isPonyOrStart(card)
 	return card.indexOf(".Pony.") >= 0 || card.indexOf(".Start.") >= 0;
 }
 
+export function isStart(card)
+{
+	return card.indexOf(".Start.") >= 0;
+}
+
 export function isBlank(card)
 {
 	return card.startsWith("blank:");

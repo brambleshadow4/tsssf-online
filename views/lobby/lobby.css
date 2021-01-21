@@ -112,6 +112,7 @@ h2
 #chooseName {display: none;}
 #gameOptionsInfo {display: none;}
 #chooseCardsInfo {display: none;}
+#startCardInfo {display: none;}
 #closedLobby { display: none;}
 
 
@@ -119,6 +120,7 @@ h2
 .pageJoin #joinGameInfo {display: block;}
 .pageOptions #gameOptionsInfo {display: block;}
 .pageCards #chooseCardsInfo {display: block;}
+.pageStartCard #startCardInfo {display: block;}
 .pageClosed #closedLobby { display: block;}
 
 .pageJoin.registered #chooseName {display: none;}
@@ -177,17 +179,108 @@ h2
 }
 
 
+.cardSelect-header
+{
+	font-size: 14pt;
+	display: flex;
+	align-items: center;
+}
+
+.bar
+{
+	flex-grow: 1;
+	height: 2px;
+	background-color: black;
+	margin: 0px 5px;
+}
+.close .collapse
+{
+	height: 20px;
+	width: 20px;
+	background-image: url("/img/ios-arrow-forward.svg");
+}
+
+.open .collapse
+{
+	height: 20px;
+	width: 20px;
+	background-image: url("/img/ios-arrow-down.svg");
+}
+
+.name, .collapse
+{
+	cursor: pointer;
+}
+
+.cardSelect-header
+{
+	margin: 2px 0px;
+}
+.cardSelect-header button
+{
+	background-color: white;
+	border: solid 2px gray;
+	color: gray;
+	margin: 2px;
+}
+
+
+
+.cardSelect-header button.selected
+{
+	border: solid 2px #0074E8;
+	background-color: #0074E8;
+	color: white;
+}
+
+.cardSelect-body
+{
+	margin-left: 20px;
+}
+.close .cardSelect-body
+{
+	display: none;
+}
+
+.card
+{
+	/*13 x 18*/
+	height: 126px;
+	width: 91px; 
+	margin: 4px;
+	display: inline-block;
+
+	background-position: center; 
+	background-size: cover;
+}
+
+.card .shield
+{
+	width: 100%;
+	height: 100%;
+}
+
+
+.card.selected
+{
+	box-shadow: 0 0 4px 4px #0074E8;
+}
+
+.card.selected .shield
+{
+	background-color: rgb(0, 116, 232, .25);
+}
 
 .cardbox
 {
 	display: inline-block;
-	margin: 5px;
-	padding: 15px;
+	margin: 2px;
+	padding: 10px;
 }
 
 #chooseCardsInfo
 {
-	font-size: 0px;
+	/*font-size: 0px;*/
 }
 
 
@@ -200,7 +293,7 @@ h2
 }
 .cardbox img
 {
-	height: 170px;
+	height: 160px;
 	position: relative;
 	z-index: 0;
 
@@ -223,16 +316,6 @@ h2
 	border: solid 2px #0066ff;
 	border-radius: 10px;
 	background-color: rgba(102, 163, 255, .5);
-}
-
-.cardbox.selected
-{
-	
-}
-
-#Core-deck-select
-{
-	cursor: no-drop;
 }
 
 @media screen and (max-width: 700px)
