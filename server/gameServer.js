@@ -464,6 +464,20 @@ export function TsssfGameServer()
 	{	
 		var model = games[key];
 
+		// remove players which disconnected before the games started
+		for(var i=0; i<model.players.length; i++)
+		{
+			if(model.players[i].name == "" || !model.players[i].socket.isAlive)
+			{
+				model.players.splice(i,1);
+				i--;
+			}
+		}
+
+		if(model.players.length == 0)
+			return false;
+
+
 		model.startTime = new Date().getTime();
 
 		model.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
@@ -520,6 +534,9 @@ export function TsssfGameServer()
 		model.shipDrawPile = [];
 
 
+
+		
+
 		logGameHosted();
 
 		for(var i of model.players.filter(x => isRegistered(x)))
@@ -551,15 +568,7 @@ export function TsssfGameServer()
 			}
 		}
 
-		// remove players which disconnected before the games started
-		for(var i=0; i<model.players.length; i++)
-		{
-			if(model.players[i].name == "" || !model.players[i].socket.isAlive)
-			{
-				model.players.splice(i,1);
-				i--;
-			}
-		}
+		
 
 		randomizeOrder(model.players);
 
@@ -1083,6 +1092,8 @@ export function TsssfGameServer()
 			console.log(message);
 
 			var model = games[key];
+			if(!model) // not quite sure how this happens, but this crashed one time.
+				return;
 
 			model.messageHistory.push(message);
 
@@ -1140,7 +1151,10 @@ export function TsssfGameServer()
 					if(model.host == socket)
 					{
 
-						var options = {cardDecks:[]};
+						var options = {
+							cardDecks:["Core.*"],
+							ruleset: "turnsOnly",
+						};
 						try 
 						{
 							options = JSON.parse(message.substring(10))
@@ -1148,9 +1162,13 @@ export function TsssfGameServer()
 						catch(e){ }
 
 						
-						startGame(key, options);
-						toEveryone(key, "startgame;");
-						sendHostMessage(key, model.host, true)
+						if(startGame(key, options))
+						{
+							toEveryone(key, "startgame;");
+							sendHostMessage(key, model.host, true)
+						}
+
+						return;
 					}		
 				}
 
