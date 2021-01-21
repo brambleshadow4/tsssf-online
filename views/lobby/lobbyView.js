@@ -64,6 +64,7 @@ var HTML = `
 			<div id='startCardInfo'>
 				<h2>Pick a start card</h2>
 				<div id='startCards'></div>
+				<p id='startCardDetails'></p>
 			</div>
 
 			<div id='chooseCardsInfo'>

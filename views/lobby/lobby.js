@@ -57,7 +57,9 @@ export function loadView(isOpen)
 			["Extra Credit", "EC.*", cardBoxes[1]],
 			["Ponyville University","PU.*", cardBoxes[2]],
 			["No Holds Barred", "NoHoldsBarred.*", cardBoxes[3]],
+
 			["<h3>Mini Expansions</h3>"],
+
 			["2014 Con Exclusives", "HorriblePeople.2014ConExclusives.*"],
 			["2015 Con Exclusives", "HorriblePeople.2015ConExclusives.*"],
 			["2015 Workshop Panels", "HorriblePeople.2015Workshop.*"],
@@ -121,7 +123,7 @@ export function loadView(isOpen)
 		console.log(Object.keys(cards));
 		for(var card of Object.keys(cards).filter(x => isStart(x)))
 		{
-			console.log()
+			console.log(card);
 
 			var cardEl = makeCardElement(card);
 			var shield = document.createElement('div');
@@ -145,6 +147,16 @@ export function loadView(isOpen)
 				}
 
 				this.classList.add('selected');
+
+				var infoText = "";
+				switch(this.getAttribute('card'))
+				{	
+					case "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord":
+						infoText = "Goals will not automatically turn green if you use this start card";
+						break;
+				}
+
+				document.getElementById('startCardDetails').innerHTML = infoText;
 			}
 
 			startCards.appendChild(cardEl);

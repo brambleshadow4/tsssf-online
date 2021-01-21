@@ -333,7 +333,7 @@ export function TsssfGameServer()
 	{
 		var model = games[key];
 
-		if(model.turnstate == undefined)
+		if(!model.runGoalLogic)
 			return;
 
 		var sendUpdate = false;
@@ -344,7 +344,6 @@ export function TsssfGameServer()
 
 			if(!isBlank(goalInfo.card))
 				achieved = evalGoalCard(goalInfo.card, model)
-
 
 			if(goalInfo.achieved != achieved)
 			{
@@ -483,6 +482,8 @@ export function TsssfGameServer()
 		}
 
 		model.isInGame = true;
+
+		model.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
 
 		model.isLobbyOpen = model.keepLobbyOpen = !!options.keepLobbyOpen;
 
