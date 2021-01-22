@@ -778,68 +778,74 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 
 var playEventHandlers = [];
 
-function addPlayEvent(fn)
-{
-	playEventHandlers.push(fn);
-}
 
 async function doPlayEvent(e)
 {
-	for(var fn of playEventHandlers)
+	var cardInfo = currentDeck[e.card];
+
+	if(isPonyOrStart(e.card) && isBoardLoc(e.endLocation))
 	{
-		var x = await fn(e);
+		var fn = getActionFunction(e.card);
+		if(fn) await fn(e.card);
+	}
+
+	if(isShip(e.card))
+	{
+		var cardInfo = currentDeck[e.card];
+		if(isShip(e.card) && isBoardLoc(e.endLocation))
+		{
+			if(model.turnstate)
+			{
+				if(!model.turnstate.openShips)
+					model.turnstate.openShips = {};
+
+				model.turnstate.openShips[e.card] = true;
+			}
+		}
+	}
+
+	if(model.turnstate)
+	{
+		for(let shipCard in model.turnstate.openShips)
+		{
+			if(!cardLocations[shipCard] || !isBoardLoc(cardLocations[shipCard]))
+			{
+				// card has been removed from the board.
+				delete model.turnstate.openShips[shipCard];
+				continue
+			}
+
+			if(isShipClosed(shipCard))
+			{
+				delete model.turnstate.openShips[shipCard];
+
+				fn = getActionFunction(shipCard);
+				console.log("ship card was played");
+				console.log(fn)
+				if(fn) await fn(shipCard);
+			}
+		}
 	}
 }
 
 window.moveCard = moveCard;
 
+
+
+/*
 addPlayEvent(async function(e){
 
-	var cardInfo = currentDeck[e.card];
-	
-	//if(cardInfo.keywords.has("Changeling") && isBoardLoc(e.endLocation))
-	if(cardInfo.action == "standardChangeling" && isBoardLoc(e.endLocation))
+	if((e.startLocation == "hand" || e.startLocation == "ponyDiscardPile,top") && e.endLocation.startsWith("p,"))
 	{
-
-		if(model.turnstate)
+		var cardInfo = currentDeck[e.card];
+		if(cardInfo.action == "ChangelingSpecial(plushling)")
 		{
-			var cardNames = Object.keys(currentDeck);
-			var disguises = cardNames.filter(x => currentDeck[x].race == cardInfo.race && !currentDeck[x].doublePony && !currentDeck[x].keywords.has("Changeling"));
 
-			//if(e.card == "")
-
-			var newCard = await openCardSelect("Choose a pony to disguise as", disguises);
-
-			if(!newCard)
-				return
-
-			
-			// reset overrides when changeling changes type.
-			setCardProp(e.card, "disguise", newCard);
-			broadcastEffects();
 		}
 	}
 
-	return
-});
 
-addPlayEvent(async function(e){
-
-	var cardInfo = currentDeck[e.card];
-	if(isShip(e.card) && isBoardLoc(e.endLocation))
-	{
-		if(model.turnstate)
-		{
-			if(!model.turnstate.openShips)
-				model.turnstate.openShips = {};
-
-			if(isShipClosed(e.card))
-				await executeShipAction(e.card);
-			else
-				model.turnstate.openShips[e.card] = true;
-		}
-	}
-});
+})*/
 
 function isShipClosed(shipCard)
 {
@@ -863,6 +869,82 @@ function getShippedPonies(shipCard)
 	}
 
 	return ponies;
+}
+
+function getActionFunction(card)
+{	
+	var cardInfo = currentDeck[card];
+
+	console.log("action=" + cardInfo.action);
+
+	if(cardInfo.action && cardInfo.action.startsWith("Changeling("))
+	{
+		var a = cardInfo.action.indexOf("(");
+		var b = cardInfo.action.indexOf(")")
+		var type = cardInfo.action.substring(a+1,b);
+		return changelingAction(type);
+	}
+
+	switch(cardInfo.action)
+	{
+		case "genderChange": return genderChangeAction;
+		case "makePrincess": return makePrincessAction;
+		case "clone": return cloneAction;
+		case "timelineChange": return timelineChangeAction;
+		case "keywordChange": return keywordChangeAction;
+		case "raceChange": return raceChangeAction;
+	}
+		
+}
+
+function changelingAction(type)
+{
+	return async function(card)
+	{
+		console.log("changeling type (" + type + ")");
+
+		if(model.turnstate)
+		{
+			var cardNames = Object.keys(currentDeck);
+			var disguises = cardNames.filter(x => isPony(x) && !currentDeck[x].doublePony && x != card);
+
+			console.log(disguises.slice());
+
+			switch(type)
+			{
+				case "alicorn":
+				case "unicorn":
+				case "earth":
+				case "pegasus":
+					console.log("doing this filter");
+					disguises = disguises.filter(x => currentDeck[x].race == type);
+					break;
+				case "nonAlicornFemale":
+					disguises = disguises.filter(x => !(
+						currentDeck[x].race == "alicorn" 
+						&& (currentDeck[x].gender == "female" || currentDeck[x].gender=="malefemale"))
+					);
+					break;
+				default:
+					disguises = [];
+			}
+
+			console.log(disguises);
+
+
+			if(!disguises.length)
+				return;
+
+			var newCard = await openCardSelect("Choose a pony to disguise as", disguises);
+
+			if(!newCard)
+				return
+
+			// reset overrides when changeling changes type.
+			setCardProp(card, "disguise", newCard);
+			broadcastEffects();
+		}
+	}
 }
 
 
@@ -926,211 +1008,178 @@ function setCardProp(card, prop, value)
 		{
 			propObj[prop] = value;
 		}
-		
 	}
 }
 
-async function executeShipAction(shipCard)
+async function makePrincessAction(shipCard)
 {
-	if(model.turnstate && model.turnstate.openShips)
-		delete model.turnstate.openShips[shipCard];
-
-
 	var ponies = getShippedPonies(shipCard);
-	var shipInfo = currentDeck[shipCard]
+	var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !currentDeck[x].keywords.has("Changeling")), true);
 
-	if(shipCard == "Core.Ship.YerAPrincessHarry")
+	if(ponyCard)
 	{
-		var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !currentDeck[x].keywords.has("Changeling")), true);
+		setCardProp(ponyCard, "race", "alicorn");
+		setCardProp(ponyCard, "gender", "female");
+		setCardProp(ponyCard, "keywords", "Princess");
 
-		if(ponyCard)
-		{
-			setCardProp(ponyCard, "race", "alicorn");
-			setCardProp(ponyCard, "gender", "female");
-			setCardProp(ponyCard, "keywords", "Princess");
-
-			broadcastEffects();
-		}
+		broadcastEffects();
 	}
-
-
-	if (shipInfo.action == "genderChange")
-	{
-		var ponyCard = await openCardSelect("Choose a pony to change gender", ponies, true);
-
-		if(!ponyCard) return;
-
-		if(model.turnstate)
-		{
-			var newGender = undefined;
-
-			switch(getCardProp(ponyCard, "gender"))
-			{
-				case "male": newGender = "female"; break;
-				case "female": newGender = "male"; break;
-				default: newGender = undefined;
-			}
-
-			if(newGender)
-			{
-				setCardProp(ponyCard, "gender", newGender)
-				broadcastEffects();
-			}
-		}
-	}
-
-	if (shipInfo.action == "clone")
-	{
-		var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !currentDeck[x].doublePony), true);
-
-		if(!ponyCard) return;
-
-		if(model.turnstate)
-		{
-			setCardProp(ponyCard, "doublePony", true)
-			broadcastEffects();
-		}
-	}
-
-	if (shipInfo.action == "timelineChange")
-	{
-		var ponyCard = await openCardSelect("Choose a pony to gain the <br> time traveller symbol", ponies, true);
-
-		if(!ponyCard) return;
-
-		if(model.turnstate)
-		{
-			setCardProp(ponyCard, "altTimeline", true)
-			broadcastEffects();
-		}
-	}
-
-	if (shipInfo.action == "raceChange")
-	{
-		ponies = ponies.filter(x => !currentDeck[x].keywords.has("Changeling"));
-
-		if(ponies.length == 0)
-			return;
-
-		var pair = await raceChangePopup(ponies);
-
-		if(!pair) return;
-
-		var [ponyCard, newRace] = pair;
-
-		if(model.turnstate)
-		{
-			setCardProp(ponyCard, "race", newRace)
-			broadcastEffects();
-		}
-	}
-
-	if (shipInfo.action == "keywordChange")
-	{
-
-		var output = await createPopup([{"render":function(accept)
-		{
-
-			var element = document.createElement('div');
-			element.className = "popupPage"
-
-			var selectedPony;
-			var h1 = document.createElement('h1');
-			h1.innerHTML = "Pick a keyword";
-			element.appendChild(h1);
-
-			var card1 = makeCardElement(ponies[0]);
-			card1.setAttribute('value', ponies[0])
-
-	
-			var card2 = makeCardElement(ponies[1]);
-			card2.setAttribute('value', ponies[1])
-			
-
-			function ponySelect()
-			{
-				card1.classList.remove('selected')
-				card2.classList.remove('selected')
-				
-				this.classList.add('selected');
-				selectedPony = this.getAttribute('value');
-
-			}
-
-			card1.onclick = ponySelect;
-			element.appendChild(card1);
-
-
-			card2.onclick = ponySelect;
-			element.appendChild(card2);
-			
-			var row = document.createElement('div')
-			for(let i=0; i< allKeywords.length; i++)
-			{
-
-				var button = document.createElement("button");
-				button.innerHTML = allKeywords[i];
-				button.onclick = function(){
-
-					if(selectedPony)
-					{
-						accept([selectedPony, allKeywords[i]]);
-					}
-					
-				}
-
-				row.appendChild(button);
-
-
-				if(i%5 == 4)
-				{
-					element.appendChild(row);
-					row = document.createElement('div');
-				}
-			}
-
-			element.appendChild(row);
-
-			return element;
-
-
-		}}], true);
-
-		if(output && model.turnstate)
-		{
-			var [card, keyword] = output;
-			setCardProp(card, "keywords", keyword)
-			broadcastEffects();
-		}
-	}
-
-	
 }
 
-addPlayEvent(async function(e){
+async function genderChangeAction(shipCard)
+{
+	var ponies = getShippedPonies(shipCard);
+	var ponyCard = await openCardSelect("Choose a pony to change gender", ponies, true);
 
-	if(isPonyOrStart(e.card) && isBoardLoc(e.endLocation))
+	if(!ponyCard) return;
+
+	if(model.turnstate)
 	{
-		if(model.turnstate)
-		{
-			for(var shipCard in model.turnstate.openShips)
-			{
-				if(!cardLocations[shipCard] || !isBoardLoc(cardLocations[shipCard]))
-				{
-					// card has been removed from the board.
-					delete model.turnstate.openShips[shipCard];
-					continue
-				}
+		var newGender = undefined;
 
-				if(isShipClosed(shipCard))
-				{
-					delete model.turnstate.openShips[shipCard];
-					await executeShipAction(shipCard);
-				}
-			}
+		switch(getCardProp(ponyCard, "gender"))
+		{
+			case "male": newGender = "female"; break;
+			case "female": newGender = "male"; break;
+			default: newGender = undefined;
+		}
+
+		if(newGender)
+		{
+			setCardProp(ponyCard, "gender", newGender)
+			broadcastEffects();
 		}
 	}
-});
+}
+
+async function cloneAction(shipCard)
+{
+	var ponies = getShippedPonies(shipCard);
+	var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !currentDeck[x].doublePony), true);
+
+	if(!ponyCard) return;
+
+	if(model.turnstate)
+	{
+		setCardProp(ponyCard, "doublePony", true)
+		broadcastEffects();
+	}
+}
+
+async function timelineChangeAction(shipCard)
+{
+	var ponies = getShippedPonies(shipCard);
+	var ponyCard = await openCardSelect("Choose a pony to gain the <br> time traveller symbol", ponies, true);
+
+	if(!ponyCard) return;
+
+	if(model.turnstate)
+	{
+		setCardProp(ponyCard, "altTimeline", true)
+		broadcastEffects();
+	}
+}
+
+async function keywordChangeAction(shipCard)
+{
+	var ponies = getShippedPonies(shipCard);
+
+	var output = await createPopup([{"render":function(accept)
+	{
+		var element = document.createElement('div');
+		element.className = "popupPage"
+
+		var selectedPony;
+		var h1 = document.createElement('h1');
+		h1.innerHTML = "Pick a keyword";
+		element.appendChild(h1);
+
+		var card1 = makeCardElement(ponies[0]);
+		card1.setAttribute('value', ponies[0])
+
+
+		var card2 = makeCardElement(ponies[1]);
+		card2.setAttribute('value', ponies[1])
+		
+
+		function ponySelect()
+		{
+			card1.classList.remove('selected')
+			card2.classList.remove('selected')
+			
+			this.classList.add('selected');
+			selectedPony = this.getAttribute('value');
+
+		}
+
+		card1.onclick = ponySelect;
+		element.appendChild(card1);
+
+
+		card2.onclick = ponySelect;
+		element.appendChild(card2);
+		
+		var row = document.createElement('div')
+		for(let i=0; i< allKeywords.length; i++)
+		{
+
+			var button = document.createElement("button");
+			button.innerHTML = allKeywords[i];
+			button.onclick = function(){
+
+				if(selectedPony)
+				{
+					accept([selectedPony, allKeywords[i]]);
+				}
+				
+			}
+
+			row.appendChild(button);
+
+
+			if(i%5 == 4)
+			{
+				element.appendChild(row);
+				row = document.createElement('div');
+			}
+		}
+
+		element.appendChild(row);
+
+		return element;
+
+
+	}}], true);
+
+	if(output && model.turnstate)
+	{
+		var [card, keyword] = output;
+		setCardProp(card, "keywords", keyword)
+		broadcastEffects();
+	}
+}
+
+async function raceChangeAction(shipCard)
+{
+	var ponies = getShippedPonies(shipCard);
+	ponies = ponies.filter(x => !currentDeck[x].keywords.has("Changeling"));
+
+	if(ponies.length == 0)
+		return;
+
+	var pair = await raceChangePopup(ponies);
+
+	if(!pair) return;
+
+	var [ponyCard, newRace] = pair;
+
+	if(model.turnstate)
+	{
+		setCardProp(ponyCard, "race", newRace)
+		broadcastEffects();
+	}
+}
+
 
 
 function raceChangePopup(ponies)
