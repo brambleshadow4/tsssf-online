@@ -98,6 +98,8 @@
 }
 
 
+
+
 #playingArea.draggingPony .pony.blank
 {
 	display: inline-block;
@@ -259,6 +261,13 @@ button
 {
 	transform: rotate(90deg);
 	z-index: 0;
+}
+
+.cardActionButton
+{
+	position: absolute;
+	bottom: 0px;
+	z-index: 2;
 }
 
 .desktopmobileswitch.desktop .mobile {display: none;}

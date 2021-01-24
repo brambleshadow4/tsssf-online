@@ -17,6 +17,7 @@ import {
 	isItMyTurn,
 	setDataTransfer,
 	getDataTransfer,
+	updateTurnstate,
 	isValidMove
 } from "/game/game.js";
 import {broadcastMove} from "/game/network.js";
@@ -607,6 +608,28 @@ export function setDisguise(element, disguiseCard)
 	element.appendChild(img);
 }
 
+export function setActionButton(element, handler)
+{
+	var button = document.createElement('button');
+	button.className = "cardActionButton";
+	button.innerHTML = "Activate card";
+	button.onclick = async function(e)
+	{
+		clearActionButtons();
+		await handler(e);
+		console.log("updateTurnstate")
+		updateTurnstate();
+	};
+	element.appendChild(button);
+}
+
+export function clearActionButtons()
+{
+	var buttons = document.getElementsByClassName('cardActionButton');
+	while(buttons.length)
+		buttons[0].parentNode.removeChild(buttons[0]);
+}
+
 export function setCardKeywords(element, keywords)
 {
 	var div = document.createElement('div');
@@ -690,9 +713,6 @@ function setCardBackground(element, card, useLarge)
 			element.classList.add('pony')
 		else if (isPonyOrStart(card))
 			element.classList.add('start');
-
-
-		
 
 		var src = cards[card].thumbnail;
 		if(useLarge)

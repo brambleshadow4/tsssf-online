@@ -410,11 +410,11 @@ export function TsssfGameServer()
 		this.brokenShips = [];
 		this.brokenShipsNow = [];
 
-		this.morphCounters = {};
+		//this.morphCounters = {};
 
 		//getCurrentShipSet is still using the old morphCounters, clear them first.
-		if(model.turnstate && model.turnstate.morphCounters)
-			model.turnstate.morphCounters = {};
+		//if(model.turnstate && model.turnstate.morphCounters)
+		//	model.turnstate.morphCounters = {};
 		
 		this.shipSet = getCurrentShipSet(model);
 		this.positionMap = getCurrentPositionMap(model);
@@ -450,7 +450,9 @@ export function TsssfGameServer()
 
 				if(model.turnstate && isChangeling(model.board[n].card))
 				{
-					card = card + ":" + (model.turnstate.morphCounters[card] || 0);
+					var changelingContexts = model.turnstate.overrides[card]
+					var currentChangelingContext =  changelingContexts ? Math.max(changelingContexts.length - 1, 0) : 0
+					card = card + ":" + currentChangelingContext;
 				}
 
 				ponies.push(card)
@@ -754,7 +756,7 @@ export function TsssfGameServer()
 		{
 			if(isChangeling(card) && isBoardLoc(endLocation))
 			{
-				model.turnstate.morphCounters[card] = (model.turnstate.morphCounters[card] || 0) + 1;
+				//model.turnstate.morphCounters[card] = (model.turnstate.morphCounters[card] || 0) + 1;
 			}
 		}
 
@@ -855,7 +857,11 @@ export function TsssfGameServer()
 				var cardName = card;
 
 				if(isChangeling(card))
-					cardName = card + ":" + (model.turnstate.morphCounters[card] || 0);
+				{
+					var changelingContexts = model.turnstate.overrides[card]
+					var currentChangelingContext = changelingContexts ? Math.max(changelingContexts.length - 1, 0) : 0
+					cardName = card + ":" + currentChangelingContext;
+				}
 
 				model.turnstate.playedPonies.push(cardName);
 			}
@@ -894,8 +900,6 @@ export function TsssfGameServer()
 				&& isBoardLoc(endLocation))
 			{
 
-
-
 				if(isShipClosed(model, endLocation))
 				{
 					model.turnstate.playedShips.push([card].concat(getShippedPonies(model, endLocation)));
@@ -930,8 +934,6 @@ export function TsssfGameServer()
 				}
 	
 			}
-
-			
 		}
 
 
@@ -1304,6 +1306,17 @@ export function TsssfGameServer()
 					var overrides = JSON.parse(message.split(";")[1]);
 					model.turnstate.overrides = overrides;
 					toEveryoneElse(key, socket, message);
+
+					// a changeling update can create more broken ships
+					if(model.turnstate)
+					{
+						var newSet = getCurrentShipSet(model);
+						var newlyBroken = getBrokenShips(model.turnstate.shipSet, newSet);
+
+						model.turnstate.shipSet = newSet;
+						model.turnstate.brokenShipsNow = model.turnstate.brokenShips.concat(newlyBroken);
+						model.turnstate.brokenShips = model.turnstate.brokenShipsNow;
+					}
 
 					checkIfGoalsWereAchieved(key);
 				}

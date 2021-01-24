@@ -99,7 +99,9 @@ import {
 	makeCardElement,
 	setDisguise,
 	setCardKeywords,
-	addTempSymbol
+	addTempSymbol,
+	setActionButton,
+	clearActionButtons
 } from "/game/cardComponent.js"
 
 import * as GameView from "/game/gameView.js" 
@@ -767,6 +769,8 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 		updateFun();
 	}
 
+	clearActionButtons();
+
 	if(!forceCardToMove)
 	{
 		await doPlayEvent({card, startLocation, endLocation});
@@ -823,6 +827,24 @@ async function doPlayEvent(e)
 				console.log("ship card was played");
 				console.log(fn)
 				if(fn) await fn(shipCard);
+
+
+				// add action buttons to other cards
+				if(shipCard == e.card)
+				{
+					var ponies = getShippedPonies(shipCard);
+
+					for(let pony of ponies)
+					{
+						let fn = getActionFunction(pony);
+
+						var cardElement = model.board[cardLocations[pony]].element;
+
+						if(fn) setActionButton(cardElement, async function(e){
+							await fn(pony)
+						});
+					}
+				}
 			}
 		}
 	}
