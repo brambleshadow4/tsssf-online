@@ -601,6 +601,10 @@ export function updateCardElement(oldElement, card, location, isDraggable, isDro
 
 export function setDisguise(element, disguiseCard)
 {
+	loadCard(disguiseCard);
+
+	console.log("setDisguise " + cards[disguiseCard].thumbnail)
+
 	var img = document.createElement('img');
 	img.style.height = "100%";
 	img.src = cards[disguiseCard].thumbnail;
@@ -658,9 +662,7 @@ export function addTempSymbol(element, symbol)
 	element.appendChild(img);
 }
 
-
-
-function setCardBackground(element, card, useLarge)
+function loadCard(card)
 {
 	if(cards[card] && !cards[card].fullUrl)
 	{
@@ -673,6 +675,14 @@ function setCardBackground(element, card, useLarge)
 		cards[card].fullUrl = urlToImg;
 		cards[card].thumbnail = urlToImg.replace(".png",".thumb.jpg");
 	}
+}
+
+
+
+function setCardBackground(element, card, useLarge)
+{
+	loadCard(card);
+
 
 	if(isAnon(card))
 	{

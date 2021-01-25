@@ -16,7 +16,8 @@ import {
 	getNeighborKeys
 } from "./lib.js";
 
-import evalGoalCard from "./goalCriteria.js";
+//import  from "./goalCriteria.js";
+import {evalGoalCard, getConnectedPonies} from "./goalCriteria.js"
 
 import cards from "./cards.js";
 import {logGameHosted, logPlayerJoined} from "./stats.js";
@@ -407,14 +408,16 @@ export function TsssfGameServer()
 		this.playedShips = [];
 		this.playedPonies = [];
 
+		this.triggerShip = "";
+
 		this.brokenShips = [];
 		this.brokenShipsNow = [];
 
-		//this.morphCounters = {};
+		this.changelingContexts = {};
 
-		//getCurrentShipSet is still using the old morphCounters, clear them first.
-		//if(model.turnstate && model.turnstate.morphCounters)
-		//	model.turnstate.morphCounters = {};
+		//getCurrentShipSet is still using the old changelingContexts, clear them first.
+		if(model.turnstate && model.turnstate.changelingContexts)
+			model.turnstate.changelingContexts = {};
 		
 		this.shipSet = getCurrentShipSet(model);
 		this.positionMap = getCurrentPositionMap(model);
@@ -436,6 +439,16 @@ export function TsssfGameServer()
 		return getShippedPonies(model, shipLoc).length == 2;
 	}
 
+	function getPoniesShippedToPony(model, ponyCard)
+	{
+		var ponyLoc = model.cardLocations[ponyCard];
+		if(!isBoardLoc(ponyLoc))
+			return [];
+
+		var neighborLocs = getNeighborKeys(ponyLoc);
+
+	}
+
 	function getShippedPonies(model, shipLoc)
 	{
 		var neighbors = getNeighborKeys(shipLoc);
@@ -450,7 +463,7 @@ export function TsssfGameServer()
 
 				if(model.turnstate && isChangeling(model.board[n].card))
 				{
-					var changelingContexts = model.turnstate.overrides[card]
+					var changelingContexts = model.turnstate.changelingContexts[card];
 					var currentChangelingContext =  changelingContexts ? Math.max(changelingContexts.length - 1, 0) : 0
 					card = card + ":" + currentChangelingContext;
 				}
@@ -619,14 +632,14 @@ export function TsssfGameServer()
 		var ponies = player.hand.filter(x => isPony(x)).length;
 		var ships = player.hand.filter(x => isShip(x)).length;
 
-
 		var args = ["counts", player.name, ponies, ships, ...player.winnings]
 		toEveryoneElse(key, player.socket, args.join(";"));
 	}
 
 	function isChangeling(card)
 	{
-		return isPony(card) && cards[card].keywords.indexOf("Changeling") > -1;
+		card = card.split(":")[0];
+		return isPony(card) && cards[card] && cards[card].action && cards[card].action.startsWith("Changeling(");
 	}
 
 	function getCurrentShipSet(model)
@@ -881,6 +894,17 @@ export function TsssfGameServer()
 
 			model.turnstate.swapsNow = model.turnstate.swaps + newlySwapped;
 
+			// ship slide next to a changeling card rollback
+			/*if(isBoardLoc(endLocation) && isChangeling(card))
+			{			
+
+				if(!model.turnstate.changelingContexts[card])
+					model.turnstate.changelingContexts[card] = [];
+
+				model.turnstate.changelingContexts[card].rollback = getConnectedPonies(model, endLocation);
+			}*/
+
+
 
 
 			if(startLocation == "hand" || 
@@ -893,6 +917,11 @@ export function TsssfGameServer()
 				model.turnstate.shipSet = newSet;
 				model.turnstate.swaps = model.turnstate.swapsNow;
 				model.turnstate.positionMap = curPositionMap;
+
+				console.log("played ships")
+				console.log(model.turnstate.playedShips);
+				console.log("broken ships")
+				console.log(model.turnstate.brokenShips);
 			}
 
 			if(isShip(card)
@@ -902,8 +931,32 @@ export function TsssfGameServer()
 
 				if(isShipClosed(model, endLocation))
 				{
-					model.turnstate.playedShips.push([card].concat(getShippedPonies(model, endLocation)));
+
+					var shippedPonies = getShippedPonies(model, endLocation);
+
+					model.turnstate.playedShips.push([card].concat(shippedPonies));
 					delete model.turnstate.tentativeShips[card];
+
+					// add changeling rollback
+
+
+					var noCtxShipped = shippedPonies.map(x => x.split(":")[0]);
+					
+					if(isChangeling(noCtxShipped[0]))
+					{
+						if(!model.turnstate.changelingContexts[noCtxShipped[0]])
+							model.turnstate.changelingContexts[noCtxShipped[0]] = [];
+
+						model.turnstate.changelingContexts[noCtxShipped[0]].rollback = [shippedPonies[1]]
+					}
+
+					if(isChangeling(noCtxShipped[1]))
+					{
+						if(!model.turnstate.changelingContexts[noCtxShipped[1]])
+							model.turnstate.changelingContexts[noCtxShipped[1]] = [];
+
+						model.turnstate.changelingContexts[noCtxShipped[1]].rollback = [shippedPonies[0]];
+					}
 				}
 				else
 				{
@@ -1302,10 +1355,97 @@ export function TsssfGameServer()
 
 			if(message.startsWith("effects;"))
 			{	
+
+				// effects;<card>;[<no>;];prop;value
+
 				try{
-					var overrides = JSON.parse(message.split(";")[1]);
-					model.turnstate.overrides = overrides;
-					toEveryoneElse(key, socket, message);
+
+					var card, no, prop, value, arg;
+					var stuff = message.split(";");
+
+					// TODO validate props + values
+
+					if(stuff.length == 4)
+						[_, card, prop, value] = stuff;
+					else
+						return;
+
+					var obj;
+
+
+					if(!model.turnstate.overrides[card])
+						model.turnstate.overrides[card] = {};
+
+					obj = model.turnstate.overrides[card]
+	
+					
+					if(prop == "disguise")
+					{
+						model.turnstate.overrides[card] = {"disguise": value};
+
+						var cc = model.turnstate.changelingContexts[card];
+						if(!cc)
+						{
+							cc = model.turnstate.changelingContexts[card] = [];
+							cc.rollback = [];
+						}
+
+						var newEntry = (cc.length > 1) ? cc.length : 1;
+
+						cc[newEntry] = model.turnstate.overrides[card];
+						var oldEntry = newEntry - 1;
+
+						console.log('before')
+						console.log("played ships")
+						console.log(model.turnstate.playedShips);
+						console.log("broken ships")
+						console.log(model.turnstate.brokenShips);
+
+
+						var oldChangeling = card + ":" + oldEntry;
+						var newChangeling = card + ":" + newEntry;
+
+						for(var pony of cc.rollback)
+						{
+							for(var i = 0; i < model.turnstate.playedShips.length; i++)
+							{
+								var [s, p1, p2] = model.turnstate.playedShips[i];
+
+								if(p1 == pony && p2 == oldChangeling || p2 == pony && p1 == oldChangeling )
+								{
+									model.turnstate.playedShips[i] = [s, pony, newChangeling];
+									break;
+								}
+							}
+
+							model.turnstate.shipSet.delete(shipString(oldChangeling, pony));
+							model.turnstate.shipSet.add(shipString(newChangeling, pony));
+							
+						}
+
+						console.log('after');
+						console.log("played ships")
+						console.log(model.turnstate.playedShips);
+					}
+					else if(prop == "keywords")
+					{
+				
+						if(!obj[prop])
+						{
+							obj[prop] = [];
+						}
+
+						if(obj[prop].indexOf(value) == -1)
+						{
+							obj[prop].push(value);
+						}
+					}
+					else
+					{
+						obj[prop] = value;
+					}
+
+					toEveryoneElse(key, socket, "effects;" + JSON.stringify(model.turnstate.overrides));
 
 					// a changeling update can create more broken ships
 					if(model.turnstate)
@@ -1318,11 +1458,14 @@ export function TsssfGameServer()
 						model.turnstate.brokenShips = model.turnstate.brokenShipsNow;
 					}
 
+					//console.log("broken ships")
+					//console.log(model.turnstate.brokenShips);
+
 					checkIfGoalsWereAchieved(key);
 				}
 				catch(e)
 				{
-
+					console.log(e);
 				}
 				
 			}

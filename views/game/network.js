@@ -198,10 +198,10 @@ export function broadcastMove(card, startLocation, endLocation)
 	broadcast("move;" + card + ";" + startLocation + ";" + endLocation);
 }
 
-export function broadcastEffects()
+/*export function broadcastEffects()
 {
 	broadcast("effects;" + JSON.stringify(model.turnstate.overrides));
-}
+}*/
 
 export function broadcast(message)
 {

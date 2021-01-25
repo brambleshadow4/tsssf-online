@@ -3,23 +3,18 @@ import {isBlank} from "./lib.js";
 
 function getCardProp(model, cardFull, prop)
 {
-	var [card, substate] = cardFull.split(":");
-	var cardOverrides = model.turnstate.overrides[card];
-	var baseCard = card;
+	var [card, ctxNo] = cardFull.split(":");
+	var cardOverrides = model.turnstate.overrides[card] || {};
 
-	if(cardOverrides && cardOverrides.length)
+	if(ctxNo != undefined && !isNaN(Number(ctxNo)))
 	{
-		if(substate && Number(substate) < cardOverrides.length)
+		if(model.turnstate.changelingContexts[card] && model.turnstate.changelingContexts[card][Number(ctxNo)])
 		{
-			cardOverrides = cardOverrides[Number(substate)];
+			cardOverrides = model.turnstate.changelingContexts[card][Number(ctxNo)]
 		}
-		else
-		{
-			cardOverrides = cardOverrides[cardOverrides.length-1];
-		}
-
-		baseCard = cardOverrides.disguise || card;
 	}
+
+	var baseCard = cardOverrides.disguise || card;
 
 	if(prop == "*")
 		return cardOverrides;
@@ -182,9 +177,9 @@ function doesCardMatchSelector(model, card, selector)
 	return falseValue
 }
 
-function getConnectedPonies(model, key)
+export function getConnectedPonies(model, ponyLoc)
 {
-	var [typ, x, y] = key.split(",");
+	var [typ, x, y] = ponyLoc.split(",");
 	x = Number(x)
 	y = Number(y)
 
@@ -675,7 +670,7 @@ function typecheckAllGoals()
 
 typecheckAllGoals(cards);
 
-function evalGoalCard(card, model)
+export function evalGoalCard(card, model)
 {
 	try
 	{
@@ -823,105 +818,10 @@ function goalLogicParser(text, stack)
 			else
 			{
 				throw new Error("Bad stack " + stack);
-			}
-			
+			}		
 	}
-	
-
 }
 
 
-
-/*var goalCriteria = {
-
-	"Core.Goal.BuddingCuriosity": ExistsShipGeneric(ShippedWithOppositeGenderedSelf),
-	"Core.Goal.CargoShip": ExistsShip("Object in keywords","Object in keywords"),
-	"Core.Goal.ChancellorPuddingheadsEntourage": PlayPonies("race=earth", 3),
-	"Core.Goal.CharityAuction": ExistsShip("genderSwapped", "genderSwapped"),
-	"Core.Goal.CommanderHurricanesArmy": PlayPonies("race=pegasus", 3),
-	"Core.Goal.DeepCover": ExistsShip("Changeling in keywords","Changeling in keywords"),
-	"Core.Goal.Epidemic": PlayLovePoisons,
-	"Core.Goal.Fabulosity": ExistsShip("name=Rarity","name=Rarity"),
-	"Core.Goal.FriendshipIsBenefits": ExistsChain("Mane 6 in keywords", 6),
-	"Core.Goal.GoForthAndMultiply": PlayShips("gender=male","gender=female", 3),
-	"Core.Goal.GoodEnough": ExistsShip("name=Twilight Sparkle","name=Luna"),
-	"Core.Goal.HehPeasants": PlayPonies("race=alicorn", 3),
-	"Core.Goal.HelpImTrappedInAShippingCardGame": ExistsShip("name=Cheerilee","*"),
-	"Core.Goal.HoldOnINeedToMakeAFlowChart": SwapCount(6),
-	"Core.Goal.HostileTakeover": ExistsPony("Changeling in keywords", 3),
-	"Core.Goal.HotForTeacher": ExistsShip("name=Twilight Sparkle","name=Celestia"),
-	"Core.Goal.IGuessYoullDo": ExistsShip("name=Twilight Sparkle","name=Cheerilee"),
-	"Core.Goal.ISwearImNotGay": ExistsPonyShippedTo("gender=male", Select("gender=male",3)),
-	"Core.Goal.InvasiveSpecies": ExistsShip("race=earth","race=earth",6),
-	"Core.Goal.ItsMagicalHornsAreTouching": ExistsShip("race=unicorn || race=alicorn","race=unicorn || race=alicorn",3),
-	"Core.Goal.ItsNotCreepy": ExistsShip("name=Twilight Sparkle","name=Shining Armor"),
-	"Core.Goal.ItsNotEvil": BreakShip("name=Shining Armor","gender=female && name != Twilight Sparkle"),
-	"Core.Goal.ItsNotExactlyCheating": ExistsPonyShippedTo("*", ShippedWith2Versions),
-	"Core.Goal.JustExperimenting": ExistsPonyShippedTo("name=Rainbow Dash", Select("gender=female",3)),
-	"Core.Goal.MyFirstSlash": ExistsShip("name=Shining Armor","gender=male"),
-	"Core.Goal.NeedsMoreLesbians": PlayShips("gender=female","gender=female", 3),
-	"Core.Goal.Paradox": ExistsShip("name=Pinkie Pie","name=Pinkie Pie"),
-	"Core.Goal.Pomf": ExistsShip("race=pegasus || race=alicorn","race=pegasus || race=alicorn",3),
-	"Core.Goal.PrettyPrettyPrincess": ExistsPony("name=Twilight Sparkle && race=alicorn"),
-	"Core.Goal.PrincessPile": ExistsChain("Princess in keywords", 3),
-	"Core.Goal.QueenPlatinumsCourt": PlayPonies("race=unicorn", 3),
-	"Core.Goal.Quite": PlayShips("gender=male","gender=male", 3),
-	"Core.Goal.RainbowDashFanClub": ExistsShip("name=Rainbow Dash","name=Rainbow Dash"),
-	"Core.Goal.Rodeo": ExistsShip("name=Applejack","name=Applejack"),
-	"Core.Goal.Sadfic": BreakShip("name=Twilight Sparkle","*"),
-	"Core.Goal.SelfInsertion": ExistsChain("name=Twilight Sparkle",3),
-	"Core.Goal.ShiningArmorApprovesofThisExperiment": ExistsShip("name=Cadance","gender=female"),
-	"Core.Goal.Shipwrecker": BreakShip("*","*",12),
-	"Core.Goal.TheQuietGame": ExistsShip("name=Fluttershy","name=Fluttershy"),
-	"Core.Goal.TimeTravelersAmongUs": ExistsPony("altTimeline=true", 5),
-	"Core.Goal.WellMaybe": ExistsShip("name=Twilight Sparkle","name=Zecora"),
-
-
-	"EC.Goal.FamilyAppreciationDay": ExistsChain("Apple in keywords",4),
-	"EC.Goal.BigMacIsBigMackin": ExistsPonyShippedTo("name=Big Macintosh", Select("gender=female",3)),
-	"EC.Goal.MyWaifu": ExistsShip("OC in keywords","Mane 6 in keywords"),
-	"EC.Goal.BookClub": ExistsPonyShippedTo("name=Twilight Sparkle", Select("*",5)),
-	"EC.Goal.EnjoyingTheScenery": ExistsPonyShippedTo("name=Rarity", Select("*",4)),
-	"EC.Goal.IronPonyCompetition": ExistsPonyShippedTo("name=Rainbow Dash", Select("*",4)),
-	"EC.Goal.CiderSqueezin": ExistsPonyShippedTo("name=Applejack", Select("*",4)),
-	"EC.Goal.AintNoPartyLikeAPinkiePieParty": ExistsPonyShippedTo("name=Pinkie Pie", Select("*",4)),
-	"EC.Goal.Recruitment": ExistsPonyShippedTo("name=Fluttershy", Select("*",4)),
-	"EC.Goal.PlayingTheGame": ExistsPonyShippedTo("gender=male", Select("gender=female", 4)),
-	"EC.Goal.IReallyLikeHerMane": BreakShip("name=Smarty Pants","*"),
-	"EC.Goal.PickyPicky": Nope, // custom stat
-	"EC.Goal.BewareTheGroove": BreakShip("Elder in keywords", "race=alicorn"),
-	"EC.Goal.ABlessingOfAlicorns": ExistsPony("race=alicorn", 5),
-	"EC.Goal.TheresNoThrillLikeIronWill": ExistsShip("name=Iron Will","Villain in keywords"),
-	"EC.Goal.OfPoniesAndPerilTheMagnumOpus": ExistsChain("altTimeline=true",3),
-	"EC.Goal.Swinging": ExistsPonyShippedTo("*", AllOf("name=Mr. Cake", "name=Mrs. Cake")),
-	"EC.Goal.SpaDay": ExistsShip("Mane 6 in keywords", "name=Aloe & Lotus"),
-	"EC.Goal.NoPoniesCanPonyTwoPoniesToPony": ExistsPonyShippedTo("*",Select("*",6)),
-	"EC.Goal.EvilSocietyOfEvil": ExistsChain("Villain in keywords", 6),
-	"EC.Goal.FluttershysHomeForRedeemedEvilDoers": ExistsPonyShippedTo("name=Fluttershy",Select("Villain in keywords",3)),
-	"EC.Goal.Landslide": Nope, // custom stat
-	"EC.Goal.FleetAdmiral": PlayShips("*","*",7),
-	"EC.Goal.CoupDetat": Nope, // custom stat
-	"EC.Goal.FriendsInHighPlaces": ExistsPonyShippedTo("OC in keywords", Select("Princess in keywords",2)),
-	"EC.Goal.Recolor": ExistsPonyGeneric(GainOCKeyword, 1),
-
-
-	"PU.Goal.Besties": ExistsShip("Uni in keywords", "Uni in keywords"),
-	"PU.Goal.CutieMarkCourtship": ExistsShip("CMC in keywords", "CMC in keywords"),
-	"PU.Goal.Internship": ExistsShip("Uni in keywords || PCC in keywords", "Villain in keywords"),
-	"PU.Goal.RevengeOfTheNerds": ExistsShip("Uni in keywords || PCC in keywords", "Mane 6 in keywords"),
-	"PU.Goal.SchoolwideFestivities": ExistsChain("Uni in keywords || PCC in keywords",6),
-	"PU.Goal.WhereforeArtThouPoneo": ExistsShip("Uni in keywords","PCC in keywords"),
-
-
-	"NoHoldsBarred.Goal.ThisShipIsDelicious": ExistsPonyShippedTo("name=Pinkie Pie", AllOf("name=Luna","name=Twilight Sparkle","name=Applejack")),
-	"NoHoldsBarred.Goal.FromForeignLands": ExistsShip("Zebra in keywords || Batpony in keywords || Changeling in keywords|| Dragon in keywords",
-		 "Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords"),
-	"NoHoldsBarred.Goal.FateBreakers": ExistsShip("name=Logic Gate", "name=Flickering Oracle"),
-	"NoHoldsBarred.Goal.DarkHorseDanceCard": PlayShips("OC in keywords", "OC in keywords", 2),
-	"NoHoldsBarred.Goal.OMiGoshBugHug": ExistsShip("name=Starlit Dreams","card=Core.Start.FanficAuthorTwilight"),
-	"NoHoldsBarred.Goal.AfterThisWellNeedRehab": ExistsShip("#horsefamous in keywords","#horsefamous in keywords"),
-	"NoHoldsBarred.Goal.WhyIsEveryThingGlowing": ExistsPonyShippedTo("*", Select("OC in keywords", 4))
-
-}*/
 	
 export default evalGoalCard;
