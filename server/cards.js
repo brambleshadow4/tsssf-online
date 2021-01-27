@@ -138,7 +138,7 @@ var cards = {
 				url:"Pony_Changeling.png",
 				name: "Changeling",
 				race: "earth",
-				action: "standardChangeling",
+				action: "Changeling(earth)",
 				keywords: [
 					"Changeling",
 					"Villain"
@@ -148,7 +148,7 @@ var cards = {
 				url:"Pony_Changeling_001.png",
 				name: "Changeling",
 				race: "unicorn",
-				action: "standardChangeling",
+				action: "Changeling(unicorn)",
 				keywords: [
 					"Changeling",
 					"Villain"
@@ -158,7 +158,7 @@ var cards = {
 				url:"Pony_Changeling_002.png",
 				name: "Changeling",
 				race: "pegasus",
-				action: "standardChangeling",
+				action: "Changeling(pegasus)",
 				keywords: [
 					"Changeling",
 					"Villain"
@@ -497,7 +497,7 @@ var cards = {
 				name: "Chrysalis",
 				race: "alicorn",
 				gender: "female",
-				action: "standardChangeling",
+				action: "Changeling(alicorn)",
 				keywords: [
 					"Changeling",
 					"Queen",
@@ -829,7 +829,8 @@ var cards = {
 				url:"Ship_Worldwide Threat ofDestruction.png"
 			},
 			"Core.Ship.YerAPrincessHarry": {
-				url:"Ship_Yer a Princess Harry!.png"
+				url:"Ship_Yer a Princess Harry!.png",
+				action: "makePrincess",
 			},
 			"Core.Ship.YouHadMeAtNeigh": {
 				url:"Ship_You Had Me at Neigh.png"
@@ -1803,11 +1804,11 @@ var cards = {
 			},
 
 			"NoHoldsBarred.Pony.Sleight": {
-				// unimplemented
 				name: "Sleight",
 				url: "Pony - Sleight.png",
 				race: "pegasus",
 				gender: "female",
+				action: "Changeling(nonAlicornFemale)",
 				keywords: [
 					"Changeling",
 					"OC"
@@ -2068,6 +2069,7 @@ var cards = {
 				name: "Plushling",
 				url: "Pony - Plushling.png",
 				gender: "malefemale",
+				action: "ChangelingSpecial(plushling)",
 				keywords: [
 					"Changeling",
 					"Object",
@@ -2632,7 +2634,7 @@ var cards = {
 			},
 			"HorriblePeople.GraciousGivers.Ship.InItforthePlot": {
 				name: "In It for the Plot",
-				url: "Ship_In it for the Plot.png"
+				url: "Ship_In It for the Plot.png"
 			},
 			"HorriblePeople.GraciousGivers.Ship.BestFriends": {
 				name: "Best Friends",
