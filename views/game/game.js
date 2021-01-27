@@ -1007,7 +1007,7 @@ function getCardProp(card, prop)
 
 function setCardProp(card, prop, value)
 {
-	let isChangeling = currentDeck[card].action.startsWith("Changeling(");
+	let isChangeling = currentDeck[card].action && currentDeck[card].action.startsWith("Changeling(");
 
 	if(model.turnstate)
 	{
