@@ -76,6 +76,18 @@
 	display: none;
 }
 
+
+.card
+{
+	/*filter: grayscale(100%);*/
+}
+
+.card.justPlayed
+{
+	box-shadow: 0 0 .8vh .8vh gold;
+	/*filter: grayscale(0%);*/
+}
+
 .card.blank
 {
 	cursor: unset;
@@ -83,7 +95,7 @@
 
 .card.achieved
 {
-	box-shadow: 0 0 8px 8px green;
+	box-shadow: 0 0 1.6vh 1.6vh green;
 }
 
 

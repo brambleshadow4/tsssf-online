@@ -250,6 +250,9 @@ function addCardToBoard(key, card)
 
 	var imgElement = makeCardElement(card, key, !isBlank(card), true);
 
+	if( model.turnstate && model.turnstate.playedThisTurn.has(card))
+		imgElement.classList.add('justPlayed');
+
 	//if(isPony(card) || isShip(card))
 	//	addTrashHandlers(card, imgElement, key);
 
@@ -398,7 +401,6 @@ export function updateBoard()
 			if(cardHasValidNeighbor)
 				continue;
 			// all cards next to this blank are blank; remove it.
-
 
 			removeCardFromBoard(key);
 		

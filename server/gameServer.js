@@ -432,6 +432,8 @@ export function TsssfGameServer()
 		this.playedShips = [];
 		this.playedPonies = [];
 
+		this.playedThisTurn = [];
+
 		this.triggerShip = "";
 
 		this.brokenShips = [];

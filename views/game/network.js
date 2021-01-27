@@ -61,6 +61,9 @@ export function attachToSocket(socket)
 		if(event.data.startsWith('turnstate;'))
 		{
 			model.turnstate = JSON.parse(event.data.substring(10));	
+			model.turnstate.playedThisTurn = new Set();
+
+			console.log(model.turnstate);
 			updateTurnstate();
 		}
 

@@ -303,7 +303,8 @@ function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
 
 export function updateTurnstate()
 {
-	var turnstate = model.turnstate
+	var turnstate = model.turnstate;
+
 	if(!turnstate){
 		document.body.classList.remove("nomove");
 		return;
@@ -418,6 +419,30 @@ function updateEffects()
 			}
 		}	
 	}	
+
+
+	var playedThisTurn = new Set(model.turnstate.playedThisTurn)
+
+	var cardsWithJustPlayed = document.getElementsByClassName('justPlayed');
+	
+	var toRemove = []
+	for(var el of cardsWithJustPlayed)
+	{
+		if(!playedThisTurn.has(el.getAttribute('card')))
+		{
+			toRemove.push(el);
+		}
+	}
+
+	toRemove.map(x => x.classList.remove("justPlayed"));
+
+	for(var card of model.turnstate.playedThisTurn)
+	{
+		if(isBoardLoc(cardLocations[card]))
+		{
+			model.board[cardLocations[card]].element.classList.add('justPlayed');
+		}
+	}
 }
 
 export function updateGame(newModel)
@@ -426,6 +451,11 @@ export function updateGame(newModel)
 	{
 		clearBoard();
 		model = window.model = newModel;
+
+		if(model.turnstate)
+		{
+			model.turnstate.playedThisTurn = new Set();
+		}
 	}
 
 
@@ -527,8 +557,6 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 		return;
 	}
 
-
-
 	if(startLocation != cardLocations[card])
 	{
 
@@ -617,8 +645,6 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	}*/
 	else if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
 	{
-		console.log(startLocation);
-
 		startPos = getPosFromElement(model.board[startLocation].element);
 		removeCardFromBoard(startLocation);
 		updateBoard();
@@ -640,7 +666,6 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	var updateFun = function(){};
 	var endPos;
 	
-
 	if(endLocation == "hand")
 	{
 		model.hand.push(card);
@@ -724,6 +749,11 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 			}
 			
 			removeCardFromBoard(endLocation);
+		}
+
+		if(model.turnstate)
+		{
+			model.turnstate.playedThisTurn.add(card);
 		}
 
 		model.board[endLocation] = {
@@ -836,8 +866,7 @@ async function doPlayEvent(e)
 				delete model.turnstate.openShips[shipCard];
 
 				fn = getActionFunction(shipCard);
-				console.log("ship card was played");
-				console.log(fn)
+				
 				if(fn) await fn(shipCard);
 
 
@@ -912,8 +941,6 @@ function getActionFunction(card)
 {	
 	var cardInfo = currentDeck[card];
 
-	console.log("action=" + cardInfo.action);
-
 	if(cardInfo.action && cardInfo.action.startsWith("Changeling("))
 	{
 		var a = cardInfo.action.indexOf("(");
@@ -938,14 +965,12 @@ function changelingAction(type)
 {
 	return async function(card)
 	{
-		console.log("changeling type (" + type + ")");
 
 		if(model.turnstate)
 		{
 			var cardNames = Object.keys(currentDeck);
 			var disguises = cardNames.filter(x => isPony(x) && !currentDeck[x].doublePony && x != card);
 
-			console.log(disguises.slice());
 
 			switch(type)
 			{
@@ -953,7 +978,6 @@ function changelingAction(type)
 				case "unicorn":
 				case "earth":
 				case "pegasus":
-					console.log("doing this filter");
 					disguises = disguises.filter(x => currentDeck[x].race == type);
 					break;
 				case "nonAlicornFemale":
@@ -965,9 +989,6 @@ function changelingAction(type)
 				default:
 					disguises = [];
 			}
-
-			console.log(disguises);
-
 
 			if(!disguises.length)
 				return;
