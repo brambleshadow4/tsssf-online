@@ -451,7 +451,7 @@ export function updateGame(newModel)
 	{
 		clearBoard();
 		model = window.model = newModel;
-	
+
 		if(model.turnstate)
 		{
 			model.turnstate.playedThisTurn = new Set(model.turnstate.playedThisTurn );
@@ -547,7 +547,7 @@ function getCardAtLoc(loc)
 }
 
 
-export async function moveCard(card, startLocation, endLocation, forceCardToMove)
+export async function moveCard(card, startLocation, endLocation, forceCardToMove, extraArg)
 {
 	var startPos;
 	const vh = window.innerHeight/100;
@@ -720,7 +720,7 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	else if(endLocation == "winnings")
 	{
 
-		model.winnings.push(card);
+		model.winnings.push({card, value: Number(extraArg) || 0});
 		updateFun = updateWinnings;
 
 		var enddiv = document.getElementById("winnings");

@@ -19,9 +19,6 @@ import
 	endMoveShared
 } from "/game/cardComponent.js";
 
-import {createPopup} from "/game/popupComponent.js";
-
-
 
 var draggingBoard = false;
 

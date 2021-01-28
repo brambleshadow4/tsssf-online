@@ -164,7 +164,13 @@ export function attachToSocket(socket)
 			{
 				player.ponies = ponies;
 				player.ships = ships;
-				player.winnings = winnings;
+				player.winnings = winnings.map(x =>{
+					var s = x.split(",")
+					return {
+						card: s[0],
+						value: Number(s[1])
+					}
+				});
 			}
 			else
 			{
@@ -196,9 +202,10 @@ export function attachToSocket(socket)
 }
 
 
-export function broadcastMove(card, startLocation, endLocation)
+// extra arg is used for goals
+export function broadcastMove(card, startLocation, endLocation, extraArg)
 {
-	broadcast("move;" + card + ";" + startLocation + ";" + endLocation);
+	broadcast("move;" + card + ";" + startLocation + ";" + endLocation + ";" + extraArg);
 }
 
 /*export function broadcastEffects()

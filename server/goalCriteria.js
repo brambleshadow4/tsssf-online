@@ -51,7 +51,7 @@ function getCardProp(model, cardFull, prop)
 
 function doesCardMatchSelector(model, card, selector)
 {
-	console.log("doesCardMatchSelector " + card + " " + selector);
+	//console.log("doesCardMatchSelector " + card + " " + selector);
 
 	let trueValue = 1;
 	let falseValue = 0;
@@ -70,7 +70,6 @@ function doesCardMatchSelector(model, card, selector)
 			originalGender = cards[model.turnstate.overrides[card].disguise].gender
 		}
 
-		console.log(getCardProp(model, card,"gender") != originalGender)
 		return (getCardProp(model, card,"gender") != originalGender ? trueValue : falseValue);
 	}
 
@@ -79,7 +78,6 @@ function doesCardMatchSelector(model, card, selector)
 	if(clauses.length > 1)
 	{
 		var criteria = clauses.map( clause => doesCardMatchSelector(model, card, clause.trim()));
-		console.log(criteria.reduce((a,b) => a && b))
 		return (criteria.reduce((a,b) => a && b) ? trueValue : falseValue);
 	}
 
@@ -88,7 +86,6 @@ function doesCardMatchSelector(model, card, selector)
 	if(clauses.length > 1)
 	{
 		var criteria = clauses.map( clause => doesCardMatchSelector(model, card, clause.trim()));
-		console.log(criteria.reduce((a,b) => a || b))
 		return ( criteria.reduce((a,b) => a || b) ? trueValue : falseValue);
 	}
 
@@ -108,22 +105,18 @@ function doesCardMatchSelector(model, card, selector)
 
 		if(prop == "name")
 		{
-			console.log(cardValue.has(value) )
 			return cardValue.has(value) ? falseValue : trueValue;
 		}
 
 		if(prop == "gender" && cardValue == "malefemale")
 		{
-			console.log(true)
 			return trueValue;
 		}
 
 		if(prop == "race" && cardValue == "earth/unicorn")
 		{	
-			console.log(value == "earth" || value == "unicorn")
 			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
 		}
-		console.log(cardValue != value )
 		return (cardValue != value ? trueValue : falseValue);
 	}
 
@@ -145,7 +138,6 @@ function doesCardMatchSelector(model, card, selector)
 
 		if(prop == "name")
 		{
-			console.log(cardValue.has(value))
 			return cardValue.has(value) ? trueValue : falseValue;
 		}
 
@@ -156,7 +148,6 @@ function doesCardMatchSelector(model, card, selector)
 			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
 
-		console.log(cardValue == value)
 		return (cardValue == value ? trueValue : falseValue);
 	}
 
@@ -169,11 +160,9 @@ function doesCardMatchSelector(model, card, selector)
 
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
 
-		console.log(getCardProp(model, card, prop).has(value))
 		return (getCardProp(model, card, prop).has(value) ? trueValue : falseValue);
 	}
 
-	console.log(false);
 	return falseValue
 }
 
@@ -463,7 +452,6 @@ function BreakShip(selector1, selector2, count)
 	count = count || 1;
 	return function(model)
 	{
-		console.log(model.turnstate.brokenShipsNow);
 
 		if(model.turnstate)
 		{
@@ -484,11 +472,9 @@ function BreakShip(selector1, selector2, count)
 
 			});
 
-			console.log("break ship " + (matchingPlays.length >= count))
 			return (matchingPlays.length >= count);
 		}
 
-		console.log("break ship false");
 		return false;
 	}
 }

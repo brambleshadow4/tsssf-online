@@ -452,7 +452,6 @@ export function TsssfGameServer()
 		this.swaps = 0;
 		this.swapsNow = 0;
 		
-
 		this.clientProps = function()
 		{
 			return {
@@ -578,9 +577,6 @@ export function TsssfGameServer()
 		model.shipDrawPile = [];
 
 
-
-		
-
 		logGameHosted();
 
 		for(var i of model.players.filter(x => isRegistered(x)))
@@ -661,7 +657,7 @@ export function TsssfGameServer()
 		var ponies = player.hand.filter(x => isPony(x)).length;
 		var ships = player.hand.filter(x => isShip(x)).length;
 
-		var args = ["counts", player.name, ponies, ships, ...player.winnings]
+		var args = ["counts", player.name, ponies, ships, ...player.winnings.map(x=>x.card + "," + x.value)]
 		toEveryoneElse(key, player.socket, args.join(";"));
 	}
 
@@ -758,7 +754,7 @@ export function TsssfGameServer()
 
 	function moveCard(message, key, socket)
 	{
-		var [_,card,startLocation,endLocation] = message.split(";");
+		var [_,card,startLocation, endLocation, extraArg] = message.split(";");
 		var player = getPlayer(key, socket);
 
 		var model = games[key];
@@ -870,7 +866,7 @@ export function TsssfGameServer()
 
 		if(endLocation == "winnings")
 		{
-			player.winnings.push(card)
+			player.winnings.push({card, value: Number(extraArg) || 0});
 		}
 
 		if(isDiscardLoc(endLocation))

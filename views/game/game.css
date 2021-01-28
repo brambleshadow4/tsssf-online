@@ -137,8 +137,9 @@
 .ponyCount { background-image: url(/img/Pony-Back.png); }
 .shipCount { background-image: url(/img/Ship-Back.png); }
 .goalCount { background-image: url(/img/Goal-Back.png); }
+.pointCount { background-image: url(/img/sym/points.png); }
 
-.ponyCount, .shipCount, .goalCount
+.ponyCount, .shipCount, .goalCount, .pointCount
 {
 	
 	background-size: contain;
@@ -182,12 +183,18 @@ body
 	overflow: hidden;
 }
 
-button
+button, input
 {
 	font-size: 12pt;
 	margin-bottom: 10px;
 	padding: 5px 10px;
 	cursor: pointer;
+}
+
+input[type="number"]
+{
+	width: 50px;
+	cursor: auto;
 }
 
 .card
@@ -510,6 +517,21 @@ button
 	right: 0vh;
 }
 
+#winnings .score
+{
+	display: inline-block;
+	position: absolute;
+	text-align: center;
+	bottom: 1vh;
+	width: 13vh;
+	right: 0vh;
+	height: 24pt;
+	z-index: 3;
+	font-weight: bold;
+	color: #EB0687;
+	font-size: 24pt;
+}
+
 #winnings .returnArrow
 {
 	display: none;
@@ -634,6 +656,11 @@ iframe
 }
 
 .card.selected
+{
+	box-shadow: 0 0 8px 8px blue;
+}
+
+.raceButton.selected
 {
 	box-shadow: 0 0 8px 8px blue;
 }
