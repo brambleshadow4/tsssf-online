@@ -432,7 +432,9 @@ export function TsssfGameServer()
 		this.playedShips = [];
 		this.playedPonies = [];
 
-		this.playedThisTurn = [];
+
+
+		this.playedThisTurn = new Set();
 
 		this.triggerShip = "";
 
@@ -454,6 +456,7 @@ export function TsssfGameServer()
 		this.clientProps = function()
 		{
 			return {
+				playedThisTurn: [...this.playedThisTurn],
 				overrides: this.overrides,
 				currentPlayer: this.currentPlayer
 			}
@@ -791,14 +794,7 @@ export function TsssfGameServer()
 		console.log("  P: " + player.name);
 
 
-		if(model.turnstate)
-		{
-			if(isChangeling(card) && isBoardLoc(endLocation))
-			{
-				//model.turnstate.morphCounters[card] = (model.turnstate.morphCounters[card] || 0) + 1;
-			}
-		}
-
+	
 
 		let serverEndLoc = endLocation;
 		if(serverEndLoc == "hand" || serverEndLoc == "winnings")
@@ -857,6 +853,11 @@ export function TsssfGameServer()
 		if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
 		{
 			model.board[endLocation] = {card: card}
+
+			if(model.turnstate)
+			{
+				model.turnstate.playedThisTurn.add(card);
+			}
 		}
 
 		if(isGoalLoc(endLocation))

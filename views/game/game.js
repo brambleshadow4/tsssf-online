@@ -451,10 +451,10 @@ export function updateGame(newModel)
 	{
 		clearBoard();
 		model = window.model = newModel;
-
+	
 		if(model.turnstate)
 		{
-			model.turnstate.playedThisTurn = new Set();
+			model.turnstate.playedThisTurn = new Set(model.turnstate.playedThisTurn );
 		}
 	}
 
