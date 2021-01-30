@@ -2065,11 +2065,10 @@ var cards = {
 				]
 			},
 			"NoHoldsBarred.Pony.Plushling": {
-				// unimplemented
 				name: "Plushling",
 				url: "Pony - Plushling.png",
 				gender: "malefemale",
-				action: "ChangelingSpecial(plushling)",
+				action: "ChangelingNoRedisguise(plushling)",
 				keywords: [
 					"Changeling",
 					"Object",
@@ -2098,10 +2097,10 @@ var cards = {
 				]
 			},
 			"NoHoldsBarred.Pony.KingVespid": {
-				// unimplemented
 				name: "King Vespid",
 				url: "Pony - King Vespid.png",
 				gender: "male",
+				action: "ChangelingNoRedisguise(replace)",
 				keywords: [
 					"Changeling",
 					"OC"

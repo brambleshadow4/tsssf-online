@@ -25,6 +25,11 @@ function getCardProp(model, cardFull, prop)
 
 	if(prop == "keywords")
 	{
+		if(cards[card].action && cards[card].action.indexOf("plushling") >= 0)
+		{
+			baseCard = card;
+		}
+
 		let baseKeywords = (cardOverrides && cardOverrides.keywords) || [];
 
 		if(cardOverrides && cardOverrides.disguise)

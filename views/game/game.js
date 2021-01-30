@@ -646,8 +646,17 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	else if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
 	{
 		startPos = getPosFromElement(model.board[startLocation].element);
+
+		var removedCard = model.board[startLocation].card;
+
 		removeCardFromBoard(startLocation);
 		updateBoard();
+
+		if(model.turnstate)
+		{
+			model.turnstate.removedFrom = [startLocation, removedCard];
+		}
+
 	}
 	else if(isGoalLoc(startLocation))
 	{
@@ -815,12 +824,19 @@ async function doPlayEvent(e)
 {
 	var cardInfo = currentDeck[e.card];
 
+
+	var isImmediatePlay = (e.startLocation == "hand" || e.startLocation == "ponyDiscardPile,top")
+
+
 	if(isPonyOrStart(e.card) && isBoardLoc(e.endLocation))
 	{
 		var neighbors = getNeighborCards(e.card);
 
 		if(model.turnstate)
 		{
+			if(!model.turnstate.openShips)
+				model.turnstate.openShips = {};
+
 			if(neighbors.length == 1 && model.turnstate.openShips[neighbors[0]])
 			{
 				model.turnstate.triggerShip = neighbors[0];
@@ -832,7 +848,10 @@ async function doPlayEvent(e)
 		}
 
 		var fn = getActionFunction(e.card);
-		if(fn) await fn(e.card);
+		if(fn && (isImmediatePlay || doActionOnSwap(e.card)))
+		{
+			await fn(e.card);
+		}
 	}
 
 	if(isShip(e.card))
@@ -941,7 +960,17 @@ function getActionFunction(card)
 {	
 	var cardInfo = currentDeck[card];
 
-	if(cardInfo.action && cardInfo.action.startsWith("Changeling("))
+	if(!cardInfo.action) { return; }
+
+	if(cardInfo.action.startsWith("Changeling("))
+	{
+		var a = cardInfo.action.indexOf("(");
+		var b = cardInfo.action.indexOf(")")
+		var type = cardInfo.action.substring(a+1,b);
+		return changelingAction(type);
+	}
+
+	if(cardInfo.action.startsWith("ChangelingNoRedisguise("))
 	{
 		var a = cardInfo.action.indexOf("(");
 		var b = cardInfo.action.indexOf(")")
@@ -957,8 +986,18 @@ function getActionFunction(card)
 		case "timelineChange": return timelineChangeAction;
 		case "keywordChange": return keywordChangeAction;
 		case "raceChange": return raceChangeAction;
+	}		
+}
+
+function doActionOnSwap(card)
+{
+	var cardInfo = currentDeck[card];
+	if(cardInfo.action && cardInfo.action.startsWith("Changeling("))
+	{
+		return true;
 	}
-		
+
+	return false;
 }
 
 function changelingAction(type)
@@ -971,6 +1010,7 @@ function changelingAction(type)
 			var cardNames = Object.keys(currentDeck);
 			var disguises = cardNames.filter(x => isPony(x) && !currentDeck[x].doublePony && x != card);
 
+			var newDisguise = "";
 
 			switch(type)
 			{
@@ -986,20 +1026,45 @@ function changelingAction(type)
 						&& (currentDeck[x].gender == "female" || currentDeck[x].gender=="malefemale"))
 					);
 					break;
+				case "replace":
+					
+					console.log("running replace changeling");
+					var thisLocation = cardLocations[card];
+					
+					var offset = thisLocation.replace("p,","offset,");
+
+					console.log(offset);
+					if(model.board[offset] && model.board[offset].card)
+					{
+						newDisguise = model.board[offset].card;
+					}
+					else if(model.turnstate.removedFrom 
+						&& model.turnstate.removedFrom[0] == thisLocation)
+					{
+						newDisguise = model.turnstate.removedFrom[1] ;
+					}
+					
+					disguises = [];
+
+					break;
+				case "plushling":
+					// no extra filtering needs to be done for plushling
+					break;
 				default:
 					disguises = [];
 			}
 
-			if(!disguises.length)
+			if(!disguises.length && !newDisguise)
 				return;
 
-			var newCard = await openCardSelect("Choose a pony to disguise as", disguises);
+			newDisguise = newDisguise || await openCardSelect("Choose a pony to disguise as", disguises);
 
-			if(!newCard)
+			if(!newDisguise)
 				return
 
 			// reset overrides when changeling changes type.
-			setCardProp(card, "disguise", newCard);
+			console.log("newDisguise:" + newDisguise)
+			setCardProp(card, "disguise", newDisguise);
 			//broadcastEffects();
 		}
 	}

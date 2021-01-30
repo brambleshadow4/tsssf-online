@@ -635,7 +635,7 @@ export function TsssfGameServer()
 		var model = games[key];
 		if(isBoardLoc(loc) || isOffsetLoc(loc))
 		{
-
+			
 			return (model.board[loc] != undefined)
 		}
 		if(isGoalLoc(loc))
