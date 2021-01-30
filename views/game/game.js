@@ -408,7 +408,7 @@ function updateEffects()
 				addTempSymbol(element, "altTimeline");
 			}
 
-			if(decs.doublePony)
+			if(decs.count == 2)
 			{
 				addTempSymbol(element, "doublePony");
 			}
@@ -1165,13 +1165,13 @@ async function genderChangeAction(shipCard)
 async function cloneAction(shipCard)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !currentDeck[x].doublePony), true);
+	var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !currentDeck[x].count), true);
 
 	if(!ponyCard) return;
 
 	if(model.turnstate)
 	{
-		setCardProp(ponyCard, "doublePony", true)
+		setCardProp(ponyCard, "count", 2)
 		//broadcastEffects();
 	}
 }

@@ -17,7 +17,7 @@ var cards = {
 				name: "Aloe & Lotus",
 				race: "earth",
 				gender: "female",
-				doublePony: "true",
+				count: 2,
 				action: "newGoal",
 				keywords: []
 			},
@@ -259,7 +259,7 @@ var cards = {
 				race: "unicorn",
 				gender: "male",
 				action: "swap",
-				doublePony: "true",
+				count: 2,
 				keywords: [
 					"Villain"
 				]
@@ -1877,7 +1877,7 @@ var cards = {
 				name: "Lotus Heat & Petal Spark",
 				url: "Pony - Lotus Heat and Petal Spark.png",
 				race: "pegasus",
-				doublePony: "true",
+				count: 2,
 				gender: "female",
 				keywords: [
 					"OC",
@@ -2216,7 +2216,7 @@ var cards = {
 				]
 			},
 			"HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee": {
-				//unimplemented
+				//unimplemented, temporary goals
 				name: "Cheerilee",
 				url: "Pony_Test Subject Cheerilee.png",
 				race: "earth",
@@ -2236,7 +2236,6 @@ var cards = {
 				]
 			},
 			"HorriblePeople.2014ConExclusives.Pony.CiderMatronAppleBloom": {
-				//unimplemented
 				name: "Apple Bloom",
 				url: "Pony_Cider Matron Apple Bloom.png",
 				race: "earth",
@@ -2263,11 +2262,11 @@ var cards = {
 				keywords: []
 			},
 			"HorriblePeople.2015ConExclusives.Pony.AnEntireSwarmOfBreezies": {
-				// unimplemented
 				name: "An Entire Swarm of Breezies",
 				url: "Pony_An Entire Swarm of Breezies.png",
 				race: "pegasus",
 				gender: "malefemale",
+				count: 10,
 				keywords: [
 					"Breezy"
 				]
@@ -2680,7 +2679,7 @@ var cards = {
 				url: "Pony_Applejack's Parents.png",
 				race: "earth",
 				gender: "malefemale",
-				doublePony: "true",
+				count: 2,
 				keywords: [
 					"Apple"
 				]

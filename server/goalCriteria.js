@@ -58,11 +58,8 @@ function doesCardMatchSelector(model, card, selector)
 {
 	//console.log("doesCardMatchSelector " + card + " " + selector);
 
-	let trueValue = 1;
+	let trueValue = getCardProp(model, card, "count") || 1;
 	let falseValue = 0;
-	if(getCardProp(model, card, "doublePony"))
-		trueValue = 2;
-
 
 	if(selector.trim() == "*")
 		return trueValue;
@@ -300,9 +297,9 @@ function ExistsChain(selector, count)
 				var chained = buildChain(key);				
 				var ponyCards = [...chained].map(x => model.board[x].card);
 
-				var chainCount = ponyCards.map( x=> getCardProp(model, x, "doublePony") ? 2 : 1).reduce((a,b) => a + b, 0)
+				var chainCount = ponyCards.map(x => getCardProp(model, x, "count") || 1).reduce((a,b) => a + b, 0)
 
-				if(chainCount >= count)
+				if(chainCount >= count && ponyCards.length > 1)
 					return true;
 			}
 		}

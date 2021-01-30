@@ -32,9 +32,6 @@ var PROP_VALUES = {
 	"altTimeline":{
 		"true": 1,
 	},
-	"doublePony":{
-		"true": 1,
-	},
 	"race":{
 		"earth": 1,
 		"unicorn":1, 
@@ -635,7 +632,7 @@ export function TsssfGameServer()
 		var model = games[key];
 		if(isBoardLoc(loc) || isOffsetLoc(loc))
 		{
-			
+
 			return (model.board[loc] != undefined)
 		}
 		if(isGoalLoc(loc))
@@ -1397,6 +1394,11 @@ export function TsssfGameServer()
 					else if(prop == "keywords")
 					{
 
+					}
+					else if(prop == "count")
+					{
+						value = Number(value);
+						if(isNaN(value)) return;
 					}
 					else
 					{
