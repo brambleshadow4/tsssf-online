@@ -1972,7 +1972,7 @@ var cards = {
 				]
 			},
 			"NoHoldsBarred.Pony.WaifuThiefFlashSentry": {
-				// unimplemented
+				// unimplemented extra board
 				name: "Waifu Thief Flash Sentry",
 				url: "Pony - Waifu Stealer Flash Sentry.png",
 				race: "pegasus",
@@ -2301,9 +2301,8 @@ var cards = {
 			},
 
 			"HorriblePeople.2015ConExclusives.Ship.ObjectofAdoration": {
-				//unimplemented
-				name: "Object of Adoration",
-				url: "Ship_Object of Adoration.png"
+				url: "Ship_Object of Adoration.png",
+				action: "addKeywords(Object)"
 			},
 
 		// 2015 workshop
@@ -2857,13 +2856,11 @@ var cards = {
 				]
 			},
 			"HorriblePeople.Mean6.Ship.TheNightmareBecomesYou": {
-				// unimplemented
-				name: "The Nightmare Becomes You",
-				url: "Ship_The Nightmare Becomes You.png"
+				url: "Ship_The Nightmare Becomes You.png",
+				action: "addKeywords(Nightmare, Villain)"
 			},
 
 			"HorriblePeople.Mean6.Goal.DarkestDay": {
-				name: "Darkest Day",
 				url: "Goal_Darkest Day.png",
 				goalLogic: "ExistsChain(Nightmare in keywords, 3)",
 				points: "2"

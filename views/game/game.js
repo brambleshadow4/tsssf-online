@@ -847,7 +847,7 @@ async function doPlayEvent(e)
 			}
 		}
 
-		var fn = getActionFunction(e.card);
+		var fn = getCardAction(e.card);
 		if(fn && (isImmediatePlay || doActionOnSwap(e.card)))
 		{
 			await fn(e.card);
@@ -884,7 +884,7 @@ async function doPlayEvent(e)
 			{
 				delete model.turnstate.openShips[shipCard];
 
-				fn = getActionFunction(shipCard);
+				fn = getCardAction(shipCard);
 				
 				if(fn) await fn(shipCard);
 
@@ -898,7 +898,9 @@ async function doPlayEvent(e)
 
 					for(let pony of ponies)
 					{
-						let fn = getActionFunction(pony);
+						let fn = getCardAction(pony);
+
+
 
 						var cardElement = model.board[cardLocations[pony]].element;
 
@@ -956,36 +958,34 @@ function getNeighborCards(shipCard)
 	return neighborCards;
 }
 
-function getActionFunction(card)
+function getCardAction(card)
 {	
 	var cardInfo = currentDeck[card];
 
 	if(!cardInfo.action) { return; }
 
-	if(cardInfo.action.startsWith("Changeling("))
+	var actionName = cardInfo.action;
+	var params = [];
+	var a = actionName.indexOf("(");
+	var b = actionName.indexOf(")");
+	if(a && b)
 	{
-		var a = cardInfo.action.indexOf("(");
-		var b = cardInfo.action.indexOf(")")
-		var type = cardInfo.action.substring(a+1,b);
-		return changelingAction(type);
+		params = actionName.substring(a+1,b).split(",").map( x => x.trim());
+		actionName = actionName.substring(0,a);
 	}
 
-	if(cardInfo.action.startsWith("ChangelingNoRedisguise("))
+	switch(actionName)
 	{
-		var a = cardInfo.action.indexOf("(");
-		var b = cardInfo.action.indexOf(")")
-		var type = cardInfo.action.substring(a+1,b);
-		return changelingAction(type);
-	}
-
-	switch(cardInfo.action)
-	{
+		case "ChangelingNoRedisguise": 
+		case "Changeling": 
+			return changelingAction(...params);
 		case "genderChange": return genderChangeAction;
 		case "makePrincess": return makePrincessAction;
 		case "clone": return cloneAction;
 		case "timelineChange": return timelineChangeAction;
 		case "keywordChange": return keywordChangeAction;
 		case "raceChange": return raceChangeAction;
+		case "addKeywords": return addKeywordsAction(...params);
 	}		
 }
 
@@ -1028,12 +1028,9 @@ function changelingAction(type)
 					break;
 				case "replace":
 					
-					console.log("running replace changeling");
 					var thisLocation = cardLocations[card];
-					
 					var offset = thisLocation.replace("p,","offset,");
 
-					console.log(offset);
 					if(model.board[offset] && model.board[offset].card)
 					{
 						newDisguise = model.board[offset].card;
@@ -1063,7 +1060,6 @@ function changelingAction(type)
 				return
 
 			// reset overrides when changeling changes type.
-			console.log("newDisguise:" + newDisguise)
 			setCardProp(card, "disguise", newDisguise);
 			//broadcastEffects();
 		}
@@ -1186,9 +1182,10 @@ async function timelineChangeAction(shipCard)
 	if(model.turnstate)
 	{
 		setCardProp(ponyCard, "altTimeline", true)
-		//broadcastEffects();
 	}
 }
+
+
 
 async function keywordChangeAction(shipCard)
 {
@@ -1224,7 +1221,6 @@ async function keywordChangeAction(shipCard)
 
 		card1.onclick = ponySelect;
 		element.appendChild(card1);
-
 
 		card2.onclick = ponySelect;
 		element.appendChild(card2);
@@ -1265,7 +1261,25 @@ async function keywordChangeAction(shipCard)
 	{
 		var [card, keyword] = output;
 		setCardProp(card, "keywords", keyword)
-		//broadcastEffects();
+	}
+}
+
+function addKeywordsAction(...keywords)
+{
+	return async function(shipCard)
+	{
+		var ponies = getNeighborCards(shipCard);
+		var ponyCard = await openCardSelect("Choose a pony to gain keywords", ponies, true);
+
+		if(!ponyCard) return;
+
+		if(model.turnstate)
+		{
+			for(var keyword of keywords)
+			{
+				setCardProp(ponyCard, "keywords", keyword);
+			}
+		}
 	}
 }
 
