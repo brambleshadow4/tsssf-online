@@ -1,5 +1,3 @@
-
-
 export function isPony(card)
 {
 	return card.indexOf(".Pony.") >= 0 || card == "anon:pony";

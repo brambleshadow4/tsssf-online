@@ -255,7 +255,6 @@ function addCardToBoard(key, card)
 
 	var refPoint = document.getElementById('refPoint');
 
-	
 	switch(pieces[0])
 	{
 		case "p":
@@ -263,11 +262,13 @@ function addCardToBoard(key, card)
 			imgElement.style.left = x * gridWidth + "vh";
 			break;
 		case "sr":
+			imgElement.classList.add('shippos');
 			imgElement.classList.add('sideways');
 			imgElement.style.top = y * gridWidth + "vh";
 			imgElement.style.left = x * gridWidth + 22/2 + "vh";
 			break;
 		case "sd":
+			imgElement.classList.add('shippos');
 			imgElement.style.top = y * gridWidth + 22/2 + "vh";
 			imgElement.style.left = x * gridWidth + "vh";
 			break;

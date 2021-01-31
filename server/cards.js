@@ -1868,6 +1868,7 @@ var cards = {
 				url: "Pony - Impy Three.png",
 				race: "pegasus",
 				gender: "female",
+				action: "ship",
 				keywords: [
 					"Batpony",
 					"OC"
@@ -2040,6 +2041,7 @@ var cards = {
 				url: "Pony - Trick Candle.png",
 				race: "earth",
 				gender: "male",
+				changeGoalPointValues: true,
 				keywords: [
 					"OC",
 					"#horsefamous"
@@ -2251,7 +2253,8 @@ var cards = {
 				name: "Discord",
 				url: "START_Fanfic Author Discord.png",
 				race: "alicorn",
-				gender: "male"
+				gender: "male",
+				changeGoalPointValues: true
 			},
 
 			"HorriblePeople.2015ConExclusives.Pony.DreamboatBrad": {
@@ -2288,6 +2291,7 @@ var cards = {
 				url: "Pony_Mistress of Equality Starlight Glimmer.png",
 				race: "unicorn",
 				gender: "female",
+				changeGoalPointValues: true,
 				keywords: [
 					"Villain"
 				]
@@ -2901,6 +2905,7 @@ var cards = {
 			name: "Starlight Glimmer",
 			race: "unicorn",
 			gender: "female",
+			changeGoalPointValues: true,
 			keywords: []
 		},
 

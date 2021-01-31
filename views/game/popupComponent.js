@@ -17,7 +17,6 @@ export function createPopup(tabs, miniMode)
 		var parent = document.createElement('div');
 		parent.className = "popupContainer";
 
-		
 		var div = document.createElement('div');
 		div.className = "popup";
 		if(miniMode)

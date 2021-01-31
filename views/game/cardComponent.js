@@ -89,7 +89,21 @@ function getGoalPoints(model, card, achieved)
 		points = [Number(pointString)];
 	}
 
-	if(!achieved)
+	var changeGoalPointValues = false;
+
+	for(var key in model.board)
+	{
+		if(key.startsWith('p,'))
+		{
+			var card = model.board[key].card;
+			if(cards[card] && cards[card].changeGoalPointValues)
+			{
+				changeGoalPointValues = true;
+			}
+		}
+	}
+
+	if(!achieved || changeGoalPointValues)
 	{
 		points.push(-1);
 	}
@@ -315,7 +329,8 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 				document.getElementById('playingArea').classList.add('draggingPony');
 			}
 
-			if(isShip(card))
+			//console.log(cards[card].action)
+			if(isShip(card) || cards[card].action == "ship")
 			{
 				document.getElementById('playingArea').classList.add('draggingShip');
 			}
@@ -409,7 +424,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 				document.getElementById('playingArea').classList.add('draggingPony');
 			}
 
-			if(isShip(card))
+			if(isShip(card) || cards[card].action == "ship")
 			{
 				document.getElementById('playingArea').classList.add('draggingShip');
 			}
@@ -786,7 +801,6 @@ function setCardBackground(element, card, useLarge)
 {
 	loadCard(card);
 
-
 	if(isAnon(card))
 	{
 		element.classList.remove('blank');
@@ -816,14 +830,12 @@ function setCardBackground(element, card, useLarge)
 	}
 	else
 	{
-		if(isShip(card))
-			element.classList.add('ship')
-
-		if(isGoal(card))
-			element.classList.add('goal');
-
 		if(isPony(card))
 			element.classList.add('pony')
+		else if(isShip(card))
+			element.classList.add('ship')
+		else if(isGoal(card))
+			element.classList.add('goal');
 		else if (isPonyOrStart(card))
 			element.classList.add('start');
 

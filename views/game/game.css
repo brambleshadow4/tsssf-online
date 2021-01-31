@@ -253,6 +253,11 @@ input[type="number"]
 	z-index: 1;
 }
 
+.card.pony.shippos
+{
+	z-index: 1;
+}
+
 .card.start
 {
 	background-color: #3E3F3E;

@@ -529,7 +529,7 @@ export function isValidMove(cardDragged, targetCard, endLocation)
 		return !model.board[offsetLoc];
 	}
 
-	return (targetCard == "blank:ship" && isShip(cardDragged)
+	return (targetCard == "blank:ship" && (isShip(cardDragged) || cards[cardDragged].action == "ship")
 		|| (targetCard == "blank:pony" && isPonyOrStart(cardDragged))
 	);
 }
@@ -885,7 +885,6 @@ async function doPlayEvent(e)
 				delete model.turnstate.openShips[shipCard];
 
 				fn = getCardAction(shipCard);
-				
 				if(fn) await fn(shipCard);
 
 
@@ -968,7 +967,8 @@ function getCardAction(card)
 	var params = [];
 	var a = actionName.indexOf("(");
 	var b = actionName.indexOf(")");
-	if(a && b)
+
+	if(a > 0 && b > 0)
 	{
 		params = actionName.substring(a+1,b).split(",").map( x => x.trim());
 		actionName = actionName.substring(0,a);
