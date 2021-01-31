@@ -41,6 +41,7 @@ export function attachToSocket(socket)
 
 		if(event.data.startsWith('kick'))
 		{
+			document.getElementById('playingArea').style.backgroundColor = "#FFCCCC";
 			alert("The game's host kicked you from the game");
 			kicked = true;
 
@@ -194,8 +195,14 @@ export function attachToSocket(socket)
 
 	socket.onCloseHandler = function(event)
 	{
-		if(!kicked)
-			alert("Failed to connect to the server :(")
+
+		setTimeout(function(){
+			if(!kicked)
+			{
+				document.getElementById('playingArea').style.backgroundColor = "#FFCCCC";
+				alert("Failed to connect to the server :(");
+			}
+		}, 300);
 	}
 
 	socket.send("requestmodel;" + (localStorage["playerID"] || 0))

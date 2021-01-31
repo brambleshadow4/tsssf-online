@@ -2642,8 +2642,8 @@ var cards = {
 				url: "Ship_Best Friends.png"
 			},
 			"HorriblePeople.GraciousGivers.Ship.DunkedInTheDatingPool": {
-				//unimplemented
 				name: "Dunked in the Dating Pool",
+				action: "raceGenderChange",
 				url: "Ship_Dunked in the Dating Pool.png"
 			},
 			"HorriblePeople.GraciousGivers.Goal.AHoardOfPrincesses": {

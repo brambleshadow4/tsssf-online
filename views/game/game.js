@@ -985,6 +985,7 @@ function getCardAction(card)
 		case "timelineChange": return timelineChangeAction;
 		case "keywordChange": return keywordChangeAction;
 		case "raceChange": return raceChangeAction;
+		case "raceGenderChange": return raceGenderChangeAction;
 		case "addKeywords": return addKeywordsAction(...params);
 	}		
 }
@@ -1304,6 +1305,27 @@ async function raceChangeAction(shipCard)
 	}
 }
 
+async function raceGenderChangeAction(shipCard)
+{
+	var ponies = getNeighborCards(shipCard);
+	ponies = ponies.filter(x => !currentDeck[x].keywords.has("Changeling"));
+
+	if(ponies.length == 0)
+		return;
+
+	var triple = await raceGenderChangePopup(ponies);
+
+	if(!triple) return;
+
+	var [ponyCard, newRace, newGender] = triple;
+
+	if(model.turnstate)
+	{
+		setCardProp(ponyCard, "race", newRace);
+		setCardProp(ponyCard, "gender", newGender);
+	}
+}
+
 
 
 function raceChangePopup(ponies)
@@ -1400,6 +1422,146 @@ function raceChangePopup(ponies)
 		alicorn.onclick = raceSelect;
 
 		div.appendChild(buttonDiv);
+
+		return div;
+
+	}}],true)
+}
+
+function raceGenderChangePopup(ponies)
+{
+	return createPopup([{render: function(acceptFn)
+	{
+		var selectedPony;
+		var selectedRace;
+		var selectedGender;
+
+		var div =document.createElement('div');
+		div.classList.add('popupPage');
+
+		var h1 = document.createElement('h1');
+		h1.innerHTML = "Choose a pony and select their new race/gender";
+		div.appendChild(h1)
+
+		var buttonDiv = document.createElement('div')
+		buttonDiv.className = "raceButtonContainer"
+
+
+		var card1 = makeCardElement(ponies[0]);
+		card1.setAttribute('value', ponies[0])
+
+		if(ponies.length == 2)
+		{
+			var card2 = makeCardElement(ponies[1]);
+			card2.setAttribute('value', ponies[1])
+		}
+		
+
+		function ponySelect()
+		{
+			card1.classList.remove('selected')
+			if(card2)
+				card2.classList.remove('selected')
+			
+			this.classList.add('selected');
+			selectedPony = this.getAttribute('value');
+
+			if(selectedPony && selectedRace && selectedGender)
+				acceptFn([selectedPony, selectedRace, selectedGender]);
+
+		}
+
+		card1.onclick = ponySelect;
+		buttonDiv.appendChild(card1);
+
+		if(card2)
+		{
+			card2.onclick = ponySelect;
+			buttonDiv.appendChild(card2);
+		}
+
+		var rows = document.createElement('div');
+		var topRow = document.createElement('div');
+		var bottomRow = document.createElement('div');
+		bottomRow.className = "raceButtonContainer";
+		topRow.className = "raceButtonContainer";
+
+		rows.appendChild(topRow);
+		rows.appendChild(bottomRow);
+		rows.style = "display: inline-block";
+
+		var earth = document.createElement('img');
+		earth.className = 'raceButton';
+		earth.setAttribute('value','earth')
+		earth.src = "/img/sym/earth.png";
+		topRow.appendChild(earth)
+
+		var pegasus = document.createElement('img');
+		pegasus.className = 'raceButton';
+		pegasus.src = "/img/sym/pegasus.png";
+		pegasus.setAttribute('value','pegasus')
+		topRow.appendChild(pegasus)
+
+		var unicorn = document.createElement('img');
+		unicorn.className = 'raceButton';
+		unicorn.src = "/img/sym/unicorn.png";
+		unicorn.setAttribute('value','unicorn')
+		topRow.appendChild(unicorn)
+
+		var alicorn = document.createElement('img');
+		alicorn.className = 'raceButton';
+		alicorn.src = "/img/sym/alicorn.png";
+		alicorn.setAttribute('value','alicorn')
+		topRow.appendChild(alicorn)
+
+		function raceSelect()
+		{
+			earth.classList.remove('selected')
+			pegasus.classList.remove('selected')
+			unicorn.classList.remove('selected')
+			alicorn.classList.remove('selected')
+			this.classList.add('selected');
+			selectedRace = this.getAttribute('value');
+
+			if(selectedPony && selectedRace && selectedGender)
+				acceptFn([selectedPony, selectedRace, selectedGender]);
+		}
+
+		earth.onclick = raceSelect;
+		pegasus.onclick = raceSelect;
+		unicorn.onclick = raceSelect;
+		alicorn.onclick = raceSelect;
+
+
+
+		var male = document.createElement('img');
+		male.className = 'raceButton';
+		male.setAttribute('value','male')
+		male.src = "/img/sym/male.png";
+		bottomRow.appendChild(male)
+
+		var female = document.createElement('img');
+		female.className = 'raceButton';
+		female.setAttribute('value','female')
+		female.src = "/img/sym/female.png";
+		bottomRow.appendChild(female);
+
+		function genderSelect()
+		{
+			male.classList.remove('selected')
+			female.classList.remove('selected')
+			this.classList.add('selected');
+			selectedGender = this.getAttribute('value');
+
+			if(selectedPony && selectedRace && selectedGender)
+				acceptFn([selectedPony, selectedRace, selectedGender]);
+		}
+
+		male.onclick = genderSelect;
+		female.onclick = genderSelect;
+
+		buttonDiv.appendChild(rows);
+		div.appendChild(buttonDiv)
 
 		return div;
 
