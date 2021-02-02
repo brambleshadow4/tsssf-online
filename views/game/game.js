@@ -952,7 +952,8 @@ async function doPlayEvent(e)
 						var cardElement = model.board[cardLocations[pony]].element;
 
 						if(fn) setActionButton(cardElement, async function(e){
-							await fn(pony)
+							await fn(pony);
+							updateEffects();
 						});
 					}
 				}
@@ -1122,11 +1123,7 @@ function getCardProp(card, prop)
 
 	var baseCard = card;
 
-	if(cardObj && cardObj.length)
-	{
-		cardObj = cardObj[cardObj.length-1];
-		baseCard = cardObj.disguise || card;
-	}
+	baseCard = cardObj.disguise || card;
 
 	if(prop == "*")
 	{
@@ -1150,6 +1147,11 @@ function setCardProp(card, prop, value)
 	if(model.turnstate)
 	{
 		if (!model.turnstate.overrides[card])
+		{
+			model.turnstate.overrides[card] = {};
+		}
+
+		if(prop == "disguise")
 		{
 			model.turnstate.overrides[card] = {};
 		}

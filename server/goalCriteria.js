@@ -4,13 +4,18 @@ import {isBlank} from "./lib.js";
 function getCardProp(model, cardFull, prop)
 {
 	var [card, ctxNo] = cardFull.split(":");
+	ctxNo = Number(ctxNo);
 	var cardOverrides = model.turnstate.overrides[card] || {};
 
-	if(ctxNo != undefined && !isNaN(Number(ctxNo)))
+	if(ctxNo != undefined && !isNaN(ctxNo))
 	{
-		if(model.turnstate.changelingContexts[card] && model.turnstate.changelingContexts[card][Number(ctxNo)])
+		if(ctxNo == 0)
 		{
-			cardOverrides = model.turnstate.changelingContexts[card][Number(ctxNo)]
+			cardOverrides = {};
+		}
+		else if(model.turnstate.changelingContexts[card] && model.turnstate.changelingContexts[card][ctxNo])
+		{
+			cardOverrides = model.turnstate.changelingContexts[card][ctxNo]
 		}
 	}
 

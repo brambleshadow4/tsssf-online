@@ -1183,8 +1183,6 @@ export function TsssfGameServer()
 
 		function onMessage(message)
 		{
-			console.log(message);
-
 			var model = games[key];
 			if(!model) // not quite sure how this happens, but this crashed one time.
 				return;
