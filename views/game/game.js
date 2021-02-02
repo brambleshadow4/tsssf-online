@@ -347,6 +347,18 @@ var turnStateChangelings = {};
 
 function updateEffects()
 {
+	var larsonEffect = "";
+
+	for(var key in model.board)
+	{
+		if(model.board[key] && model.board[key].card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
+		{
+			larsonEffect = model.board[key].card;
+			break;
+		}
+	}
+
+
 	var decoration = document.getElementsByClassName('decoration');
 	var i = 0;
 	while(i < decoration.length)
@@ -361,6 +373,9 @@ function updateEffects()
 	for(var card in turnStateChangelings)
 	{
 		let newDisguise = getCardProp(card, "disguise");
+
+		if(larsonEffect)
+			newDisguise = larsonEffect;
 
 		if(!isBoardLoc(cardLocations[card]))
 		{
@@ -379,16 +394,49 @@ function updateEffects()
 	}
 
 
-	for(var card in model.turnstate.overrides)
+	var cardsToApplyEffectsTo = model.turnstate.overrides;
+
+
+	if(larsonEffect)
+	{
+		var newCards = Object.keys(model.board)
+			.filter( x => x.startsWith("p,"))
+			.map(x => model.board[x].card);
+
+		var newObj = {}
+		for(var card of newCards)
+		{
+			if(card != larsonEffect)
+				newObj[card] = true;
+		}
+
+		cardsToApplyEffectsTo = newObj;
+	}
+
+
+	for(var card in cardsToApplyEffectsTo)
 	{	
+
 		if(isBoardLoc(cardLocations[card]))
 		{
 			var element = model.board[cardLocations[card]].element;
-
 			var decs = getCardProp(card, "*");
+
+			if(larsonEffect)
+			{
+				decs.race = "alicorn";
+				if(!decs.keywords)
+					decs.keywords = ["Princess"];
+				else
+					decs.keywords.push("Princess");
+
+				if(decs.disguise)
+					decs.disguise = larsonEffect;
+			}
 
 			if(decs.disguise && element.getElementsByClassName('changeling').length == 0)
 			{
+
 				setDisguise(element, decs.disguise);
 				turnStateChangelings[card] = decs.disguise;
 			}
@@ -1070,7 +1118,8 @@ function changelingAction(type)
 
 function getCardProp(card, prop)
 {
-	var cardObj = model.turnstate.overrides[card];
+	var cardObj = model.turnstate.overrides[card] || {};
+
 	var baseCard = card;
 
 	if(cardObj && cardObj.length)
@@ -1080,7 +1129,13 @@ function getCardProp(card, prop)
 	}
 
 	if(prop == "*")
-		return cardObj;
+	{
+		var copy = {};
+		for(var prop in cardObj)
+			copy[prop] = cardObj[prop]
+
+		return copy;
+	}
 
 	if(cardObj && cardObj[prop])
 		return cardObj[prop]

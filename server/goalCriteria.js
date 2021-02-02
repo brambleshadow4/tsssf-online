@@ -16,11 +16,18 @@ function getCardProp(model, cardFull, prop)
 
 	var baseCard = cardOverrides.disguise || card;
 
+	if(cardOverrides.disguise && model.turnstate.specialEffects.larsonEffect)
+		baseCard = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+
+
 	if(prop == "*")
 		return cardOverrides;
 
 	if(prop == "card")
 		return card;
+
+	if(prop == "race" && model.turnstate.specialEffects.larsonEffect)
+		return "alicorn";
 
 
 	if(prop == "keywords")
@@ -31,6 +38,9 @@ function getCardProp(model, cardFull, prop)
 		}
 
 		let baseKeywords = (cardOverrides && cardOverrides.keywords) || [];
+
+		if(model.turnstate.specialEffects.larsonEffect)
+			baseKeywords.push("Princess");
 
 		if(cardOverrides && cardOverrides.disguise)
 			baseKeywords = baseKeywords.concat(cards[card].keywords);

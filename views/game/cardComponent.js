@@ -757,6 +757,8 @@ export function setCardKeywords(element, keywords)
 	var div = document.createElement('div');
 	div.className = "keywords decoration";
 
+	var keywords = new Set(keywords)
+
 	for(var word of keywords)
 	{
 		div.innerHTML += "<div>" + word + "</div>";

@@ -430,6 +430,22 @@ export function TsssfGameServer()
 		this.playedPonies = [];
 
 
+		this.specialEffects = {};
+
+		this.updateSpecialEffects = function()
+		{
+			delete this.specialEffects["larsonEffect"];
+			for(var key in model.board)
+			{
+				if(model.board[key].card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
+				{
+					this.specialEffects["larsonEffect"] = true;
+				}
+			}
+		}
+
+		this.updateSpecialEffects();
+
 
 		this.playedThisTurn = new Set();
 
@@ -845,11 +861,15 @@ export function TsssfGameServer()
 
 		if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
 		{
-			model.board[endLocation] = {card: card}
+			model.board[endLocation] = {card: card};
+
+
 
 			if(model.turnstate)
 			{
 				model.turnstate.playedThisTurn.add(card);
+
+
 			}
 		}
 
@@ -924,6 +944,10 @@ export function TsssfGameServer()
 			}
 
 
+			if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
+			{
+				model.turnstate.updateSpecialEffects();
+			}
 
 
 			if(startLocation == "hand" || 
