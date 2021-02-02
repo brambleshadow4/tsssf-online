@@ -406,8 +406,8 @@ function updateEffects()
 		var newObj = {}
 		for(var card of newCards)
 		{
-			if(card != larsonEffect)
-				newObj[card] = true;
+
+			newObj[card] = true;
 		}
 
 		cardsToApplyEffectsTo = newObj;
@@ -422,7 +422,7 @@ function updateEffects()
 			var element = model.board[cardLocations[card]].element;
 			var decs = getCardProp(card, "*");
 
-			if(larsonEffect)
+			if(larsonEffect && card != larsonEffect)
 			{
 				decs.race = "alicorn";
 				if(!decs.keywords)
