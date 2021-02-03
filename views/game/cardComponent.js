@@ -22,6 +22,8 @@ import {
 } from "/game/game.js";
 import {broadcastMove} from "/game/network.js";
 
+import {createPopup} from "/game/popupComponent.js";
+
 var isDkeyPressed = false;
 var hoverCard;
 var hoverCardDiv;
@@ -64,13 +66,55 @@ export function endMoveShared()
 	playingArea.classList.remove("draggingShip")
 }
 
+function getGoalPoints(model, card, achieved)
+{
+	if(!isGoal(card))
+		return [];
+
+	var points = [];
+	var pointString = cards[card].points;
+	if(pointString.indexOf("-") > -1)
+	{
+		var i = pointString.indexOf("-")
+		var minPts = Number(pointString.substring(0, i))
+		var maxPts = Number(pointString.substring(i+1));
+
+		for(i=minPts; i<=maxPts; i++)
+		{
+			points.push(i);
+		}
+	}
+	else
+	{
+		points = [Number(pointString)];
+	}
+
+	var changeGoalPointValues = false;
+
+	for(var key in model.board)
+	{
+		if(key.startsWith('p,'))
+		{
+			var card = model.board[key].card;
+			if(cards[card] && cards[card].changeGoalPointValues)
+			{
+				changeGoalPointValues = true;
+			}
+		}
+	}
+
+	if(!achieved || changeGoalPointValues)
+	{
+		points.push(-1);
+	}
+
+	return points;
+}
 
 export function makeCardElement(card, location, isDraggable, isDropTarget)
 {
 	var imgElement = document.createElement('div');
 	imgElement.classList.add("card");
-
-
 
 	setCardBackground(imgElement, card);
 
@@ -89,7 +133,6 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 	{
 		if(!isItMyTurn()) return;
 
-
 		if(imgElement.getElementsByClassName('goalCheck').length > 0)
 			return;
 
@@ -98,7 +141,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 		img.src= "/img/check.svg";
 		img.style.width = "5vh";
 
-		img.onclick = function(e)
+		img.onclick = async function(e)
 		{
 			if(isItMyTurn() && !isDeleteClick())
 			{
@@ -106,8 +149,18 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 				e.stopPropagation();
 
 				var card = model.currentGoals[goalNo].card;
-				moveCard(card, "goal,"+goalNo, "winnings")
-				broadcastMove(card, "goal,"+goalNo, "winnings")
+				var achieved = model.currentGoals[goalNo].achieved
+				var points = getGoalPoints(window.model, card, achieved);
+
+				var value = points[0];
+				if(points.length > 1)
+					value = await pointsPopup(points);
+
+				if(value == undefined)
+						return;
+
+				moveCard(card, "goal," + goalNo, "winnings", false, value)
+				broadcastMove(card, "goal," + goalNo, "winnings", value)
 			}
 		}
 
@@ -274,7 +327,8 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 				document.getElementById('playingArea').classList.add('draggingPony');
 			}
 
-			if(isShip(card))
+			//console.log(cards[card].action)
+			if(isShip(card) || cards[card].action == "ship")
 			{
 				document.getElementById('playingArea').classList.add('draggingShip');
 			}
@@ -368,7 +422,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 				document.getElementById('playingArea').classList.add('draggingPony');
 			}
 
-			if(isShip(card))
+			if(isShip(card) || cards[card].action == "ship")
 			{
 				document.getElementById('playingArea').classList.add('draggingShip');
 			}
@@ -585,6 +639,68 @@ function removeShiftHover(element)
 }
 
 
+function pointsPopup(points)
+{
+	console.log(points);
+
+	return createPopup([
+	{
+		name: "",
+		render: function(accept)
+		{
+			var div = document.createElement('div');
+
+			var p = document.createElement('p');
+			p.innerHTML = "Choose how many points you should get";
+			p.style = "padding: 10px; padding-top: 20px;"
+			div.appendChild(p);
+
+			for(let val of points)
+			{
+				if(val == -1)
+				{
+					let customDiv = document.createElement('div');
+
+					
+					let input = document.createElement('input');
+					input.type = "number";
+
+
+					input.value = points.reduce((a,b) => Math.max(a,b), 0) + 1;
+					
+
+					let button = document.createElement('button');
+					button.innerHTML = "Other";
+					button.onclick = function()
+					{
+						if(!isNaN(Number(input.value)))
+						{
+							accept(Number(input.value));
+						}
+					}
+
+					customDiv.appendChild(input);
+					customDiv.appendChild(button);
+
+					div.appendChild(customDiv);
+				}
+				else
+				{
+					let button = document.createElement('button');
+					button.innerHTML = val;
+					button.onclick = function(){
+						accept(val);
+					};
+
+					div.appendChild(button);
+				}
+			}
+
+			return div;
+		}
+	}], true);
+}
+
 
 // dragHandler is responsible for removing a card from its old location
 // dropHandler is responsible for adding a card to its new location.
@@ -639,6 +755,8 @@ export function setCardKeywords(element, keywords)
 	var div = document.createElement('div');
 	div.className = "keywords decoration";
 
+	var keywords = new Set(keywords)
+
 	for(var word of keywords)
 	{
 		div.innerHTML += "<div>" + word + "</div>";
@@ -683,7 +801,6 @@ function setCardBackground(element, card, useLarge)
 {
 	loadCard(card);
 
-
 	if(isAnon(card))
 	{
 		element.classList.remove('blank');
@@ -713,14 +830,12 @@ function setCardBackground(element, card, useLarge)
 	}
 	else
 	{
-		if(isShip(card))
-			element.classList.add('ship')
-
-		if(isGoal(card))
-			element.classList.add('goal');
-
 		if(isPony(card))
 			element.classList.add('pony')
+		else if(isShip(card))
+			element.classList.add('ship')
+		else if(isGoal(card))
+			element.classList.add('goal');
 		else if (isPonyOrStart(card))
 			element.classList.add('start');
 

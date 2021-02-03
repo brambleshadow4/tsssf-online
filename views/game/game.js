@@ -303,7 +303,8 @@ function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
 
 export function updateTurnstate()
 {
-	var turnstate = model.turnstate
+	var turnstate = model.turnstate;
+
 	if(!turnstate){
 		document.body.classList.remove("nomove");
 		return;
@@ -346,6 +347,18 @@ var turnStateChangelings = {};
 
 function updateEffects()
 {
+	var larsonEffect = "";
+
+	for(var key in model.board)
+	{
+		if(model.board[key] && model.board[key].card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
+		{
+			larsonEffect = model.board[key].card;
+			break;
+		}
+	}
+
+
 	var decoration = document.getElementsByClassName('decoration');
 	var i = 0;
 	while(i < decoration.length)
@@ -360,6 +373,9 @@ function updateEffects()
 	for(var card in turnStateChangelings)
 	{
 		let newDisguise = getCardProp(card, "disguise");
+
+		if(larsonEffect && newDisguise)
+			newDisguise = larsonEffect;
 
 		if(!isBoardLoc(cardLocations[card]))
 		{
@@ -378,13 +394,45 @@ function updateEffects()
 	}
 
 
-	for(var card in model.turnstate.overrides)
+	var cardsToApplyEffectsTo = model.turnstate.overrides;
+
+
+	if(larsonEffect)
+	{
+		var newCards = Object.keys(model.board)
+			.filter( x => x.startsWith("p,"))
+			.map(x => model.board[x].card);
+
+		var newObj = {}
+		for(var card of newCards)
+		{
+
+			newObj[card] = true;
+		}
+
+		cardsToApplyEffectsTo = newObj;
+	}
+
+
+	for(var card in cardsToApplyEffectsTo)
 	{	
+
 		if(isBoardLoc(cardLocations[card]))
 		{
 			var element = model.board[cardLocations[card]].element;
-
 			var decs = getCardProp(card, "*");
+
+			if(larsonEffect && card != larsonEffect)
+			{
+				decs.race = "alicorn";
+				if(!decs.keywords)
+					decs.keywords = ["Princess"];
+				else
+					decs.keywords.push("Princess");
+
+				if(decs.disguise)
+					decs.disguise = larsonEffect;
+			}
 
 			if(decs.disguise && element.getElementsByClassName('changeling').length == 0)
 			{
@@ -407,7 +455,7 @@ function updateEffects()
 				addTempSymbol(element, "altTimeline");
 			}
 
-			if(decs.doublePony)
+			if(decs.count == 2)
 			{
 				addTempSymbol(element, "doublePony");
 			}
@@ -418,6 +466,30 @@ function updateEffects()
 			}
 		}	
 	}	
+
+
+	var playedThisTurn = new Set(model.turnstate.playedThisTurn)
+
+	var cardsWithJustPlayed = document.getElementsByClassName('justPlayed');
+	
+	var toRemove = []
+	for(var el of cardsWithJustPlayed)
+	{
+		if(!playedThisTurn.has(el.getAttribute('card')))
+		{
+			toRemove.push(el);
+		}
+	}
+
+	toRemove.map(x => x.classList.remove("justPlayed"));
+
+	for(var card of model.turnstate.playedThisTurn)
+	{
+		if(isBoardLoc(cardLocations[card]))
+		{
+			model.board[cardLocations[card]].element.classList.add('justPlayed');
+		}
+	}
 }
 
 export function updateGame(newModel)
@@ -426,6 +498,11 @@ export function updateGame(newModel)
 	{
 		clearBoard();
 		model = window.model = newModel;
+
+		if(model.turnstate)
+		{
+			model.turnstate.playedThisTurn = new Set(model.turnstate.playedThisTurn );
+		}
 	}
 
 
@@ -499,7 +576,7 @@ export function isValidMove(cardDragged, targetCard, endLocation)
 		return !model.board[offsetLoc];
 	}
 
-	return (targetCard == "blank:ship" && isShip(cardDragged)
+	return (targetCard == "blank:ship" && (isShip(cardDragged) || cards[cardDragged].action == "ship")
 		|| (targetCard == "blank:pony" && isPonyOrStart(cardDragged))
 	);
 }
@@ -517,7 +594,7 @@ function getCardAtLoc(loc)
 }
 
 
-export async function moveCard(card, startLocation, endLocation, forceCardToMove)
+export async function moveCard(card, startLocation, endLocation, forceCardToMove, extraArg)
 {
 	var startPos;
 	const vh = window.innerHeight/100;
@@ -526,8 +603,6 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	{
 		return;
 	}
-
-
 
 	if(startLocation != cardLocations[card])
 	{
@@ -617,11 +692,18 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	}*/
 	else if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
 	{
-		console.log(startLocation);
-
 		startPos = getPosFromElement(model.board[startLocation].element);
+
+		var removedCard = model.board[startLocation].card;
+
 		removeCardFromBoard(startLocation);
 		updateBoard();
+
+		if(model.turnstate)
+		{
+			model.turnstate.removedFrom = [startLocation, removedCard];
+		}
+
 	}
 	else if(isGoalLoc(startLocation))
 	{
@@ -640,7 +722,6 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	var updateFun = function(){};
 	var endPos;
 	
-
 	if(endLocation == "hand")
 	{
 		model.hand.push(card);
@@ -695,7 +776,7 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	else if(endLocation == "winnings")
 	{
 
-		model.winnings.push(card);
+		model.winnings.push({card, value: Number(extraArg) || 0});
 		updateFun = updateWinnings;
 
 		var enddiv = document.getElementById("winnings");
@@ -724,6 +805,11 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 			}
 			
 			removeCardFromBoard(endLocation);
+		}
+
+		if(model.turnstate)
+		{
+			model.turnstate.playedThisTurn.add(card);
 		}
 
 		model.board[endLocation] = {
@@ -785,12 +871,19 @@ async function doPlayEvent(e)
 {
 	var cardInfo = currentDeck[e.card];
 
+
+	var isImmediatePlay = (e.startLocation == "hand" || e.startLocation == "ponyDiscardPile,top")
+
+
 	if(isPonyOrStart(e.card) && isBoardLoc(e.endLocation))
 	{
 		var neighbors = getNeighborCards(e.card);
 
 		if(model.turnstate)
 		{
+			if(!model.turnstate.openShips)
+				model.turnstate.openShips = {};
+
 			if(neighbors.length == 1 && model.turnstate.openShips[neighbors[0]])
 			{
 				model.turnstate.triggerShip = neighbors[0];
@@ -801,8 +894,11 @@ async function doPlayEvent(e)
 			}
 		}
 
-		var fn = getActionFunction(e.card);
-		if(fn) await fn(e.card);
+		var fn = getCardAction(e.card);
+		if(fn && (isImmediatePlay || doActionOnSwap(e.card)))
+		{
+			await fn(e.card);
+		}
 	}
 
 	if(isShip(e.card))
@@ -835,9 +931,7 @@ async function doPlayEvent(e)
 			{
 				delete model.turnstate.openShips[shipCard];
 
-				fn = getActionFunction(shipCard);
-				console.log("ship card was played");
-				console.log(fn)
+				fn = getCardAction(shipCard);
 				if(fn) await fn(shipCard);
 
 
@@ -850,12 +944,15 @@ async function doPlayEvent(e)
 
 					for(let pony of ponies)
 					{
-						let fn = getActionFunction(pony);
+						let fn = getCardAction(pony);
+
+
 
 						var cardElement = model.board[cardLocations[pony]].element;
 
 						if(fn) setActionButton(cardElement, async function(e){
-							await fn(pony)
+							await fn(pony);
+							updateEffects();
 						});
 					}
 				}
@@ -867,21 +964,6 @@ async function doPlayEvent(e)
 window.moveCard = moveCard;
 
 
-
-/*
-addPlayEvent(async function(e){
-
-	if((e.startLocation == "hand" || e.startLocation == "ponyDiscardPile,top") && e.endLocation.startsWith("p,"))
-	{
-		var cardInfo = currentDeck[e.card];
-		if(cardInfo.action == "ChangelingSpecial(plushling)")
-		{
-
-		}
-	}
-
-
-})*/
 
 function isShipClosed(shipCard)
 {
@@ -908,44 +990,61 @@ function getNeighborCards(shipCard)
 	return neighborCards;
 }
 
-function getActionFunction(card)
+function getCardAction(card)
 {	
 	var cardInfo = currentDeck[card];
 
-	console.log("action=" + cardInfo.action);
+	if(!cardInfo.action) { return; }
 
-	if(cardInfo.action && cardInfo.action.startsWith("Changeling("))
+	var actionName = cardInfo.action;
+	var params = [];
+	var a = actionName.indexOf("(");
+	var b = actionName.indexOf(")");
+
+	if(a > 0 && b > 0)
 	{
-		var a = cardInfo.action.indexOf("(");
-		var b = cardInfo.action.indexOf(")")
-		var type = cardInfo.action.substring(a+1,b);
-		return changelingAction(type);
+		params = actionName.substring(a+1,b).split(",").map( x => x.trim());
+		actionName = actionName.substring(0,a);
 	}
 
-	switch(cardInfo.action)
+	switch(actionName)
 	{
+		case "ChangelingNoRedisguise": 
+		case "Changeling": 
+			return changelingAction(...params);
 		case "genderChange": return genderChangeAction;
 		case "makePrincess": return makePrincessAction;
 		case "clone": return cloneAction;
 		case "timelineChange": return timelineChangeAction;
 		case "keywordChange": return keywordChangeAction;
 		case "raceChange": return raceChangeAction;
+		case "raceGenderChange": return raceGenderChangeAction;
+		case "addKeywords": return addKeywordsAction(...params);
+	}		
+}
+
+function doActionOnSwap(card)
+{
+	var cardInfo = currentDeck[card];
+	if(cardInfo.action && cardInfo.action.startsWith("Changeling("))
+	{
+		return true;
 	}
-		
+
+	return false;
 }
 
 function changelingAction(type)
 {
 	return async function(card)
 	{
-		console.log("changeling type (" + type + ")");
 
 		if(model.turnstate)
 		{
 			var cardNames = Object.keys(currentDeck);
-			var disguises = cardNames.filter(x => isPony(x) && !currentDeck[x].doublePony && x != card);
+			var disguises = cardNames.filter(x => isPony(x) && currentDeck[x].count == undefined && x != card);
 
-			console.log(disguises.slice());
+			var newDisguise = "";
 
 			switch(type)
 			{
@@ -953,7 +1052,6 @@ function changelingAction(type)
 				case "unicorn":
 				case "earth":
 				case "pegasus":
-					console.log("doing this filter");
 					disguises = disguises.filter(x => currentDeck[x].race == type);
 					break;
 				case "nonAlicornFemale":
@@ -962,23 +1060,41 @@ function changelingAction(type)
 						&& (currentDeck[x].gender == "female" || currentDeck[x].gender=="malefemale"))
 					);
 					break;
+				case "replace":
+					
+					var thisLocation = cardLocations[card];
+					var offset = thisLocation.replace("p,","offset,");
+
+					if(model.board[offset] && model.board[offset].card)
+					{
+						newDisguise = model.board[offset].card;
+					}
+					else if(model.turnstate.removedFrom 
+						&& model.turnstate.removedFrom[0] == thisLocation)
+					{
+						newDisguise = model.turnstate.removedFrom[1] ;
+					}
+					
+					disguises = [];
+
+					break;
+				case "plushling":
+					// no extra filtering needs to be done for plushling
+					break;
 				default:
 					disguises = [];
 			}
 
-			console.log(disguises);
-
-
-			if(!disguises.length)
+			if(!disguises.length && !newDisguise)
 				return;
 
-			var newCard = await openCardSelect("Choose a pony to disguise as", disguises);
+			newDisguise = newDisguise || await openCardSelect("Choose a pony to disguise as", disguises);
 
-			if(!newCard)
+			if(!newDisguise)
 				return
 
 			// reset overrides when changeling changes type.
-			setCardProp(card, "disguise", newCard);
+			setCardProp(card, "disguise", newDisguise);
 			//broadcastEffects();
 		}
 	}
@@ -987,17 +1103,20 @@ function changelingAction(type)
 
 function getCardProp(card, prop)
 {
-	var cardObj = model.turnstate.overrides[card];
+	var cardObj = model.turnstate.overrides[card] || {};
+
 	var baseCard = card;
 
-	if(cardObj && cardObj.length)
-	{
-		cardObj = cardObj[cardObj.length-1];
-		baseCard = cardObj.disguise || card;
-	}
+	baseCard = cardObj.disguise || card;
 
 	if(prop == "*")
-		return cardObj;
+	{
+		var copy = {};
+		for(var prop in cardObj)
+			copy[prop] = cardObj[prop]
+
+		return copy;
+	}
 
 	if(cardObj && cardObj[prop])
 		return cardObj[prop]
@@ -1012,6 +1131,11 @@ function setCardProp(card, prop, value)
 	if(model.turnstate)
 	{
 		if (!model.turnstate.overrides[card])
+		{
+			model.turnstate.overrides[card] = {};
+		}
+
+		if(prop == "disguise")
 		{
 			model.turnstate.overrides[card] = {};
 		}
@@ -1079,13 +1203,13 @@ async function genderChangeAction(shipCard)
 async function cloneAction(shipCard)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !currentDeck[x].doublePony), true);
+	var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !currentDeck[x].count), true);
 
 	if(!ponyCard) return;
 
 	if(model.turnstate)
 	{
-		setCardProp(ponyCard, "doublePony", true)
+		setCardProp(ponyCard, "count", 2)
 		//broadcastEffects();
 	}
 }
@@ -1100,9 +1224,10 @@ async function timelineChangeAction(shipCard)
 	if(model.turnstate)
 	{
 		setCardProp(ponyCard, "altTimeline", true)
-		//broadcastEffects();
 	}
 }
+
+
 
 async function keywordChangeAction(shipCard)
 {
@@ -1138,7 +1263,6 @@ async function keywordChangeAction(shipCard)
 
 		card1.onclick = ponySelect;
 		element.appendChild(card1);
-
 
 		card2.onclick = ponySelect;
 		element.appendChild(card2);
@@ -1179,7 +1303,25 @@ async function keywordChangeAction(shipCard)
 	{
 		var [card, keyword] = output;
 		setCardProp(card, "keywords", keyword)
-		//broadcastEffects();
+	}
+}
+
+function addKeywordsAction(...keywords)
+{
+	return async function(shipCard)
+	{
+		var ponies = getNeighborCards(shipCard);
+		var ponyCard = await openCardSelect("Choose a pony to gain keywords", ponies, true);
+
+		if(!ponyCard) return;
+
+		if(model.turnstate)
+		{
+			for(var keyword of keywords)
+			{
+				setCardProp(ponyCard, "keywords", keyword);
+			}
+		}
 	}
 }
 
@@ -1201,6 +1343,27 @@ async function raceChangeAction(shipCard)
 	{
 		setCardProp(ponyCard, "race", newRace)
 		//broadcastEffects();
+	}
+}
+
+async function raceGenderChangeAction(shipCard)
+{
+	var ponies = getNeighborCards(shipCard);
+	ponies = ponies.filter(x => !currentDeck[x].keywords.has("Changeling"));
+
+	if(ponies.length == 0)
+		return;
+
+	var triple = await raceGenderChangePopup(ponies);
+
+	if(!triple) return;
+
+	var [ponyCard, newRace, newGender] = triple;
+
+	if(model.turnstate)
+	{
+		setCardProp(ponyCard, "race", newRace);
+		setCardProp(ponyCard, "gender", newGender);
 	}
 }
 
@@ -1300,6 +1463,146 @@ function raceChangePopup(ponies)
 		alicorn.onclick = raceSelect;
 
 		div.appendChild(buttonDiv);
+
+		return div;
+
+	}}],true)
+}
+
+function raceGenderChangePopup(ponies)
+{
+	return createPopup([{render: function(acceptFn)
+	{
+		var selectedPony;
+		var selectedRace;
+		var selectedGender;
+
+		var div =document.createElement('div');
+		div.classList.add('popupPage');
+
+		var h1 = document.createElement('h1');
+		h1.innerHTML = "Choose a pony and select their new race/gender";
+		div.appendChild(h1)
+
+		var buttonDiv = document.createElement('div')
+		buttonDiv.className = "raceButtonContainer"
+
+
+		var card1 = makeCardElement(ponies[0]);
+		card1.setAttribute('value', ponies[0])
+
+		if(ponies.length == 2)
+		{
+			var card2 = makeCardElement(ponies[1]);
+			card2.setAttribute('value', ponies[1])
+		}
+		
+
+		function ponySelect()
+		{
+			card1.classList.remove('selected')
+			if(card2)
+				card2.classList.remove('selected')
+			
+			this.classList.add('selected');
+			selectedPony = this.getAttribute('value');
+
+			if(selectedPony && selectedRace && selectedGender)
+				acceptFn([selectedPony, selectedRace, selectedGender]);
+
+		}
+
+		card1.onclick = ponySelect;
+		buttonDiv.appendChild(card1);
+
+		if(card2)
+		{
+			card2.onclick = ponySelect;
+			buttonDiv.appendChild(card2);
+		}
+
+		var rows = document.createElement('div');
+		var topRow = document.createElement('div');
+		var bottomRow = document.createElement('div');
+		bottomRow.className = "raceButtonContainer";
+		topRow.className = "raceButtonContainer";
+
+		rows.appendChild(topRow);
+		rows.appendChild(bottomRow);
+		rows.style = "display: inline-block";
+
+		var earth = document.createElement('img');
+		earth.className = 'raceButton';
+		earth.setAttribute('value','earth')
+		earth.src = "/img/sym/earth.png";
+		topRow.appendChild(earth)
+
+		var pegasus = document.createElement('img');
+		pegasus.className = 'raceButton';
+		pegasus.src = "/img/sym/pegasus.png";
+		pegasus.setAttribute('value','pegasus')
+		topRow.appendChild(pegasus)
+
+		var unicorn = document.createElement('img');
+		unicorn.className = 'raceButton';
+		unicorn.src = "/img/sym/unicorn.png";
+		unicorn.setAttribute('value','unicorn')
+		topRow.appendChild(unicorn)
+
+		var alicorn = document.createElement('img');
+		alicorn.className = 'raceButton';
+		alicorn.src = "/img/sym/alicorn.png";
+		alicorn.setAttribute('value','alicorn')
+		topRow.appendChild(alicorn)
+
+		function raceSelect()
+		{
+			earth.classList.remove('selected')
+			pegasus.classList.remove('selected')
+			unicorn.classList.remove('selected')
+			alicorn.classList.remove('selected')
+			this.classList.add('selected');
+			selectedRace = this.getAttribute('value');
+
+			if(selectedPony && selectedRace && selectedGender)
+				acceptFn([selectedPony, selectedRace, selectedGender]);
+		}
+
+		earth.onclick = raceSelect;
+		pegasus.onclick = raceSelect;
+		unicorn.onclick = raceSelect;
+		alicorn.onclick = raceSelect;
+
+
+
+		var male = document.createElement('img');
+		male.className = 'raceButton';
+		male.setAttribute('value','male')
+		male.src = "/img/sym/male.png";
+		bottomRow.appendChild(male)
+
+		var female = document.createElement('img');
+		female.className = 'raceButton';
+		female.setAttribute('value','female')
+		female.src = "/img/sym/female.png";
+		bottomRow.appendChild(female);
+
+		function genderSelect()
+		{
+			male.classList.remove('selected')
+			female.classList.remove('selected')
+			this.classList.add('selected');
+			selectedGender = this.getAttribute('value');
+
+			if(selectedPony && selectedRace && selectedGender)
+				acceptFn([selectedPony, selectedRace, selectedGender]);
+		}
+
+		male.onclick = genderSelect;
+		female.onclick = genderSelect;
+
+		buttonDiv.appendChild(rows);
+		div.appendChild(buttonDiv)
 
 		return div;
 

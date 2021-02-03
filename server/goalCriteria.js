@@ -3,18 +3,34 @@ import {isBlank} from "./lib.js";
 
 function getCardProp(model, cardFull, prop)
 {
+
+
 	var [card, ctxNo] = cardFull.split(":");
+	ctxNo = Number(ctxNo);
 	var cardOverrides = model.turnstate.overrides[card] || {};
 
-	if(ctxNo != undefined && !isNaN(Number(ctxNo)))
+	if(ctxNo != undefined && !isNaN(ctxNo))
 	{
-		if(model.turnstate.changelingContexts[card] && model.turnstate.changelingContexts[card][Number(ctxNo)])
+		if(model.turnstate.changelingContexts[card] && model.turnstate.changelingContexts[card][ctxNo])
 		{
-			cardOverrides = model.turnstate.changelingContexts[card][Number(ctxNo)]
+			cardOverrides = model.turnstate.changelingContexts[card][ctxNo]
 		}
 	}
 
 	var baseCard = cardOverrides.disguise || card;
+
+	if(ctxNo == 0)
+	{
+		baseCard = card;
+	}
+	else
+	{
+		if(cardOverrides.disguise && model.turnstate.specialEffects.larsonEffect)
+			baseCard = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+	}
+
+	
+
 
 	if(prop == "*")
 		return cardOverrides;
@@ -22,10 +38,21 @@ function getCardProp(model, cardFull, prop)
 	if(prop == "card")
 		return card;
 
+	if(prop == "race" && model.turnstate.specialEffects.larsonEffect)
+		return "alicorn";
+
 
 	if(prop == "keywords")
 	{
+		if(cards[card].action && cards[card].action.indexOf("plushling") >= 0)
+		{
+			baseCard = card;
+		}
+
 		let baseKeywords = (cardOverrides && cardOverrides.keywords) || [];
+
+		if(model.turnstate.specialEffects.larsonEffect)
+			baseKeywords.push("Princess");
 
 		if(cardOverrides && cardOverrides.disguise)
 			baseKeywords = baseKeywords.concat(cards[card].keywords);
@@ -51,13 +78,10 @@ function getCardProp(model, cardFull, prop)
 
 function doesCardMatchSelector(model, card, selector)
 {
-	console.log("doesCardMatchSelector " + card + " " + selector);
+	//console.log("doesCardMatchSelector " + card + " " + selector);
 
-	let trueValue = 1;
+	let trueValue = getCardProp(model, card, "count") || 1;
 	let falseValue = 0;
-	if(getCardProp(model, card, "doublePony"))
-		trueValue = 2;
-
 
 	if(selector.trim() == "*")
 		return trueValue;
@@ -70,7 +94,6 @@ function doesCardMatchSelector(model, card, selector)
 			originalGender = cards[model.turnstate.overrides[card].disguise].gender
 		}
 
-		console.log(getCardProp(model, card,"gender") != originalGender)
 		return (getCardProp(model, card,"gender") != originalGender ? trueValue : falseValue);
 	}
 
@@ -79,7 +102,6 @@ function doesCardMatchSelector(model, card, selector)
 	if(clauses.length > 1)
 	{
 		var criteria = clauses.map( clause => doesCardMatchSelector(model, card, clause.trim()));
-		console.log(criteria.reduce((a,b) => a && b))
 		return (criteria.reduce((a,b) => a && b) ? trueValue : falseValue);
 	}
 
@@ -88,7 +110,6 @@ function doesCardMatchSelector(model, card, selector)
 	if(clauses.length > 1)
 	{
 		var criteria = clauses.map( clause => doesCardMatchSelector(model, card, clause.trim()));
-		console.log(criteria.reduce((a,b) => a || b))
 		return ( criteria.reduce((a,b) => a || b) ? trueValue : falseValue);
 	}
 
@@ -108,22 +129,18 @@ function doesCardMatchSelector(model, card, selector)
 
 		if(prop == "name")
 		{
-			console.log(cardValue.has(value) )
 			return cardValue.has(value) ? falseValue : trueValue;
 		}
 
 		if(prop == "gender" && cardValue == "malefemale")
 		{
-			console.log(true)
 			return trueValue;
 		}
 
 		if(prop == "race" && cardValue == "earth/unicorn")
 		{	
-			console.log(value == "earth" || value == "unicorn")
 			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
 		}
-		console.log(cardValue != value )
 		return (cardValue != value ? trueValue : falseValue);
 	}
 
@@ -145,7 +162,6 @@ function doesCardMatchSelector(model, card, selector)
 
 		if(prop == "name")
 		{
-			console.log(cardValue.has(value))
 			return cardValue.has(value) ? trueValue : falseValue;
 		}
 
@@ -154,9 +170,9 @@ function doesCardMatchSelector(model, card, selector)
 		
 		if(prop == "race" && cardValue == "earth/unicorn")
 			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
+
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
 
-		console.log(cardValue == value)
 		return (cardValue == value ? trueValue : falseValue);
 	}
 
@@ -169,11 +185,9 @@ function doesCardMatchSelector(model, card, selector)
 
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
 
-		console.log(getCardProp(model, card, prop).has(value))
 		return (getCardProp(model, card, prop).has(value) ? trueValue : falseValue);
 	}
 
-	console.log(false);
 	return falseValue
 }
 
@@ -306,9 +320,9 @@ function ExistsChain(selector, count)
 				var chained = buildChain(key);				
 				var ponyCards = [...chained].map(x => model.board[x].card);
 
-				var chainCount = ponyCards.map( x=> getCardProp(model, x, "doublePony") ? 2 : 1).reduce((a,b) => a + b, 0)
+				var chainCount = ponyCards.map(x => getCardProp(model, x, "count") || 1).reduce((a,b) => a + b, 0)
 
-				if(chainCount >= count)
+				if(chainCount >= count && ponyCards.length > 1)
 					return true;
 			}
 		}
@@ -463,7 +477,6 @@ function BreakShip(selector1, selector2, count)
 	count = count || 1;
 	return function(model)
 	{
-		console.log(model.turnstate.brokenShipsNow);
 
 		if(model.turnstate)
 		{
@@ -484,11 +497,9 @@ function BreakShip(selector1, selector2, count)
 
 			});
 
-			console.log("break ship " + (matchingPlays.length >= count))
 			return (matchingPlays.length >= count);
 		}
 
-		console.log("break ship false");
 		return false;
 	}
 }
@@ -617,7 +628,14 @@ function ShippedWith2Versions(model, ponyCards)
 			return id1 != id2;
 		}*/
 
-		return getCardProp(model,card2,"name") == getCardProp(model,card1,"name")
+		var set1 = getCardProp(model,card2,"name");
+		var set2 = getCardProp(model,card1,"name");
+		for(var item of set1)
+		{
+			if(set2.has(item))
+				return true;
+		}
+		return false;	
 	}
 
 	let centeredCount = 0;

@@ -19,9 +19,6 @@ import
 	endMoveShared
 } from "/game/cardComponent.js";
 
-import {createPopup} from "/game/popupComponent.js";
-
-
 
 var draggingBoard = false;
 
@@ -250,12 +247,14 @@ function addCardToBoard(key, card)
 
 	var imgElement = makeCardElement(card, key, !isBlank(card), true);
 
+	if( model.turnstate && model.turnstate.playedThisTurn.has(card))
+		imgElement.classList.add('justPlayed');
+
 	//if(isPony(card) || isShip(card))
 	//	addTrashHandlers(card, imgElement, key);
 
 	var refPoint = document.getElementById('refPoint');
 
-	
 	switch(pieces[0])
 	{
 		case "p":
@@ -263,11 +262,13 @@ function addCardToBoard(key, card)
 			imgElement.style.left = x * gridWidth + "vh";
 			break;
 		case "sr":
+			imgElement.classList.add('shippos');
 			imgElement.classList.add('sideways');
 			imgElement.style.top = y * gridWidth + "vh";
 			imgElement.style.left = x * gridWidth + 22/2 + "vh";
 			break;
 		case "sd":
+			imgElement.classList.add('shippos');
 			imgElement.style.top = y * gridWidth + 22/2 + "vh";
 			imgElement.style.left = x * gridWidth + "vh";
 			break;
@@ -398,7 +399,6 @@ export function updateBoard()
 			if(cardHasValidNeighbor)
 				continue;
 			// all cards next to this blank are blank; remove it.
-
 
 			removeCardFromBoard(key);
 		

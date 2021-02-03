@@ -10,7 +10,6 @@ export function createPopup(tabs, miniMode)
 	// closePopupWithVal closes the popup and accepts the promise with val.
 	function handler(accept, reject)
 	{
-
 		var closeButton = document.createElement('img');
 		closeButton.src = "/img/close.svg";
 		closeButton.id = "popupCloseButton";
@@ -18,7 +17,6 @@ export function createPopup(tabs, miniMode)
 		var parent = document.createElement('div');
 		parent.className = "popupContainer";
 
-		
 		var div = document.createElement('div');
 		div.className = "popup";
 		if(miniMode)

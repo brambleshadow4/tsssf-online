@@ -17,7 +17,7 @@ var cards = {
 				name: "Aloe & Lotus",
 				race: "earth",
 				gender: "female",
-				doublePony: "true",
+				count: 2,
 				action: "newGoal",
 				keywords: []
 			},
@@ -259,7 +259,7 @@ var cards = {
 				race: "unicorn",
 				gender: "male",
 				action: "swap",
-				doublePony: "true",
+				count: 2,
 				keywords: [
 					"Villain"
 				]
@@ -1868,6 +1868,7 @@ var cards = {
 				url: "Pony - Impy Three.png",
 				race: "pegasus",
 				gender: "female",
+				action: "ship",
 				keywords: [
 					"Batpony",
 					"OC"
@@ -1877,7 +1878,7 @@ var cards = {
 				name: "Lotus Heat & Petal Spark",
 				url: "Pony - Lotus Heat and Petal Spark.png",
 				race: "pegasus",
-				doublePony: "true",
+				count: 2,
 				gender: "female",
 				keywords: [
 					"OC",
@@ -1972,7 +1973,7 @@ var cards = {
 				]
 			},
 			"NoHoldsBarred.Pony.WaifuThiefFlashSentry": {
-				// unimplemented
+				// unimplemented extra board
 				name: "Waifu Thief Flash Sentry",
 				url: "Pony - Waifu Stealer Flash Sentry.png",
 				race: "pegasus",
@@ -2040,6 +2041,7 @@ var cards = {
 				url: "Pony - Trick Candle.png",
 				race: "earth",
 				gender: "male",
+				changeGoalPointValues: true,
 				keywords: [
 					"OC",
 					"#horsefamous"
@@ -2065,11 +2067,10 @@ var cards = {
 				]
 			},
 			"NoHoldsBarred.Pony.Plushling": {
-				// unimplemented
 				name: "Plushling",
 				url: "Pony - Plushling.png",
 				gender: "malefemale",
-				action: "ChangelingSpecial(plushling)",
+				action: "ChangelingNoRedisguise(plushling)",
 				keywords: [
 					"Changeling",
 					"Object",
@@ -2098,10 +2099,10 @@ var cards = {
 				]
 			},
 			"NoHoldsBarred.Pony.KingVespid": {
-				// unimplemented
 				name: "King Vespid",
 				url: "Pony - King Vespid.png",
 				gender: "male",
+				action: "ChangelingNoRedisguise(replace)",
 				keywords: [
 					"Changeling",
 					"OC"
@@ -2217,7 +2218,7 @@ var cards = {
 				]
 			},
 			"HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee": {
-				//unimplemented
+				//unimplemented, temporary goals
 				name: "Cheerilee",
 				url: "Pony_Test Subject Cheerilee.png",
 				race: "earth",
@@ -2237,7 +2238,6 @@ var cards = {
 				]
 			},
 			"HorriblePeople.2014ConExclusives.Pony.CiderMatronAppleBloom": {
-				//unimplemented
 				name: "Apple Bloom",
 				url: "Pony_Cider Matron Apple Bloom.png",
 				race: "earth",
@@ -2253,7 +2253,8 @@ var cards = {
 				name: "Discord",
 				url: "START_Fanfic Author Discord.png",
 				race: "alicorn",
-				gender: "male"
+				gender: "male",
+				changeGoalPointValues: true
 			},
 
 			"HorriblePeople.2015ConExclusives.Pony.DreamboatBrad": {
@@ -2264,11 +2265,11 @@ var cards = {
 				keywords: []
 			},
 			"HorriblePeople.2015ConExclusives.Pony.AnEntireSwarmOfBreezies": {
-				// unimplemented
 				name: "An Entire Swarm of Breezies",
 				url: "Pony_An Entire Swarm of Breezies.png",
 				race: "pegasus",
 				gender: "malefemale",
+				count: 10,
 				keywords: [
 					"Breezy"
 				]
@@ -2290,6 +2291,7 @@ var cards = {
 				url: "Pony_Mistress of Equality Starlight Glimmer.png",
 				race: "unicorn",
 				gender: "female",
+				changeGoalPointValues: true,
 				keywords: [
 					"Villain"
 				]
@@ -2303,9 +2305,8 @@ var cards = {
 			},
 
 			"HorriblePeople.2015ConExclusives.Ship.ObjectofAdoration": {
-				//unimplemented
-				name: "Object of Adoration",
-				url: "Ship_Object of Adoration.png"
+				url: "Ship_Object of Adoration.png",
+				action: "addKeywords(Object)"
 			},
 
 		// 2015 workshop
@@ -2354,7 +2355,6 @@ var cards = {
 				]
 			},
 			"HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh": {
-				//unimplemented
 				name: "Big Macintosh",
 				url: "Pony_Alicorn Big Macintosh.png",
 				race: "alicorn",
@@ -2633,26 +2633,21 @@ var cards = {
 				]
 			},
 			"HorriblePeople.GraciousGivers.Ship.InItforthePlot": {
-				name: "In It for the Plot",
 				url: "Ship_In It for the Plot.png"
 			},
 			"HorriblePeople.GraciousGivers.Ship.BestFriends": {
-				name: "Best Friends",
 				url: "Ship_Best Friends.png"
 			},
 			"HorriblePeople.GraciousGivers.Ship.DunkedInTheDatingPool": {
-				//unimplemented
-				name: "Dunked in the Dating Pool",
+				action: "raceGenderChange",
 				url: "Ship_Dunked in the Dating Pool.png"
 			},
 			"HorriblePeople.GraciousGivers.Goal.AHoardOfPrincesses": {
-				name: "A Hoard of Princesses",
 				url: "Goal_A Hoard of Princesses.png",
 				goalLogic: "ExistsPonyShippedTo(Dragon in keywords, Select(Princess in keywords, 3))",
 				points: "3"
 			},
 			"HorriblePeople.GraciousGivers.Goal.MaterialGirl": {
-				name: "Material Girl",
 				url: "Goal_Material Girl.png",
 				goalLogic: "ExistsPonyShippedTo(name=Twilight Sparkle, Select(Object in keywords, 3))",
 				points: "0"
@@ -2681,7 +2676,7 @@ var cards = {
 				url: "Pony_Applejack's Parents.png",
 				race: "earth",
 				gender: "malefemale",
-				doublePony: "true",
+				count: 2,
 				keywords: [
 					"Apple"
 				]
@@ -2859,13 +2854,11 @@ var cards = {
 				]
 			},
 			"HorriblePeople.Mean6.Ship.TheNightmareBecomesYou": {
-				// unimplemented
-				name: "The Nightmare Becomes You",
-				url: "Ship_The Nightmare Becomes You.png"
+				url: "Ship_The Nightmare Becomes You.png",
+				action: "addKeywords(Nightmare, Villain)"
 			},
 
 			"HorriblePeople.Mean6.Goal.DarkestDay": {
-				name: "Darkest Day",
 				url: "Goal_Darkest Day.png",
 				goalLogic: "ExistsChain(Nightmare in keywords, 3)",
 				points: "2"
@@ -2906,6 +2899,7 @@ var cards = {
 			name: "Starlight Glimmer",
 			race: "unicorn",
 			gender: "female",
+			changeGoalPointValues: true,
 			keywords: []
 		},
 

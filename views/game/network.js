@@ -41,6 +41,7 @@ export function attachToSocket(socket)
 
 		if(event.data.startsWith('kick'))
 		{
+			document.getElementById('playingArea').style.backgroundColor = "#FFCCCC";
 			alert("The game's host kicked you from the game");
 			kicked = true;
 
@@ -61,6 +62,9 @@ export function attachToSocket(socket)
 		if(event.data.startsWith('turnstate;'))
 		{
 			model.turnstate = JSON.parse(event.data.substring(10));	
+			model.turnstate.playedThisTurn = new Set();
+
+			console.log(model.turnstate);
 			updateTurnstate();
 		}
 
@@ -161,7 +165,13 @@ export function attachToSocket(socket)
 			{
 				player.ponies = ponies;
 				player.ships = ships;
-				player.winnings = winnings;
+				player.winnings = winnings.map(x =>{
+					var s = x.split(",")
+					return {
+						card: s[0],
+						value: Number(s[1])
+					}
+				});
 			}
 			else
 			{
@@ -185,23 +195,26 @@ export function attachToSocket(socket)
 
 	socket.onCloseHandler = function(event)
 	{
-		if(!kicked)
-			alert("Failed to connect to the server :(")
+
+		setTimeout(function(){
+			if(!kicked)
+			{
+				document.getElementById('playingArea').style.backgroundColor = "#FFCCCC";
+				alert("Failed to connect to the server :(");
+			}
+		}, 300);
 	}
 
 	socket.send("requestmodel;" + (localStorage["playerID"] || 0))
 }
 
 
-export function broadcastMove(card, startLocation, endLocation)
+// extra arg is used for goals
+export function broadcastMove(card, startLocation, endLocation, extraArg)
 {
-	broadcast("move;" + card + ";" + startLocation + ";" + endLocation);
+	broadcast("move;" + card + ";" + startLocation + ";" + endLocation + ";" + extraArg);
 }
 
-/*export function broadcastEffects()
-{
-	broadcast("effects;" + JSON.stringify(model.turnstate.overrides));
-}*/
 
 export function broadcast(message)
 {

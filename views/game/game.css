@@ -76,6 +76,18 @@
 	display: none;
 }
 
+
+.card
+{
+	/*filter: grayscale(100%);*/
+}
+
+.card.justPlayed
+{
+	box-shadow: 0 0 .8vh .8vh gold;
+	/*filter: grayscale(0%);*/
+}
+
 .card.blank
 {
 	cursor: unset;
@@ -83,7 +95,7 @@
 
 .card.achieved
 {
-	box-shadow: 0 0 8px 8px green;
+	box-shadow: 0 0 1.6vh 1.6vh green;
 }
 
 
@@ -125,8 +137,9 @@
 .ponyCount { background-image: url(/img/Pony-Back.png); }
 .shipCount { background-image: url(/img/Ship-Back.png); }
 .goalCount { background-image: url(/img/Goal-Back.png); }
+.pointCount { background-image: url(/img/sym/points.png); }
 
-.ponyCount, .shipCount, .goalCount
+.ponyCount, .shipCount, .goalCount, .pointCount
 {
 	
 	background-size: contain;
@@ -170,12 +183,18 @@ body
 	overflow: hidden;
 }
 
-button
+button, input
 {
 	font-size: 12pt;
 	margin-bottom: 10px;
 	padding: 5px 10px;
 	cursor: pointer;
+}
+
+input[type="number"]
+{
+	width: 50px;
+	cursor: auto;
 }
 
 .card
@@ -231,6 +250,11 @@ button
 {
 	background-color: #C9305D;
 	background-image: url(/img/Ship-Back.png);
+	z-index: 1;
+}
+
+.card.pony.shippos
+{
 	z-index: 1;
 }
 
@@ -498,6 +522,21 @@ button
 	right: 0vh;
 }
 
+#winnings .score
+{
+	display: inline-block;
+	position: absolute;
+	text-align: center;
+	bottom: 1vh;
+	width: 13vh;
+	right: 0vh;
+	height: 24pt;
+	z-index: 3;
+	font-weight: bold;
+	color: #EB0687;
+	font-size: 24pt;
+}
+
 #winnings .returnArrow
 {
 	display: none;
@@ -622,6 +661,11 @@ iframe
 }
 
 .card.selected
+{
+	box-shadow: 0 0 8px 8px blue;
+}
+
+.raceButton.selected
 {
 	box-shadow: 0 0 8px 8px blue;
 }

@@ -305,21 +305,32 @@ export function updateWinnings()
 	if(model.winnings.length)
 		element.appendChild(arrow);
 
-
 	var cardOffset = 2;
 	var offset = model.winnings.length * cardOffset;
 
 	for(var i=0; i < model.winnings.length; i++)
 	{
-		cardLocations[model.winnings[i]] = "winnings";
+		cardLocations[model.winnings[i].card] = "winnings";
 
 		offset -= cardOffset;
-		var card = makeCardElement(model.winnings[i], "winnings");
+		var card = makeCardElement(model.winnings[i].card, "winnings");
 		card.style.position = "absolute";
 		card.style.bottom = offset + "vh";
 		card.style.right = "0vh"
 		element.appendChild(card)
 	}
+
+	var points = model.winnings.reduce((a,b) => a + b.value, 0);
+
+	if(points > 0)
+	{
+		var scoreElement = document.createElement('span');
+		scoreElement.className = 'score';
+
+		scoreElement.innerHTML =  points + "pts";
+		element.appendChild(scoreElement);
+	}
+	
 
 	
 
@@ -358,8 +369,8 @@ export function updateWinnings()
 			}
 
 
-			broadcastMove(model.winnings[model.winnings.length-1], "winnings","goal," + goalSlot)
-			moveCard(model.winnings[model.winnings.length-1], "winnings","goal," + goalSlot);
+			broadcastMove(model.winnings[model.winnings.length-1].card, "winnings","goal," + goalSlot)
+			moveCard(model.winnings[model.winnings.length-1].card, "winnings","goal," + goalSlot);
 		}
 	}
 
@@ -384,16 +395,19 @@ export function updatePlayerList()
 			div.classList.add('currentPlayer');
 		}
 
+		var pts = player.winnings.reduce((a,b) => a + b.value, 0);
+
 		div.innerHTML = `
 			<span class="${className}">${player.name}</span>
 			<span class='ponyCount'>${player.ponies}</span>
 			<span class='shipCount'>${player.ships}</span>
 			<span class='goalCount'>${player.winnings.length}</span>
+			${pts}<span class='pointCount'>&nbsp;</span>
 		`;
 
 		div.onclick = function()
 		{
-			openCardSelect(player.name + "'s won goals", player.winnings);
+			openCardSelect(player.name + "'s won goals", player.winnings.map(x => x.card));
 		}
 
 		playerList.appendChild(div);
@@ -496,6 +510,7 @@ export function updateHand(cardIndex)
 	updateCardRowHeight();
 }
 
+window.addEventListener('resize', updateCardRowHeight);
 
 
 function getScrollBarWidth () {
@@ -528,14 +543,17 @@ function getScrollBarWidth () {
 function updateCardRowHeight()
 {
 	var cardRow = document.getElementById("cardRow");
+	var playingArea = document.getElementById('playingArea');
 	
 	if(cardRow.scrollWidth > window.innerWidth)
 	{
 		cardRow.style.height = `calc(20% + ${SCROLL_BAR_WIDTH}px)`;
+		playingArea.style.height = `calc(80% - ${SCROLL_BAR_WIDTH}px)`;
 	}
 	else
 	{
 		cardRow.style.height = "";
+		playingArea.style.height = "";
 	}
 }
 

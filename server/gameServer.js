@@ -32,9 +32,6 @@ var PROP_VALUES = {
 	"altTimeline":{
 		"true": 1,
 	},
-	"doublePony":{
-		"true": 1,
-	},
 	"race":{
 		"earth": 1,
 		"unicorn":1, 
@@ -432,6 +429,26 @@ export function TsssfGameServer()
 		this.playedShips = [];
 		this.playedPonies = [];
 
+
+		this.specialEffects = {};
+
+		this.updateSpecialEffects = function()
+		{
+			delete this.specialEffects["larsonEffect"];
+			for(var key in model.board)
+			{
+				if(model.board[key].card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
+				{
+					this.specialEffects["larsonEffect"] = true;
+				}
+			}
+		}
+
+		this.updateSpecialEffects();
+
+
+		this.playedThisTurn = new Set();
+
 		this.triggerShip = "";
 
 		this.brokenShips = [];
@@ -448,10 +465,10 @@ export function TsssfGameServer()
 		this.swaps = 0;
 		this.swapsNow = 0;
 		
-
 		this.clientProps = function()
 		{
 			return {
+				playedThisTurn: [...this.playedThisTurn],
 				overrides: this.overrides,
 				currentPlayer: this.currentPlayer
 			}
@@ -573,9 +590,6 @@ export function TsssfGameServer()
 		model.shipDrawPile = [];
 
 
-
-		
-
 		logGameHosted();
 
 		for(var i of model.players.filter(x => isRegistered(x)))
@@ -652,11 +666,10 @@ export function TsssfGameServer()
 
 	function sendPlayerCounts(key, player)
 	{
-		//console.log(player);
 		var ponies = player.hand.filter(x => isPony(x)).length;
 		var ships = player.hand.filter(x => isShip(x)).length;
 
-		var args = ["counts", player.name, ponies, ships, ...player.winnings]
+		var args = ["counts", player.name, ponies, ships, ...player.winnings.map(x=>x.card + "," + x.value)]
 		toEveryoneElse(key, player.socket, args.join(";"));
 	}
 
@@ -753,7 +766,7 @@ export function TsssfGameServer()
 
 	function moveCard(message, key, socket)
 	{
-		var [_,card,startLocation,endLocation] = message.split(";");
+		var [_,card,startLocation, endLocation, extraArg] = message.split(";");
 		var player = getPlayer(key, socket);
 
 		var model = games[key];
@@ -789,14 +802,7 @@ export function TsssfGameServer()
 		console.log("  P: " + player.name);
 
 
-		if(model.turnstate)
-		{
-			if(isChangeling(card) && isBoardLoc(endLocation))
-			{
-				//model.turnstate.morphCounters[card] = (model.turnstate.morphCounters[card] || 0) + 1;
-			}
-		}
-
+	
 
 		let serverEndLoc = endLocation;
 		if(serverEndLoc == "hand" || serverEndLoc == "winnings")
@@ -854,7 +860,16 @@ export function TsssfGameServer()
 
 		if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
 		{
-			model.board[endLocation] = {card: card}
+			model.board[endLocation] = {card: card};
+
+
+
+			if(model.turnstate)
+			{
+				model.turnstate.playedThisTurn.add(card);
+
+
+			}
 		}
 
 		if(isGoalLoc(endLocation))
@@ -867,7 +882,7 @@ export function TsssfGameServer()
 
 		if(endLocation == "winnings")
 		{
-			player.winnings.push(card)
+			player.winnings.push({card, value: Number(extraArg) || 0});
 		}
 
 		if(isDiscardLoc(endLocation))
@@ -928,6 +943,10 @@ export function TsssfGameServer()
 			}
 
 
+			if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
+			{
+				model.turnstate.updateSpecialEffects();
+			}
 
 
 			if(startLocation == "hand" || 
@@ -1163,8 +1182,6 @@ export function TsssfGameServer()
 
 		function onMessage(message)
 		{
-			console.log(message);
-
 			var model = games[key];
 			if(!model) // not quite sure how this happens, but this crashed one time.
 				return;
@@ -1399,10 +1416,18 @@ export function TsssfGameServer()
 					{
 
 					}
+					else if(prop == "count")
+					{
+						value = Number(value);
+						if(isNaN(value)) return;
+					}
 					else
 					{
 						if(!PROP_VALUES[prop] || !PROP_VALUES[prop][value]) return;
 					}
+
+					if(value == "true") 
+						value = true;
 
 
 					var obj;
