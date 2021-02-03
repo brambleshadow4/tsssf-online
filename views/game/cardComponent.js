@@ -108,8 +108,6 @@ function getGoalPoints(model, card, achieved)
 		points.push(-1);
 	}
 
-	console.log(points);
-
 	return points;
 }
 

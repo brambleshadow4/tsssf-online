@@ -374,7 +374,7 @@ function updateEffects()
 	{
 		let newDisguise = getCardProp(card, "disguise");
 
-		if(larsonEffect)
+		if(larsonEffect && newDisguise)
 			newDisguise = larsonEffect;
 
 		if(!isBoardLoc(cardLocations[card]))
@@ -436,7 +436,6 @@ function updateEffects()
 
 			if(decs.disguise && element.getElementsByClassName('changeling').length == 0)
 			{
-
 				setDisguise(element, decs.disguise);
 				turnStateChangelings[card] = decs.disguise;
 			}
@@ -966,21 +965,6 @@ window.moveCard = moveCard;
 
 
 
-/*
-addPlayEvent(async function(e){
-
-	if((e.startLocation == "hand" || e.startLocation == "ponyDiscardPile,top") && e.endLocation.startsWith("p,"))
-	{
-		var cardInfo = currentDeck[e.card];
-		if(cardInfo.action == "ChangelingSpecial(plushling)")
-		{
-
-		}
-	}
-
-
-})*/
-
 function isShipClosed(shipCard)
 {
 	return getNeighborCards(shipCard).length == 2;
@@ -1058,7 +1042,7 @@ function changelingAction(type)
 		if(model.turnstate)
 		{
 			var cardNames = Object.keys(currentDeck);
-			var disguises = cardNames.filter(x => isPony(x) && !currentDeck[x].doublePony && x != card);
+			var disguises = cardNames.filter(x => isPony(x) && currentDeck[x].count == undefined && x != card);
 
 			var newDisguise = "";
 

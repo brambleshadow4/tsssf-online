@@ -666,7 +666,6 @@ export function TsssfGameServer()
 
 	function sendPlayerCounts(key, player)
 	{
-		//console.log(player);
 		var ponies = player.hand.filter(x => isPony(x)).length;
 		var ships = player.hand.filter(x => isShip(x)).length;
 
@@ -1426,6 +1425,9 @@ export function TsssfGameServer()
 					{
 						if(!PROP_VALUES[prop] || !PROP_VALUES[prop][value]) return;
 					}
+
+					if(value == "true") 
+						value = true;
 
 
 					var obj;

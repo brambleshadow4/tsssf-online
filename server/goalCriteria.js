@@ -3,17 +3,15 @@ import {isBlank} from "./lib.js";
 
 function getCardProp(model, cardFull, prop)
 {
+
+
 	var [card, ctxNo] = cardFull.split(":");
 	ctxNo = Number(ctxNo);
 	var cardOverrides = model.turnstate.overrides[card] || {};
 
 	if(ctxNo != undefined && !isNaN(ctxNo))
 	{
-		if(ctxNo == 0)
-		{
-			cardOverrides = {};
-		}
-		else if(model.turnstate.changelingContexts[card] && model.turnstate.changelingContexts[card][ctxNo])
+		if(model.turnstate.changelingContexts[card] && model.turnstate.changelingContexts[card][ctxNo])
 		{
 			cardOverrides = model.turnstate.changelingContexts[card][ctxNo]
 		}
@@ -21,8 +19,17 @@ function getCardProp(model, cardFull, prop)
 
 	var baseCard = cardOverrides.disguise || card;
 
-	if(cardOverrides.disguise && model.turnstate.specialEffects.larsonEffect)
-		baseCard = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+	if(ctxNo == 0)
+	{
+		baseCard = card;
+	}
+	else
+	{
+		if(cardOverrides.disguise && model.turnstate.specialEffects.larsonEffect)
+			baseCard = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+	}
+
+	
 
 
 	if(prop == "*")
@@ -163,6 +170,7 @@ function doesCardMatchSelector(model, card, selector)
 		
 		if(prop == "race" && cardValue == "earth/unicorn")
 			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
+
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
 
 		return (cardValue == value ? trueValue : falseValue);
@@ -620,7 +628,14 @@ function ShippedWith2Versions(model, ponyCards)
 			return id1 != id2;
 		}*/
 
-		return getCardProp(model,card2,"name") == getCardProp(model,card1,"name")
+		var set1 = getCardProp(model,card2,"name");
+		var set2 = getCardProp(model,card1,"name");
+		for(var item of set1)
+		{
+			if(set2.has(item))
+				return true;
+		}
+		return false;	
 	}
 
 	let centeredCount = 0;
