@@ -35,6 +35,13 @@ function getCardProp(model, cardFull, prop)
 	if(prop == "*")
 		return cardOverrides;
 
+	var allowOverrides = true;
+	if(prop.endsWith("_o"))
+	{
+		allowOverrides = false;
+		prop = prop.substring(prop, prop.length-2);
+	}
+
 	if(prop == "card")
 		return card;
 
@@ -49,7 +56,7 @@ function getCardProp(model, cardFull, prop)
 			baseCard = card;
 		}
 
-		let baseKeywords = (cardOverrides && cardOverrides.keywords) || [];
+		let baseKeywords = (allowOverrides && cardOverrides && cardOverrides.keywords) || [];
 
 		if(model.turnstate.specialEffects.larsonEffect)
 			baseKeywords.push("Princess");
@@ -68,7 +75,7 @@ function getCardProp(model, cardFull, prop)
 		return s;
 	}
 
-	if(cardOverrides && cardOverrides[prop])
+	if(allowOverrides && cardOverrides && cardOverrides[prop])
 	{
 		return cardOverrides[prop]
 	}
@@ -176,14 +183,28 @@ function doesCardMatchSelector(model, card, selector)
 		return (cardValue == value ? trueValue : falseValue);
 	}
 
-	if(selector.indexOf(" in ") > -1)
+	if(selector.indexOf(" in ") > -1 || selector.indexOf(" !in ") > -1)
 	{
-		var [value, prop] = selector.split(" in ");
+		var invert = false;
+		if(selector.indexOf(" !in ") > -1)
+		{
+			var [value, prop] = selector.split(" !in ");
+			invert = true;
+		}
+		else
+		{
+			var [value, prop] = selector.split(" in ");
+		}
 
 		prop = prop.trim();
 		value = value.trim();
 
 		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
+
+		if(invert)
+		{
+			return (getCardProp(model, card, prop).has(value) ? falseValue : trueValue);
+		}
 
 		return (getCardProp(model, card, prop).has(value) ? trueValue : falseValue);
 	}
@@ -556,23 +577,6 @@ function ExistsShipGeneric(compareCardsFun, count)
 
 /************************** Custom Rules **************************/
 
-function GainOCKeyword(model, card)
-{
-	if(model.turnstate && model.turnstate.overrides[card] 
-		&& model.turnstate.overrides[card].keywords 
-		&& model.turnstate.overrides[card].keywords.indexOf("OC") > -1)
-	{
-
-		if(getCardProp(model, card, "doublePony"))
-			return 2;
-		return 1;
-
-	}
-
-	return 0
-}
-
-
 function PlayLovePoisons(model)
 {
 	if(model.turnstate)
@@ -728,7 +732,6 @@ function goalLogicParser(text, stack)
 			case "ExistsPonyShippedTo": return ExistsPonyShippedTo;
 			case "ExistsShip": return ExistsShip;
 			case "ExistsShipGeneric": return ExistsShipGeneric;
-			case "GainOCKeyword": return GainOCKeyword;
 			case "PlayLovePoisons": return PlayLovePoisons;
 			case "PlayPonies": return PlayPonies;
 			case "PlayShips": return PlayShips;
