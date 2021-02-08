@@ -979,7 +979,7 @@ var cards = {
 			},
 			"Core.Goal.PrettyPrettyPrincess":{
 				url:"Goal_Pretty Pretty Princess.png",
-				goalLogic: "ExistsPony(name=Twilight Sparkle && race=alicorn)",
+				goalLogic: "ExistsPony(name=Twilight Sparkle && race=alicorn && race_o != alicorn)",
 				points:"3"
 			},
 			"Core.Goal.PrincessPile":{
@@ -1313,13 +1313,13 @@ var cards = {
 			"EC.Goal.FriendsInHighPlaces": {
 				name: "Friends in High Places",
 				url: "Goal_Friends in High Places.png",
-				goalLogic: "ExistsPonyShippedTo(OC in keywords, Select(Princess in keywords,2))",
+				goalLogic: "ExistsPonyShippedTo(OC in keywords, Select(Princess in keywords, 2))",
 				points: "3"
 			},
 			"EC.Goal.Recolor": {
 				name: "Recolor",
 				url: "Goal_Recolor.png",
-				goalLogic: "ExistsPonyGeneric(GainOCKeyword, 1)",
+				goalLogic: "ExistsPony(OC in keywords && OC !in keywords_o, 1)",
 				points: "2"
 			},
 
