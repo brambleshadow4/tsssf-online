@@ -765,7 +765,7 @@ export function setCardKeywords(element, keywords)
 	element.appendChild(div);
 }
 
-export function addTempSymbol(element, symbol)
+export function addTempSymbol(element, symbol, tooltip)
 {
 	if(symbol == undefined)
 		return;
@@ -777,6 +777,8 @@ export function addTempSymbol(element, symbol)
 
 	img.src = "/img/sym/" + symbol + extension;
 	img.className = "symbol decoration";
+	if(tooltip)
+		img.title = tooltip
 	element.appendChild(img);
 }
 

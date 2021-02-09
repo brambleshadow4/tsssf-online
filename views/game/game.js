@@ -464,6 +464,11 @@ function updateEffects()
 			{
 				setCardKeywords(element, decs.keywords)
 			}
+
+			if(decs.shipWithEverypony)
+			{
+				addTempSymbol(element, "star", "This pony is shipped with every other pony on the grid");
+			}
 		}	
 	}	
 
@@ -1009,17 +1014,21 @@ function getCardAction(card)
 
 	switch(actionName)
 	{
+		case "addKeywords": return addKeywordsAction(...params);
 		case "ChangelingNoRedisguise": 
 		case "Changeling": 
 			return changelingAction(...params);
-		case "genderChange": return genderChangeAction;
-		case "makePrincess": return makePrincessAction;
 		case "clone": return cloneAction;
-		case "timelineChange": return timelineChangeAction;
+		case "genderChange": return genderChangeAction;
 		case "keywordChange": return keywordChangeAction;
+		case "makePrincess": return makePrincessAction;
 		case "raceChange": return raceChangeAction;
 		case "raceGenderChange": return raceGenderChangeAction;
-		case "addKeywords": return addKeywordsAction(...params);
+		case "shipWithEverypony": return shipWithEveryponyAction;
+		case "timelineChange": return timelineChangeAction;
+		
+		
+		
 	}		
 }
 
@@ -1137,7 +1146,11 @@ function setCardProp(card, prop, value)
 
 		if(prop == "disguise")
 		{
+			var oldOverrides = model.turnstate.overrides[card];
 			model.turnstate.overrides[card] = {};
+
+			if(oldOverrides.shipWithEverypony)
+				model.turnstate.overrides[card].shipWithEverypony = true;
 		}
 
 		var propObj = model.turnstate.overrides[card]
@@ -1197,6 +1210,25 @@ async function genderChangeAction(shipCard)
 			setCardProp(ponyCard, "gender", newGender)
 			//broadcastEffects();
 		}
+	}
+}
+
+async function shipWithEveryponyAction(ponyCard)
+{
+	var ponies = [];
+	for(var key in model.board)
+	{
+		if(key.startsWith("p,") && !isBlank(model.board[key].card))
+		{
+			ponies.push(model.board[key].card);
+		}
+	}
+
+	var chosen = await openCardSelect("Choose a pony to ship with everypony", ponies, true);
+
+	if(chosen)
+	{
+		setCardProp(chosen, "shipWithEverypony", true);
 	}
 }
 

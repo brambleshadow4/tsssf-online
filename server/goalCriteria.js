@@ -212,9 +212,10 @@ function doesCardMatchSelector(model, card, selector)
 	return falseValue
 }
 
-export function getConnectedPonies(model, ponyLoc)
+export function getConnectedPonies(model, ponyLoc, onlyCountDirectlyShipped)
 {
 	var [typ, x, y] = ponyLoc.split(",");
+	var thisPony = model.board[ponyLoc].card;
 	x = Number(x)
 	y = Number(y)
 
@@ -225,18 +226,38 @@ export function getConnectedPonies(model, ponyLoc)
 		["sd," + x + "," + (y-1), "p," + x + "," + (y-1)]
 	]
 
-	var connected = [];
+
+	var connected = new Set();
+	if(!onlyCountDirectlyShipped && model.turnstate.specialEffects.shipWithEverypony.has(thisPony))
+	{
+		for(var key in model.board)
+		{
+			if(key.startsWith("p,") && !isBlank(model.board[key].card) && model.board[key].card != thisPony)
+			{
+				connected.add(model.board[key].card);
+			}
+		}
+	}
+	
 	for(var [shipKey, ponyKey] of shipPonyPairs)
 	{
 		if(model.board[shipKey] && model.board[ponyKey] 
 			&& !isBlank(model.board[shipKey].card) && !isBlank(model.board[ponyKey].card))
 		{
-			connected.push(model.board[ponyKey].card)
+			connected.add(model.board[ponyKey].card)
 		}
-	}	
+	}
 
-	return connected;
-
+	if(!onlyCountDirectlyShipped)
+	{
+		for(var pony of model.turnstate.specialEffects.shipWithEverypony)
+		{
+			if(pony != thisPony)
+				connected.add(pony);
+		}
+	}
+	
+	return [...connected];
 }
 
 
@@ -326,7 +347,7 @@ function ExistsChain(selector, count)
 				chained.add(thisKey);	
 
 
-				var ponyKeys = getConnectedPonies(model, thisKey).map( x => model.cardLocations[x])
+				var ponyKeys = getConnectedPonies(model, thisKey, true).map( x => model.cardLocations[x])
 				workList = workList.concat(ponyKeys);
 			}
 
@@ -537,6 +558,8 @@ function ExistsShipGeneric(compareCardsFun, count)
 	{
 		var boardCount = 0;
 
+		var shipWithEverypony = model.turnstate.specialEffects.shipWithEverypony
+
 		for(var key in model.board)
 		{
 			if(key.startsWith("s") && !isBlank(model.board[key].card))
@@ -561,8 +584,26 @@ function ExistsShipGeneric(compareCardsFun, count)
 				var card1 = model.board[card1key].card;
 				var card2 = model.board[card2key].card;
 
+				// don't double count the shipWithEverypony card
+				if(shipWithEverypony.has(card1) || shipWithEverypony.has(card2))
+					continue; 
+
 				if(card1 && card2 && !isBlank(card1) && !isBlank(card2))
 				{
+					if(compareCardsFun(model, card1, card2))
+						boardCount++;
+				}
+			}
+		}
+
+		for(var card1 of shipWithEverypony)
+		{	
+			for(var key in model.board)
+			{
+				if(key.startsWith("p") && !isBlank(model.board[key].card) && model.board[key].card != card1)
+				{
+					var card2 = model.board[key].card;
+
 					if(compareCardsFun(model, card1, card2))
 						boardCount++;
 				}
