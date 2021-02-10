@@ -374,7 +374,6 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 		}
 
 		imgElement.draggable = true;
-
 		imgElement.classList.add('grab');
 
 		
@@ -412,8 +411,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 			setDataTransfer(card + ";" + location)
 			//draggingBoard = false;
 
-
-			var img = document.createElement('span')
+			var img = document.getElementById('dragimg');
 			e.dataTransfer.setDragImage(img, 0, 0);
 
 
