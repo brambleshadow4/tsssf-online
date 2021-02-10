@@ -374,7 +374,6 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 		}
 
 		imgElement.draggable = true;
-
 		imgElement.classList.add('grab');
 
 		
@@ -412,8 +411,7 @@ export function makeCardElement(card, location, isDraggable, isDropTarget)
 			setDataTransfer(card + ";" + location)
 			//draggingBoard = false;
 
-
-			var img = document.createElement('span')
+			var img = document.getElementById('dragimg');
 			e.dataTransfer.setDragImage(img, 0, 0);
 
 
@@ -765,7 +763,7 @@ export function setCardKeywords(element, keywords)
 	element.appendChild(div);
 }
 
-export function addTempSymbol(element, symbol)
+export function addTempSymbol(element, symbol, tooltip)
 {
 	if(symbol == undefined)
 		return;
@@ -777,6 +775,8 @@ export function addTempSymbol(element, symbol)
 
 	img.src = "/img/sym/" + symbol + extension;
 	img.className = "symbol decoration";
+	if(tooltip)
+		img.title = tooltip
 	element.appendChild(img);
 }
 

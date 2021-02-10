@@ -543,6 +543,8 @@ function getScrollBarWidth () {
 function updateCardRowHeight()
 {
 	var cardRow = document.getElementById("cardRow");
+
+	if(!cardRow) return;
 	var playingArea = document.getElementById('playingArea');
 	
 	if(cardRow.scrollWidth > window.innerWidth)

@@ -32,6 +32,9 @@ var PROP_VALUES = {
 	"altTimeline":{
 		"true": 1,
 	},
+	"shipWithEverypony":{
+		"true": 1,
+	},
 	"race":{
 		"earth": 1,
 		"unicorn":1, 
@@ -430,7 +433,9 @@ export function TsssfGameServer()
 		this.playedPonies = [];
 
 
-		this.specialEffects = {};
+		this.specialEffects = {
+			shipWithEverypony: new Set()
+		};
 
 		this.updateSpecialEffects = function()
 		{
@@ -480,14 +485,17 @@ export function TsssfGameServer()
 		return getShippedPonies(model, shipLoc).length == 2;
 	}
 
-	function getPoniesShippedToPony(model, ponyCard)
+
+	function appendChangelingContext(card, model)
 	{
-		var ponyLoc = model.cardLocations[ponyCard];
-		if(!isBoardLoc(ponyLoc))
-			return [];
+		if(model.turnstate && isChangeling(card))
+		{
+			var changelingContexts = model.turnstate.changelingContexts[card];
+			var currentChangelingContext =  changelingContexts ? Math.max(changelingContexts.length - 1, 0) : 0
+			return card + ":" + currentChangelingContext;
+		}
 
-		var neighborLocs = getNeighborKeys(ponyLoc);
-
+		return card;
 	}
 
 	function getShippedPonies(model, shipLoc)
@@ -502,12 +510,7 @@ export function TsssfGameServer()
 			{
 				var card = model.board[n].card;
 
-				if(model.turnstate && isChangeling(model.board[n].card))
-				{
-					var changelingContexts = model.turnstate.changelingContexts[card];
-					var currentChangelingContext =  changelingContexts ? Math.max(changelingContexts.length - 1, 0) : 0
-					card = card + ":" + currentChangelingContext;
-				}
+				card = appendChangelingContext(card, model);
 
 				ponies.push(card)
 			}
@@ -691,6 +694,18 @@ export function TsssfGameServer()
 				if(pair.length == 2)
 				{	
 					s.add(shipString(pair[0], pair[1]));
+				}
+			}
+
+			if(model.turnstate && model.turnstate.specialEffects.shipWithEverypony)
+			{
+				var pony1 = model.board[key].card;
+				for(var pony2 of model.turnstate.specialEffects.shipWithEverypony)
+				{
+					if(pony1 != pony2)
+					{
+						s.add(shipString(appendChangelingContext(pony1, model), appendChangelingContext(pony2, model)));
+					}
 				}
 			}
 		}
@@ -1441,9 +1456,13 @@ export function TsssfGameServer()
 					
 					if(prop == "disguise")
 					{
-						
+						var oldOverride = model.turnstate.overrides[card];
 
 						model.turnstate.overrides[card] = {"disguise": value};
+
+						if(oldOverride.shipWithEverypony)
+							model.turnstate.overrides[card].shipWithEverypony = true;
+
 
 						var cc = model.turnstate.changelingContexts[card];
 						if(!cc)
@@ -1496,11 +1515,18 @@ export function TsssfGameServer()
 						obj[prop] = value;
 					}
 
+
+
 					toEveryoneElse(key, socket, "effects;" + JSON.stringify(model.turnstate.overrides));
 
 					// a changeling update can create more broken ships
 					if(model.turnstate)
 					{
+						if(prop == "shipWithEverypony")
+						{
+							model.turnstate.specialEffects.shipWithEverypony.add(card);
+						}
+
 						var newSet = getCurrentShipSet(model);
 						var newlyBroken = getBrokenShips(model.turnstate.shipSet, newSet);
 

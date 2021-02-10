@@ -2627,6 +2627,7 @@ var cards = {
 				url: "Pony_Princess CelestAI.png",
 				race: "alicorn",
 				gender: "female",
+				action: "shipWithEverypony",
 				keywords: [
 					"AI",
 					"Princess",

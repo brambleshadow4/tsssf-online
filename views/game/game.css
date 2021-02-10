@@ -80,6 +80,8 @@
 .card
 {
 	/*filter: grayscale(100%);*/
+	user-drag: element;
+    -khtml-user-drag: element;
 }
 
 .card.justPlayed

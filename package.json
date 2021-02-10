@@ -1,6 +1,6 @@
 {
   "name": "tsssf",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "description": "A node.js/websocket implementation of the card game Twilight Sparkle's Secret Shipfic Folder",
   "main": "server/server.js",
   "type": "module",

@@ -65,6 +65,7 @@ var HTML = `
 	</div>
 </div>
 <div id='preloadedImages' style="display: none;"></div>
+<img id='dragimg' src="/img/sym/void.png"/ >
 
 <script type="module" src="/game/game.js"></script>
 <script type="module" src="/game/network.js"></script>
