@@ -36,7 +36,7 @@ function getCardProp(model, cardFull, prop)
 		return cardOverrides;
 
 	var allowOverrides = true;
-	if(prop.endsWith("_o"))
+	if(prop.endsWith("_b"))
 	{
 		allowOverrides = false;
 		prop = prop.substring(prop, prop.length-2);
@@ -101,7 +101,7 @@ function doesCardMatchSelector(model, card, selector)
 			originalGender = cards[model.turnstate.overrides[card].disguise].gender
 		}
 
-		return (getCardProp(model, card,"gender") != originalGender ? trueValue : falseValue);
+		return (getCardProp(model, card, "gender") != originalGender ? trueValue : falseValue);
 	}
 
 	var clauses = selector.split("&&");
@@ -649,7 +649,20 @@ function SwapCount(count)
 
 function ShippedWithOppositeGenderedSelf(model, card1, card2)
 {
-	if(getCardProp(model, card1, "name") == getCardProp(model, card2, "name"))
+	var hasSameName = false;
+	var nameset1 = getCardProp(model, card1, "name");
+	var nameset2 = getCardProp(model, card2, "name");
+
+	for(var name of nameset1)
+	{
+		if(nameset2.has(name))
+		{
+			hasSameName = true;
+			break;
+		}
+	}
+
+	if(hasSameName)
 	{
 		var gender1 = getCardProp(model, card1, "gender");
 		var gender2 = getCardProp(model, card2, "gender");
