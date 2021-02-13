@@ -36,7 +36,7 @@ function getCardProp(model, cardFull, prop)
 		return cardOverrides;
 
 	var allowOverrides = true;
-	if(prop.endsWith("_o"))
+	if(prop.endsWith("_b"))
 	{
 		allowOverrides = false;
 		prop = prop.substring(prop, prop.length-2);
@@ -101,7 +101,7 @@ function doesCardMatchSelector(model, card, selector)
 			originalGender = cards[model.turnstate.overrides[card].disguise].gender
 		}
 
-		return (getCardProp(model, card,"gender") != originalGender ? trueValue : falseValue);
+		return (getCardProp(model, card, "gender") != originalGender ? trueValue : falseValue);
 	}
 
 	var clauses = selector.split("&&");
@@ -473,6 +473,10 @@ function PlayPonies(selector, count)
 }
 
 
+function getShipCount(model, pony1, pony2)
+{
+	return Math.max(getCardProp(model, pony1, "count") || 1, getCardProp(model, pony2, "count") || 1)
+}
 
 function PlayShips(selector1, selector2, count)
 {
@@ -488,19 +492,24 @@ function PlayShips(selector1, selector2, count)
 	{
 		if(model.turnstate)
 		{
-			var matchingPlays = model.turnstate.playedShips.filter(function(x){
+			var matchingPlays = model.turnstate.playedShips.map(function(x){
 
 				var [ship, pony1, pony2] = x;
 
 				if(doesCardMatchSelector(model, pony1, selector1) && doesCardMatchSelector(model, pony2, selector2))
-					return true
+				{
+					return getShipCount(model, pony1, pony2);
+
+				}
 				else if (doesCardMatchSelector(model, pony1, selector2) && doesCardMatchSelector(model, pony2, selector1))
-					return true;
-				return false
+				{
+					return getShipCount(model, pony1, pony2);
+				}
+				return 0
 
 			});
 
-			return (matchingPlays.length >= count);
+			return (matchingPlays.reduce((a,b) => a + b, 0) >= count);
 		}
 
 		return false;
@@ -522,24 +531,24 @@ function BreakShip(selector1, selector2, count)
 
 		if(model.turnstate)
 		{
-			var matchingPlays = model.turnstate.brokenShipsNow.filter(function(x){
+			var matchingPlays = model.turnstate.brokenShipsNow.map(function(x){
 
 				var [pony1, pony2] = x;
 
 				if(doesCardMatchSelector(model, pony1, selector1) && doesCardMatchSelector(model, pony2, selector2))
 				{
-					return true
+					return getShipCount(model, pony1, pony2);
 				}
 				else if (doesCardMatchSelector(model, pony1, selector2) && doesCardMatchSelector(model, pony2, selector1))
 				{
-					return true;
+					return getShipCount(model, pony1, pony2);
 				}
 
-				return false
+				return 0
 
 			});
 
-			return (matchingPlays.length >= count);
+			return (matchingPlays.reduce((a,b) => a + b, 0)  >= count);
 		}
 
 		return false;
@@ -591,7 +600,9 @@ function ExistsShipGeneric(compareCardsFun, count)
 				if(card1 && card2 && !isBlank(card1) && !isBlank(card2))
 				{
 					if(compareCardsFun(model, card1, card2))
-						boardCount++;
+					{
+						boardCount += getShipCount(model, card1, card2)
+					}
 				}
 			}
 		}
@@ -605,11 +616,12 @@ function ExistsShipGeneric(compareCardsFun, count)
 					var card2 = model.board[key].card;
 
 					if(compareCardsFun(model, card1, card2))
-						boardCount++;
+					{
+						boardCount += getShipCount(model, card1, card2);
+					}
 				}
 			}
 		}
-
 
 		return boardCount >= count;
 	}
@@ -649,7 +661,20 @@ function SwapCount(count)
 
 function ShippedWithOppositeGenderedSelf(model, card1, card2)
 {
-	if(getCardProp(model, card1, "name") == getCardProp(model, card2, "name"))
+	var hasSameName = false;
+	var nameset1 = getCardProp(model, card1, "name");
+	var nameset2 = getCardProp(model, card2, "name");
+
+	for(var name of nameset1)
+	{
+		if(nameset2.has(name))
+		{
+			hasSameName = true;
+			break;
+		}
+	}
+
+	if(hasSameName)
 	{
 		var gender1 = getCardProp(model, card1, "gender");
 		var gender2 = getCardProp(model, card2, "gender");

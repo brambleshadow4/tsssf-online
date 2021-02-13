@@ -1,13 +1,18 @@
-console.log("view selector is running");
+var host = window.location.hostname;
+var protocol;
 
-var host = window.location.host.replace(/:.*/,"") + ":8080";
-var socket = new WebSocket("ws://" + host + "/" + window.location.search);
+var port = window.location.port || 80;
 
+switch(window.location.protocol)
+{
+	case "http:": protocol = "ws:"; break;
+	case "https:": protocol = "wss:"; port=443; break;
+}
+
+var host = window.location.host.replace(/:.*/,"");
+var socket = new WebSocket(protocol + "//" + host + ":" + port + "/" + window.location.search);
 window.socket = socket;
 
-console.log("this is ")
-
-console.log(socket)
 
 import * as Game from "/game/game.js"
 import * as Lobby from "/lobby.js"
@@ -16,7 +21,6 @@ import * as Lobby from "/lobby.js"
 
 socket.addEventListener("open", function()
 {
-	console.log("Socket opened successfully!")
 	socket.send("handshake;" + (localStorage["playerID"] || 0));
 	//socket.send("requestmodel;" + (localStorage["playerID"] || 0))
 });

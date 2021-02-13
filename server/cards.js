@@ -864,7 +864,7 @@ var cards = {
 			},
 			"Core.Goal.DeepCover":{
 				url:"Goal_Deep Cover.png",
-				goalLogic: "ExistsShip(Changeling in keywords,Changeling in keywords)",
+				goalLogic: "ExistsShip(Changeling in keywords, Changeling in keywords)",
 				points:"3"
 			},
 			"Core.Goal.Epidemic":{
@@ -979,7 +979,7 @@ var cards = {
 			},
 			"Core.Goal.PrettyPrettyPrincess":{
 				url:"Goal_Pretty Pretty Princess.png",
-				goalLogic: "ExistsPony(name=Twilight Sparkle && race=alicorn && race_o != alicorn)",
+				goalLogic: "ExistsPony(name=Twilight Sparkle && race=alicorn && race_b != alicorn)",
 				points:"3"
 			},
 			"Core.Goal.PrincessPile":{
@@ -1319,7 +1319,7 @@ var cards = {
 			"EC.Goal.Recolor": {
 				name: "Recolor",
 				url: "Goal_Recolor.png",
-				goalLogic: "ExistsPony(OC in keywords && OC !in keywords_o, 1)",
+				goalLogic: "ExistsPony(OC in keywords && OC !in keywords_b, 1)",
 				points: "2"
 			},
 

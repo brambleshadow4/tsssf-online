@@ -808,6 +808,10 @@ function createHelpPopup()
 			render: htmlTab(`<iframe src="/rulebook.html"></iframe>`)
 		},
 		{
+			name: 'FAQ',
+			render: htmlTab(`<iframe src="/faq.html"></iframe>`)
+		},
+		{
 			name: "Card Reference",
 			render: referencePageRender
 		}

@@ -3,3 +3,8 @@ package-lock.json
 **.db
 
 **.thumb.jpg
+
+server/server.crt
+server/server.csr
+server/server.key
+server/settings.txt
