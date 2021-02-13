@@ -5,8 +5,6 @@ import {makeCardElement} from "/game/cardComponent.js";
 import {isStart} from "/lib.js";
 import cards from "/game/cards.js";
 
-console.log(Object.keys(cards));
-
 var gameOptionsDiv 
 var chooseCardsDiv 
 var joinGameDiv 
@@ -101,7 +99,6 @@ export function loadView(isOpen)
 
 			box.onclick = function()
 			{
-				console.log("box clicked " +this.className)
 
 				if(this.classList.contains('selected'))
 				{
@@ -118,13 +115,9 @@ export function loadView(isOpen)
 		}
 
 		var startCards = document.getElementById('startCards');
-		console.log('cards')
-		console.log(Object.keys(cards).filter(x => isStart(x)));
-		console.log(Object.keys(cards));
+
 		for(var card of Object.keys(cards).filter(x => isStart(x)))
 		{
-			console.log(card);
-
 			var cardEl = makeCardElement(card);
 			var shield = document.createElement('div');
 
@@ -197,10 +190,7 @@ function onMessage()
 	{
 		var [_,val] = event.data.split(";");
 
-		console.log(event.data);
 		var options = JSON.parse(val);
-
-		console.log(options);
 
 		if(options)
 		{
@@ -275,7 +265,6 @@ function onMessage()
 
 	if(event.data.startsWith("lobbylist;"))
 	{
-		console.log('lobbylist');
 		var [_, myName, names] = event.data.split(";");
 
 		var names = names.split(",");
@@ -326,10 +315,6 @@ function startGame()
 
 	var startCard = document.getElementById('startCards').getElementsByClassName('selected')[0];
 	options.startCard = startCard ? startCard.getAttribute('card') : "Core.Start.FanficAuthorTwilight";
-
-
-
-	console.log(options.cardDecks);
 
 	if(document.getElementById('sandbox').checked)
 		options.ruleset = "sandbox";
