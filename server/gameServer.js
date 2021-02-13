@@ -461,9 +461,17 @@ export function TsssfGameServer()
 
 		this.changelingContexts = {};
 
+
 		//getCurrentShipSet is still using the old changelingContexts, clear them first.
-		if(model.turnstate && model.turnstate.changelingContexts)
+		if(model.turnstate)
+		{
 			model.turnstate.changelingContexts = {};
+			model.turnstate.specialEffects = {
+				shipWithEverypony: new Set()
+			}
+		}
+
+
 		
 		this.shipSet = getCurrentShipSet(model);
 		this.positionMap = getCurrentPositionMap(model);
