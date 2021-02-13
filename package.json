@@ -9,6 +9,7 @@
   "license": "",
   "dependencies": {
     "express": "^4.17.1",
+    "https": "^1.0.0",
     "sqlite3": "^5.0.0",
     "ws": "^7.3.1"
   }

@@ -4,16 +4,46 @@ import ws from 'ws';
 import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js"
+import https from "https";
 
 const app = express()
 let PORT = 80;
 
-if(process.argv[2] == "dev")
+var argSet = new Set(process.argv);
+
+if(argSet.has("dev"))
 	PORT = 8000;
+
+var settings = {}
+
+try
+{
+	var settingsRaw = fs.readFileSync("server/settings.txt");
+	var settingsList = settingsRaw.toString().split(/\r?\n/g);
+
+	for (var line of settingsList)
+	{
+		var eq = line.indexOf('=');
+		if(eq != -1)
+		{	
+			var key = line.substring(0,eq);
+			settings[key] = line.substring(eq+1);
+
+			if(settings[key] === "true")
+				settings[key] = true;
+			if(settings[key] === "false")
+				settings[key] = false;
+		}
+	}
+}
+catch(e){}
+
 
 
 app.get('/', file("./views/home.html"));
 app.get('/img/**', fmap("/img/**", "./img/**"));
+
+app.get('/.well-known/**', fmap("/.well-known/**", "./.well-known/**"));
 
 app.get("/game/game.js", file("./views/game/game.js"))
 app.get("/game/gameView.js", file("./views/game/gameView.js"))
@@ -100,10 +130,40 @@ app.get("/host", function(req, res){
 	res.redirect("/lobby?" + key);
 })
 
-app.get("/**", function(req,res){ res.redirect("/"); });
-	
-app.listen(PORT, () => console.log(`TSSSF web server listening on port ${PORT}!`))
+app.get("/**", function(req,res){ 
 
+	console.log("redirect");
+	console.log(req.url);
+	res.redirect("/"); 
+
+});
+	
+
+var server;
+if(settings.KEY && !argSet.has("nossl"))
+{
+	server = https.createServer({
+			key: fs.readFileSync(settings.KEY),
+			cert: fs.readFileSync(settings.CERT),
+			passphrase: settings.PASSPHRASE
+		}, app)
+		.listen(443, function () {
+			console.log('TSSSF web server listening on port 443!')
+		});
+
+	var app2 = express();
+	app2.get("/*", function(req,res){
+
+		var hostname = req.headers.host.split(":")[0];
+		res.redirect("https://" + hostname + req.url); 
+	});
+
+	app2.listen(PORT);
+}
+else
+{
+	server = app.listen(PORT, () => console.log(`TSSSF web server listening on port ${PORT}!`))
+}
 
 
 
@@ -164,7 +224,6 @@ function sendIfExists(url, res)
 
 const tsssfServer = TsssfGameServer();
 
-const server = app.listen(8080);
 server.on('upgrade', (request, socket, head) => {
 	tsssfServer.handleUpgrade(request, socket, head, socket => {
 		tsssfServer.emit('connection', socket, request);
