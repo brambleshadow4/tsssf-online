@@ -1662,26 +1662,32 @@ var cards = {
 			"PU.Goal.Besties":{
 				url:"Goal_Besties!.png",
 				goalLogic: "ExistsShip(Uni in keywords, Uni in keywords)",
+				points: "2"
 			},
 			"PU.Goal.CutieMarkCourtship":{
 				url:"Goal_Cutie Mark Courtship.png",
 				goalLogic: "ExistsShip(CMC in keywords, CMC in keywords)",
+				points: "2"
 			},
 			"PU.Goal.Internship":{
 				url:"Goal_Internship.png",
 				goalLogic: "ExistsShip(Uni in keywords || PCC in keywords, Villain in keywords)",
+				points: "2"
 			},
 			"PU.Goal.RevengeOfTheNerds":{
 				url:"Goal_Revenge of the Nerds.png",
 				goalLogic: "ExistsShip(Uni in keywords || PCC in keywords, Mane 6 in keywords)",
+				points: "1"
 			},
 			"PU.Goal.SchoolwideFestivities":{
 				url:"Goal_Schoolwide Festivities.png",
 				goalLogic: "ExistsChain(Uni in keywords || PCC in keywords, 6)",
+				points: "3"
 			},
 			"PU.Goal.WhereforeArtThouPoneo":{
 				url:"Goal_Wherefore Art ThouPoneo.png",
 				goalLogic: "ExistsShip(Uni in keywords, PCC in keywords)",
+				points: "2"
 			},
 
 	// No Holds Barred
