@@ -1,6 +1,11 @@
-var oldPopupAccept;
+var oldPopupAccept: undefined | ((value?: any) => any) ;
 
-export function createPopup(tabs, miniMode)
+export function createPopup(
+	tabs:{
+		render: (acceptFun: (value?: any) => any) => HTMLElement,
+		name?: string,
+	}[],
+	miniMode?: boolean)
 {
 
 	if(oldPopupAccept)
@@ -8,7 +13,7 @@ export function createPopup(tabs, miniMode)
 
 	//each tab has a function render(closePopupWithVal)
 	// closePopupWithVal closes the popup and accepts the promise with val.
-	function handler(accept, reject)
+	function handler(accept: (value?: any) => any, reject: (value?: any) => any)
 	{
 		var closeButton = document.createElement('img');
 		closeButton.src = "/img/close.svg";
@@ -26,9 +31,10 @@ export function createPopup(tabs, miniMode)
 
 		// When we call a tab's render function, we send it the newAccept function
 		// so that the render can close the popup with value val
-		function newAccept(val)
+		function newAccept(val?: any)
 		{
-			parent.parentNode.removeChild(parent);
+			if(parent.parentNode)
+				parent.parentNode.removeChild(parent);
 			oldPopupAccept = undefined;
 			accept(val);
 		}
@@ -48,9 +54,10 @@ export function createPopup(tabs, miniMode)
 
 			for(let i =0; i < tabs.length; i++)
 			{
-				var tab = document.createElement('div');
+				let tab = document.createElement('div');
 				let tabName = tabs[i].name;
-				tab.innerHTML = tabName;
+				if(tabName)
+					tab.innerHTML = tabName;
 				tabDiv.appendChild(tab);
 
 				tab.onclick = function()
@@ -60,9 +67,9 @@ export function createPopup(tabs, miniMode)
 						tabDiv.children[j].classList.remove('selected')
 					}
 
-					this.classList.add('selected');
+					tab.classList.add('selected');
 
-					var container = document.getElementById('popupContent');
+					var container = document.getElementById('popupContent')!;
 					container.innerHTML = "";
 					container.appendChild(tabs[i].render(newAccept));
 				}
@@ -91,7 +98,7 @@ export function createPopup(tabs, miniMode)
 	return new Promise(handler);
 }
 
-export function htmlTab(html)
+export function htmlTab(html: string)
 {
 	return function()
 	{

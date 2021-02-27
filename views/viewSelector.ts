@@ -20,7 +20,6 @@ var socket = new WebSocket(protocol + "//" + host + ":" + port + "/" + window.lo
 (window as any).socket = socket;
 
 
-// @ts-ignore
 import * as Game from "./game/game.js"
 import * as Lobby from "./lobby/lobby.js"
 

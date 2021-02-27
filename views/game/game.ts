@@ -59,7 +59,7 @@
 
 */
 
-import cards from "/game/cards.js";
+import cards from "../../server/cards.js";
 import {
 	isPony, 
 	isGoal, 
@@ -72,8 +72,12 @@ import {
 	isBlank,
 	isPonyOrStart,
 	isCardIncluded,
-	getNeighborKeys
-} from "/lib.js";
+	getNeighborKeys,
+	GameModel as GameModelShared,
+	Card, Location,
+	Turnstate,
+	CardElement
+} from "../../server/lib.js";
 
 import {
 	updatePonyDiscard,
@@ -85,7 +89,7 @@ import {
 	updateHand,
 	initPeripherals,
 	openCardSelect
-} from "/game/peripheralComponents.js";
+} from "./peripheralComponents.js";
 
 import
 {
@@ -93,7 +97,7 @@ import
 	initBoard,
 	updateBoard,
 	clearBoard
-} from "/game/boardComponent.js"
+} from "./boardComponent.js"
 
 import {
 	makeCardElement,
@@ -102,24 +106,46 @@ import {
 	addTempSymbol,
 	setActionButton,
 	clearActionButtons
-} from "/game/cardComponent.js"
+} from "./cardComponent.js"
 
-import * as GameView from "/game/gameView.js" 
+import * as GameView from "./gameView.js" 
+
+import {WebSocketPlus} from "../viewSelector.js"
 
 import {
 	broadcastMove,
 	broadcast,
 	attachToSocket,
 	//broadcastEffects
-} from "/game/network.js";
+} from "./network.js";
 
-import {createPopup} from "/game/popupComponent.js";
 
-var model = {};
-window.model = model;
+interface GameModel extends GameModelShared
+{
+	hand: Card[],
+	winnings: {card: Card, value: number}[],
+	playerName: string,
+	turnstate: Turnstate & {
+		openShips: {[card: string]: true}
+		removedFrom: [Location, Card];
+	};
+}
 
-var cardLocations = {};
-window.cardLocations = cardLocations;
+import {createPopup} from "./popupComponent.js";
+
+let win = window as unknown as {
+	cardLocations: {[key:string]: Location},
+	model: GameModel,
+	toggleFullScreen: Function,
+	createHelpPopup: Function,
+	socket: WebSocketPlus,
+	updateGame: Function,
+	currentDeck: {[key:string]: any},
+}
+
+win.model = {} as GameModel;
+
+win.cardLocations = {};
 
 var offsetId = 0;
 
@@ -142,7 +168,7 @@ function toggleFullScreen()
 	}		
 }
 
-window.toggleFullScreen = toggleFullScreen;
+win.toggleFullScreen = toggleFullScreen;
 
 export function loadView()
 {
@@ -154,7 +180,7 @@ export function loadView()
 	turnStateChangelings = {};
 	haveCardsLoaded = false;
 
-	window.cardLocations = cardLocations = {};
+	win.cardLocations = {};
 
 	document.body.innerHTML = "";
 	document.head.innerHTML = GameView.HEAD;
@@ -166,16 +192,16 @@ export function loadView()
 	if(!sessionStorage["shownHelp"])
 	{
 		sessionStorage["shownHelp"] = "true";
-		createHelpPopup();
+		win.createHelpPopup();
 	}
 
-	attachToSocket(window.socket);
+	attachToSocket(win.socket);
 
-	window.updateGame = updateGame;
+	win.updateGame = updateGame;
 
-	window.onresize = function(e)
+	window.onresize = function(e: Event)
 	{
-		var fullscreenButton = document.getElementById('fullscreenButton')
+		var fullscreenButton = document.getElementById('fullscreenButton') as HTMLImageElement;
 		if(fullscreenButton)
 		{
 			if(document.fullscreenElement)
@@ -194,10 +220,10 @@ export function loadView()
 
 
 
-var allKeywords = [];
+var allKeywords: string[] = [];
 
 // Preloading all the cards makes everything feel instant.
-var currentDeck;
+var currentDeck: {[key:string]: any};
 
 
 function LoadCards()
@@ -205,16 +231,15 @@ function LoadCards()
 	if(haveCardsLoaded)
 		return;
 
-	var keywordSet = new Set();
+	var keywordSet: Set<string> = new Set();
 
 	haveCardsLoaded = true;
 
-	var preloadedImages = document.getElementById('preloadedImages');
+	var preloadedImages = document.getElementById('preloadedImages')!;
 
 
-	window.currentDeck = currentDeck = {};
-	
-	var re = new RegExp(model.cardDecks) 
+	win.currentDeck = currentDeck = {};
+	let model = win.model;
 
 	for(var key in cards)
 	{
@@ -256,28 +281,30 @@ function LoadCards()
 }
 
 
-function getPosFromElement(element)
+function getPosFromElement(element: HTMLElement)
 {
 	var rect = element.getBoundingClientRect();
 	return {top: rect.top +"px", left: rect.left + "px"};
 }
 
-function getPosFromId(id)
+function getPosFromId(id: string)
 {
-	var rect = document.getElementById(id).getBoundingClientRect();
+	var rect = document.getElementById(id)!.getBoundingClientRect();
 	return {top: rect.top + "px", left: rect.left + "px"};
 }
 
-function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
+function animateCardMove(card: Card, startPos: {[key:string]: string}, endPos: {[key:string]: string}, endLocationUpdateFn: Function)
 {
 	var floatCard = makeCardElement(card);
 	floatCard.style.margin = "0px";
 	floatCard.style.position = "absolute";
 	floatCard.classList.add('flying');
 	for(var key in startPos)
-		floatCard.style[key] = startPos[key];
+	{
+		(floatCard as any).style[key] = startPos[key];
+	}
 
-	floatCard.style.zIndex = 4;
+	floatCard.style.zIndex = "4";
 	floatCard.style.transition = "top .5s, left .5s";
 	floatCard.style.transitionTimingFunction = "linear";
 
@@ -285,7 +312,9 @@ function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
 
 	setTimeout(function(){
 		for(var key in endPos)
-			floatCard.style[key] = endPos[key];
+		{
+			(floatCard as any).style[key] = endPos[key];
+		}
 
 	},20)
 	
@@ -298,19 +327,19 @@ function animateCardMove(card, startPos, endPos, endLocationUpdateFn)
 	}, 520);
 }
 
-
-
-
 export function updateTurnstate()
 {
-	var turnstate = model.turnstate;
+	let model = win.model;
+	var turnstate = model.turnstate!;
 
 	if(!turnstate){
 		document.body.classList.remove("nomove");
 		return;
 	}
 
-	var div = document.getElementById('turnInfo');
+
+
+	var div = document.getElementById('turnInfo')!;
 	if(isItMyTurn())
 	{
 		document.body.classList.remove("nomove");
@@ -339,15 +368,20 @@ export function updateTurnstate()
 	}
 
 	updateEffects();
-
 	updatePlayerList();
 }
 
-var turnStateChangelings = {};
+var turnStateChangelings: {[key:string]: any} = {};
 
 function updateEffects()
 {
 	var larsonEffect = "";
+	let model = win.model;
+
+	if(!model.turnstate) return;
+
+
+	let cardLocations = win.cardLocations;
 
 	for(var key in model.board)
 	{
@@ -366,7 +400,7 @@ function updateEffects()
 		if(decoration[i].classList.contains('changeling'))
 			i++;
 		else
-			decoration[i].parentNode.removeChild(decoration[i]);
+			decoration[i].parentNode!.removeChild(decoration[i]);
 	}
 
 	// We don't want to update changelines always because that will mess up their animation
@@ -384,10 +418,10 @@ function updateEffects()
 
 		if(isBoardLoc(cardLocations[card]) && newDisguise != turnStateChangelings[card])
 		{	
-			var element = model.board[cardLocations[card]].element;
+			var element = model.board[cardLocations[card]].element!;
 			var div = element.getElementsByClassName('changeling')[0];
 			if(div)
-				div.parentNode.removeChild(div);
+				div.parentNode!.removeChild(div);
 
 			delete turnStateChangelings[card]	
 		}
@@ -403,10 +437,9 @@ function updateEffects()
 			.filter( x => x.startsWith("p,"))
 			.map(x => model.board[x].card);
 
-		var newObj = {}
+		var newObj = {} as any;
 		for(var card of newCards)
 		{
-
 			newObj[card] = true;
 		}
 
@@ -419,7 +452,7 @@ function updateEffects()
 
 		if(isBoardLoc(cardLocations[card]))
 		{
-			var element = model.board[cardLocations[card]].element;
+			var element = model.board[cardLocations[card]].element!;
 			var decs = getCardProp(card, "*");
 
 			if(larsonEffect && card != larsonEffect)
@@ -488,34 +521,37 @@ function updateEffects()
 
 	toRemove.map(x => x.classList.remove("justPlayed"));
 
-	for(var card of model.turnstate.playedThisTurn)
+	for(let card of model.turnstate.playedThisTurn)
 	{
 		if(isBoardLoc(cardLocations[card]))
 		{
-			model.board[cardLocations[card]].element.classList.add('justPlayed');
+			model.board[cardLocations[card]].element!.classList.add('justPlayed');
 		}
 	}
 }
 
-export function updateGame(newModel)
+export function updateGame(newModel?: GameModel)
 {
+
 	if(newModel)
 	{
 		clearBoard();
-		model = window.model = newModel;
+		win.model = newModel;
 
-		if(model.turnstate)
+		if(win.model.turnstate)
 		{
-			model.turnstate.playedThisTurn = new Set(model.turnstate.playedThisTurn );
+			win.model.turnstate.playedThisTurn = new Set(win.model.turnstate.playedThisTurn );
 		}
 	}
+
+	let model = win.model;
 
 
 	LoadCards();
 
 	var flyingCards = document.getElementsByClassName('flying');
 	while(flyingCards.length)
-		flyingCards[0].parentNode.removeChild(flyingCards[0]);
+		flyingCards[0].parentNode!.removeChild(flyingCards[0]);
 
 	
 	updateHand();
@@ -525,6 +561,8 @@ export function updateGame(newModel)
 	updatePonyDiscard();
 	updateShipDiscard();
 	updateGoalDiscard();
+
+	let cardLocations = win.cardLocations;
 
 	for(var card of model.ponyDiscardPile)
 	{
@@ -554,13 +592,14 @@ export function updateGame(newModel)
 
 export function isItMyTurn()
 {
+	let model = win.model;
 	return model.turnstate == undefined || model.turnstate.currentPlayer == model.playerName;
 }
 
 
 let dataTransferVar = "stupid";
 
-export function setDataTransfer(val)
+export function setDataTransfer(val: string)
 {
 	dataTransferVar = val;
 }
@@ -571,9 +610,10 @@ export function getDataTransfer()
 }
 
 
-export function isValidMove(cardDragged, targetCard, endLocation)
+export function isValidMove(cardDragged: Card, targetCard: Card, endLocation: Location)
 {
 	if(cardDragged == targetCard) return false;
+	let model = win.model;
 
 	if(isPonyOrStart(targetCard) && isPonyOrStart(cardDragged))
 	{
@@ -586,23 +626,31 @@ export function isValidMove(cardDragged, targetCard, endLocation)
 	);
 }
 
-function getCardAtLoc(loc)
+function getCardAtLoc(loc: Location)
 {
+	let model = win.model;
 	if(isBoardLoc(loc))
 	{
 		return model.board[loc].card;
 	}
 	if(isGoalLoc(loc))
 	{
-		return model.currentGoals[Number(loc.split(",")[1]).card];
+		return model.currentGoals[Number(loc.split(",")[1])].card;
 	}
 }
 
 
-export async function moveCard(card, startLocation, endLocation, forceCardToMove, extraArg)
-{
-	var startPos;
+export async function moveCard(
+	card: Card,
+	startLocation: Location,
+	endLocation: Location, 
+	forceCardToMove?: boolean, 
+	extraArg?: any
+){
+	var startPos = {};
 	const vh = window.innerHeight/100;
+	let model = win.model;
+	let cardLocations = win.cardLocations;
 
 	if(cardLocations[card] == endLocation)
 	{
@@ -621,7 +669,7 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 			&& (isBoardLoc(cardLocations[card]) || isGoalLoc(cardLocations[card]))
 			&& getCardAtLoc(cardLocations[card]) != card)
 		{
-			cardLocations[card] = undefined;
+			delete cardLocations[card];
 		}
 
 		if(cardLocations[card] != undefined)
@@ -638,11 +686,11 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 
 	if(startLocation == "winnings")
 	{
-		var i = model.winnings.indexOf(card);
+		let i = model.winnings.map(x => x.card).indexOf(card);
 		model.winnings.splice(i,1);
 		updateWinnings();
 
-		var enddiv = document.getElementById("winnings");
+		var enddiv = document.getElementById("winnings")!;
 		rect = enddiv.getBoundingClientRect();
 		startPos = {
 			top: rect.bottom - 18*vh + "px",
@@ -652,7 +700,7 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 
 	if(startLocation == "hand")
 	{
-		var i = model.hand.indexOf(card);
+		let i = model.hand.indexOf(card);
 
 		startPos = getPosFromId("hand" + i);
 
@@ -665,11 +713,11 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	{
 		
 		var [pile,slot] = startLocation.split(",");
-		var i = model[pile].indexOf(card);
-		model[pile].splice(i,1);
+		let i = (model as any)[pile].indexOf(card);
+		(model as any)[pile].splice(i,1);
 
 
-		var newTopCard = model[pile][model[pile].length-1];
+		var newTopCard = (model as any)[pile][(model as any)[pile].length-1];
 		cardLocations[newTopCard] = pile + ",top";
 
 		startPos = getPosFromId(pile);
@@ -697,7 +745,7 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	}*/
 	else if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
 	{
-		startPos = getPosFromElement(model.board[startLocation].element);
+		startPos = getPosFromElement(model.board[startLocation].element!);
 
 		var removedCard = model.board[startLocation].card;
 
@@ -712,10 +760,10 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	}
 	else if(isGoalLoc(startLocation))
 	{
-		var [_,i] = startLocation.split(',')
-		i = Number(i);
+		var [_,is] = startLocation.split(',')
+		let i = Number(is);
 
-		startPos = getPosFromElement(document.getElementById('currentGoals').getElementsByClassName('card')[i]);
+		startPos = getPosFromElement(document.getElementById('currentGoals')!.getElementsByClassName('card')[i] as HTMLElement);
 
 		model.currentGoals[i] = {card:"blank:goal", achieved: false};
 
@@ -725,13 +773,13 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	/// removing
 
 	var updateFun = function(){};
-	var endPos;
+	var endPos = {};
 	
 	if(endLocation == "hand")
 	{
 		model.hand.push(card);
 
-		var enddiv = document.getElementById('hand-pony');
+		var enddiv = document.getElementById('hand-pony')!;
 		var rect = enddiv.getBoundingClientRect();
 
 		var cardCount = isPony(card) ? model.hand.filter(x => isPony(x)).length : model.hand.length;
@@ -751,23 +799,25 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	{
 		var [pile,slot] = endLocation.split(",");
 
+		let discardArr = (model as any)[pile] as Card[];
+
 		if (slot=="top")
 		{
-			if(model[pile].length)
-				cardLocations[model[pile][model[pile].length-1]] = pile + ",stack";
+			if(discardArr.length)
+				cardLocations[discardArr[discardArr.length-1]] = pile + ",stack";
 
-			model[pile].push(card);
+			discardArr.push(card);
 		}
 		else
 		{
-			model[pile].splice(Math.max(0,model[pile].length-2), 0, card);
+			discardArr.splice(Math.max(0,discardArr.length-2), 0, card);
 		}
 
 		var updateFun2 = {
 			"pony": updatePonyDiscard,
 			"ship": updateShipDiscard,
 			"goal": updateGoalDiscard
-		}[endLocation.substring(0,4)];
+		}[endLocation.substring(0,4)] as Function;
 
 		updateFun = () => {
 			if(slot=="top")
@@ -784,7 +834,7 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 		model.winnings.push({card, value: Number(extraArg) || 0});
 		updateFun = updateWinnings;
 
-		var enddiv = document.getElementById("winnings");
+		var enddiv = document.getElementById("winnings")!;
 		rect = enddiv.getBoundingClientRect();
 		endPos = {
 			top: rect.bottom - 18*vh + "px",
@@ -825,10 +875,10 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 	}
 	else if(isGoalLoc(endLocation))
 	{
-		let [_,i] = endLocation.split(',')
-		i = Number(i);
+		let [_,istr] = endLocation.split(',')
+		let i = Number(istr);
 
-		endPos = getPosFromElement(document.getElementById('currentGoals').getElementsByClassName('card')[i]);
+		endPos = getPosFromElement(document.getElementById('currentGoals')!.getElementsByClassName('card')[i] as HTMLElement);
 
 		model.currentGoals[i] = {card, achieved: false};
 		updateFun = () => updateGoals(i)
@@ -851,7 +901,7 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 			|| isPlayerLoc(endLocation))
 	)
 	{
-		animateCardMove(card, startPos, endPos, updateFun);
+		animateCardMove(card, startPos || {}, endPos || {}, updateFun);
 	}
 	else
 	{
@@ -872,10 +922,11 @@ export async function moveCard(card, startLocation, endLocation, forceCardToMove
 var playEventHandlers = [];
 
 
-async function doPlayEvent(e)
+async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation: Location})
 {
 	var cardInfo = currentDeck[e.card];
-
+	let model = win.model;
+	let cardLocations = win.cardLocations;
 
 	var isImmediatePlay = (e.startLocation == "hand" || e.startLocation == "ponyDiscardPile,top")
 
@@ -889,14 +940,14 @@ async function doPlayEvent(e)
 			if(!model.turnstate.openShips)
 				model.turnstate.openShips = {};
 
-			if(neighbors.length == 1 && model.turnstate.openShips[neighbors[0]])
+			/*if(neighbors.length == 1 && model.turnstate.openShips[neighbors[0]])
 			{
 				model.turnstate.triggerShip = neighbors[0];
 			}
 			else
 			{
 				model.turnstate.triggerShip = "";
-			}
+			}*/
 		}
 
 		var fn = getCardAction(e.card);
@@ -923,8 +974,9 @@ async function doPlayEvent(e)
 
 	if(model.turnstate)
 	{
-		for(let shipCard in model.turnstate.openShips)
+		for(let key in model.turnstate.openShips)
 		{
+			let shipCard =  key
 			if(!cardLocations[shipCard] || !isBoardLoc(cardLocations[shipCard]))
 			{
 				// card has been removed from the board.
@@ -943,7 +995,7 @@ async function doPlayEvent(e)
 				// add action buttons to other cards
 				if(shipCard == e.card)
 				{
-					model.turnstate.triggerShip = shipCard;
+					//model.turnstate.triggerShip = shipCard;
 
 					var ponies = getNeighborCards(shipCard);
 
@@ -953,12 +1005,16 @@ async function doPlayEvent(e)
 
 
 
-						var cardElement = model.board[cardLocations[pony]].element;
+						var cardElement = model.board[cardLocations[pony]].element!;
 
-						if(fn) setActionButton(cardElement, async function(e){
-							await fn(pony);
-							updateEffects();
-						});
+						if(fn != undefined)
+						{
+							let fn2 = fn;
+							setActionButton(cardElement, async function(e: Event){
+								await fn2(pony);
+								updateEffects();
+							});	
+						}
 					}
 				}
 			}
@@ -966,19 +1022,20 @@ async function doPlayEvent(e)
 	}
 }
 
-window.moveCard = moveCard;
+//window.moveCard = moveCard;
 
 
 
-function isShipClosed(shipCard)
+function isShipClosed(shipCard: Card)
 {
 	return getNeighborCards(shipCard).length == 2;
 }
 
 
-function getNeighborCards(shipCard)
+function getNeighborCards(shipCard: Card)
 {
-	var loc = cardLocations[shipCard];
+	let model = win.model;
+	var loc = win.cardLocations[shipCard];
 
 	var neighbors = getNeighborKeys(loc);
 
@@ -995,14 +1052,14 @@ function getNeighborCards(shipCard)
 	return neighborCards;
 }
 
-function getCardAction(card)
+function getCardAction(card: Card)
 {	
 	var cardInfo = currentDeck[card];
 
 	if(!cardInfo.action) { return; }
 
-	var actionName = cardInfo.action;
-	var params = [];
+	var actionName = cardInfo.action as string;
+	var params: string[] = [];
 	var a = actionName.indexOf("(");
 	var b = actionName.indexOf(")");
 
@@ -1017,7 +1074,7 @@ function getCardAction(card)
 		case "addKeywords": return addKeywordsAction(...params);
 		case "ChangelingNoRedisguise": 
 		case "Changeling": 
-			return changelingAction(...params);
+			return (changelingAction as any)(...params);
 		case "clone": return cloneAction;
 		case "genderChange": return genderChangeAction;
 		case "keywordChange": return keywordChangeAction;
@@ -1027,14 +1084,12 @@ function getCardAction(card)
 		case "shipWithEverypony": return shipWithEveryponyAction;
 		case "timelineChange": return timelineChangeAction;
 		
-		
-		
 	}		
 }
 
-function doActionOnSwap(card)
+function doActionOnSwap(card: Card)
 {
-	var cardInfo = currentDeck[card];
+	var cardInfo = win.currentDeck[card];
 	if(cardInfo.action && cardInfo.action.startsWith("Changeling("))
 	{
 		return true;
@@ -1043,9 +1098,11 @@ function doActionOnSwap(card)
 	return false;
 }
 
-function changelingAction(type)
+function changelingAction(type: string)
 {
-	return async function(card)
+	let model = win.model;
+	let cardLocations = win.cardLocations;
+	return async function(card: Card)
 	{
 
 		if(model.turnstate)
@@ -1110,8 +1167,9 @@ function changelingAction(type)
 }
 
 
-function getCardProp(card, prop)
+function getCardProp(card: Card, prop: string)
 {
+	let model = win.model;
 	var cardObj = model.turnstate.overrides[card] || {};
 
 	var baseCard = card;
@@ -1120,7 +1178,7 @@ function getCardProp(card, prop)
 
 	if(prop == "*")
 	{
-		var copy = {};
+		var copy = {} as any;
 		for(var prop in cardObj)
 			copy[prop] = cardObj[prop]
 
@@ -1133,8 +1191,9 @@ function getCardProp(card, prop)
 	return currentDeck[baseCard][prop];
 }
 
-function setCardProp(card, prop, value)
+function setCardProp(card: Card, prop: string, value: any)
 {
+	let model = win.model;
 	let isChangeling = currentDeck[card].action && currentDeck[card].action.startsWith("Changeling(");
 
 	if(model.turnstate)
@@ -1172,7 +1231,7 @@ function setCardProp(card, prop, value)
 	}
 }
 
-async function makePrincessAction(shipCard)
+async function makePrincessAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
 	var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !currentDeck[x].keywords.has("Changeling")), true);
@@ -1187,14 +1246,14 @@ async function makePrincessAction(shipCard)
 	}
 }
 
-async function genderChangeAction(shipCard)
+async function genderChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
 	var ponyCard = await openCardSelect("Choose a pony to change gender", ponies, true);
 
 	if(!ponyCard) return;
 
-	if(model.turnstate)
+	if(win.model.turnstate)
 	{
 		var newGender = undefined;
 
@@ -1213,8 +1272,9 @@ async function genderChangeAction(shipCard)
 	}
 }
 
-async function shipWithEveryponyAction(ponyCard)
+async function shipWithEveryponyAction(ponyCard: Card)
 {
+	let model = win.model;
 	var ponies = [];
 	for(var key in model.board)
 	{
@@ -1232,28 +1292,28 @@ async function shipWithEveryponyAction(ponyCard)
 	}
 }
 
-async function cloneAction(shipCard)
+async function cloneAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
 	var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !currentDeck[x].count), true);
 
 	if(!ponyCard) return;
 
-	if(model.turnstate)
+	if(win.model.turnstate)
 	{
 		setCardProp(ponyCard, "count", 2)
 		//broadcastEffects();
 	}
 }
 
-async function timelineChangeAction(shipCard)
+async function timelineChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
 	var ponyCard = await openCardSelect("Choose a pony to gain the <br> time traveller symbol", ponies, true);
 
 	if(!ponyCard) return;
 
-	if(model.turnstate)
+	if(win.model.turnstate)
 	{
 		setCardProp(ponyCard, "altTimeline", true)
 	}
@@ -1261,7 +1321,7 @@ async function timelineChangeAction(shipCard)
 
 
 
-async function keywordChangeAction(shipCard)
+async function keywordChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
 
@@ -1270,7 +1330,7 @@ async function keywordChangeAction(shipCard)
 		var element = document.createElement('div');
 		element.className = "popupPage"
 
-		var selectedPony;
+		var selectedPony: Card;
 		var h1 = document.createElement('h1');
 		h1.innerHTML = "Pick a keyword";
 		element.appendChild(h1);
@@ -1283,13 +1343,13 @@ async function keywordChangeAction(shipCard)
 		card2.setAttribute('value', ponies[1])
 		
 
-		function ponySelect()
+		function ponySelect(this: any)
 		{
 			card1.classList.remove('selected')
 			card2.classList.remove('selected')
 			
 			this.classList.add('selected');
-			selectedPony = this.getAttribute('value');
+			selectedPony = this.getAttribute('value')!;
 
 		}
 
@@ -1331,23 +1391,23 @@ async function keywordChangeAction(shipCard)
 
 	}}], true);
 
-	if(output && model.turnstate)
+	if(output && win.model.turnstate)
 	{
 		var [card, keyword] = output;
 		setCardProp(card, "keywords", keyword)
 	}
 }
 
-function addKeywordsAction(...keywords)
+function addKeywordsAction(...keywords: string[])
 {
-	return async function(shipCard)
+	return async function(shipCard: Card)
 	{
 		var ponies = getNeighborCards(shipCard);
 		var ponyCard = await openCardSelect("Choose a pony to gain keywords", ponies, true);
 
 		if(!ponyCard) return;
 
-		if(model.turnstate)
+		if(win.model.turnstate)
 		{
 			for(var keyword of keywords)
 			{
@@ -1357,7 +1417,7 @@ function addKeywordsAction(...keywords)
 	}
 }
 
-async function raceChangeAction(shipCard)
+async function raceChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
 	ponies = ponies.filter(x => !currentDeck[x].keywords.has("Changeling"));
@@ -1371,14 +1431,14 @@ async function raceChangeAction(shipCard)
 
 	var [ponyCard, newRace] = pair;
 
-	if(model.turnstate)
+	if(win.model.turnstate)
 	{
 		setCardProp(ponyCard, "race", newRace)
 		//broadcastEffects();
 	}
 }
 
-async function raceGenderChangeAction(shipCard)
+async function raceGenderChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
 	ponies = ponies.filter(x => !currentDeck[x].keywords.has("Changeling"));
@@ -1392,7 +1452,7 @@ async function raceGenderChangeAction(shipCard)
 
 	var [ponyCard, newRace, newGender] = triple;
 
-	if(model.turnstate)
+	if(win.model.turnstate)
 	{
 		setCardProp(ponyCard, "race", newRace);
 		setCardProp(ponyCard, "gender", newGender);
@@ -1401,12 +1461,12 @@ async function raceGenderChangeAction(shipCard)
 
 
 
-function raceChangePopup(ponies)
+function raceChangePopup(ponies: Card[])
 {
 	return createPopup([{render: function(acceptFn)
 	{
-		var selectedPony;
-		var selectedRace;
+		var selectedPony: Card;
+		var selectedRace: string;
 
 		var div =document.createElement('div');
 		div.classList.add('popupPage');
@@ -1420,23 +1480,26 @@ function raceChangePopup(ponies)
 
 
 		var card1 = makeCardElement(ponies[0]);
-		card1.setAttribute('value', ponies[0])
+		card1.setAttribute('value', ponies[0]);
+
+		var card2: CardElement | undefined;
 
 		if(ponies.length == 2)
 		{
-			var card2 = makeCardElement(ponies[1]);
+			card2 = makeCardElement(ponies[1]);
 			card2.setAttribute('value', ponies[1])
 		}
 		
 
-		function ponySelect()
+		function ponySelect(this: any, e: MouseEvent)
 		{
+			var el = this as HTMLElement;
 			card1.classList.remove('selected')
 			if(card2)
 				card2.classList.remove('selected')
 			
-			this.classList.add('selected');
-			selectedPony = this.getAttribute('value');
+			el.classList.add('selected');
+			selectedPony = el.getAttribute('value')!;
 
 			if(selectedPony && selectedRace)
 				acceptFn([selectedPony, selectedRace]);
@@ -1476,7 +1539,7 @@ function raceChangePopup(ponies)
 		alicorn.setAttribute('value','alicorn')
 		buttonDiv.appendChild(alicorn)
 
-		function raceSelect()
+		function raceSelect(this: any, e: any)
 		{
 			earth.classList.remove('selected')
 			pegasus.classList.remove('selected')
@@ -1501,13 +1564,13 @@ function raceChangePopup(ponies)
 	}}],true)
 }
 
-function raceGenderChangePopup(ponies)
+function raceGenderChangePopup(ponies: Card[])
 {
 	return createPopup([{render: function(acceptFn)
 	{
-		var selectedPony;
-		var selectedRace;
-		var selectedGender;
+		var selectedPony = "";
+		var selectedRace = "";
+		var selectedGender = "";
 
 		var div =document.createElement('div');
 		div.classList.add('popupPage');
@@ -1523,14 +1586,16 @@ function raceGenderChangePopup(ponies)
 		var card1 = makeCardElement(ponies[0]);
 		card1.setAttribute('value', ponies[0])
 
+		let card2: CardElement | undefined;
+
 		if(ponies.length == 2)
 		{
-			var card2 = makeCardElement(ponies[1]);
+			card2 = makeCardElement(ponies[1]);
 			card2.setAttribute('value', ponies[1])
 		}
 		
 
-		function ponySelect()
+		function ponySelect(this: any, e: any)
 		{
 			card1.classList.remove('selected')
 			if(card2)
@@ -1561,7 +1626,7 @@ function raceGenderChangePopup(ponies)
 
 		rows.appendChild(topRow);
 		rows.appendChild(bottomRow);
-		rows.style = "display: inline-block";
+		(rows as any).style = "display: inline-block";
 
 		var earth = document.createElement('img');
 		earth.className = 'raceButton';
@@ -1587,7 +1652,7 @@ function raceGenderChangePopup(ponies)
 		alicorn.setAttribute('value','alicorn')
 		topRow.appendChild(alicorn)
 
-		function raceSelect()
+		function raceSelect(this: any)
 		{
 			earth.classList.remove('selected')
 			pegasus.classList.remove('selected')
@@ -1619,7 +1684,7 @@ function raceGenderChangePopup(ponies)
 		female.src = "/img/sym/female.png";
 		bottomRow.appendChild(female);
 
-		function genderSelect()
+		function genderSelect(this: any)
 		{
 			male.classList.remove('selected')
 			female.classList.remove('selected')

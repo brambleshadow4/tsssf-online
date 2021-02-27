@@ -10,7 +10,8 @@ import {
 	isGoal,
 	Card,
 	GameModel,
-	Location
+	Location,
+	CardElement
 } from "../../server/lib.js";
 
 import cards from "../../server/cards.js";
@@ -22,12 +23,9 @@ import {
 	getDataTransfer,
 	updateTurnstate,
 	isValidMove
-	// @ts-ignore
 } from "./game.js";
-// @ts-ignore
 import {broadcastMove} from "./network.js";
 
-// @ts-ignore
 import {createPopup} from "./popupComponent.js";
 
 var isDkeyPressed = false;
@@ -119,7 +117,7 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 	return points;
 }
 
-type CardElement = HTMLElement & {brand: "card"}
+
 
 export function makeCardElement(card: Card, location?: Location, isDraggable?: boolean, isDropTarget?: boolean): CardElement
 {
@@ -330,8 +328,8 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 					e.stopPropagation();
 
 					endMoveShared();
-					moveCard(card, location, trashTarget + ",top");
-					broadcastMove(card, location, trashTarget + ",top");
+					moveCard(card, location!, trashTarget + ",top");
+					broadcastMove(card, location!, trashTarget + ",top");
 				}
 			}
 
@@ -373,8 +371,8 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			}
 		}
 
-		moveCard(card, startLoc, location);
-		broadcastMove(card, startLoc, location);
+		moveCard(card, startLoc, location!);
+		broadcastMove(card, startLoc, location!);
 	}
 
 	if(isDraggable && location)
@@ -484,7 +482,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 		{
 			var draggedCard = getDataTransfer().split(";")[0];
 
-			if(isValidMove(draggedCard, card, location))
+			if(isValidMove(draggedCard, card, location!))
 				e.preventDefault();
 		}
 
@@ -506,7 +504,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				overMainDiv = true;
 			}
 
-			if(isValidMove(draggedCard, card, location))
+			if(isValidMove(draggedCard, card, location!))
 			{
 				if (isBlank(card))
 					setCardBackground(imgElement, draggedCard)
@@ -658,7 +656,7 @@ function pointsPopup(points: number[])
 	return createPopup([
 	{
 		name: "",
-		render: function(accept: (value: any) => any)
+		render: function(accept: ((value?: any) => any)) 
 		{
 			var div = document.createElement('div');
 
@@ -779,7 +777,7 @@ export function setCardKeywords(element: CardElement, keywords: string[])
 	element.appendChild(div);
 }
 
-export function addTempSymbol(element: CardElement, symbol: string, tooltip: string)
+export function addTempSymbol(element: CardElement, symbol: string, tooltip?: string)
 {
 	if(symbol == undefined)
 		return;

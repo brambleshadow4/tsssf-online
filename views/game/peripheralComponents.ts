@@ -12,8 +12,10 @@ import {
 	isDiscardLoc,
 	isBlank,
 	isAnon,
-	isPonyOrStart
-} from "/lib.js";
+	isPonyOrStart,
+	GameModel,
+	Card, Location
+} from "../../server/lib.js";
 
 import {broadcastMove,
 	broadcast,
@@ -22,46 +24,56 @@ import {broadcastMove,
 	requestSwapShuffle,
 	requestDrawGoal,
 	attachToSocket
-} from "/game/network.js";
+} from "./network.js";
 
 import {
 	makeCardElement,
 	updateCardElement,
 	isDeleteClick,
 	endMoveShared
-} from "/game/cardComponent.js"
+} from "./cardComponent.js"
 
 import {
 	isItMyTurn,
 	getDataTransfer,
-	isValidMove
-} from "/game/game.js"
+	isValidMove,
+	moveCard
+} from "./game.js"
 
 import {
 	createPopup,
 	htmlTab
-} from "/game/popupComponent.js"
+} from "./popupComponent.js"
 
+
+
+let win = window as unknown as {
+	model: GameModel,
+	openSettings: () => void;
+	cardLocations: {[key:string]: Location};
+	currentDeck: {[key: string]: any},
+	createHelpPopup: () => void;
+}
 
 var SCROLL_BAR_WIDTH = getScrollBarWidth();
 
 
 export function initPeripherals()
 {
-	document.getElementById("ponyDrawPile").onclick = requestDrawPony;
-	document.getElementById("shipDrawPile").onclick = requestDrawShip;
-	document.getElementById("goalDrawPile").onclick = preRequestDrawGoal;
+	document.getElementById("ponyDrawPile")!.onclick = requestDrawPony;
+	document.getElementById("shipDrawPile")!.onclick = requestDrawShip;
+	document.getElementById("goalDrawPile")!.onclick = preRequestDrawGoal;
 
-	var shuffles = ["pony","ship","goal"];
+	var shuffles: ("pony"|"ship"|"goal")[] = ["pony","ship","goal"];
 
 	for(let key of shuffles)
 	{
 		let id = key+"Shuffle";
 
-		document.getElementById(id).onclick = () => requestSwapShuffle(key)
+		document.getElementById(id)!.onclick = () => requestSwapShuffle(key)
 
 		id = key + "DrawPile"
-		document.getElementById(id).ontouchstart = function(e)
+		document.getElementById(id)!.ontouchstart = function(e)
 		{
 
 
@@ -81,11 +93,11 @@ export function initPeripherals()
 			}, 1000);
 		}
 
-		document.getElementById(id).oncontextmenu = (e) => { e.preventDefault();}
+		document.getElementById(id)!.oncontextmenu = (e) => { e.preventDefault();}
 
 	}
 
-	var hand = document.getElementById('hand')
+	var hand = document.getElementById('hand')!
 	hand.ondragover = function(e)
 	{
 		var data = getDataTransfer().split(";")
@@ -123,14 +135,15 @@ export function initPeripherals()
 				div.ondragleave = function(e)
 				{
 					var div = document.getElementById('handDropzone');
-					if(div)
+					if(div && div.parentNode)
 						div.parentNode.removeChild(div);
 				}
 
 				div.ondrop = function(e)
 				{
 					e.preventDefault();
-					div.parentNode.removeChild(div);
+					if(div && div.parentNode)
+						div.parentNode.removeChild(div);
 					var [card, startLoc] = getDataTransfer().split(";")
 
 					moveCard(card, startLoc, "hand");
@@ -160,6 +173,7 @@ export function initPeripherals()
 
 function preRequestDrawGoal()
 {
+	let model = win.model;
 	var i = 0;
 	while(i < model.currentGoals.length)
 	{
@@ -174,25 +188,26 @@ function preRequestDrawGoal()
 }
 
 
-export function updatePonyDiscard(cardOnTop)
+export function updatePonyDiscard(cardOnTop?: Card)
 {
+	let model = win.model as GameModel & {ponyDrawPileLength: number}
 	if(model.ponyDrawPileLength == 0)
-		document.getElementById("ponyDrawPile").classList.add('blank');
+		document.getElementById("ponyDrawPile")!.classList.add('blank');
 	else
-		document.getElementById("ponyDrawPile").classList.remove('blank');
+		document.getElementById("ponyDrawPile")!.classList.remove('blank');
 
 
 	var l = model.ponyDiscardPile.length;
 	var topCard = cardOnTop || (l ? model.ponyDiscardPile[l-1] : "blank:pony");
 
 	updateCardElement(
-		document.getElementById("ponyDiscardPile"),
+		document.getElementById("ponyDiscardPile")!,
 		topCard,
 		"ponyDiscardPile,top",
 		l > 0, false
 	)
 
-	var element = document.getElementById("ponyDiscardPile");
+	var element = document.getElementById("ponyDiscardPile")!;
 	element.addEventListener('click', async function(){
 		
 		if(model.ponyDiscardPile.length)
@@ -211,26 +226,27 @@ export function updatePonyDiscard(cardOnTop)
 	});
 }
 
-export function updateShipDiscard(tempCard)
+export function updateShipDiscard(tempCard?: Card)
 {
+	let model = win.model as GameModel & {ponyDrawPileLength: number, shipDrawPileLength: number};
 
 	if(model.shipDrawPileLength == 0)
-		document.getElementById("shipDrawPile").classList.add('blank');
+		document.getElementById("shipDrawPile")!.classList.add('blank');
 	else
-		document.getElementById("shipDrawPile").classList.remove('blank');
+		document.getElementById("shipDrawPile")!.classList.remove('blank');
 
 
 	var l = model.shipDiscardPile.length;
 	var topCard = tempCard || (l ? model.shipDiscardPile[l-1] : "blank:ship");
 
 	updateCardElement(
-		document.getElementById("shipDiscardPile"),
+		document.getElementById("shipDiscardPile")!,
 		topCard,
 		"shipDiscardPile,top",
 		l > 0, false
 	)
 
-	var element = document.getElementById("shipDiscardPile");
+	var element = document.getElementById("shipDiscardPile")!;
 	element.addEventListener('click', async function(){
 		
 		if(model.shipDiscardPile.length)
@@ -250,9 +266,10 @@ export function updateShipDiscard(tempCard)
 	});
 }
 
-export function updateGoalDiscard(tempCard)
+export function updateGoalDiscard(tempCard?: Card)
 {
-	var element = document.getElementById("goalDrawPile")
+	var element = document.getElementById("goalDrawPile")!;
+	let model = win.model as GameModel & {goalDrawPileLength: number, shipDrawPileLength: number};
 
 	if(model.goalDrawPileLength == 0)
 		element.classList.add('blank');
@@ -263,14 +280,14 @@ export function updateGoalDiscard(tempCard)
 	var topCard = tempCard || (l ? model.goalDiscardPile[l-1] : "blank:goal");
 
 	updateCardElement(
-		document.getElementById("goalDiscardPile"),
+		document.getElementById("goalDiscardPile")!,
 		topCard,
 		"goalDiscardPile,top",
 		false, false
 	);
 
 
-	element = document.getElementById("goalDiscardPile")
+	element = document.getElementById("goalDiscardPile")!
 	element.onclick = async function()
 	{
 		if(model.goalDiscardPile.length)
@@ -295,12 +312,14 @@ var lastArrowClick = 0;
 
 export function updateWinnings()
 {
-	var element = document.getElementById('winnings');
+	var element = document.getElementById('winnings')!;
 	element.innerHTML = "";
 
-	var arrow = document.createElement("img");
+	let arrow = document.createElement("img");
 	arrow.src = "/img/return.svg";
 	arrow.className = 'returnArrow';
+
+	let model = win.model as GameModel & {winnings: any[]};
 
 	if(model.winnings.length)
 		element.appendChild(arrow);
@@ -310,7 +329,7 @@ export function updateWinnings()
 
 	for(var i=0; i < model.winnings.length; i++)
 	{
-		cardLocations[model.winnings[i].card] = "winnings";
+		win.cardLocations[model.winnings[i].card] = "winnings";
 
 		offset -= cardOffset;
 		var card = makeCardElement(model.winnings[i].card, "winnings");
@@ -352,7 +371,7 @@ export function updateWinnings()
 		}
 	}
 
-	arrow.onclick = function(e)
+	function clickEvent(e: MouseEvent | TouchEvent)
 	{
 		var newTime = new Date().getTime();
 		if(!isItMyTurn() || (newTime - lastArrowClick < 250))
@@ -365,7 +384,7 @@ export function updateWinnings()
 		{
 			if(model.winnings.length == 1)
 			{
-				this.parentNode.removeChild(this)
+				arrow.parentNode!.removeChild(arrow)
 			}
 
 
@@ -374,28 +393,33 @@ export function updateWinnings()
 		}
 	}
 
-	arrow.ontouchstart = arrow.onclick;
+	arrow.onclick = clickEvent;
+	arrow.ontouchstart = clickEvent;
 
 	
 }
 
 export function updatePlayerList()
 {
-	var playerList = document.getElementById('playerList');
+	var playerList = document.getElementById('playerList')!;
 	playerList.innerHTML = "";
-	for(let player of model.players)
+	let model = win.model;
+	for(let player of model.players as any)
 	{
 		var div = document.createElement('div');
 		div.className = "player";
 
 		var className = player.disconnected ? "disconnected" : "";
 
+
 		if(model.turnstate && model.turnstate.currentPlayer == player.name)
 		{
 			div.classList.add('currentPlayer');
 		}
 
-		var pts = player.winnings.reduce((a,b) => a + b.value, 0);
+		type Winning = {value: number, card: Card};
+
+		var pts = player.winnings.reduce((a: number, b: Winning) => a + b.value, 0);
 
 		div.innerHTML = `
 			<span class="${className}">${player.name}</span>
@@ -407,7 +431,7 @@ export function updatePlayerList()
 
 		div.onclick = function()
 		{
-			openCardSelect(player.name + "'s won goals", player.winnings.map(x => x.card));
+			openCardSelect(player.name + "'s won goals", player.winnings.map((x: Winning) => x.card));
 		}
 
 		playerList.appendChild(div);
@@ -415,10 +439,10 @@ export function updatePlayerList()
 }
 
 
-export function updateGoals(goalNo, isSoftUpdate)
+export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 {
 
-	var goalDiv = document.getElementById('currentGoals');
+	var goalDiv = document.getElementById('currentGoals') as HTMLElement;
 
 	var start = 0;
 	var end = 3;
@@ -428,6 +452,8 @@ export function updateGoals(goalNo, isSoftUpdate)
 		start = goalNo;
 		end = goalNo + 1;
 	}
+
+	let model = win.model;
 
 	for(let i=start; i<end; i++)
 	{
@@ -442,10 +468,10 @@ export function updateGoals(goalNo, isSoftUpdate)
 
 
 		let element = updateCardElement(
-			goalDiv.getElementsByClassName('card')[i],
+			goalDiv.getElementsByClassName('card')[i] as HTMLElement,
 			model.currentGoals[i].card, "goal," + i, false, false);
 
-		cardLocations[model.currentGoals[i].card] = "goal," + i;
+		win.cardLocations[model.currentGoals[i].card] = "goal," + i;
 
 		if(model.currentGoals[i].achieved)
 		{
@@ -458,19 +484,21 @@ export function updateGoals(goalNo, isSoftUpdate)
 	}
 }
 
-export function updateHand(cardIndex)
+export function updateHand(cardIndex?: number)
 {
-	var handDiv = document.getElementById('hand');	
+	var handDiv = document.getElementById('hand')!;	
 
-	var ponyHand = document.getElementById('hand-pony');
-	var shipHand = document.getElementById('hand-ship')
+	var ponyHand = document.getElementById('hand-pony')!;
+	var shipHand = document.getElementById('hand-ship')!;
+	let model = win.model as GameModel & {hand: Card[]};
+
 	if(cardIndex == undefined)
 	{
 		var oldCards = handDiv.getElementsByClassName('card');
 
 		while(oldCards.length)
 		{
-			oldCards[0].parentNode.removeChild(oldCards[0]);
+			oldCards[0].parentNode!.removeChild(oldCards[0]);
 		}
 
 		for(var i=0; i<model.hand.length; i++)
@@ -478,7 +506,7 @@ export function updateHand(cardIndex)
 			var cardEl = makeCardElement(model.hand[i], "hand", true);
 			cardEl.id = "hand" + i;
 
-			cardLocations[model.hand[i]] = "hand";
+			win.cardLocations[model.hand[i]] = "hand";
 
 			if(isPony(model.hand[i]))
 			{
@@ -545,7 +573,7 @@ function updateCardRowHeight()
 	var cardRow = document.getElementById("cardRow");
 
 	if(!cardRow) return;
-	var playingArea = document.getElementById('playingArea');
+	var playingArea = document.getElementById('playingArea')!;
 	
 	if(cardRow.scrollWidth > window.innerWidth)
 	{
@@ -560,10 +588,10 @@ function updateCardRowHeight()
 }
 
 
-export function openCardSelect(title, cards, miniMode)
+export function openCardSelect(title: string, cards: Card[], miniMode?: boolean)
 {
 	return createPopup([{
-		render: function(closePopupWithVal, reject){
+		render: function(closePopupWithVal: any){
 
 			var div = document.createElement('div');
 			div.classList.add("popupPage")
@@ -593,10 +621,11 @@ export function openCardSelect(title, cards, miniMode)
 }
 
 
-window.openSettings = function()
+win.openSettings = function()
 {
 	return createPopup([{
-		render: function(closeFn)
+		name: "",
+		render: function(closeFn: (value?: any) => any)
 		{
 			var div = document.createElement('div')
 			div.className = "popupPage";
@@ -614,7 +643,8 @@ window.openSettings = function()
 			<div id='kickButtons'></div>
 			`
 
-			for(let player of model.players)
+
+			for(let player of win.model.players)
 			{
 				var button = document.createElement('button');
 				button.innerHTML = "Kick " + player.name;
@@ -626,23 +656,27 @@ window.openSettings = function()
 
 				var innerDiv = document.createElement('div')
 				innerDiv.appendChild(button)
-				div.querySelector("#kickButtons").appendChild(innerDiv);
+				div.querySelector("#kickButtons")!.appendChild(innerDiv);
 			}
 
-			div.querySelector("#newGameButton").onclick = function()
+			let newGameButton = div.querySelector("#newGameButton") as HTMLButtonElement;
+
+			newGameButton.onclick = function()
 			{
 				closeFn();
 				broadcast("startlobby;");
-			}	
-
-			if(model.keepLobbyOpen)
-			{
-				div.querySelector("#keepLobbyOpen").checked = true;
 			}
 
-			div.querySelector("#keepLobbyOpen").onclick = function()
+			let keepLobbyOpen = div.querySelector("#keepLobbyOpen") as HTMLInputElement;
+
+			if(win.model.keepLobbyOpen)
 			{
-				broadcast("keepLobbyOpen;" + (this.checked ? 1 : 0));
+				keepLobbyOpen.checked = true;
+			}
+
+			keepLobbyOpen.onclick = function()
+			{
+				broadcast("keepLobbyOpen;" + (keepLobbyOpen.checked ? 1 : 0));
 			}		
 
 			return div;
@@ -660,7 +694,7 @@ function referencePageRender()
 	var shipReference = document.createElement('div');
 	var goalReference = document.createElement('div');
 
-	var keys = Object.keys(window.currentDeck);
+	var keys = Object.keys(win.currentDeck);
 
 	keys.sort();
 	for(let key of keys)
@@ -815,7 +849,6 @@ function createHelpPopup()
 			name: "Card Reference",
 			render: referencePageRender
 		}
-
 	]);
 }
 
@@ -904,4 +937,4 @@ function quickStartPage()
 	return div;
 }
 
-window.createHelpPopup = createHelpPopup;
+win.createHelpPopup = createHelpPopup;

@@ -1,10 +1,15 @@
 export type Card = string
 export type Location = string;
 
+export type CardElement = HTMLElement & {brand: "card"}
+
 export interface GameModel
 {
 	board: {
-		[key:string]: {card: Card}
+		[key:string]: {
+			card: Card,
+			element?: CardElement,
+		}
 	},
 
 	cardDecks: string[],
@@ -20,6 +25,11 @@ export interface GameModel
 	currentGoals: {card: Card, achieved: boolean}[],
 
 	turnstate?: Turnstate,
+
+
+	keepLobbyOpen: boolean,
+
+	players: any[],
 
 
 	startCard: Card,
