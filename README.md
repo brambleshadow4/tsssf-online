@@ -24,6 +24,7 @@ Prerequisites: Familiarity with node/npm.
 	git clone <link-to-repo>
 	cd <repo-folder>
 	npm install 
+	npm run tsc
 	cd ./img
 	py generateThumbnails.py
 

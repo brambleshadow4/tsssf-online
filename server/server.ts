@@ -54,9 +54,12 @@ app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent
 
 
 app.get("/viewSelector.js", file("./views/viewSelector.js"))
+
 app.get("/lib.js", file("./server/lib.js"))
+app.get("/server/lib.js", file("./server/lib.js"))
 
 
+app.get("/server/cards.js", file("./server/cards.js"))
 app.get("/game/cards.js", file("./server/cards.js"))
 
 app.get("/rulebook.html", file("./views/rulebook.html"))
@@ -115,7 +118,7 @@ app.get("/stats", async function(req, res){
 
 
 app.get("/lobby.css", file("./views/lobby/lobby.css"))
-app.get("/lobby.js", file("./views/lobby/lobby.js"))
+app.get("/lobby/lobby.js", file("./views/lobby/lobby.js"))
 app.get("/lobby/lobbyView.js", file("./views/lobby/lobbyView.js"))
 
 app.get("/host", function(req, res){
