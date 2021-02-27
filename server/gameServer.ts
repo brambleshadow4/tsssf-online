@@ -15,16 +15,59 @@ import {
 	isCardIncluded,
 	getNeighborKeys,
 	Card,
-	Location
+	Location,
+	GameModel as GameModelShared,
+	Turnstate,
+	ChangelingContextList
 } from "./lib.js";
 
-//import  from "./goalCriteria.js";
+
 // @ts-ignore
 import {evalGoalCard, getConnectedPonies} from "./goalCriteria.js"
 import cards from "./cards.js";
-// @ts-ignore
 import {logGameHosted, logPlayerJoined} from "./stats.js";
 
+
+export interface GameModel extends GameModelShared
+{
+	players: Player[],
+	startTime?: number,
+	isInGame: boolean,
+	isLobbyOpen: boolean,
+	keepLobbyOpen: boolean,
+	deathCount: number,
+
+	board: {
+		[key:string]: {card: Card}
+	},
+
+	cardLocations: {
+		[card:string]: Location
+	}
+
+	cardDecks: string[],
+
+	ponyDiscardPile: Card[],
+	shipDiscardPile: Card[],
+	goalDiscardPile: Card[],
+
+	ponyDrawPile: Card[],
+	shipDrawPile: Card[],
+	goalDrawPile: Card[],
+
+	currentGoals: {card: Card, achieved: boolean}[],
+
+	runGoalLogic: boolean,
+
+	startCard: Card,
+
+	ruleset: string,
+
+	host?: ws,
+
+	messageHistory: string[],
+
+}
 
 var PROP_VALUES = {
 
@@ -59,104 +102,6 @@ export interface TsssfGameServer extends ws.Server
 	players: Player[],
 }
 
-interface Turnstate
-{
-	currentPlayer: string,
-	overrides: {
-		[key:string]: {
-			[prop:string]: any
-		}
-	}
-
-	tentativeShips: {
-		[key: string]: any
-	}
-
-	playedShips: [Card, Card, Card][],
-	playedPonies: Card[],
-
-	specialEffects:{
-		shipWithEverypony: Set<Card>,
-		larsonEffect?: boolean
-	}
-
-	updateSpecialEffects: () => void,
-
-	playedThisTurn: Set<any>,
-
-	brokenShips: string[][],
-	brokenShipsNow: string[][],
-
-	positionMap: {
-		[card:string]: Location
-	}
-
-	changelingContexts: {
-		[card:string]: ChangelingContextList
-	},
-
-	swaps: number,
-	swapsNow: number,
-
-	shipSet: Set<string>,
-
-	clientProps: () => any
-
-}
-
-type ChangelingContextList = {
-	list: any[],
-	rollback: {}
-}
-
-
-/**
-
-		*/
-interface GameModel
-{
-	players: Player[],
-	startTime?: number,
-	isInGame: boolean,
-	isLobbyOpen: boolean,
-	keepLobbyOpen: boolean,
-	deathCount: number,
-
-	board: {
-		[key:string]: {card: Card}
-	},
-
-	cardLocations: {
-		[card:string]: Location
-	}
-
-	cardDecks: string[],
-
-	ponyDiscardPile: Card[],
-	shipDiscardPile: Card[],
-	goalDiscardPile: Card[],
-
-	ponyDrawPile: Card[],
-	shipDrawPile: Card[],
-	goalDrawPile: Card[],
-
-	currentGoals: {card: Card, achieved: boolean}[],
-
-	turnstate?: Turnstate,
-
-	runGoalLogic: boolean,
-
-	startCard: Card,
-
-	ruleset: string,
-
-	host?: ws,
-
-
-
-	messageHistory: string[],
-
-}
 
 interface Player 
 {

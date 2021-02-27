@@ -38,3 +38,12 @@ If instead you'd like to run the severver on port 8000, use
 
 	node server/server.js dev
 
+
+### Adding HTTPS ###
+
+To run the web server over SSL, create a settings.txt file in the server
+directory with the following items set:
+
+	CERT=path/to/server.crt
+	KEY=path/to/private.key
+	PASSPHRASE=password

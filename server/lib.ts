@@ -1,6 +1,84 @@
 export type Card = string
 export type Location = string;
 
+export interface GameModel
+{
+	board: {
+		[key:string]: {card: Card}
+	},
+
+	cardDecks: string[],
+
+	ponyDiscardPile: Card[],
+	shipDiscardPile: Card[],
+	goalDiscardPile: Card[],
+
+	ponyDrawPile: Card[],
+	shipDrawPile: Card[],
+	goalDrawPile: Card[],
+
+	currentGoals: {card: Card, achieved: boolean}[],
+
+	turnstate?: Turnstate,
+
+
+	startCard: Card,
+	ruleset: string,
+
+	messageHistory: string[],
+}
+
+export interface ChangelingContextList
+{
+	list: any[],
+	rollback: {}
+}
+
+export interface Turnstate
+{
+	currentPlayer: string,
+	overrides: {
+		[key:string]: {
+			[prop:string]: any
+		}
+	}
+
+	tentativeShips: {
+		[key: string]: any
+	}
+
+	playedShips: [Card, Card, Card][],
+	playedPonies: Card[],
+
+	specialEffects:{
+		shipWithEverypony: Set<Card>,
+		larsonEffect?: boolean
+	}
+
+	updateSpecialEffects: () => void,
+
+	playedThisTurn: Set<any>,
+
+	brokenShips: string[][],
+	brokenShipsNow: string[][],
+
+	positionMap: {
+		[card:string]: Location
+	}
+
+	changelingContexts: {
+		[card:string]: ChangelingContextList
+	},
+
+	swaps: number,
+	swapsNow: number,
+
+	shipSet: Set<string>,
+
+	clientProps: () => any
+
+}
+
 export function isPony(card: Card)
 {
 	return card.indexOf(".Pony.") >= 0 || card == "anon:pony";
