@@ -3,7 +3,7 @@ import fs from 'fs';
 import ws from 'ws';
 import https from "https";
 import cards from "./cards.js"
-import {tsssfGameServer, TsssfGameServer} from "./gameServer.js";
+import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js"
 
 
@@ -68,7 +68,10 @@ app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
 
 app.get("/lobby", function(req,res)
 {
-	var key = Object.keys(req.query)[0];
+	var key = Object.keys(req.query)[0].toUpperCase();
+
+	console.log(key);
+	console.log(tsssfServer.games[key]);
 
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
@@ -82,7 +85,7 @@ app.get("/lobby", function(req,res)
 
 app.get("/game", function(req, res)
 {
-	var key = Object.keys(req.query)[0];
+	var key = Object.keys(req.query)[0].toUpperCase();
 
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
@@ -220,14 +223,10 @@ function sendIfExists(url:string, res: any)
 // the same ws upgrade process described here:
 // https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server
 
-const tsssfServer = tsssfGameServer();
+const tsssfServer = new TsssfGameServer();
 
 server.on('upgrade', (request, socket, head) => {
 	tsssfServer.handleUpgrade(request, socket, head, (socket: any) => {
 		tsssfServer.emit('connection', socket, request);
 	});
 });
-
-
-
-

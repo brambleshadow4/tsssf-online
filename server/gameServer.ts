@@ -17,7 +17,6 @@ import {
 	Card,
 	Location,
 	GameModel as GameModelShared,
-	Turnstate,
 	ChangelingContextList
 } from "./lib.js";
 
@@ -27,47 +26,6 @@ import {evalGoalCard, getConnectedPonies} from "./goalCriteria.js"
 import cards from "./cards.js";
 import {logGameHosted, logPlayerJoined} from "./stats.js";
 
-
-export interface GameModel extends GameModelShared
-{
-	players: Player[],
-	startTime?: number,
-	isInGame: boolean,
-	isLobbyOpen: boolean,
-	keepLobbyOpen: boolean,
-	deathCount: number,
-
-	board: {
-		[key:string]: {card: Card}
-	},
-
-	cardLocations: {
-		[card:string]: Location
-	}
-
-	cardDecks: string[],
-
-	ponyDiscardPile: Card[],
-	shipDiscardPile: Card[],
-	goalDiscardPile: Card[],
-
-	ponyDrawPile: Card[],
-	shipDrawPile: Card[],
-	goalDrawPile: Card[],
-
-	currentGoals: {card: Card, achieved: boolean}[],
-
-	runGoalLogic: boolean,
-
-	startCard: Card,
-
-	ruleset: string,
-
-	host?: ws,
-
-	messageHistory: string[],
-
-}
 
 var PROP_VALUES = {
 
@@ -89,18 +47,13 @@ var PROP_VALUES = {
 	}
 } as any;
 
-export interface TsssfGameServer extends ws.Server
+/*export interface TsssfGameServer extends ws.Server
 {
-	games: {[key:string]:GameModel},
 	openLobby: (key?:string) => void,
-	getStats: () => {
-		games: number,
-		players: number,
-		startTime?: number
-	},
+
 
 	players: Player[],
-}
+}*/
 
 
 interface Player 
@@ -114,352 +67,54 @@ interface Player
 
 }
 
-export function tsssfGameServer(): TsssfGameServer
+
+const TEMP_DISCONNECT_TIME = 15*1000;
+export class TsssfGameServer
 {
-	const wsServer = new ws.Server({ noServer: true }) as TsssfGameServer;
-	wsServer.games = {};
-	var games = wsServer.games;
+	public games: {[key:string] : GameModel};
 
-	const interval = setInterval(function ping()
+	private wsServer: ws.Server;
+
+	constructor()
 	{
-		for(var key in games)
+		this.wsServer = new ws.Server({ noServer: true });
+		this.games = {};
+
+		const interval = setInterval(function ping(this:TsssfGameServer)
 		{
-			var anyPlayersAlive = false;
-			for(var i=0; i < games[key].players.length; i++)
+			for(var key in this.games)
 			{
-				if(games[key].players[i].socket.isAlive)
+				var anyPlayersAlive = false;
+				for(var i=0; i < this.games[key].players.length; i++)
 				{
-					anyPlayersAlive = true;
-					break;
+					if(this.games[key].players[i].socket.isAlive)
+					{
+						anyPlayersAlive = true;
+						break;
+					}
+				}
+
+				if(!anyPlayersAlive)
+				{
+					this.games[key].deathCount++;
+
+					if(this.games[key].deathCount >= 4)
+					{
+						delete this.games[key];
+					}
+				}
+				else
+				{
+					this.games[key].deathCount = 0;
 				}
 			}
 
-			if(!anyPlayersAlive)
-			{
-				games[key].deathCount++;
+		}, 15000);
 
-				if(games[key].deathCount >= 4)
-				{
-					delete games[key];
-				}
-			}
-			else
-			{
-				games[key].deathCount = 0;
-			}
-		}
-
-	}, 15000);
-
-	wsServer.getStats = function()
-	{
-		var stats = {games:0, players:0} as {games: number, players: number, startTime?: number}
-		var startTime;
-		for(var key in games)
-		{
-			if(games[key].isInGame)
-			{
-				stats.games++;
-				stats.players += games[key].players.filter(x => x.socket.isAlive).length;
-
-				let thisStartTime = games[key].startTime; 
-				if(thisStartTime !== undefined)
-				{
-					startTime = Math.max(thisStartTime, startTime || 0);
-				}
-			}
-		}
-
-		if(startTime)
-			stats.startTime = startTime;
-
-		return stats;
+		this.wsServer.on('connection', handleCrash(this.onConnection.bind(this)));
 	}
 
-	var TEMP_DISCONNECT_TIME = 15*1000;
-
-	function isRegistered(player?: Player)
-	{
-		return player != undefined && player.name != "";
-	}
-
-	function checkNameIsUnique(key: string, name: string)
-	{
-		for(var i=0; i < games[key].players.length; i++)
-		{
-			if(games[key].players[i].name == name)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	function addPlayerConnection(key: string, socket: ws): Player
-	{
-		var player = getPlayer(key, socket)
-
-		if(!player)
-		{
-			player = {
-				socket: socket,
-				hand: [],
-				winnings: [],
-				id: 0,
-				name: ""
-			}
-
-			games[key].players.push(player);
-		}
-
-		return player;
-	}
-
-	function registerPlayerName(key: string, socket: ws, name: string)
-	{
-		var count = 0;
-		var newName = name;
-
-		var player = getPlayer(key,socket)
-
-		if(!player)
-		{
-			player = addPlayerConnection(key, socket);
-		}
-
-		name = name || "Player";
-		while(!checkNameIsUnique(key, newName))
-		{
-			count++;
-			newName = name + count;
-		}
-
-		
-		player.id = Math.floor(Math.random()*10**16)+1;
-
-
-		//if(player.name == "")
-		//	logPlayerJoined();
-
-		player.name = newName;
-
-		socket.send("registered;" + player.id)
-		return;
-	}
-
-	function sendLobbyList(key: string)
-	{
-		var allPlayers = games[key].players.filter(x => x.socket.isAlive)
-			.map(x => x.name).join(",");
-
-
-		for(var player of games[key].players)
-		{
-			player.socket.send("lobbylist;" + player.name + ";" + allPlayers);
-		}
-	}
-
-	function getPlayer(key: string, thissocket: ws, id?: number): Player | undefined
-	{
-		if(!games[key]) return;
-
-		for(var i=0; i < games[key].players.length; i++)
-		{
-			var socket = games[key].players[i].socket;
-
-			if(socket == thissocket || Number(games[key].players[i].id) == id)
-			{
-				if(socket != thissocket)
-					 games[key].players[i].socket = thissocket;
-
-				return games[key].players[i] 
-			}
-		}
-	}
-
-	function getPlayerByName(key: string, name: string)
-	{
-		for(var i=0; i < games[key].players.length; i++)
-		{
-			if(name == games[key].players[i].name)
-			{
-				return games[key].players[i] 
-			}
-		}
-	}
-
-	function getPlayerIndex(key: string, thissocket: ws): number
-	{
-		for(var i=0; i < games[key].players.length; i++)
-		{
-			var socket = games[key].players[i].socket;
-
-			if(socket == thissocket)
-			{
-				return i;
-			}
-		}
-
-		throw new Error("no player index");
-	}
-
-	function toEveryoneElse(key: string, thissocket: ws, message: string)
-	{
-		for(var i=0; i < games[key].players.length; i++)
-		{
-			var socket = games[key].players[i].socket;
-			if(socket != thissocket && socket.isAlive)
-			{
-				socket.send(message);
-			}
-		}
-	}	
-
-	function toEveryone(key: string, message: string)
-	{
-		for(var i=0; i < games[key].players.length; i++)
-		{
-			var socket = games[key].players[i].socket;
-			
-			if(socket.isAlive)
-				socket.send(message);
-		}
-	}	
-
-	function getPlayerModel(key: string, socket: ws)
-	{
-		var model = {} as any;
-
-		model.board = games[key].board;
-		model.cardDecks = games[key].cardDecks;
-
-		model.ponyDiscardPile = games[key].ponyDiscardPile;
-		model.shipDiscardPile = games[key].shipDiscardPile;
-		model.goalDiscardPile = games[key].goalDiscardPile;
-
-		model.currentGoals = games[key].currentGoals;
-
-		model.goalDrawPileLength = games[key].goalDrawPile.length;
-		model.ponyDrawPileLength = games[key].ponyDrawPile.length;
-		model.shipDrawPileLength = games[key].shipDrawPile.length;
-
-		var player = getPlayer(key, socket)!;
-
-		model.hand = player.hand;
-		model.winnings = player.winnings;
-		model.playerName = player.name;
-
-		model.players = getPlayerListForThisPlayer(key, socket)
-
-		let ts = games[key].turnstate;
-		if(ts)
-		{
-			model.turnstate = ts.clientProps();
-		}
-
-		model.keepLobbyOpen = games[key].isLobbyOpen;
-
-		model.startCard = games[key].startCard;
-
-		return model;
-	}
-
-	function getPlayerListForThisPlayer(key: string, socket: ws)
-	{
-		var playerCount = games[key].players.length 
-		var players = [];
-
-		if(playerCount > 1)
-		{
-			var playerIndex = getPlayerIndex(key, socket);
-
-			for(var i=(playerIndex+1) % playerCount; i != playerIndex; i = ((i + 1) % playerCount))
-			{
-				let other = games[key].players[i];
-				
-				if(other.name != "") // Players who are still registering have a name of ""
-				{
-					players.push({
-						name: other.name,
-						disconnected: !other.socket.isAlive,
-						ponies: other.hand.filter(x => isPony(x)).length,
-						ships: other.hand.filter(x => isShip(x)).length,
-						winnings: other.winnings
-					});
-				}
-			}
-		}
-
-		return players;
-	}
-
-	function sendPlayerlistsToEachPlayer(key: string)
-	{
-		for(var player of games[key].players)
-		{
-			if(player.socket.isAlive && player.name != "")
-			{
-				var playerlist = getPlayerListForThisPlayer(key, player.socket);
-				player.socket.send("playerlist;" + JSON.stringify(playerlist))
-			}
-		}
-	}
-
-	function sendHostMessage(key: string, socket:ws, isHost: boolean)
-	{
-		if(!isHost)
-			var payload = "0"
-		else
-			var payload = JSON.stringify({
-				cardDecks: games[key].cardDecks,
-				startCard: games[key].startCard,
-				ruleset: games[key].ruleset,
-				keepLobbyOpen: games[key].keepLobbyOpen
-			})
-
-		socket.send("ishost;" + payload)
-	}
-
-	function sendCurrentState(key: string, socket: ws)
-	{
-		var model = getPlayerModel(key, socket);
-		socket.send("model;" + JSON.stringify(model));
-	}
-
-	function checkIfGoalsWereAchieved(key: string)
-	{
-		var model = games[key];
-
-		if(!model.runGoalLogic)
-			return;
-
-		var sendUpdate = false;
-
-		for(var goalInfo of model.currentGoals)
-		{
-			var achieved = false;
-
-			if(!isBlank(goalInfo.card))
-				achieved = evalGoalCard(goalInfo.card, model)
-
-			if(goalInfo.achieved != achieved)
-			{
-				sendUpdate = true;
-			}
-
-			goalInfo.achieved = achieved;
-		}
-
-		if(sendUpdate)
-		{
-			toEveryone(key, "goalachieved;" + model.currentGoals.map(x => x.achieved ? "1" : "").join(";"));
-		}
-	}
-
-
-	wsServer.openLobby = openLobby;
-	function openLobby(key?: string): string
+	public openLobby(key?: string): string
 	{
 		if(!key)
 		{
@@ -473,874 +128,210 @@ export function tsssfGameServer(): TsssfGameServer
 					key += letters[Math.floor(Math.random() * 26)]
 				}
 			}
-			while(games[key] !== undefined)
+			while(this.games[key] !== undefined)
 		}
 		
-		games[key] = {
-			messageHistory: [],
-			cardDecks: ["Core.*"],
-			startCard: "Core.Start.FanficAuthorTwilight",
-			deathCount: 0,
-			isLobbyOpen: true,
-			isInGame: false,
-			keepLobbyOpen: false,
-			players: []
-		} as unknown as GameModel;
+		this.games[key] = new GameModel();
 
 		return key;
 	}
 
-	function shipString(card1:Card, card2: Card): string
+	/*tsssfServer.handleUpgrade(request, socket, head, (socket: any) => {
+			tsssfServer.emit('connection', socket, request);
+		});
+	*/
+	public handleUpgrade(request: any, socket:any, head:any, fn: any)
 	{
-		if(card1 < card2)
-			return card1 + "/" + card2
+		this.wsServer.handleUpgrade(request, socket, head, fn);
+	}
 
-		return card2 + "/" + card1;
+	public emit(event:any, socket:any, request:any)
+	{
+		this.wsServer.emit(event, socket, request);
 	}
 
 
-
-	function Turnstate(this:Turnstate, model: GameModel, currentPlayerName: string)
-	{	
-		this.currentPlayer = currentPlayerName;
-		this.overrides = {};
-		this.tentativeShips = {};
-		this.playedShips = [];
-		this.playedPonies = [];
-
-
-		this.specialEffects = {
-			shipWithEverypony: new Set()
-		};
-
-		this.updateSpecialEffects = function()
+	public getStats(): {games: number, players: number, startTime?: number}
+	{
+		var stats = {games:0, players:0} as {games: number, players: number, startTime?: number}
+		var startTime;
+		for(var key in this.games)
 		{
-			delete this.specialEffects["larsonEffect"];
-			for(var key in model.board)
+			if(this.games[key].isInGame)
 			{
-				if(model.board[key].card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
+				stats.games++;
+				stats.players += this.games[key].players.filter(x => x.socket.isAlive).length;
+
+				let thisStartTime = this.games[key].startTime; 
+				if(thisStartTime !== undefined)
 				{
-					this.specialEffects["larsonEffect"] = true;
+					startTime = Math.max(thisStartTime, startTime || 0);
 				}
 			}
 		}
 
-		this.updateSpecialEffects();
+		if(startTime)
+			stats.startTime = startTime;
 
-
-		this.playedThisTurn = new Set();
-
-
-		this.brokenShips = [];
-		this.brokenShipsNow = [];
-
-		this.changelingContexts = {};
-
-
-		//getCurrentShipSet is still using the old changelingContexts, clear them first.
-		if(model.turnstate)
-		{
-			model.turnstate.changelingContexts = {};
-			model.turnstate.specialEffects = {
-				shipWithEverypony: new Set()
-			}
-		}
-
-
-		
-		this.shipSet = getCurrentShipSet(model);
-		this.positionMap = getCurrentPositionMap(model);
-		this.swaps = 0;
-		this.swapsNow = 0;
-		
-		this.clientProps = function()
-		{
-			return {
-				playedThisTurn: [...this.playedThisTurn],
-				overrides: this.overrides,
-				currentPlayer: this.currentPlayer
-			}
-		}
-	}
-
-	function isShipClosed(model: GameModel, shipLoc: Location)
-	{
-		return getShippedPonies(model, shipLoc).length == 2;
-	}
-
-
-	function appendChangelingContext(card: Card, model: GameModel)
-	{
-		if(model.turnstate && isChangeling(card))
-		{
-			var changelingContexts = model.turnstate.changelingContexts[card];
-			var currentChangelingContext =  changelingContexts ? Math.max(changelingContexts.list.length - 1, 0) : 0
-			return card + ":" + currentChangelingContext;
-		}
-
-		return card;
-	}
-
-	function getShippedPonies(model: GameModel, shipLoc: Location)
-	{
-		var neighbors = getNeighborKeys(shipLoc);
-
-		var shipClosed = true;
-		var ponies = [];
-		for(var n of neighbors)
-		{
-			if(model.board[n] && !isBlank(model.board[n].card))
-			{
-				var card = model.board[n].card;
-
-				card = appendChangelingContext(card, model);
-
-				ponies.push(card)
-			}
-		}
-
-		return ponies;
-	}
-
-	function startGame(key: string, options: any)
-	{	
-		var model = games[key];
-
-		// remove players which disconnected before the games started
-		for(var i=0; i<model.players.length; i++)
-		{
-			if(model.players[i].name == "" || !model.players[i].socket.isAlive)
-			{
-				model.players.splice(i,1);
-				i--;
-			}
-		}
-
-		if(model.players.length == 0)
-			return false;
-
-
-		model.startTime = new Date().getTime();
-
-		model.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
-
-		model.cardLocations = {};
-		model.board = {
-			"p,0,0":{
-				card: model.startCard
-			}
-		};
-
-		for(var player of model.players)
-		{
-			player.hand = [];
-			player.winnings = [];
-		}
-
-		model.isInGame = true;
-
-		model.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
-
-		model.isLobbyOpen = model.keepLobbyOpen = !!options.keepLobbyOpen;
-
-
-		model.cardLocations[model.startCard] = "p,0,0";
-
-		var decks = ["Core.*"];
-		if(options.cardDecks)
-		{
-			//var allowedDecks = ["PU.*","EC.*"]
-			decks = options.cardDecks; //.filter( x => allowedDecks.indexOf(x) > -1);
-			//decks.push("Core.*");
-		}
-
-		model.cardDecks = decks;
-		
-		model.goalDiscardPile = [];
-		model.ponyDiscardPile = [];
-		model.shipDiscardPile = [];
-
-		model.currentGoals = [
-			{card:"blank:goal", achieved: false},
-			{card:"blank:goal", achieved: false},
-			{card:"blank:goal", achieved: false}
-		];
-
-		// client only props
-		//     hand:
-		//     winnings
-
-		// private props
-		model.goalDrawPile = [];
-		model.ponyDrawPile = [];
-		model.shipDrawPile = [];
-
-
-		logGameHosted();
-
-		for(let i of model.players.filter(x => isRegistered(x)))
-		{
-			logPlayerJoined();
-		}
-
-		for(var cardName in cards)
-		{
-			if(!isCardIncluded(cardName, model))
-				continue;
-
-			if(isGoal(cardName))
-			{
-				model.goalDrawPile.push(cardName);
-				model.cardLocations[key] = "goalDrawPile";
-			}
-			else if(isPony(cardName))
-			{	
-				model.ponyDrawPile.push(cardName);
-				model.cardLocations[key] = "ponyDrawPile";
-			}
-			else if(isShip(cardName))
-			{
-				model.shipDrawPile.push(cardName);
-				model.cardLocations[key] = "shipDrawPile";
-			}
-		}
-
-		
-
-		randomizeOrder(model.players);
-
-		model.ruleset = options.ruleset.substring(0,200);
-
-		if(options.ruleset == "turnsOnly")
-		{
-			// @ts-ignore
-			model.turnstate = new Turnstate(model, model.players[0].name);
-		}
-		else
-		{
-			delete model.turnstate;
-		}
-
-		randomizeOrder(model.goalDrawPile);
-		randomizeOrder(model.ponyDrawPile);
-		randomizeOrder(model.shipDrawPile);
-
-		return key;
-	}
-
-	function isLocOccupied(key:string, loc: Location)
-	{
-		var model = games[key];
-		if(isBoardLoc(loc) || isOffsetLoc(loc))
-		{
-
-			return (model.board[loc] != undefined)
-		}
-		if(isGoalLoc(loc))
-		{
-			var goalNo = Number(loc.split(",")[1]);
-
-			if(model.currentGoals[goalNo] == undefined)
-				return false;
-
-			return model.currentGoals[goalNo].card != "blank:goal"
-		}
-
-		return false;
-	}
-
-	function sendPlayerCounts(key:string, player:Player)
-	{
-		var ponies = player.hand.filter(x => isPony(x)).length;
-		var ships = player.hand.filter(x => isShip(x)).length;
-
-		var args = ["counts", player.name, ponies, ships, ...player.winnings.map(x=>x.card + "," + x.value)]
-		toEveryoneElse(key, player.socket, args.join(";"));
-	}
-
-	function isChangeling(card:Card)
-	{
-		card = card.split(":")[0];
-		return isPony(card) && cards[card] && cards[card].action && cards[card].action.startsWith("Changeling(");
-	}
-
-	function getCurrentShipSet(model: GameModel): Set<string>
-	{
-		var s: Set<string> = new Set();
-		for(var key in model.board)
-		{
-			if (key.startsWith("s"))
-			{
-				var pair = getShippedPonies(model, key);
-
-				if(pair.length == 2)
-				{	
-					s.add(shipString(pair[0], pair[1]));
-				}
-			}
-
-			if(model.turnstate && model.turnstate.specialEffects.shipWithEverypony)
-			{
-				var pony1 = model.board[key].card;
-				for(var pony2 of model.turnstate.specialEffects.shipWithEverypony)
-				{
-					if(pony1 != pony2)
-					{
-						s.add(shipString(appendChangelingContext(pony1, model), appendChangelingContext(pony2, model)));
-					}
-				}
-			}
-		}
-
-		return s;
-	}
-
-	function getCurrentPositionMap(model: GameModel)
-	{
-		var map:{[key:string]: Location} = {};
-
-		for(var loc in model.board)
-		{
-			if (loc.startsWith("p,") && !isBlank(model.board[loc].card))
-			{
-				map[model.board[loc].card] = loc;
-			}
-		}
-
-		return map;
-
-	}
-
-
-	function getBrokenShips(startSet: Set<string>, endSet: Set<string>)
-	{
-		var broken = [];
-
-		for(var ship of startSet)
-		{
-			if(!endSet.has(ship))
-			{
-				broken.push(ship.split("/"));
-			}
-		}
-
-		return broken;
-	}
-
-	function getSwappedCount(startPositions: {[loc: string]: Card}, endPositions: {[loc: string]: Card})
-	{
-		var count = 0;
-		for(var key in startPositions)
-		{
-			if(endPositions[key] && endPositions[key] != startPositions[key])
-			{
-				count++;
-			}
-		}
-
-		return count;
-	}
-
-
-	function changeTurnToNextPlayer(key: string)
-	{
-		let ts = games[key].turnstate
-		if(!ts)
-			return;
-
-		var rotation = games[key].players.filter(x => !x.socket.isDead && x.name != "");
-
-		if(rotation.length == 0)
-			return;
-
-		var k = rotation.map(x=> x.name).indexOf(ts.currentPlayer);
-		k = (k+1)%rotation.length;
-
-		// @ts-ignore
-		games[key].turnstate = new Turnstate(games[key], rotation[k].name)
-		toEveryone(key, "turnstate;" + JSON.stringify(games[key].turnstate!.clientProps()));
-
-		checkIfGoalsWereAchieved(key);
-	}
-
-	function moveCard(message: string, key: string, socket: ws)
-	{
-		var [_,card,startLocation, endLocation, extraArg] = message.split(";");
-		var player = getPlayer(key, socket)!;
-
-		var model = games[key];
-
-		let serverStartLoc = startLocation;
-		if(startLocation == "hand" || startLocation == "winnings")
-			serverStartLoc = "player," + player.name;
-
-
-		// if the player has an incorrect position for a card, move it to where it actually should be.
-		if(model.cardLocations[card] != serverStartLoc || isLocOccupied(key, endLocation))
-		{						
-			var whereTheCardActuallyIs = model.cardLocations[card];
-			if(whereTheCardActuallyIs == "player," + player.name)
-			{
-				if(isGoal(card))
-					whereTheCardActuallyIs = "winnings";
-				else
-					whereTheCardActuallyIs = "hand";
-			}
-
-			console.log("X " + message);
-			console.log("  P: " + player.name);
-
-			console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
-			console.log("  move;" + card + ";limbo;" + whereTheCardActuallyIs);
-			socket.send("move;" + card + ";limbo;" + whereTheCardActuallyIs);
-
-			return;
-		}
-
-		console.log("\u221A " + message);
-		console.log("  P: " + player.name);
-
-
-	
-
-		let serverEndLoc = endLocation;
-		if(serverEndLoc == "hand" || serverEndLoc == "winnings")
-			serverEndLoc = "player," + player.name;
-
-		model.cardLocations[card] = serverEndLoc;
-
-		// remove from old location
-		if(startLocation == "hand")
-		{
-			var i = getPlayer(key, socket)!.hand.indexOf(card);
-
-			getPlayer(key, socket)!.hand.splice(i, 1);
-		}
-
-		if(startLocation == "winnings")
-		{
-			let player = getPlayer(key, socket)!
-			var i = player.winnings.map(x => x.card).indexOf(card);
-			player.winnings.splice(i, 1);
-		}
-
-		if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
-		{
-			if(model.board[startLocation] && model.board[startLocation].card == card)
-				delete model.board[startLocation];
-		}
-
-		if(isDiscardLoc(startLocation))
-		{
-			let model2 = model as any;
-			var [pile,slot] = startLocation.split(",");
-			let i = model2[pile].indexOf(card);
-			model2[pile].splice(i,1);
-
-			if(model2[pile].length)
-			{
-				var topCard = model2[pile][model2[pile].length-1]
-				model.cardLocations[topCard] = pile+",top";
-			}
-		}
-
-		if(isGoalLoc(startLocation))
-		{
-			let [_,iStr] = startLocation.split(",")
-			let i = Number(iStr);
-			if(model.currentGoals[i].card != "blank:goal")
-				model.currentGoals[i].card = "blank:goal";
-			
-		}
-
-		// move to end location
-
-		if(endLocation == "hand")
-		{
-			getPlayer(key, socket)!.hand.push(card)
-		}
-
-		if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
-		{
-			model.board[endLocation] = {card: card};
-
-			if(model.turnstate)
-			{
-				model.turnstate.playedThisTurn.add(card);
-			}
-		}
-
-		if(isGoalLoc(endLocation))
-		{
-			var [_,goalNoStr] = endLocation.split(",")
-			let goalNo = Number(goalNoStr);
-			model.currentGoals[goalNo].card = card;
-			model.cardLocations[card] = "goal," + goalNo;
-		}
-
-		if(endLocation == "winnings")
-		{
-			player.winnings.push({card, value: Number(extraArg) || 0});
-		}
-
-		if(isDiscardLoc(endLocation))
-		{
-			// the only valid placement is on top of the discard pile
-			var [pile,slot] = endLocation.split(",");
-			let model2 = model as any;
-			model2[pile].push(card);
-
-			if(model2[pile].length > 1)
-			{
-				var underCard = model2[pile][model2[pile].length-2];
-				model.cardLocations[underCard] = pile + ",stack";
-			}
-		}
-
-
-		if(isPony(card) 
-			&& (startLocation == "hand" || startLocation == "ponyDiscardPile,top")
-			&& isBoardLoc(endLocation))
-		{
-			if(model.turnstate)
-			{
-
-				var cardName = card;
-
-				if(isChangeling(card))
-				{
-					var changelingContexts = model.turnstate.overrides[card]
-					var currentChangelingContext = changelingContexts ? Math.max(changelingContexts.length - 1, 0) : 0
-					cardName = card + ":" + currentChangelingContext;
-				}
-
-				model.turnstate.playedPonies.push(cardName);
-			}
-		}
-
-
-		if(model.turnstate)
-		{
-			var newSet = getCurrentShipSet(model);
-			var newlyBroken = getBrokenShips(model.turnstate.shipSet, newSet);
-
-			model.turnstate.brokenShipsNow = model.turnstate.brokenShips.concat(newlyBroken);
-
-
-			var curPositionMap = getCurrentPositionMap(model);
-			var newlySwapped = getSwappedCount(model.turnstate.positionMap, curPositionMap)
-
-			model.turnstate.swapsNow = model.turnstate.swaps + newlySwapped;
-
-			// ship slide next to a changeling card rollback
-			if(isBoardLoc(endLocation) && isChangeling(card))
-			{			
-				if(!model.turnstate.changelingContexts[card])
-					model.turnstate.changelingContexts[card] = {list: [], rollback: {}} as ChangelingContextList;
-
-				model.turnstate.changelingContexts[card].rollback = getConnectedPonies(model, endLocation);
-			}
-
-
-			if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
-			{
-				model.turnstate.updateSpecialEffects();
-			}
-
-
-			if(startLocation == "hand" || 
-				startLocation == "shipDiscardPile,top" || startLocation == "ponyDiscardPile,top"
-				|| endLocation == "shipDiscardPile,top" || endLocation == "ponyDiscardPile,top")
-			{
-				// update
-
-				model.turnstate.brokenShips = model.turnstate.brokenShipsNow;
-				model.turnstate.shipSet = newSet;
-				model.turnstate.swaps = model.turnstate.swapsNow;
-				model.turnstate.positionMap = curPositionMap;
-			}
-
-			if(isShip(card)
-				&& (startLocation == "hand" || startLocation == "shipDiscardPile,top")
-				&& isBoardLoc(endLocation))
-			{
-
-				if(isShipClosed(model, endLocation))
-				{
-
-					var shippedPonies = getShippedPonies(model, endLocation);
-
-					model.turnstate.playedShips.push([card, shippedPonies[0], shippedPonies[1]]);
-					delete model.turnstate.tentativeShips[card];
-
-					// add changeling rollback
-
-					/*var noCtxShipped = shippedPonies.map(x => x.split(":")[0]);
-					
-					if(isChangeling(noCtxShipped[0]))
-					{
-						if(!model.turnstate.changelingContexts[noCtxShipped[0]])
-							model.turnstate.changelingContexts[noCtxShipped[0]] = [];
-
-						model.turnstate.changelingContexts[noCtxShipped[0]].rollback = [shippedPonies[1]]
-					}
-
-					if(isChangeling(noCtxShipped[1]))
-					{
-						if(!model.turnstate.changelingContexts[noCtxShipped[1]])
-							model.turnstate.changelingContexts[noCtxShipped[1]] = [];
-
-						model.turnstate.changelingContexts[noCtxShipped[1]].rollback = [shippedPonies[0]];
-					}*/
-				}
-				else
-				{
-					model.turnstate.tentativeShips[card] = true;
-				}
-
-			}
-
-			if(isPony(card) && isBoardLoc(endLocation))
-			{
-
-				for(var tentativeShip in model.turnstate.tentativeShips)
-				{
-					var shipLoc = model.cardLocations[tentativeShip];
-
-					if(!shipLoc || !isBoardLoc(shipLoc))
-					{
-						delete model.turnstate.tentativeShips[tentativeShip];
-						continue;
-					}
-
-					if(isShipClosed(model, shipLoc))
-					{
-						var [a, b, ...nope] =  getShippedPonies(model, shipLoc);
-						model.turnstate.playedShips.push([tentativeShip, a, b]);
-						delete model.turnstate.tentativeShips[tentativeShip];
-					}
-				}
-	
-			}
-		}
-
-
-		// cant move to a goal location yet
-
-		socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
-
-		if(startLocation == "hand" || startLocation == "winnings")
-			startLocation = "player,"+player.name;
-
-		if(endLocation == "hand" || endLocation == "winnings")
-			endLocation = "player,"+player.name;
-
-		toEveryoneElse(key, socket, "move;" + card + ";" + startLocation + ";" + endLocation);
-
-
-		if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
-		{
-			sendPlayerCounts(key, player);
-		}
-
-
-		if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
-		{
-			var [pile,slot] = startLocation.split(",");
-			let model2 = model as any;
-			if(model2[pile].length)
-			{
-				var topCard = model2[pile][model2[pile].length-1]
-				toEveryone(key, "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
-			}
-		}
-
-		
-		checkIfGoalsWereAchieved(key);
-	}
-
-
-	function handleCrash(fun: Function)
-	{
-		return function(...args: any[])
-		{
-			try {
-				fun(...args) 
-			}
-			catch(e)
-			{
-				var now = new Date();
-
-				function pad(n: number)
-				{
-					if(n < 10)
-						return "0" + n
-					else 
-						return "" + n
-				}
-
-				var s = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + (now.getDate()) + " " + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds())
-
-				var data = [];
-
-				data.push(e.toString())
-				data.push(e.stack)
-				data.push("")
-				data.push("GAMES")
-				data.push(util.inspect(games, {depth:Infinity}))
-
-				fs.writeFileSync("CRASH " + s + ".txt", data.join("\n"))
-				throw e
-			}
-		}
+		return stats;
 	}
 
 	//startGame("dev");
 	//games["dev"].allowInGameRegistration = true;
 
-	function onConnection(socket: ws & {isAlive: boolean, isDead:boolean}, request:any, client:any)
+	private onConnection(socket: ws & {isAlive: boolean, isDead:boolean}, request:any, client:any)
 	{
-		socket.isAlive = true;
-		socket.isDead = false;
+		console.log("redirecting to game");
 
-		let key = request.url.substring(2);
-		if(!games[key])
+		let key = request.url.substring(2).toUpperCase();
+
+		if(!this.games[key])
 		{
 			socket.send("closed;");
 			socket.terminate();
 			return;
 		}
 
-		sendLobbyList(key);	
+		this.games[key].onConnection(socket, request, client);
+	}
+	
+}
 
-		function onClose()
+
+export class GameModel 
+{
+	public players: Player[] = [];
+	public startTime?: number = 0;
+	public isInGame = false;
+	public isLobbyOpen = true; 
+	public keepLobbyOpen = false;
+	public deathCount = 0;
+
+	public board: {
+		[key:string]: {card: Card}
+	} = {};
+
+	public cardLocations: {
+		[card:string]: Location
+	} = {};
+
+	public cardDecks: string[] = ["Core.*"];
+
+	public ponyDiscardPile: Card[] = [];
+	public shipDiscardPile: Card[] = [];
+	public goalDiscardPile: Card[] = [];
+
+	public ponyDrawPile: Card[] = [];
+	public shipDrawPile: Card[] = [];
+	public goalDrawPile: Card[] = [];
+
+	public currentGoals: {card: Card, achieved: boolean}[] = [];
+
+	public runGoalLogic = true;
+
+	public startCard: Card = "Core.Start.FanficAuthorTwilight";
+
+	private ruleset: string = "";
+
+	private host?: ws;
+
+	public messageHistory: string[] = [];
+
+	public turnstate?: Turnstate;
+
+	constructor()
+	{
+		
+
+	}
+
+	public onConnection(socket: ws & {isAlive: boolean, isDead:boolean}, request:any, client:any)
+	{
+		socket.isAlive = true;
+		socket.isDead = false;
+		
+		socket.on('message', handleCrash(this.onMessage(this, socket)));
+		socket.on('close', handleCrash(this.onClose));
+
+		console.log("connecting to the game");
+		if(!this.host)
 		{
-			if(!games[key]) return;
-
-			socket.isAlive = false;
-
-			let player = getPlayer(key, socket)
-			let deadName = player ? player.name : "";
-
-			// mark the socket as dead after 15 s. 
-			setTimeout(() => {
-
-				socket.isDead = true;
-				let player = getPlayerByName(key, deadName);
-
-				if(player == undefined || (player && player.socket == socket))
-				{
-					let curPlayerName = games[key] && games[key].turnstate && games[key].turnstate!.currentPlayer;
-
-					if(curPlayerName == deadName)
-					{
-						changeTurnToNextPlayer(key);
-					}
-				}
-
-			}, TEMP_DISCONNECT_TIME); 
-
-			if(games[key].host == socket)
-			{
-				var connectedPlayers = games[key].players.filter(x => x.socket.isAlive);
-
-				if(games[key].isInGame)
-					connectedPlayers = connectedPlayers.filter(x => isRegistered(x))
-
-				if(connectedPlayers.length)
-				{
-					games[key].host = connectedPlayers[0].socket;
-					sendHostMessage(key, games[key].host!, true)
-				}
-				else
-				{
-					delete games[key].host;
-				}
-			}
-
-
-			if(games[key].isLobbyOpen && !games[key].isInGame)
-			{
-				for(var i=0; i < games[key].players.length; i++)
-				{
-					if(socket == games[key].players[i].socket)
-					{
-						games[key].players.splice(i, 1);
-						break;
-					}
-				}
-
-				sendLobbyList(key);
-			}
-
-			if(games[key].isInGame)
-			{
-				sendPlayerlistsToEachPlayer(key);
-			}
+			var players = this.players;
 		}
 
-		socket.on('close', handleCrash(onClose));
+		this.sendLobbyList();		
+	}
 
-		function onMessage(message: string)
+	private onMessage(game: GameModel, socket: ws)
+	{
+		return function(message: string)
 		{
-			var model = games[key];
-			if(!model) // not quite sure how this happens, but this crashed one time.
+			console.log("this is swell");
+
+			if(!game) // not quite sure how this happens, but this crashed one time.
 				return;
 
-			model.messageHistory.push(message);
+			game.messageHistory.push(message);
 
 			if(message.startsWith("handshake;"))
 			{
 				let id = Number(message.split(";")[1]);
 
-				var player = getPlayer(key, socket, id);
+				var player = game.getPlayer(socket, id);
 
 				if(!player)
 				{
-					player = addPlayerConnection(key, socket);
+					player = game.addPlayerConnection(socket);
 				}
 
-				if(isRegistered(player) && model.isInGame)
+				if(game.isRegistered(player) && game.isInGame)
 				{
 					socket.send("handshake;game");
-					sendPlayerlistsToEachPlayer(key);
+					game.sendPlayerlistsToEachPlayer();
 
-					if(model.players.filter(x => !x.socket.isDead).length == 1)
-						changeTurnToNextPlayer(key); // only one alive player. Make sure it's their turn.
-
+					if(game.players.filter(x => !x.socket.isDead).length == 1)
+						game.changeTurnToNextPlayer(); // only one alive player. Make sure it's their turn.
 				}
-				else if(model.isLobbyOpen)
+				else if(game.isLobbyOpen)
 				{
 					socket.send("handshake;lobby");
-					sendLobbyList(key);
+					game.sendLobbyList();
 				}
 				else
 				{
 					socket.send("handshake;closed");
 				}
 
+				if(!game.host)
+				{
+					var players = game.players
+					game.host = players[0].socket;
+					game.sendHostMessage( players[0].socket, true);
+				}
+
 				return;
 			}
 
 
-			if(model.isLobbyOpen)
+			if(game.isLobbyOpen)
 			{
 				if(message.startsWith("ishost;"))
 				{
-					if(!model.host || model.host == socket)
+					/*if(!game.host || game.host == socket)
 					{
-						model.host = socket;
+						game.host = socket;
 						sendHostMessage(key, socket, true)
 					}
 					else
 					{
 						sendHostMessage(key, socket, false)
-					}			
+					}	*/
+					game.sendHostMessage( socket, game.host == socket);		
 				}
 
 				if(message.startsWith("startgame;"))
 				{
-					if(model.host == socket)
+					if(game.host == socket)
 					{
 
 						var options = {
@@ -1354,11 +345,11 @@ export function tsssfGameServer(): TsssfGameServer
 						catch(e){ }
 
 						
-						if(startGame(key, options))
-						{
-							toEveryone(key, "startgame;");
-							sendHostMessage(key, model.host, true)
-						}
+						game.startGame(options);
+					
+						game.toEveryone( "startgame;");
+						game.sendHostMessage( game.host, true)
+				
 
 						return;
 					}		
@@ -1370,59 +361,59 @@ export function tsssfGameServer(): TsssfGameServer
 					var [_,id,name] = message.split(";");
 					name = (name || "").replace(/[^A-Za-z0-9 _]/g,"");
 					
-					registerPlayerName(key, socket, name);
+					game.registerPlayerName(socket, name);
 					
-					if(model.isInGame)
+					if(game.isInGame)
 					{
 						socket.send("startgame;");
 						logPlayerJoined();
-						sendPlayerlistsToEachPlayer(key);
+						game.sendPlayerlistsToEachPlayer();
 					}
 					else
 					{
-						sendLobbyList(key);
+						game.sendLobbyList();
 					}
 				}
 			}
 
-			if(model.isInGame && message.startsWith("startlobby") && socket == model.host)
+			if(game.isInGame && message.startsWith("startlobby") && socket == game.host)
 			{
-				model.isInGame = false;
-				model.isLobbyOpen = true;
-				toEveryone(key, "startlobby;");
-				sendLobbyList(key);
+				game.isInGame = false;
+				game.isLobbyOpen = true;
+				game.toEveryone("startlobby;");
+				game.sendLobbyList();
 
-				for(let player of model.players)
+				for(let player of game.players)
 				{
-					if(isRegistered(player))
+					if(game.isRegistered(player))
 						player.socket.send("registered;" + player.id);
 				}
 			}
 
-			if(model.isInGame && socket == model.host && message.startsWith("keepLobbyOpen;"))
+			if(game.isInGame && socket == game.host && message.startsWith("keepLobbyOpen;"))
 			{
 				var [_, keepLobbyOpenSTR] = message.split(";");
 				let keepLobbyOpen = !!Number(keepLobbyOpenSTR);
-				model.isLobbyOpen = keepLobbyOpen;
-				model.keepLobbyOpen = keepLobbyOpen;
+				game.isLobbyOpen = keepLobbyOpen;
+				game.keepLobbyOpen = keepLobbyOpen;
 
-				toEveryone(key, "keepLobbyOpen;" + (keepLobbyOpen ? 1 : 0));
+				game.toEveryone("keepLobbyOpen;" + (keepLobbyOpen ? 1 : 0));
 			}
 
-			if(!isRegistered(getPlayer(key, socket)))
+			if(!game.isRegistered(game.getPlayer(socket)))
 			{
 				return;
 			}
- 
 
-			if(message.startsWith("kick;") && socket == model.host)
+
+			if(message.startsWith("kick;") && socket == game.host)
 			{
 				var [_, playerName] = message.split(";");
 
 				var playerIndex = -1;
-				for(var i=0; i< model.players.length; i++)
+				for(var i=0; i< game.players.length; i++)
 				{
-					if(model.players[i].name == playerName)
+					if(game.players[i].name == playerName)
 					{
 						playerIndex = i; 
 						break;
@@ -1431,47 +422,47 @@ export function tsssfGameServer(): TsssfGameServer
 
 				if(playerIndex != -1)
 				{
-					var hand = model.players[i].hand;
-					var winnings = model.players[i].winnings;
+					var hand = game.players[i].hand;
+					var winnings = game.players[i].winnings;
 
-					if(model.turnstate && model.turnstate.currentPlayer == playerName)
-						changeTurnToNextPlayer(key);
+					if(game.turnstate && game.turnstate.currentPlayer == playerName)
+						game.changeTurnToNextPlayer();
 
-					model.players[i].socket.send("kick");
-					model.players[i].socket.close()
-					model.players.splice(i,1);
+					game.players[i].socket.send("kick");
+					game.players[i].socket.close()
+					game.players.splice(i,1);
 
 					var ponies = hand.filter(x => isPony(x));
 					var ships = hand.filter(x => isShip(x));
 
-					model.shipDiscardPile = model.shipDiscardPile.concat(ships);
-					model.ponyDiscardPile = model.ponyDiscardPile.concat(ponies);
-					model.goalDiscardPile = model.goalDiscardPile.concat(winnings.map(x => x.card));
+					game.shipDiscardPile = game.shipDiscardPile.concat(ships);
+					game.ponyDiscardPile = game.ponyDiscardPile.concat(ponies);
+					game.goalDiscardPile = game.goalDiscardPile.concat(winnings.map(x => x.card));
 
 					for(var card of ponies)
 					{
-						model.cardLocations[card] = "ponyDiscardPile,stack"
+						game.cardLocations[card] = "ponyDiscardPile,stack"
 					}
 
 					for(var card of ships)
 					{
-						model.cardLocations[card] = "shipDiscardPile,stack"
+						game.cardLocations[card] = "shipDiscardPile,stack"
 					}
 
 					for(let card of winnings)
 					{
-						model.cardLocations[card.card] = "goalDiscardPile,stack"
+						game.cardLocations[card.card] = "goalDiscardPile,stack"
 					}
 
-					model.cardLocations[model.shipDiscardPile[model.shipDiscardPile.length-1]] = "shipDiscardPile,top";
-					model.cardLocations[model.goalDiscardPile[model.goalDiscardPile.length-1]] = "goalDiscardPile,top";
-					model.cardLocations[model.ponyDiscardPile[model.ponyDiscardPile.length-1]] = "ponyDiscardPile,top";
+					game.cardLocations[game.shipDiscardPile[game.shipDiscardPile.length-1]] = "shipDiscardPile,top";
+					game.cardLocations[game.goalDiscardPile[game.goalDiscardPile.length-1]] = "goalDiscardPile,top";
+					game.cardLocations[game.ponyDiscardPile[game.ponyDiscardPile.length-1]] = "ponyDiscardPile,top";
 
-					// request model
+					// request game
 
-					for(let player of model.players)
+					for(let player of game.players)
 					{
-						sendCurrentState(key, player.socket);
+						game.sendCurrentState(player.socket);
 					}
 
 				}
@@ -1480,17 +471,17 @@ export function tsssfGameServer(): TsssfGameServer
 			if(message.startsWith("requestmodel;"))
 			{	
 				// If a new player joins + there's no one else connected (rejoining a dead game), make sure it's their turn.
-				if(model.players.filter(x => x.socket.isAlive).length == 1)
+				if(game.players.filter(x => x.socket.isAlive).length == 1)
 				{
-					model.host = socket;
-					sendHostMessage(key, model.host, true)
+					game.host = socket;
+					game.sendHostMessage(game.host, true)
 				}
 
-				sendCurrentState(key, socket);
+				game.sendCurrentState(socket);
 				return;
 			}
 
-			if(message.startsWith("effects;") && model.turnstate)
+			if(message.startsWith("effects;") && game.turnstate)
 			{	
 				// effects;<card>;prop;value
 
@@ -1534,32 +525,32 @@ export function tsssfGameServer(): TsssfGameServer
 					var obj;
 
 
-					if(!model.turnstate.overrides[card])
-						model.turnstate.overrides[card] = {};
+					if(!game.turnstate.overrides[card])
+						game.turnstate.overrides[card] = {};
 
-					obj = model.turnstate.overrides[card]
-	
+					obj = game.turnstate.overrides[card]
+
 					
 					if(prop == "disguise")
 					{
-						var oldOverride = model.turnstate.overrides[card];
+						var oldOverride = game.turnstate.overrides[card];
 
-						model.turnstate.overrides[card] = {"disguise": value};
+						game.turnstate.overrides[card] = {"disguise": value};
 
 						if(oldOverride.shipWithEverypony)
-							model.turnstate.overrides[card].shipWithEverypony = true;
+							game.turnstate.overrides[card].shipWithEverypony = true;
 
 
-						var cc = model.turnstate.changelingContexts[card] as any;
+						var cc = game.turnstate.changelingContexts[card] as any;
 						if(!cc)
 						{
-							cc = model.turnstate.changelingContexts[card] = [] as any;
-							cc.rollback = [];
+							cc = game.turnstate.changelingContexts[card] = {list: [], rollback:[]};
+							
 						}
 
 						var newEntry = (cc.length > 1) ? cc.length : 1;
 
-						cc[newEntry] = model.turnstate.overrides[card];
+						cc[newEntry] = game.turnstate.overrides[card];
 						var oldEntry = newEntry - 1;
 
 						var oldChangeling = card + ":" + oldEntry;
@@ -1567,19 +558,19 @@ export function tsssfGameServer(): TsssfGameServer
 
 						for(var pony of cc.rollback)
 						{
-							for(var i = 0; i < model.turnstate.playedShips.length; i++)
+							for(var i = 0; i < game.turnstate.playedShips.length; i++)
 							{
-								var [s, p1, p2] = model.turnstate.playedShips[i];
+								var [s, p1, p2] = game.turnstate.playedShips[i];
 
 								if(p1 == pony && p2 == oldChangeling || p2 == pony && p1 == oldChangeling )
 								{
-									model.turnstate.playedShips[i] = [s, pony, newChangeling];
+									game.turnstate.playedShips[i] = [s, pony, newChangeling];
 									break;
 								}
 							}
 
-							model.turnstate.shipSet.delete(shipString(oldChangeling, pony));
-							model.turnstate.shipSet.add(shipString(newChangeling, pony));
+							game.turnstate.shipSet.delete(game.shipString(oldChangeling, pony));
+							game.turnstate.shipSet.add(game.shipString(newChangeling, pony));
 							
 						}
 					}
@@ -1603,25 +594,25 @@ export function tsssfGameServer(): TsssfGameServer
 
 
 
-					toEveryoneElse(key, socket, "effects;" + JSON.stringify(model.turnstate.overrides));
+					game.toEveryoneElse( socket, "effects;" + JSON.stringify(game.turnstate.overrides));
 
 					// a changeling update can create more broken ships
-					if(model.turnstate)
+					if(game.turnstate)
 					{
 						if(prop == "shipWithEverypony")
 						{
-							model.turnstate.specialEffects.shipWithEverypony.add(card);
+							game.turnstate.specialEffects.shipWithEverypony.add(card);
 						}
 
-						var newSet = getCurrentShipSet(model);
-						var newlyBroken = getBrokenShips(model.turnstate.shipSet, newSet);
+						var newSet = game.getCurrentShipSet();
+						var newlyBroken = game.getBrokenShips(game.turnstate.shipSet, newSet);
 
-						model.turnstate.shipSet = newSet;
-						model.turnstate.brokenShipsNow = model.turnstate.brokenShips.concat(newlyBroken);
-						model.turnstate.brokenShips = model.turnstate.brokenShipsNow;
+						game.turnstate.shipSet = newSet;
+						game.turnstate.brokenShipsNow = game.turnstate.brokenShips.concat(newlyBroken);
+						game.turnstate.brokenShips = game.turnstate.brokenShipsNow;
 					}
 
-					checkIfGoalsWereAchieved(key);
+					game.checkIfGoalsWereAchieved();
 				}
 				catch(e)
 				{
@@ -1636,26 +627,26 @@ export function tsssfGameServer(): TsssfGameServer
 				if(typ != "ship" && typ != "pony" && typ != "goal")
 					return;
 
-				let model2 = model as any;
+				let model2 = game as any;
 
 				var len = model2[typ + "DrawPile"].length;
 
 				if(typ == "goal")
 				{
-					var goalNo = model.currentGoals.map(x => x.card).indexOf("blank:goal")
+					var goalNo = game.currentGoals.map(x => x.card).indexOf("blank:goal")
 
 					if(len && goalNo > -1)
 					{
 						let card = model2[typ + "DrawPile"].pop();
-						model.currentGoals[goalNo] = {card, achieved: false};
-						model.cardLocations[card] = "goal," + goalNo;
+						game.currentGoals[goalNo] = {card, achieved: false};
+						game.cardLocations[card] = "goal," + goalNo;
 
 						var msg = "draw;" + typ + ";" + (len - 1);
 
-						toEveryone(key, msg);
-						toEveryone(key, "move;" + card + ";goalDrawPile;goal," + goalNo);
+						game.toEveryone( msg);
+						game.toEveryone( "move;" + card + ";goalDrawPile;goal," + goalNo);
 
-						checkIfGoalsWereAchieved(key);
+						game.checkIfGoalsWereAchieved();
 					}
 					else
 						return ;//sendCurrentState(key, socket);
@@ -1666,16 +657,16 @@ export function tsssfGameServer(): TsssfGameServer
 					{
 						let card = model2[typ + "DrawPile"].pop();
 
-						let player = getPlayer(key, socket)!
+						let player = game.getPlayer(socket)!
 						player.hand.push(card);
-						model.cardLocations[card] = "player," + player.name;
+						game.cardLocations[card] = "player," + player.name;
 
 						var msg = "draw;" + typ + ";" + (len - 1);
-						toEveryone(key, msg);
+						game.toEveryone( msg);
 						socket.send("move;" + card + ";" + typ + "DrawPile;hand");
-						toEveryoneElse(key, socket, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
+						game.toEveryoneElse(socket, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
 					
-						sendPlayerCounts(key, player);
+						game.sendPlayerCounts(player);
 					}
 				}
 			}
@@ -1686,7 +677,7 @@ export function tsssfGameServer(): TsssfGameServer
 
 				if(["pony","goal","ship"].indexOf(typ) > -1)
 				{
-					let model2 = model as any;
+					let model2 = game as any;
 					var swap = model2[typ + "DrawPile"];
 					model2[typ+"DrawPile"] = model2[typ+"DiscardPile"];
 					model2[typ+"DiscardPile"] = swap;
@@ -1713,36 +704,1091 @@ export function tsssfGameServer(): TsssfGameServer
 					}
 					
 
-					toEveryone(key, ["swapshuffle", typ, model2[typ+"DrawPile"].length, ...model2[typ+"DiscardPile"]].join(";"));
+					game.toEveryone(["swapshuffle", typ, model2[typ+"DrawPile"].length, ...model2[typ+"DiscardPile"]].join(";"));
 				}
 			}
 
 			if(message.startsWith("move;"))
 			{
-				moveCard(message, key, socket);
+				game.moveCard(message, socket);
 			}
 
 			if(message == "endturn")
 			{
-				let player = getPlayer(key, socket)!;
+				let player = game.getPlayer(socket)!;
 
-				if(!model.turnstate) return;
+				if(!game.turnstate) return;
 
 
-				if(player.name == model.turnstate.currentPlayer)
+				if(player.name == game.turnstate.currentPlayer)
 				{
 				
-					changeTurnToNextPlayer(key);	
+					game.changeTurnToNextPlayer();	
+				}
+			}
+		}
+	}
+
+	private onClose(game: GameModel, socket: ws & {isAlive: boolean, isDead: boolean})
+	{
+		return function()
+		{
+			socket.isAlive = false;
+
+			let player = game.getPlayer(socket)
+			let deadName = player ? player.name : "";
+
+			// mark the socket as dead after 15 s. 
+			setTimeout(() => {
+
+				socket.isDead = true;
+				let player = game.getPlayerByName(deadName);
+
+				if(player == undefined || (player && player.socket == socket))
+				{
+					let curPlayerName = game.turnstate?.currentPlayer;
+
+					if(curPlayerName == deadName)
+					{
+						game.changeTurnToNextPlayer();
+					}
+				}
+
+			}, TEMP_DISCONNECT_TIME); 
+
+			if(game.host == socket)
+			{
+				console.log("host is disconnecting");
+
+				var connectedPlayers = game.players.filter(x => x.socket.isAlive);
+
+				if(game.isInGame)
+					connectedPlayers = connectedPlayers.filter(x => game.isRegistered(x));
+
+				if(connectedPlayers.length)
+				{
+					game.host = connectedPlayers[0].socket;
+
+					console.log("setting host to " + connectedPlayers[0].name);
+
+					game.sendHostMessage(game.host!, true)
+				}
+				else
+				{
+					delete game.host;
+				}
+			}
+
+
+			if(game.isLobbyOpen && !game.isInGame)
+			{
+				for(var i=0; i < game.players.length; i++)
+				{
+					if(socket == game.players[i].socket)
+					{
+						game.players.splice(i, 1);
+						break;
+					}
+				}
+
+				game.sendLobbyList();
+			}
+
+			if(game.isInGame)
+			{
+				game.sendPlayerlistsToEachPlayer();
+			}
+		}
+	}	
+
+	private isRegistered(player?: Player)
+	{
+		return player != undefined && player.name != "";
+	}
+
+	private checkNameIsUnique(name: string)
+	{
+		for(var i=0; i < this.players.length; i++)
+		{
+			if(this.players[i].name == name)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private addPlayerConnection(socket: ws): Player
+	{
+		var player = this.getPlayer(socket)
+
+		if(!player)
+		{
+			player = {
+				socket: socket,
+				hand: [],
+				winnings: [],
+				id: 0,
+				name: ""
+			}
+
+			this.players.push(player);
+		}
+
+		return player;
+	}
+
+	private registerPlayerName(socket: ws, name: string)
+	{
+		var count = 0;
+		var newName = name;
+
+		var player = this.getPlayer(socket)
+
+		if(!player)
+		{
+			player = this.addPlayerConnection(socket);
+		}
+
+		name = name || "Player";
+		while(!this.checkNameIsUnique(newName))
+		{
+			count++;
+			newName = name + count;
+		}
+
+		
+		player.id = Math.floor(Math.random()*10**16)+1;
+
+
+		//if(player.name == "")
+		//	logPlayerJoined();
+
+		player.name = newName;
+
+		socket.send("registered;" + player.id)
+		return;
+	}
+
+	public sendLobbyList()
+	{
+		var allPlayers = this.players.filter(x => x.socket.isAlive)
+			.map(x => x.name).join(",");
+
+		for(var player of this.players)
+		{
+			player.socket.send("lobbylist;" + player.name + ";" + allPlayers);
+		}
+	}
+
+	public getPlayer(thissocket: ws, id?: number): Player | undefined
+	{
+		for(var i=0; i < this.players.length; i++)
+		{
+			var socket = this.players[i].socket;
+
+			if(socket == thissocket || Number(this.players[i].id) == id)
+			{
+				if(socket != thissocket)
+					 this.players[i].socket = thissocket;
+
+				return this.players[i] 
+			}
+		}
+	}
+
+	public getPlayerByName(name: string)
+	{
+		for(var i=0; i < this.players.length; i++)
+		{
+			if(name == this.players[i].name)
+			{
+				return this.players[i] 
+			}
+		}
+	}
+
+	public getPlayerIndex(thissocket: ws): number
+	{
+		for(var i=0; i < this.players.length; i++)
+		{
+			var socket = this.players[i].socket;
+
+			if(socket == thissocket)
+			{
+				return i;
+			}
+		}
+
+		throw new Error("no player index");
+	}
+
+	public toEveryoneElse(thissocket: ws, message: string)
+	{
+		for(var i=0; i < this.players.length; i++)
+		{
+			var socket = this.players[i].socket;
+			if(socket != thissocket && socket.isAlive)
+			{
+				socket.send(message);
+			}
+		}
+	}	
+
+	public toEveryone( message: string)
+	{
+		for(var i=0; i < this.players.length; i++)
+		{
+			var socket = this.players[i].socket;
+			
+			if(socket.isAlive)
+				socket.send(message);
+		}
+	}	
+
+	public getPlayerModel(socket: ws)
+	{
+		var model = {} as any;
+
+		model.board = this.board;
+		model.cardDecks = this.cardDecks;
+
+		model.ponyDiscardPile = this.ponyDiscardPile;
+		model.shipDiscardPile = this.shipDiscardPile;
+		model.goalDiscardPile = this.goalDiscardPile;
+
+		model.currentGoals = this.currentGoals;
+
+		model.goalDrawPileLength = this.goalDrawPile.length;
+		model.ponyDrawPileLength = this.ponyDrawPile.length;
+		model.shipDrawPileLength = this.shipDrawPile.length;
+
+		var player = this.getPlayer(socket)!;
+
+		model.hand = player.hand;
+		model.winnings = player.winnings;
+		model.playerName = player.name;
+
+		model.players = this.getPlayerListForThisPlayer(socket)
+
+		let ts = this.turnstate;
+		if(ts)
+		{
+			model.turnstate = ts.clientProps();
+		}
+
+		model.keepLobbyOpen = this.isLobbyOpen;
+
+		model.startCard = this.startCard;
+
+		return model;
+	}
+
+	public getPlayerListForThisPlayer(socket: ws)
+	{
+		var playerCount = this.players.length 
+		var players = [];
+
+		if(playerCount > 1)
+		{
+			var playerIndex = this.getPlayerIndex(socket);
+
+			for(var i=(playerIndex+1) % playerCount; i != playerIndex; i = ((i + 1) % playerCount))
+			{
+				let other = this.players[i];
+				
+				if(other.name != "") // Players who are still registering have a name of ""
+				{
+					players.push({
+						name: other.name,
+						disconnected: !other.socket.isAlive,
+						ponies: other.hand.filter(x => isPony(x)).length,
+						ships: other.hand.filter(x => isShip(x)).length,
+						winnings: other.winnings
+					});
 				}
 			}
 		}
 
-		socket.on('message', handleCrash(onMessage))
-			
+		return players;
 	}
 
-	wsServer.on('connection', handleCrash(onConnection));
+	public sendPlayerlistsToEachPlayer()
+	{
+		for(var player of this.players)
+		{
+			if(player.socket.isAlive && player.name != "")
+			{
+				var playerlist = this.getPlayerListForThisPlayer(player.socket);
+				player.socket.send("playerlist;" + JSON.stringify(playerlist))
+			}
+		}
+	}
+
+	private sendHostMessage(socket:ws, isHost: boolean)
+	{
+		if(!isHost)
+			var payload = "0"
+		else
+			var payload = JSON.stringify({
+				cardDecks: this.cardDecks,
+				startCard: this.startCard,
+				ruleset: this.ruleset,
+				keepLobbyOpen: this.keepLobbyOpen
+			})
+
+		socket.send("ishost;" + payload)
+	}
+
+	private sendCurrentState( socket: ws)
+	{
+		var model = this.getPlayerModel(socket);
+		socket.send("model;" + JSON.stringify(model));
+	}
+
+	private checkIfGoalsWereAchieved()
+	{
+
+		if(!this.runGoalLogic)
+			return;
+
+		var sendUpdate = false;
+
+		for(var goalInfo of this.currentGoals)
+		{
+			var achieved = false;
+
+			if(!isBlank(goalInfo.card))
+				achieved = evalGoalCard(goalInfo.card, this)
+
+			if(goalInfo.achieved != achieved)
+			{
+				sendUpdate = true;
+			}
+
+			goalInfo.achieved = achieved;
+		}
+
+		if(sendUpdate)
+		{
+			this.toEveryone("goalachieved;" + this.currentGoals.map(x => x.achieved ? "1" : "").join(";"));
+		}
+	}
+
+
+	
 	
 
-	return wsServer;
+	private shipString(card1:Card, card2: Card): string
+	{
+		if(card1 < card2)
+			return card1 + "/" + card2
+
+		return card2 + "/" + card1;
+	}
+
+	
+
+	private startGame(options: any)
+	{	
+
+		// remove players which disconnected before the games started
+		for(var i=0; i<this.players.length; i++)
+		{
+			if(this.players[i].name == "" || !this.players[i].socket.isAlive)
+			{
+				this.players.splice(i,1);
+				i--;
+			}
+		}
+
+		if(this.players.length == 0)
+			return false;
+
+
+		this.startTime = new Date().getTime();
+
+		this.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
+
+		this.cardLocations = {};
+		this.board = {
+			"p,0,0":{
+				card: this.startCard
+			}
+		};
+
+		for(var player of this.players)
+		{
+			player.hand = [];
+			player.winnings = [];
+		}
+
+		this.isInGame = true;
+
+		this.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
+
+		this.isLobbyOpen = this.keepLobbyOpen = !!options.keepLobbyOpen;
+
+
+		this.cardLocations[this.startCard] = "p,0,0";
+
+		var decks = ["Core.*"];
+		if(options.cardDecks)
+		{
+			//var allowedDecks = ["PU.*","EC.*"]
+			decks = options.cardDecks; //.filter( x => allowedDecks.indexOf(x) > -1);
+			//decks.push("Core.*");
+		}
+
+		this.cardDecks = decks;
+		
+		this.goalDiscardPile = [];
+		this.ponyDiscardPile = [];
+		this.shipDiscardPile = [];
+
+		this.currentGoals = [
+			{card:"blank:goal", achieved: false},
+			{card:"blank:goal", achieved: false},
+			{card:"blank:goal", achieved: false}
+		];
+
+		// client only props
+		//     hand:
+		//     winnings
+
+		// private props
+		this.goalDrawPile = [];
+		this.ponyDrawPile = [];
+		this.shipDrawPile = [];
+
+
+		logGameHosted();
+
+		for(let i of this.players.filter(x => this.isRegistered(x)))
+		{
+			logPlayerJoined();
+		}
+
+		for(var cardName in cards)
+		{
+			if(!isCardIncluded(cardName, this))
+				continue;
+
+			if(isGoal(cardName))
+			{
+				this.goalDrawPile.push(cardName);
+				this.cardLocations[cardName] = "goalDrawPile";
+			}
+			else if(isPony(cardName))
+			{	
+				this.ponyDrawPile.push(cardName);
+				this.cardLocations[cardName] = "ponyDrawPile";
+			}
+			else if(isShip(cardName))
+			{
+				this.shipDrawPile.push(cardName);
+				this.cardLocations[cardName] = "shipDrawPile";
+			}
+		}
+
+		randomizeOrder(this.players);
+
+		this.ruleset = options.ruleset.substring(0,200);
+
+		if(options.ruleset == "turnsOnly")
+		{
+			this.turnstate = new Turnstate(this, this.players[0].name);
+		}
+		else
+		{
+			delete this.turnstate;
+		}
+
+		randomizeOrder(this.goalDrawPile);
+		randomizeOrder(this.ponyDrawPile);
+		randomizeOrder(this.shipDrawPile);
+
+		console.log(this);
+	}
+
+	private isLocOccupied(loc: Location)
+	{
+		if(isBoardLoc(loc) || isOffsetLoc(loc))
+		{
+
+			return (this.board[loc] != undefined)
+		}
+		if(isGoalLoc(loc))
+		{
+			var goalNo = Number(loc.split(",")[1]);
+
+			if(this.currentGoals[goalNo] == undefined)
+				return false;
+
+			return this.currentGoals[goalNo].card != "blank:goal"
+		}
+
+		return false;
+	}
+
+	private sendPlayerCounts(player:Player)
+	{
+		var ponies = player.hand.filter(x => isPony(x)).length;
+		var ships = player.hand.filter(x => isShip(x)).length;
+
+		var args = ["counts", player.name, ponies, ships, ...player.winnings.map(x=>x.card + "," + x.value)]
+		this.toEveryoneElse(player.socket, args.join(";"));
+	}
+
+	private isChangeling(card:Card)
+	{
+		card = card.split(":")[0];
+		return isPony(card) && cards[card] && cards[card].action && cards[card].action.startsWith("Changeling(");
+	}
+
+	public getCurrentShipSet(): Set<string>
+	{
+		var s: Set<string> = new Set();
+		for(var key in this.board)
+		{
+			if (key.startsWith("s"))
+			{
+				var pair = this.getShippedPonies(key);
+
+				if(pair.length == 2)
+				{	
+					s.add(this.shipString(pair[0], pair[1]));
+				}
+			}
+
+			if(this.turnstate && this.turnstate.specialEffects.shipWithEverypony)
+			{
+				var pony1 = this.board[key].card;
+				for(var pony2 of this.turnstate.specialEffects.shipWithEverypony)
+				{
+					if(pony1 != pony2)
+					{
+						s.add(this.shipString(this.appendChangelingContext(pony1, this), this.appendChangelingContext(pony2, this)));
+					}
+				}
+			}
+		}
+
+		return s;
+	}
+
+	public getCurrentPositionMap()
+	{
+		var map:{[key:string]: Location} = {};
+
+		for(var loc in this.board)
+		{
+			if (loc.startsWith("p,") && !isBlank(this.board[loc].card))
+			{
+				map[this.board[loc].card] = loc;
+			}
+		}
+
+		return map;
+
+	}
+
+	private isShipClosed(shipLoc: Location)
+	{
+		return this.getShippedPonies(shipLoc).length == 2;
+	}
+
+
+	private appendChangelingContext(card: Card, model: GameModel)
+	{
+		if(this.turnstate && this.isChangeling(card))
+		{
+			var changelingContexts = this.turnstate.changelingContexts[card];
+			var currentChangelingContext =  changelingContexts ? Math.max(changelingContexts.list.length - 1, 0) : 0
+			return card + ":" + currentChangelingContext;
+		}
+
+		return card;
+	}
+
+	private getShippedPonies(shipLoc: Location)
+	{
+		var neighbors = getNeighborKeys(shipLoc);
+
+		var shipClosed = true;
+		var ponies = [];
+		for(var n of neighbors)
+		{
+			if(this.board[n] && !isBlank(this.board[n].card))
+			{
+				var card = this.board[n].card;
+
+				card = this.appendChangelingContext(card, this);
+
+				ponies.push(card)
+			}
+		}
+
+		return ponies;
+	}
+
+	private getBrokenShips(startSet: Set<string>, endSet: Set<string>)
+	{
+		var broken:[Card,Card][] = [];
+
+		for(var ship of startSet)
+		{
+			if(!endSet.has(ship))
+			{
+				broken.push(ship.split("/") as [Card, Card]);
+			}
+		}
+
+		return broken;
+	}
+
+	private getSwappedCount(startPositions: {[loc: string]: Card}, endPositions: {[loc: string]: Card})
+	{
+		var count = 0;
+		for(var key in startPositions)
+		{
+			if(endPositions[key] && endPositions[key] != startPositions[key])
+			{
+				count++;
+			}
+		}
+
+		return count;
+	}
+
+
+	private changeTurnToNextPlayer()
+	{
+		let ts = this.turnstate;
+		if(!ts)
+			return;
+
+		var rotation = this.players.filter(x => !x.socket.isDead && x.name != "");
+
+		if(rotation.length == 0)
+			return;
+
+		var k = rotation.map(x=> x.name).indexOf(ts.currentPlayer);
+		k = (k+1)%rotation.length;
+
+		this.turnstate = new Turnstate(this, rotation[k].name)
+		this.toEveryone("turnstate;" + JSON.stringify(this.turnstate!.clientProps()));
+
+		this.checkIfGoalsWereAchieved();
+	}
+
+	private moveCard(message: string, socket: ws)
+	{
+		var [_,card,startLocation, endLocation, extraArg] = message.split(";");
+		var player = this.getPlayer(socket)!;
+
+		let serverStartLoc = startLocation;
+		if(startLocation == "hand" || startLocation == "winnings")
+			serverStartLoc = "player," + player.name;
+
+
+		// if the player has an incorrect position for a card, move it to where it actually should be.
+		if(this.cardLocations[card] != serverStartLoc || this.isLocOccupied(endLocation))
+		{						
+			var whereTheCardActuallyIs = this.cardLocations[card];
+			if(whereTheCardActuallyIs == "player," + player.name)
+			{
+				if(isGoal(card))
+					whereTheCardActuallyIs = "winnings";
+				else
+					whereTheCardActuallyIs = "hand";
+			}
+
+			console.log("X " + message);
+			console.log("  P: " + player.name);
+
+			console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
+			console.log("  move;" + card + ";limbo;" + whereTheCardActuallyIs);
+			socket.send("move;" + card + ";limbo;" + whereTheCardActuallyIs);
+
+			return;
+		}
+
+		console.log("\u221A " + message);
+		console.log("  P: " + player.name);
+
+		let serverEndLoc = endLocation;
+		if(serverEndLoc == "hand" || serverEndLoc == "winnings")
+			serverEndLoc = "player," + player.name;
+
+		this.cardLocations[card] = serverEndLoc;
+
+		// remove from old location
+		if(startLocation == "hand")
+		{
+			var i = this.getPlayer(socket)!.hand.indexOf(card);
+
+			this.getPlayer(socket)!.hand.splice(i, 1);
+		}
+
+		if(startLocation == "winnings")
+		{
+			let player = this.getPlayer(socket)!
+			var i = player.winnings.map(x => x.card).indexOf(card);
+			player.winnings.splice(i, 1);
+		}
+
+		if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
+		{
+			if(this.board[startLocation] && this.board[startLocation].card == card)
+				delete this.board[startLocation];
+		}
+
+		if(isDiscardLoc(startLocation))
+		{
+			let model = this as any;
+			var [pile,slot] = startLocation.split(",");
+			let i = model[pile].indexOf(card);
+			model[pile].splice(i,1);
+
+			if(model[pile].length)
+			{
+				var topCard = model[pile][model[pile].length-1]
+				model.cardLocations[topCard] = pile+",top";
+			}
+		}
+
+		if(isGoalLoc(startLocation))
+		{
+			let [_,iStr] = startLocation.split(",")
+			let i = Number(iStr);
+			if(this.currentGoals[i].card != "blank:goal")
+				this.currentGoals[i].card = "blank:goal";
+			
+		}
+
+		// move to end location
+
+		if(endLocation == "hand")
+		{
+			this.getPlayer(socket)!.hand.push(card)
+			this.checkIfGoalsWereAchieved();
+		}
+
+		if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
+		{
+			this.board[endLocation] = {card: card};
+
+			if(this.turnstate)
+			{
+				this.turnstate.playedThisTurn.add(card);
+			}
+		}
+
+		if(isGoalLoc(endLocation))
+		{
+			var [_,goalNoStr] = endLocation.split(",")
+			let goalNo = Number(goalNoStr);
+			this.currentGoals[goalNo].card = card;
+			this.cardLocations[card] = "goal," + goalNo;
+		}
+
+		if(endLocation == "winnings")
+		{
+			player.winnings.push({card, value: Number(extraArg) || 0});
+		}
+
+		if(isDiscardLoc(endLocation))
+		{
+			// the only valid placement is on top of the discard pile
+			var [pile,slot] = endLocation.split(",");
+			let model = this as any;
+			model[pile].push(card);
+
+			if(model[pile].length > 1)
+			{
+				var underCard = model[pile][model[pile].length-2];
+				model.cardLocations[underCard] = pile + ",stack";
+			}
+		}
+
+
+		if(isPony(card) 
+			&& (startLocation == "hand" || startLocation == "ponyDiscardPile,top")
+			&& isBoardLoc(endLocation))
+		{
+			if(this.turnstate)
+			{
+
+				var cardName = card;
+
+				if(this.isChangeling(card))
+				{
+					var changelingContexts = this.turnstate.overrides[card];
+					//model.turnstate.[]
+					var currentChangelingContext = changelingContexts ? Math.max(changelingContexts.length - 1, 0) : 0
+					cardName = card + ":" + currentChangelingContext;
+
+				}
+
+				this.turnstate.playedPonies.push(cardName);
+			}
+		}
+
+
+		if(this.turnstate)
+		{
+			var newSet = this.getCurrentShipSet();
+			var newlyBroken = this.getBrokenShips(this.turnstate.shipSet, newSet);
+
+			this.turnstate.brokenShipsNow = this.turnstate.brokenShips.concat(newlyBroken);
+
+
+			var curPositionMap = this.getCurrentPositionMap();
+			var newlySwapped = this.getSwappedCount(this.turnstate.positionMap, curPositionMap)
+
+			this.turnstate.swapsNow = this.turnstate.swaps + newlySwapped;
+
+			// ship slide next to a changeling card rollback
+			if(isBoardLoc(endLocation) && this.isChangeling(card))
+			{			
+				if(!this.turnstate.changelingContexts[card])
+					this.turnstate.changelingContexts[card] = {list: [], rollback: {}};
+
+				this.turnstate.changelingContexts[card].rollback = getConnectedPonies(this, endLocation);
+			}
+
+
+			if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
+			{
+				this.turnstate.updateSpecialEffects(this.board);
+			}
+
+
+			if(startLocation == "hand" || 
+				startLocation == "shipDiscardPile,top" || startLocation == "ponyDiscardPile,top"
+				|| endLocation == "shipDiscardPile,top" || endLocation == "ponyDiscardPile,top")
+			{
+				// update
+
+				this.turnstate.brokenShips = this.turnstate.brokenShipsNow;
+				this.turnstate.shipSet = newSet;
+				this.turnstate.swaps = this.turnstate.swapsNow;
+				this.turnstate.positionMap = curPositionMap;
+			}
+
+			if(isShip(card)
+				&& (startLocation == "hand" || startLocation == "shipDiscardPile,top")
+				&& isBoardLoc(endLocation))
+			{
+
+				if(this.isShipClosed(endLocation))
+				{
+
+					var shippedPonies = this.getShippedPonies(endLocation);
+
+					this.turnstate.playedShips.push([card, shippedPonies[0], shippedPonies[1]]);
+					delete this.turnstate.tentativeShips[card];
+
+					// add changeling rollback
+
+					/*var noCtxShipped = shippedPonies.map(x => x.split(":")[0]);
+					
+					if(isChangeling(noCtxShipped[0]))
+					{
+						if(!model.turnstate.changelingContexts[noCtxShipped[0]])
+							model.turnstate.changelingContexts[noCtxShipped[0]] = [];
+
+						model.turnstate.changelingContexts[noCtxShipped[0]].rollback = [shippedPonies[1]]
+					}
+
+					if(isChangeling(noCtxShipped[1]))
+					{
+						if(!model.turnstate.changelingContexts[noCtxShipped[1]])
+							model.turnstate.changelingContexts[noCtxShipped[1]] = [];
+
+						model.turnstate.changelingContexts[noCtxShipped[1]].rollback = [shippedPonies[0]];
+					}*/
+				}
+				else
+				{
+					this.turnstate.tentativeShips[card] = true;
+				}
+
+			}
+
+			if(isPony(card) && isBoardLoc(endLocation))
+			{
+
+				for(var tentativeShip in this.turnstate.tentativeShips)
+				{
+					var shipLoc = this.cardLocations[tentativeShip];
+
+					if(!shipLoc || !isBoardLoc(shipLoc))
+					{
+						delete this.turnstate.tentativeShips[tentativeShip];
+						continue;
+					}
+
+					if(this.isShipClosed(shipLoc))
+					{
+						var [a, b, ...nope] = this.getShippedPonies(shipLoc);
+						this.turnstate.playedShips.push([tentativeShip, a, b]);
+						delete this.turnstate.tentativeShips[tentativeShip];
+					}
+				}
+	
+			}
+		}
+
+
+		// cant move to a goal location yet
+
+		socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
+
+		if(startLocation == "hand" || startLocation == "winnings")
+			startLocation = "player,"+player.name;
+
+		if(endLocation == "hand" || endLocation == "winnings")
+			endLocation = "player,"+player.name;
+
+		this.toEveryoneElse(socket, "move;" + card + ";" + startLocation + ";" + endLocation);
+
+
+		if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
+		{
+			this.sendPlayerCounts(player);
+		}
+
+
+		if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
+		{
+			var [pile,slot] = startLocation.split(",");
+			let model2 = this as any;
+			if(model2[pile].length)
+			{
+				var topCard = model2[pile][model2[pile].length-1]
+				this.toEveryone( "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
+			}
+		}
+
+		
+		this.checkIfGoalsWereAchieved();
+	}
+
+
+	
+}
+
+
+export class Turnstate
+{	
+	public currentPlayer = "";
+	public overrides: {[key:string]: any} = {};
+	public tentativeShips: {[key: string]: any} = {};
+	public playedShips: [Card, Card, Card][] = [];
+	public playedPonies: Card[] = [];
+
+
+	public specialEffects: {
+		shipWithEverypony: Set<string>,
+		larsonEffect?: boolean
+	} = {
+		shipWithEverypony: new Set()
+	};
+
+	public updateSpecialEffects(board: {[key: string]: {card: Card}})
+	{
+		delete this.specialEffects["larsonEffect"];
+		for(var key in board)
+		{
+			if(board[key].card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
+			{
+				this.specialEffects["larsonEffect"] = true;
+			}
+		}
+	}
+
+	//this.updateSpecialEffects();
+
+
+	public playedThisTurn = new Set();
+
+
+	public brokenShips: [Card,Card][] = [];
+	public brokenShipsNow: [Card,Card][] = [];
+
+	public changelingContexts: {[key:string] : ChangelingContextList} = {};
+
+
+	//getCurrentShipSet is still using the old changelingContexts, clear them first.
+	
+
+	public swaps = 0;
+	public swapsNow = 0;
+
+	public shipSet: Set<string>;
+	public positionMap: {[key: string]: string};	
+	
+	
+	public clientProps()
+	{
+		return {
+			playedThisTurn: [...this.playedThisTurn],
+			overrides: this.overrides,
+			currentPlayer: this.currentPlayer
+		}
+	}
+
+	public constructor(model: GameModel, currentPlayerName: string)
+	{
+		this.currentPlayer = currentPlayerName;
+
+		if(model.turnstate)
+		{
+			model.turnstate.changelingContexts = {};
+			model.turnstate.specialEffects = {
+				shipWithEverypony: new Set()
+			}
+		}
+
+		this.shipSet = model.getCurrentShipSet();
+		this.positionMap = model.getCurrentPositionMap();	
+	}
+}
+
+function handleCrash(this: any, fun: Function)
+{
+	return function(this: any, ...args: any[])
+	{
+		try {
+			fun(...args) 
+		}
+		catch(e)
+		{
+			var now = new Date();
+
+			function pad(n: number)
+			{
+				if(n < 10)
+					return "0" + n
+				else 
+					return "" + n
+			}
+
+			var s = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + (now.getDate()) + " " + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds())
+
+			var data = [];
+
+			data.push(e.toString())
+			data.push(e.stack)
+			data.push("")
+			data.push("GAMES")
+			data.push(util.inspect(this, {depth:Infinity}))
+
+			fs.writeFileSync("CRASH " + s + ".txt", data.join("\n"))
+			throw e
+		}
+	}
 }

@@ -130,6 +130,10 @@ h2
 .host .registered .startButtonArea {display: block;}
 .host .registered .mobileOnly.startButtonArea {display: none;}
 
+.waitingOnHost { display: none; }
+.registered .waitingOnHost {display: block; }
+.host .registered .waitingOnHost {display: none; }
+
 .startButtonArea {
 	margin: 10px 0px;
 }
@@ -337,6 +341,7 @@ h2
 	.host #joinGameInfo {display: block;}
 	.host #gameOptionsInfo {display: block;}
 	.host #chooseCardsInfo {display: block;}
+	.host #startCardInfo {display: block;}
 
 	#chooseName {display: block;}
 	.registered #chooseName {display: none;}
@@ -346,6 +351,7 @@ h2
 	.pageClosed #joinGameInfo {display: none;}
 	.pageClosed #gameOptionsInfo {display: none;}
 	.pageClosed #chooseCardsInfo {display: none;}
+	.pageClosed #startCardInfo {display: none;}
 
 
 	#rightSide

@@ -1125,6 +1125,8 @@ function changelingAction(type: string)
 						currentDeck[x].race == "alicorn" 
 						&& (currentDeck[x].gender == "female" || currentDeck[x].gender=="malefemale"))
 					);
+
+					console.log(disguises);
 					break;
 				case "replace":
 					

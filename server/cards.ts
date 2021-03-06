@@ -2898,6 +2898,7 @@ var cards: {[card:string]: any} = {
 			},
 			"HorriblePeople.WeeabooParadaisu.Ship.BeautifulHenshin": {
 				name: "Beautiful Henshin",
+				action: "makePrincess",
 				url: "Ship_Beautiful Henshin.png",
 			},
 	

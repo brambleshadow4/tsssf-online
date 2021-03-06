@@ -40,7 +40,7 @@ export interface GameModel
 
 export interface ChangelingContextList
 {
-	list: any[],
+	list: {[prop: string]: any},
 	rollback: {}
 }
 
