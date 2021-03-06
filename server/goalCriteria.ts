@@ -696,6 +696,9 @@ function ShippedWithOppositeGenderedSelf(model: GameModel, card1: Card, card2: C
 		var gender1 = getCardProp(model, card1, "gender");
 		var gender2 = getCardProp(model, card2, "gender");
 
+		//console.log(gender1)+ " "  + console.log(gender2);
+		//console.log(model);
+
 		return ((gender1 == "male" && gender2 == "female") || (gender1 == "female" && gender2 == "male"))
 	}
 

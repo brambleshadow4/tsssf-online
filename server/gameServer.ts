@@ -56,15 +56,13 @@ var PROP_VALUES = {
 }*/
 
 
-interface Player 
+export interface Player 
 {
 	socket: any,
 	name: string,
 	hand: string[],
 	winnings: {card: Card, value: number}[],
 	id: number,
-
-
 }
 
 
@@ -181,8 +179,6 @@ export class TsssfGameServer
 
 	private onConnection(socket: ws & {isAlive: boolean, isDead:boolean}, request:any, client:any)
 	{
-		console.log("redirecting to game");
-
 		let key = request.url.substring(2).toUpperCase();
 
 		if(!this.games[key])
@@ -239,6 +235,8 @@ export class GameModel
 
 	public turnstate?: Turnstate;
 
+	public debug = false;
+
 	constructor()
 	{
 		
@@ -253,7 +251,6 @@ export class GameModel
 		socket.on('message', handleCrash(this.onMessage(this, socket)));
 		socket.on('close', handleCrash(this.onClose));
 
-		console.log("connecting to the game");
 		if(!this.host)
 		{
 			var players = this.players;
@@ -262,12 +259,10 @@ export class GameModel
 		this.sendLobbyList();		
 	}
 
-	private onMessage(game: GameModel, socket: ws)
+	public onMessage(game: GameModel, socket: ws)
 	{
 		return function(message: string)
 		{
-			console.log("this is swell");
-
 			if(!game) // not quite sure how this happens, but this crashed one time.
 				return;
 
@@ -486,7 +481,6 @@ export class GameModel
 				// effects;<card>;prop;value
 
 				try{
-
 					let card, no, prop, value, arg;
 					var stuff = message.split(";");
 
@@ -541,16 +535,16 @@ export class GameModel
 							game.turnstate.overrides[card].shipWithEverypony = true;
 
 
-						var cc = game.turnstate.changelingContexts[card] as any;
+						var cc = game.turnstate.changelingContexts[card];
+
 						if(!cc)
 						{
 							cc = game.turnstate.changelingContexts[card] = {list: [], rollback:[]};
-							
 						}
 
-						var newEntry = (cc.length > 1) ? cc.length : 1;
+						var newEntry = (cc.list.length > 1) ? cc.list.length : 1;
 
-						cc[newEntry] = game.turnstate.overrides[card];
+						cc.list[newEntry] = game.turnstate.overrides[card];
 						var oldEntry = newEntry - 1;
 
 						var oldChangeling = card + ":" + oldEntry;
@@ -606,6 +600,9 @@ export class GameModel
 
 						var newSet = game.getCurrentShipSet();
 						var newlyBroken = game.getBrokenShips(game.turnstate.shipSet, newSet);
+
+						console.log(game.turnstate.shipSet);
+						console.log(newSet);
 
 						game.turnstate.shipSet = newSet;
 						game.turnstate.brokenShipsNow = game.turnstate.brokenShips.concat(newlyBroken);
@@ -758,8 +755,6 @@ export class GameModel
 
 			if(game.host == socket)
 			{
-				console.log("host is disconnecting");
-
 				var connectedPlayers = game.players.filter(x => x.socket.isAlive);
 
 				if(game.isInGame)
@@ -768,8 +763,6 @@ export class GameModel
 				if(connectedPlayers.length)
 				{
 					game.host = connectedPlayers[0].socket;
-
-					console.log("setting host to " + connectedPlayers[0].name);
 
 					game.sendHostMessage(game.host!, true)
 				}
@@ -1090,7 +1083,7 @@ export class GameModel
 
 	
 
-	private startGame(options: any)
+	public startGame(options: any)
 	{	
 
 		// remove players which disconnected before the games started
@@ -1208,8 +1201,6 @@ export class GameModel
 		randomizeOrder(this.goalDrawPile);
 		randomizeOrder(this.ponyDrawPile);
 		randomizeOrder(this.shipDrawPile);
-
-		console.log(this);
 	}
 
 	private isLocOccupied(loc: Location)
@@ -1385,7 +1376,7 @@ export class GameModel
 
 	private moveCard(message: string, socket: ws)
 	{
-		var [_,card,startLocation, endLocation, extraArg] = message.split(";");
+		var [_,card, startLocation, endLocation, extraArg] = message.split(";");
 		var player = this.getPlayer(socket)!;
 
 		let serverStartLoc = startLocation;
@@ -1405,18 +1396,26 @@ export class GameModel
 					whereTheCardActuallyIs = "hand";
 			}
 
-			console.log("X " + message);
-			console.log("  P: " + player.name);
+			if(this.debug)
+			{
+				console.log("X " + message);
+				console.log("  P: " + player.name);
 
-			console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
-			console.log("  move;" + card + ";limbo;" + whereTheCardActuallyIs);
+				console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
+				console.log("  move;" + card + ";limbo;" + whereTheCardActuallyIs);
+			}
+			
 			socket.send("move;" + card + ";limbo;" + whereTheCardActuallyIs);
 
 			return;
 		}
 
-		console.log("\u221A " + message);
-		console.log("  P: " + player.name);
+		if(this.debug)
+		{
+			console.log("\u221A " + message);
+			console.log("  P: " + player.name);
+		}
+		
 
 		let serverEndLoc = endLocation;
 		if(serverEndLoc == "hand" || serverEndLoc == "winnings")
@@ -1554,7 +1553,7 @@ export class GameModel
 			if(isBoardLoc(endLocation) && this.isChangeling(card))
 			{			
 				if(!this.turnstate.changelingContexts[card])
-					this.turnstate.changelingContexts[card] = {list: [], rollback: {}};
+					this.turnstate.changelingContexts[card] = {list: [], rollback: []};
 
 				this.turnstate.changelingContexts[card].rollback = getConnectedPonies(this, endLocation);
 			}
@@ -1585,31 +1584,32 @@ export class GameModel
 
 				if(this.isShipClosed(endLocation))
 				{
+					//i.e. played a ship card between two ponies
 
 					var shippedPonies = this.getShippedPonies(endLocation);
 
 					this.turnstate.playedShips.push([card, shippedPonies[0], shippedPonies[1]]);
 					delete this.turnstate.tentativeShips[card];
 
-					// add changeling rollback
+					// remove changeling rollback
 
-					/*var noCtxShipped = shippedPonies.map(x => x.split(":")[0]);
+					var noCtxShipped = shippedPonies.map(x => x.split(":")[0]);
 					
-					if(isChangeling(noCtxShipped[0]))
+					if(this.isChangeling(noCtxShipped[0]))
 					{
-						if(!model.turnstate.changelingContexts[noCtxShipped[0]])
-							model.turnstate.changelingContexts[noCtxShipped[0]] = [];
+						if(!this.turnstate.changelingContexts[noCtxShipped[0]])
+							this.turnstate.changelingContexts[noCtxShipped[0]] = {list:[], rollback: []};
 
-						model.turnstate.changelingContexts[noCtxShipped[0]].rollback = [shippedPonies[1]]
+						this.turnstate.changelingContexts[noCtxShipped[0]].rollback = []
 					}
 
-					if(isChangeling(noCtxShipped[1]))
+					if(this.isChangeling(noCtxShipped[1]))
 					{
-						if(!model.turnstate.changelingContexts[noCtxShipped[1]])
-							model.turnstate.changelingContexts[noCtxShipped[1]] = [];
+						if(!this.turnstate.changelingContexts[noCtxShipped[1]])
+							this.turnstate.changelingContexts[noCtxShipped[1]] = {list:[], rollback: []};;
 
-						model.turnstate.changelingContexts[noCtxShipped[1]].rollback = [shippedPonies[0]];
-					}*/
+						this.turnstate.changelingContexts[noCtxShipped[1]].rollback = [];
+					}
 				}
 				else
 				{
@@ -1672,13 +1672,9 @@ export class GameModel
 				this.toEveryone( "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
 			}
 		}
-
-		
+	
 		this.checkIfGoalsWereAchieved();
 	}
-
-
-	
 }
 
 

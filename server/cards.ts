@@ -1,5 +1,3 @@
-import {} from "./lib.js";
-
 var cards: {[card:string]: any} = {
 
 	// CORE DECK
@@ -701,7 +699,7 @@ var cards: {[card:string]: any} = {
 				url:"Ship_Do You Think Love Can BloomEven on a Battlefield.png",
 				action: "timelineChange"
 			},
-			"Core.Ship.DudeLooksLikeaLady": {
+			"Core.Ship.DudeLooksLikeALady": {
 				url:"Ship_Dude Looks Like a Lady.png",
 				action: "genderChange"
 			},

@@ -5,12 +5,14 @@
 	"main": "server/server.js",
 	"type": "module",
 	"scripts": {
-		"tsc": "tsc"
+		"tsc": "tsc",
+		"test": "node ./server/testFramework.js"
 	},
 	"author": "brambleshadow4",
 	"license": "",
 	"dependencies": {
 		"@types/express": "^4.17.11",
+		"@types/jest": "^26.0.20",
 		"@types/node": "^14.14.31",
 		"@types/sqlite3": "^3.1.7",
 		"@types/ws": "^7.4.0",
