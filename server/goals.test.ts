@@ -215,4 +215,43 @@ export default function(){
 		expect(hasShipPair(game.turnstate!.brokenShipsNow, p2, changeling + ":1")).toBe(true);
 
 	});
+
+	test("It's not evil changeling", () =>{
+
+		let [game, player] = setupGame();
+		let goal = "Core.Goal.ItsNotEvil";
+
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon"
+		let lovePoison = "Core.Ship.LovePoisonIsNoJoke";
+
+		let pony = "Core.Pony.DramaticallyWoundedRarity";
+		let changeling = "Core.Pony.UnicornChangeling";
+		
+
+		player.drawGoal(goal);
+		[ship1, ship2, lovePoison, pony, changeling].forEach(x => player.grab(x));
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(pony, "hand", "p,1,0");
+
+		player.move(ship2, "hand", "sr,1,0");
+		player.move(changeling, "hand", "p,2,0");
+		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
+
+		player.move(lovePoison, "hand", "sd,1,0");
+		player.move(changeling, "p,2,0", "p,1,1");
+		player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
+
+		
+		expectGoalAchieved(game, goal);
+
+		//console.log(game);
+
+		console.log(game.turnstate!.brokenShipsNow)
+		//expect(game.turnstate!.brokenShipsNow.length).toBe(2);
+		//expect(hasShipPair(game.turnstate!.brokenShipsNow, "Core.Start.FanficAuthorTwilight", changeling + ":1")).toBe(true);
+		//expect(hasShipPair(game.turnstate!.brokenShipsNow, p2, changeling + ":1")).toBe(true);
+
+	});
 };

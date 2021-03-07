@@ -929,7 +929,5 @@ function goalLogicParser(text: string, stack: string[]): any
 			}		
 	}
 }
-
-
 	
 export default evalGoalCard;

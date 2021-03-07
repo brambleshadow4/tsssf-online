@@ -550,6 +550,10 @@ export class GameModel
 						var oldChangeling = card + ":" + oldEntry;
 						var newChangeling = card + ":" + newEntry;
 
+
+						console.log("prerollback");
+						console.log(game.turnstate.shipSet);
+
 						for(var pony of cc.rollback)
 						{
 							for(var i = 0; i < game.turnstate.playedShips.length; i++)
@@ -567,6 +571,9 @@ export class GameModel
 							game.turnstate.shipSet.add(game.shipString(newChangeling, pony));
 							
 						}
+
+						console.log("postRollback");
+						console.log(game.turnstate.shipSet);
 					}
 					else if(prop == "keywords")
 					{
@@ -598,11 +605,14 @@ export class GameModel
 							game.turnstate.specialEffects.shipWithEverypony.add(card);
 						}
 
-						var newSet = game.getCurrentShipSet();
-						var newlyBroken = game.getBrokenShips(game.turnstate.shipSet, newSet);
 
+
+						var newSet = game.getCurrentShipSet();
+
+						console.log(newSet)
 						console.log(game.turnstate.shipSet);
-						console.log(newSet);
+
+						var newlyBroken = game.getBrokenShips(game.turnstate.shipSet, newSet);
 
 						game.turnstate.shipSet = newSet;
 						game.turnstate.brokenShipsNow = game.turnstate.brokenShips.concat(newlyBroken);
