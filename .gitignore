@@ -8,3 +8,6 @@ server/server.crt
 server/server.csr
 server/server.key
 server/settings.txt
+server/**.js
+views/*/*.js
+views/*.js

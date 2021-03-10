@@ -1,4 +1,4 @@
-var cards = {
+var cards: {[card:string]: any} = {
 
 	// CORE DECK
 		"Core.Start.FanficAuthorTwilight":{
@@ -699,7 +699,7 @@ var cards = {
 				url:"Ship_Do You Think Love Can BloomEven on a Battlefield.png",
 				action: "timelineChange"
 			},
-			"Core.Ship.DudeLooksLikeaLady": {
+			"Core.Ship.DudeLooksLikeALady": {
 				url:"Ship_Dude Looks Like a Lady.png",
 				action: "genderChange"
 			},
@@ -934,7 +934,7 @@ var cards = {
 			},
 			"Core.Goal.ItsMagicalHornsAreTouching":{
 				url:"Goal_It's MagicalHorns Are Touching.png",
-				goalLogic: "ExistsShip(race=unicorn || race=alicorn,race=unicorn || race=alicorn,3)",
+				goalLogic: "ExistsShip(race=unicorn || race=alicorn, race=unicorn || race=alicorn, 3)",
 				points:"1"
 			},
 			"Core.Goal.ItsNotCreepy":{
@@ -2896,6 +2896,7 @@ var cards = {
 			},
 			"HorriblePeople.WeeabooParadaisu.Ship.BeautifulHenshin": {
 				name: "Beautiful Henshin",
+				action: "makePrincess",
 				url: "Ship_Beautiful Henshin.png",
 			},
 	

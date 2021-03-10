@@ -56,7 +56,7 @@ export function logPlayerJoined()
 	db.close();
 }
 
-function timeQuery(db, table, start, end)
+function timeQuery(db: sqlite3.Database, table: string, start:number, end:number): Promise<number>
 {
 	return new Promise(function(resolve, reject)
 	{
@@ -66,11 +66,14 @@ function timeQuery(db, table, start, end)
 			function(err, rows){
 
 				if(err)
+				{
 					reject(err)
+					return;
+				}
 
 				if(rows == undefined)
 				{
-					resolve("0?");
+					reject("rows is undefined")
 					return;
 				}
 
@@ -81,19 +84,35 @@ function timeQuery(db, table, start, end)
 	});
 }
 
-function startOfTodayUTC(dte)
+function startOfTodayUTC(dte: Date)
 {
 	var d = new Date(dte.getTime() + dte.getTimezoneOffset()*60*1000 + 2000);
 	d = new Date(d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()))
 	return d;
 }
 
-function utcDay(dte)
+function utcDay(dte: Date)
 {
 	return new Date(dte.getTime() + dte.getTimezoneOffset()*60*1000);
 }
 
-export async function getStats()
+export type GameStats = {
+	"$3": number,
+	"$4": number,
+	"$5": number,
+	"$6": number,
+	"$7": number,
+	"$8": number,
+	"$9": number,
+	"$A": number,
+	"$B": number,
+	"$C": number,
+	"gamesHostedThisWeek": number[],
+	"playersJoinedThisWeek": number[]
+}
+
+
+export async function getStats(): Promise<GameStats>
 {
 
 	var dte = new Date();
@@ -109,12 +128,13 @@ export async function getStats()
 	var utc = utcDay(dte);
 
 	var today = startOfTodayUTC(dte);
+	var todayNum = today.getTime();
 	var week =  today.getTime() - 24*60*60*1000*utc.getDay()
 	
 	var dayLen = 24*60*60*1000;
 
-	var month = new Date(utc.getFullYear() + "-" + pad(utc.getMonth()+1) + "-01");
-	month = month.getTime();
+	month = new Date(utc.getFullYear() + "-" + pad(utc.getMonth()+1) + "-01");
+	var monthNum = month.getTime();
 
 	var db = new sqlite3.Database('./server/stats.db');
 
@@ -125,26 +145,26 @@ export async function getStats()
 		timeQuery(db, "GamesHosted", hr24, now),
 		timeQuery(db, "PlayersJoined", week, now),
 		timeQuery(db, "GamesHosted", week, now),
-		timeQuery(db, "PlayersJoined", month, now),
-		timeQuery(db, "GamesHosted", month, now),
+		timeQuery(db, "PlayersJoined", monthNum, now),
+		timeQuery(db, "GamesHosted", monthNum, now),
 		timeQuery(db, "PlayersJoined", 0, now),
 		timeQuery(db, "GamesHosted", 0, now),
 		//
-		timeQuery(db, "GamesHosted", today, now),
-		timeQuery(db, "GamesHosted", today-dayLen, today),
-		timeQuery(db, "GamesHosted", today-dayLen*2, today-dayLen),
-		timeQuery(db, "GamesHosted", today-dayLen*3, today-dayLen*2),
-		timeQuery(db, "GamesHosted", today-dayLen*4, today-dayLen*3),
-		timeQuery(db, "GamesHosted", today-dayLen*5, today-dayLen*4),
-		timeQuery(db, "GamesHosted", today-dayLen*6, today-dayLen*5),
+		timeQuery(db, "GamesHosted", todayNum, now),
+		timeQuery(db, "GamesHosted", todayNum-dayLen, todayNum),
+		timeQuery(db, "GamesHosted", todayNum-dayLen*2, todayNum-dayLen),
+		timeQuery(db, "GamesHosted", todayNum-dayLen*3, todayNum-dayLen*2),
+		timeQuery(db, "GamesHosted", todayNum-dayLen*4, todayNum-dayLen*3),
+		timeQuery(db, "GamesHosted", todayNum-dayLen*5, todayNum-dayLen*4),
+		timeQuery(db, "GamesHosted", todayNum-dayLen*6, todayNum-dayLen*5),
 
-		timeQuery(db, "PlayersJoined", today, now),
-		timeQuery(db, "PlayersJoined", today-dayLen, today),
-		timeQuery(db, "PlayersJoined", today-dayLen*2, today-dayLen),
-		timeQuery(db, "PlayersJoined", today-dayLen*3, today-dayLen*2),
-		timeQuery(db, "PlayersJoined", today-dayLen*4, today-dayLen*3),
-		timeQuery(db, "PlayersJoined", today-dayLen*5, today-dayLen*4),
-		timeQuery(db, "PlayersJoined", today-dayLen*6, today-dayLen*5),
+		timeQuery(db, "PlayersJoined", todayNum, now),
+		timeQuery(db, "PlayersJoined", todayNum-dayLen, todayNum),
+		timeQuery(db, "PlayersJoined", todayNum-dayLen*2, todayNum-dayLen),
+		timeQuery(db, "PlayersJoined", todayNum-dayLen*3, todayNum-dayLen*2),
+		timeQuery(db, "PlayersJoined", todayNum-dayLen*4, todayNum-dayLen*3),
+		timeQuery(db, "PlayersJoined", todayNum-dayLen*5, todayNum-dayLen*4),
+		timeQuery(db, "PlayersJoined", todayNum-dayLen*6, todayNum-dayLen*5),
 
 
 
@@ -169,7 +189,7 @@ export async function getStats()
 
 }
 
-function pad(num)
+function pad(num: number)
 {
 	if (num < 10)
 		return "0" + num;

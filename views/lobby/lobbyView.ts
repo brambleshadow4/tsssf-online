@@ -94,6 +94,10 @@ var HTML = `
 				<button onclick="startGame();">Start Game</button>
 			</div>
 
+			<div class='waitingOnHost'>
+				<p>Waiting for the host to start the game.</p>
+			</div>
+
 			<div id='closedLobby'>
 				<p>Game in session. The lobby for this game is closed</p>
 				<!--<p>If this is a mistake, reach out to the game's host. They can choose to allow new players to join mid game.</p>-->

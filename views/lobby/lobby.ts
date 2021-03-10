@@ -1,29 +1,42 @@
-import * as LobbyView from "/lobby/lobbyView.js";
+import * as LobbyView from "./lobbyView.js";
 
-import {cardSelectComponent} from "/lobby/cardSelectComponent.js";
-import {makeCardElement} from "/game/cardComponent.js";
-import {isStart} from "/lib.js";
-import cards from "/game/cards.js";
+import {cardSelectComponent} from "./cardSelectComponent.js";
+import {makeCardElement} from "../game/cardComponent.js";
+import {isStart, Card} from "../../server/lib.js";
+import cards from "../../server/cards.js";
 
-var gameOptionsDiv 
-var chooseCardsDiv 
-var joinGameDiv 
+import {WebSocketPlus} from "../viewSelector.js";
+
+var gameOptionsDiv: HTMLElement;
+var chooseCardsDiv: HTMLElement;
+var joinGameDiv: HTMLElement;
 var ishost = false;
 var sentName = false;
-var cardBoxElements = {};
 
-var decks = {
+var cardBoxElements: {[key: string]: Element} = {};
+var deckElements: {[key: string]: Element} = {}
+
+
+var globals = window as unknown as {
+
+	decks: {
+		[key: string]: Set<string>
+	},
+
+	socket: WebSocketPlus,
+	register: Function,
+	startGame: Function,
+	changePage: Function,
+};
+
+globals.decks =  {
 	"Core.*": new Set(),
 	"PU.*": new Set(),
 	"EC.*": new Set(),
 }
 
-var deckElements = {}
 
-window.decks = decks;
-
-
-export function loadView(isOpen)
+export function loadView(isOpen: boolean)
 {
 	if(window.location.pathname != "/lobby")
 	{
@@ -35,22 +48,19 @@ export function loadView(isOpen)
 
 	if(isOpen)
 	{
-		document.getElementById('inviteURL').value = window.location.href;
-		socket = window.socket;
+		(document.getElementById('inviteURL') as HTMLInputElement).value = window.location.href;
+		let socket = globals.socket;
 
 		socket.send("ishost;");
 
 		socket.onMessageHandler = onMessage;
 
-		window.joinGameTab = joinGameTab;
-		window.gameOptionsTab = gameOptionsTab;
-		window.chooseCardsTab = chooseCardsTab;
-		window.register = register;
-		window.startGame = startGame;
+		globals.register = register;
+		globals.startGame = startGame;
 
 		var cardBoxes = document.getElementsByClassName('cardbox')
 
-		var deckInfo = [
+		var deckInfo: ([string] | [string, string]| [string, string, Element])[] = [
 			["Core", "Core.*", cardBoxes[0]],
 			["Extra Credit", "EC.*", cardBoxes[1]],
 			["Ponyville University","PU.*", cardBoxes[2]],
@@ -71,20 +81,23 @@ export function loadView(isOpen)
 			["NewNewCore / Misc", "HorriblePeople.Misc.*"]
 		];
 
-		var cardSelectors = document.getElementById('cardSelectors');
+		var cardSelectors = document.getElementById('cardSelectors')!;
 
-		var deckElementList = [];
+		var deckElementList: HTMLElement[] = [];
 		for(var info of deckInfo)
 		{
+
 			if(info.length == 1)
 			{
-				var el = document.createElement('div');
-				el.innerHTML = info[0];
+				let el = document.createElement('div');
+				el.innerHTML = info[0] as string;
 				cardSelectors.appendChild(el);
 				continue;
 			}
 
-			var el = cardSelectComponent(decks, ...info)
+			info = info as [string, string, Element];
+
+			let el = cardSelectComponent(globals.decks, ...info )
 			deckElementList.push(el)
 			deckElements[info[1]] = el;
 			cardSelectors.appendChild(el);
@@ -94,31 +107,31 @@ export function loadView(isOpen)
 
 		for(let i=0; i < cardBoxes.length; i++)
 		{
-			let box = cardBoxes[i];
-			cardBoxElements[box.getAttribute('value')] = box;
+			let box = cardBoxes[i] as HTMLElement;
+			cardBoxElements[box.getAttribute('value') as string] = box;
 
 			box.onclick = function()
 			{
 
-				if(this.classList.contains('selected'))
+				if(box.classList.contains('selected'))
 				{
-					this.classList.remove("selected");
+					box.classList.remove("selected");
 					deckElementList[i].getElementsByTagName('button')[0].click();
 				}
 				else
 				{
-					this.classList.add('selected');
+					box.classList.add('selected');
 					deckElementList[i].getElementsByTagName('button')[2].click();
 					//console.log(deckElements[i].getElementsByTagName('button')[2]);
 				}
 			}
 		}
 
-		var startCards = document.getElementById('startCards');
+		var startCards = document.getElementById('startCards')!;
 
 		for(var card of Object.keys(cards).filter(x => isStart(x)))
 		{
-			var cardEl = makeCardElement(card);
+			let cardEl = makeCardElement(card);
 			var shield = document.createElement('div');
 
 
@@ -130,32 +143,30 @@ export function loadView(isOpen)
 			shield.className ='shield';
 			cardEl.appendChild(shield);
 
-			cardEl.onclick = function(e)
+			cardEl.onclick = function(e: Event)
 			{
-				var cards = this.parentNode.getElementsByClassName('card');
+				var cards = (cardEl.parentNode as HTMLElement).getElementsByClassName('card');
 
-				for(el of cards)
+				for(let el of cards)
 				{
 					el.classList.remove('selected');
 				}
 
-				this.classList.add('selected');
+				cardEl.classList.add('selected');
 
 				var infoText = "";
-				switch(this.getAttribute('card'))
+				switch(cardEl.getAttribute('card'))
 				{	
 					case "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord":
 						infoText = "Goals will not automatically turn green if you use this start card";
 						break;
 				}
 
-				document.getElementById('startCardDetails').innerHTML = infoText;
+				document.getElementById('startCardDetails')!.innerHTML = infoText;
 			}
 
 			startCards.appendChild(cardEl);
 		}
-
-
 	}
 	else
 	{
@@ -163,27 +174,22 @@ export function loadView(isOpen)
 	}
 }
 
-function addStartCardSelectors()
-{
-
-}
-
-function getPackString(card)
+function getPackString(card: Card)
 {
 	var dotPos = card.substring(0, card.lastIndexOf(".")).lastIndexOf(".")
 	return card.substring(0, dotPos+1) + "*";
 }
 
 
-function onMessage()
+function onMessage(event: MessageEvent)
 {
 	if(event.data.startsWith("registered;"))
 	{
 		var [_,id] = event.data.split(";")
 		localStorage["playerID"] = id;
 
-		document.getElementById('main').classList.add('registered');
-		document.getElementById('main').classList.remove('unregistered');
+		document.getElementById('main')!.classList.add('registered');
+		document.getElementById('main')!.classList.remove('unregistered');
 	}
 
 	if(event.data.startsWith("ishost;"))
@@ -197,7 +203,7 @@ function onMessage()
 
 
 			ishost = true;
-			document.getElementById('rightSide').classList.add('host')
+			document.getElementById('rightSide')!.classList.add('host')
 
 			for(var key in cardBoxElements)
 			{
@@ -208,7 +214,7 @@ function onMessage()
 			{
 				var s = new Set(options.cardDecks);
 
-				var boxes = document.getElementsByClassName('cardbox');
+				var boxes = document.getElementsByClassName('cardbox') as HTMLCollectionOf<HTMLElement>;
 				for(var el of boxes)
 				{
 					if(s.has(el.getAttribute('deck')))
@@ -217,10 +223,10 @@ function onMessage()
 					}
 				}
 
-				var cardDivs = document.getElementsByClassName('card');
+				var cardDivs = document.getElementsByClassName('card') as HTMLCollectionOf<HTMLElement>;
 				for(var el of cardDivs)
 				{
-					var card = el.getAttribute('card')
+					var card = el.getAttribute('card') as string;
 					if(s.has(card))
 					{
 						el.classList.add('selected');
@@ -231,7 +237,7 @@ function onMessage()
 					}
 				}
 
-				var allButtons = document.getElementsByClassName('allButton');
+				var allButtons = document.getElementsByClassName('allButton') as HTMLCollectionOf<HTMLElement>;
 				for(var el of allButtons)
 				{
 					if(s.has(el.getAttribute('deck')))
@@ -240,7 +246,7 @@ function onMessage()
 					}
 				}
 
-				cardDivs = document.getElementById('startCards').getElementsByClassName('card')
+				cardDivs = document.getElementById('startCards')!.getElementsByClassName('card') as HTMLCollectionOf<HTMLElement>;
 
 				for(var el of cardDivs)
 				{
@@ -253,12 +259,12 @@ function onMessage()
 				
 
 			if(options.ruleset == "turnsOnly")
-				document.getElementById("turnsOnly").checked = true;
+				input("turnsOnly").checked = true;
 			else if (options.ruleset == "sandbox")
-				document.getElementById("sandbox").checked = true;
+				input("sandbox").checked = true;
 
 			if(options.keepLobbyOpen)
-				document.getElementById("keepLobbyOpen").checked = true;
+				input("keepLobbyOpen").checked = true;
 		}
 	}
 
@@ -268,7 +274,7 @@ function onMessage()
 		var [_, myName, names] = event.data.split(";");
 
 		var names = names.split(",");
-		var list = document.getElementById('playerList');
+		var list = document.getElementById('playerList')!;
 		
 
 		list.innerHTML = "";
@@ -282,7 +288,7 @@ function onMessage()
 			list.innerHTML += "<div>" + name + "</div>"
 		}
 
-		document.getElementById('playerList2').innerHTML = list.innerHTML
+		document.getElementById('playerList2')!.innerHTML = list.innerHTML
 
 		
 		if(myName != "")
@@ -297,37 +303,42 @@ function onMessage()
 }
 
 
+function input(id: string): HTMLInputElement
+{
+	return document.getElementById(id) as HTMLInputElement;
+}
+
 function register()
 {
-	var name = document.getElementById("playerName").value;
-	socket.send("register;" + (localStorage["playerID"] || 0) + ";" + name);
+	var name = input("playerName").value;
+	globals.socket.send("register;" + (localStorage["playerID"] || 0) + ";" + name);
 }
 
 function startGame()
 {
 	var cardDecks = document.getElementsByClassName('cardbox');
-	var options = {cardDecks:[]};
+	var options: any = {cardDecks:[]};
 
 
 	// skip 0 because it's core
 
-	options.cardDecks = Object.keys(decks).map(x => [...decks[x]]).reduce((a,b) => a.concat(b), []);
+	options.cardDecks = Object.keys(globals.decks).map(x => [...globals.decks[x]]).reduce((a,b) => a.concat(b), []);
 
-	var startCard = document.getElementById('startCards').getElementsByClassName('selected')[0];
+	var startCard = document.getElementById('startCards')!.getElementsByClassName('selected')[0];
 	options.startCard = startCard ? startCard.getAttribute('card') : "Core.Start.FanficAuthorTwilight";
 
-	if(document.getElementById('sandbox').checked)
+	if(input('sandbox').checked)
 		options.ruleset = "sandbox";
-	if(document.getElementById('turnsOnly').checked)
+	if(input('turnsOnly').checked)
 		options.ruleset = "turnsOnly";
 
-	options.keepLobbyOpen = !!document.getElementById('keepLobbyOpen').checked;
+	options.keepLobbyOpen = !!input('keepLobbyOpen').checked;
 
-	socket.send("startgame;" + JSON.stringify(options));
+	globals.socket.send("startgame;" + JSON.stringify(options));
 }
 
 
-function changePage(el, pageCssClass)
+function changePage(el: HTMLElement | undefined, pageCssClass: string)
 {
 	var main = document.getElementsByClassName('main')[0];
 
@@ -346,39 +357,7 @@ function changePage(el, pageCssClass)
 		el.classList.add('selected');
 }
 
-window.changePage = changePage
-
-
-function joinGameTab()
-{
-	gameOptionsDiv.classList.add('off');
-	chooseCardsDiv.classList.add('off');
-	joinGameDiv.classList.remove("off");
-
-	
-}
-
-function gameOptionsTab()
-{
-	gameOptionsDiv.classList.remove('off');
-	chooseCardsDiv.classList.add('off');
-	joinGameDiv.classList.add("off");
-
-	document.getElementsByClassName('selected')[0].classList.remove('selected');
-	document.getElementById('gameOptionsTab').classList.add('selected')
-}
-
-
-function chooseCardsTab()
-{
-	gameOptionsDiv.classList.add('off');
-	chooseCardsDiv.classList.remove('off');
-	joinGameDiv.classList.add("off");
-
-	document.getElementsByClassName('selected')[0].classList.remove('selected');
-	document.getElementById('chooseCardsTab').classList.add('selected')
-}
-
+globals.changePage = changePage
 
 var animCounter = 0;
 function loadingPlayerAnimation()

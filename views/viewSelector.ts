@@ -1,3 +1,9 @@
+
+export type WebSocketPlus = WebSocket & {
+	onMessageHandler: Function,
+	onCloseHandler: Function
+}
+
 var host = window.location.hostname;
 var protocol;
 
@@ -10,12 +16,12 @@ switch(window.location.protocol)
 }
 
 var host = window.location.host.replace(/:.*/,"");
-var socket = new WebSocket(protocol + "//" + host + ":" + port + "/" + window.location.search);
-window.socket = socket;
+var socket = new WebSocket(protocol + "//" + host + ":" + port + "/" + window.location.search) as WebSocketPlus;
+(window as any).socket = socket;
 
 
-import * as Game from "/game/game.js"
-import * as Lobby from "/lobby.js"
+import * as Game from "./game/game.js"
+import * as Lobby from "./lobby/lobby.js"
 
 
 

@@ -10,29 +10,41 @@ import {
 	isBlank,
 	isAnon,
 	isPonyOrStart,
-	getNeighborKeys
-} from "/lib.js";
+	getNeighborKeys,
+	GameModel,
+	Location,
+	Card,
+	CardElement
+} from "../../server/lib.js";
 
 import
 {
 	makeCardElement,
 	endMoveShared
-} from "/game/cardComponent.js";
+} from "./cardComponent.js";
 
 
 var draggingBoard = false;
 
 
-var x;
-var y;
-var dist;
+var x: number;
+var y: number;
+var dist: number;
+var refPoint: HTMLElement;
 
 const gridWidth = 22;
+
+let win = window as unknown as {
+	moveToStartCard: Function,
+	model: GameModel
+	cardLocations: {[key: string]: Location}
+}
 
 
 export async function initBoard()
 {
-	var playingArea = document.getElementById('playingArea');
+	var playingArea = document.getElementById('playingArea')!;
+	refPoint =  document.getElementById('refPoint')!;
 
 	playingArea.ontouchstart = function(e)
 	{
@@ -55,16 +67,6 @@ export async function initBoard()
 			x = (e.touches[0].clientX + e.touches[1].clientX)/2
 			y = (e.touches[0].clientY + e.touches[1].clientY)/2
 		}
-	}
-
-	window.ontouchmove = function(e)
-	{
-		//e.preventDefault();
-	}
-
-	document.body.ontouchmove = function(e)
-	{
-		//e.preventDefault();
 	}
 
 	playingArea.ontouchend = function(e)
@@ -111,14 +113,13 @@ export async function initBoard()
 		draggingBoard = false;
 	}
 
-	function updateBoardPos(newX, newY)
+	function updateBoardPos(newX: number, newY: number)
 	{
 		var difX = x - newX;
 		var difY = y - newY;
 		x = newX
 		y = newY
 
-		var refPoint = document.getElementById('refPoint');
 		if(!refPoint)
 			return;
 
@@ -139,22 +140,22 @@ export async function initBoard()
 
 	var zoomScale = 1;
 
-	window.moveToStartCard = function()
+	win.moveToStartCard = function()
 	{
-		var refPoint = document.getElementById('refPoint')
+		let refPoint = document.getElementById('refPoint');
 		if(!refPoint)
 			return;
-
+		
 		refPoint.style.transform = "scale(1,1)";
 		zoomScale = 1;
 
-		var loc = cardLocations[model.startCard];
+		var loc = win.cardLocations[win.model.startCard];
 
-		var [_, x, y] = loc.split(",");
+		var [_, xs, ys] = loc.split(",");
 
 		
-		x = Number(x);
-		y = Number(y);
+		let x = Number(xs);
+		let y = Number(ys);
 
 		const vh = window.innerHeight/100;
 
@@ -164,7 +165,7 @@ export async function initBoard()
 		x *= -1;
 		y *= -1;
 
-		var playingArea = document.getElementById('playingArea');
+		var playingArea = document.getElementById('playingArea')!;
 
 
 		console.log(playingArea.clientWidth + "," + playingArea.clientHeight);
@@ -184,7 +185,7 @@ export async function initBoard()
 
 		if(newDims != lastDims)
 		{
-			moveToStartCard();
+			win.moveToStartCard();
 			instances = 60;
 			lastDims = newDims
 		}
@@ -202,8 +203,7 @@ export async function initBoard()
 	{
 		e.preventDefault();
 
-		var refPoint = document.getElementById('refPoint');
-		var playingArea = document.getElementById('playingArea');
+		var playingArea = document.getElementById('playingArea')!;
 
 		var curX = Number(refPoint.style.left.substring(0, refPoint.style.left.length-2));
 		var curY = Number(refPoint.style.top.substring(0, refPoint.style.top.length-2));
@@ -239,7 +239,7 @@ export async function initBoard()
 	};
 }
 
-function addCardToBoard(key, card)
+function addCardToBoard(key: Location, card: Card)
 {
 	var pieces = key.split(",");
 	var x = Number(pieces[1]);
@@ -247,13 +247,11 @@ function addCardToBoard(key, card)
 
 	var imgElement = makeCardElement(card, key, !isBlank(card), true);
 
-	if( model.turnstate && model.turnstate.playedThisTurn.has(card))
+	if(win.model.turnstate && win.model.turnstate.playedThisTurn.has(card))
 		imgElement.classList.add('justPlayed');
 
 	//if(isPony(card) || isShip(card))
 	//	addTrashHandlers(card, imgElement, key);
-
-	var refPoint = document.getElementById('refPoint');
 
 	switch(pieces[0])
 	{
@@ -275,25 +273,26 @@ function addCardToBoard(key, card)
 		case "offset":
 			imgElement.style.top = y * gridWidth + 2 + "vh";
 			imgElement.style.left = x * gridWidth + 2 + "vh";
-			imgElement.style.zIndex = 3;
+			imgElement.style.zIndex = "3";
 	}
 	
 	refPoint.appendChild(imgElement);
 
-	if(!model.board[key])
+	if(!win.model.board[key])
 	{
-		model.board[key] = {card: card};
+		win.model.board[key] = {card: card};
 	}
-	model.board[key].element = imgElement;
+	win.model.board[key].element = imgElement;
 }
 
 
 
-export function removeCardFromBoard(key)
+export function removeCardFromBoard(key: Location)
 {
-	if(model.board[key])
+	let model = win.model;
+	if(win.model.board[key])
 	{
-		var el = model.board[key].element;
+		var el = win.model.board[key].element;
 
 		if(el && !el.parentNode)
 		{
@@ -301,14 +300,15 @@ export function removeCardFromBoard(key)
 			throw Error("something really weird happened")
 		}
 
-		if(el) // how tf does el not have a parent node???
+		if(el && el.parentNode)
 			el.parentNode.removeChild(el);
 		delete model.board[key];
 	}
 }
 
-export function removeCardElementFromBoard(key)
+export function removeCardElementFromBoard(key: Location)
 {
+	let model = win.model;
 	if(model.board[key])
 	{
 		var el = model.board[key].element;
@@ -327,7 +327,7 @@ export function removeCardElementFromBoard(key)
 
 export function clearBoard()
 {
-	for(var key in model.board)
+	for(var key in win.model.board)
 	{
 		removeCardElementFromBoard(key);
 	}
@@ -335,8 +335,6 @@ export function clearBoard()
 
 export function updateBoard()
 {
-	var refPoint = document.getElementById('refPoint');
-
 	var baseDist = window.innerHeight/100;
 
 	var cardLong = 18*baseDist;
@@ -344,7 +342,7 @@ export function updateBoard()
 
 	if(!refPoint)
 	{
-		var parent = document.getElementById('playingArea')
+		var parent = document.getElementById('playingArea')!;
 		refPoint = document.createElement('div');
 		refPoint.id = "refPoint";
 		refPoint.style.position = 'absolute';
@@ -356,7 +354,7 @@ export function updateBoard()
 
 
 	var gridDist = 30*baseDist;
-
+	let model = win.model;
 	for(var key in model.board)
 	{
 		var type, x,y;
@@ -365,7 +363,7 @@ export function updateBoard()
 		y = Number(y);
 
 		var card = model.board[key].card;
-		cardLocations[card] = key;
+		win.cardLocations[card] = key;
 
 
 		if(isOffsetLoc(key))

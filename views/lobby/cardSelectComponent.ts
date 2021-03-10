@@ -1,8 +1,8 @@
-import cards from "/game/cards.js";
-import {isStart} from "/lib.js" 
-import {makeCardElement} from "/game/cardComponent.js";
+import cards from "../../server/cards.js";
+import {isStart} from "../../server/lib.js" 
+import {makeCardElement} from "../game/cardComponent.js";
 
-export function cardSelectComponent(decks, name, deckPrefix, cardBox)
+export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: string, deckPrefix: string, cardBox?: Element)
 {
 	var div = document.createElement('div');
 	div.className = 'close';
@@ -34,9 +34,9 @@ export function cardSelectComponent(decks, name, deckPrefix, cardBox)
 	allButton.setAttribute('deck', deckPrefix);
 	allButton.onclick = buttonToggle("All");
 
-	function buttonToggle(button)
+	function buttonToggle(button: "None" | "Some" | "All")
 	{
-		return function(e)
+		return function(e: Event)
 		{
 			noneButton.classList.remove('selected');
 			someButton.classList.remove('selected');
@@ -97,23 +97,23 @@ export function cardSelectComponent(decks, name, deckPrefix, cardBox)
 		}
 	}
 
-	function getSelection()
+	function getSelection(): Set<string>
 	{
-		var newSet = new Set();
+		var newSet: Set<string> = new Set();
 		for(var el of body.children)
 		{
 			if(el.classList.contains('selected'))
 			{
-				newSet.add(el.getAttribute('card'));
+				newSet.add(el.getAttribute('card')!);
 			}	
 		}
-		//console.log(newSet);
+
 		return newSet;
 	}
 
 	var isShiftDown = false;
 
-	function shiftDown(e)
+	function shiftDown(e: KeyboardEvent)
 	{
 		if(e.key == "Shift")
 		{
@@ -121,7 +121,7 @@ export function cardSelectComponent(decks, name, deckPrefix, cardBox)
 		}
 	}
 
-	function shiftUp(e)
+	function shiftUp(e: KeyboardEvent)
 	{
 		if(e.key == "Shift")
 		{
@@ -153,49 +153,48 @@ export function cardSelectComponent(decks, name, deckPrefix, cardBox)
 
 	for (var card in cards)
 	{
-		
 		if(card.startsWith(match) && !isStart(card))
 		{
-			var cardEl = makeCardElement(card);
+			let cardEl = makeCardElement(card);
 			var shield = document.createElement('div');
 
 			cardEl.setAttribute('card', card);
-			cardEl.setAttribute('no', no++);
+			cardEl.setAttribute('no', "" + (no++));
 			shield.className ='shield';
 			cardEl.appendChild(shield);
 
-			cardEl.onclick = function(e)
+			cardEl.onclick = function(e: MouseEvent)
 			{
 				if(isShiftDown && shiftSelect > -1)
 				{
-					var hasSelected = this.parentNode.children[shiftSelect].classList.contains('selected');
+					var hasSelected = cardEl.parentNode!.children[shiftSelect].classList.contains('selected');
 
-					var thisNo = Number(this.getAttribute("no"));
+					var thisNo = Number(cardEl.getAttribute("no"));
 					var start = Math.min(shiftSelect, thisNo);
 					var end = Math.max(shiftSelect, thisNo);
 
 					for(var i=start; i <= end; i++)
 					{
 						if(hasSelected)
-							this.parentNode.children[i].classList.add('selected')
+							cardEl.parentNode!.children[i].classList.add('selected')
 						else
-							this.parentNode.children[i].classList.remove('selected');
+							cardEl.parentNode!.children[i].classList.remove('selected');
 					}
 					someButton.click();
 					return;
 				}
 				else
 				{
-					shiftSelect = Number(this.getAttribute("no"));
+					shiftSelect = Number(cardEl.getAttribute("no"));
 				}
 
-				if(this.classList.contains('selected'))
+				if(cardEl.classList.contains('selected'))
 				{
-					this.classList.remove('selected');
+					cardEl.classList.remove('selected');
 				}
 				else
 				{
-					this.classList.add('selected')
+					cardEl.classList.add('selected')
 				}
 				someButton.click();
 			}

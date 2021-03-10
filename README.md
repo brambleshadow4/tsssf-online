@@ -24,6 +24,7 @@ Prerequisites: Familiarity with node/npm.
 	git clone <link-to-repo>
 	cd <repo-folder>
 	npm install 
+	npm run tsc
 	cd ./img
 	py generateThumbnails.py
 
@@ -38,3 +39,19 @@ If instead you'd like to run the severver on port 8000, use
 
 	node server/server.js dev
 
+
+### Adding HTTPS ###
+
+To run the web server over SSL, create a settings.txt file in the server
+directory with the following items set:
+
+	CERT=path/to/server.crt
+	KEY=path/to/private.key
+	PASSPHRASE=password
+
+### Unit Tests ###
+
+The unit tests can all at the same time, or individually by specifying the number
+
+	npm run test
+	npm run test 10

@@ -1,10 +1,11 @@
 import express from "express";
 import fs from 'fs';
 import ws from 'ws';
+import https from "https";
 import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js"
-import https from "https";
+
 
 const app = express()
 let PORT = 80;
@@ -14,7 +15,7 @@ var argSet = new Set(process.argv);
 if(argSet.has("dev"))
 	PORT = 8000;
 
-var settings = {}
+var settings: {[key:string]: string } = {}
 
 try
 {
@@ -28,11 +29,6 @@ try
 		{	
 			var key = line.substring(0,eq);
 			settings[key] = line.substring(eq+1);
-
-			if(settings[key] === "true")
-				settings[key] = true;
-			if(settings[key] === "false")
-				settings[key] = false;
 		}
 	}
 }
@@ -58,10 +54,12 @@ app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent
 
 
 app.get("/viewSelector.js", file("./views/viewSelector.js"))
+
 app.get("/lib.js", file("./server/lib.js"))
+app.get("/server/lib.js", file("./server/lib.js"))
 
 
-
+app.get("/server/cards.js", file("./server/cards.js"))
 app.get("/game/cards.js", file("./server/cards.js"))
 
 app.get("/rulebook.html", file("./views/rulebook.html"))
@@ -70,7 +68,7 @@ app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
 
 app.get("/lobby", function(req,res)
 {
-	var key = Object.keys(req.query)[0];
+	var key = Object.keys(req.query)[0].toUpperCase();
 
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
@@ -82,9 +80,9 @@ app.get("/lobby", function(req,res)
 	}
 });
 
-app.get("/game", function(req,res)
+app.get("/game", function(req, res)
 {
-	var key = Object.keys(req.query)[0];
+	var key = Object.keys(req.query)[0].toUpperCase();
 
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
@@ -96,31 +94,31 @@ app.get("/game", function(req,res)
 	}
 });
 
-app.get("/stats", async function(req,res){
+app.get("/stats", async function(req, res){
 
 	var template = fs.readFileSync('./views/stats.html', 'utf8');
-	var stats = await getStats();
+	var stats = await getStats() as any;
 
 	for(var key in stats)
 	{
-		template = template.replace(key, stats[key]);
+		template = template.replace(key, stats[key].toString());
 	}
 
 	var liveStats = tsssfServer.getStats();
-	template = template.replace("$1", liveStats.players);
+	template = template.replace("$1", "" + liveStats.players);
 
-	template = template.replace("$2", liveStats.games);
+	template = template.replace("$2", "" +liveStats.games);
 
 	template = template.replace("$graph1.", JSON.stringify(stats.gamesHostedThisWeek));
 	template = template.replace("$graph2.", JSON.stringify(stats.playersJoinedThisWeek));
-	template = template.replace("$date.", liveStats.startTime);
+	template = template.replace("$date.", "" +liveStats.startTime);
 
 	res.send(template);
 })
 
 
 app.get("/lobby.css", file("./views/lobby/lobby.css"))
-app.get("/lobby.js", file("./views/lobby/lobby.js"))
+app.get("/lobby/lobby.js", file("./views/lobby/lobby.js"))
 app.get("/lobby/lobbyView.js", file("./views/lobby/lobbyView.js"))
 
 app.get("/host", function(req, res){
@@ -143,9 +141,9 @@ var server;
 if(settings.KEY && !argSet.has("nossl"))
 {
 	server = https.createServer({
-			key: fs.readFileSync(settings.KEY),
-			cert: fs.readFileSync(settings.CERT),
-			passphrase: settings.PASSPHRASE
+			key: fs.readFileSync(settings.KEY as string),
+			cert: fs.readFileSync(settings.CERT as string),
+			passphrase: settings.PASSPHRASE as string
 		}, app)
 		.listen(443, function () {
 			console.log('TSSSF web server listening on port 443!')
@@ -154,7 +152,7 @@ if(settings.KEY && !argSet.has("nossl"))
 	var app2 = express();
 	app2.get("/*", function(req,res){
 
-		var hostname = req.headers.host.split(":")[0];
+		var hostname = req.headers.host!.split(":")[0];
 		res.redirect("https://" + hostname + req.url); 
 	});
 
@@ -167,17 +165,17 @@ else
 
 
 
-function file(url)
+function file(url: string)
 {
-	return function(req, res){
+	return function(req: Request, res: Response){
 
 		sendIfExists(url, res);
-	}
+	} as any
 }
 
-function fmap(routeUri, fileUrl)
+function fmap(routeUri: string, fileUrl: string): any
 {
-	return function(req, res){
+	return function(req: {originalUrl: string}, res: Response){
 
 
 		let routePrefix = routeUri.substring(0,routeUri.indexOf("**"));
@@ -195,7 +193,7 @@ function fmap(routeUri, fileUrl)
 	
 }
 
-function sendIfExists(url, res)
+function sendIfExists(url:string, res: any)
 {
 	if(fs.existsSync(url))
 	{
@@ -222,14 +220,26 @@ function sendIfExists(url, res)
 // the same ws upgrade process described here:
 // https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server
 
-const tsssfServer = TsssfGameServer();
+const tsssfServer = new TsssfGameServer();
 
 server.on('upgrade', (request, socket, head) => {
-	tsssfServer.handleUpgrade(request, socket, head, socket => {
+	tsssfServer.handleUpgrade(request, socket, head, (socket: any) => {
 		tsssfServer.emit('connection', socket, request);
 	});
 });
 
-
-
-
+if(process.argv[3])
+{
+	let baseRules = {
+		cards:["Core.*"],
+		ruleset: "turnsOnly",
+		keepLobbyOpen: true
+	};
+	switch(process.argv[3])
+	{
+		case "1":
+			tsssfServer.openLobby("DEV");
+			tsssfServer.games.DEV.startGame(baseRules, ["Core.Pony.AloeAndLotus"]);
+			break;
+	}
+}

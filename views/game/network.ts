@@ -1,7 +1,13 @@
 import {
 	updateGame, moveCard, isItMyTurn,
 	updateTurnstate
-} from "/game/game.js";
+} from "./game.js";
+
+import {
+	GameModel,
+	Location,
+	Card
+} from "../../server/lib.js";
 
 import {
 	updatePonyDiscard,
@@ -9,7 +15,17 @@ import {
 	updateGoalDiscard,
 	updatePlayerList,
 	updateGoals
-} from "/game/peripheralComponents.js";
+} from "./peripheralComponents.js";
+
+import {WebSocketPlus} from "../viewSelector.js";
+
+
+let win = window as unknown as {
+	model: GameModel,
+	cardLocations: {[key: string]: Location},
+	moveToStartCard: () => any;
+	socket: WebSocketPlus;
+}
 
 ///var socket;
 //var pendingRequests = [];
@@ -32,22 +48,24 @@ import {
 })
 */
 
-export function attachToSocket(socket)
+
+
+export function attachToSocket(socket: WebSocketPlus)
 {
 	var kicked = false;
-	socket.onMessageHandler = function(event)
+	socket.onMessageHandler = function(event: MessageEvent)
 	{
-		var model = window.model;
+		var model = win.model;
 
 		if(event.data.startsWith('kick'))
 		{
-			document.getElementById('playingArea').style.backgroundColor = "#FFCCCC";
+			document.getElementById('playingArea')!.style.backgroundColor = "#FFCCCC";
 			alert("The game's host kicked you from the game");
 			kicked = true;
 
 		}
 
-		if(event.data.startsWith("effects;"))
+		if(event.data.startsWith("effects;") && model.turnstate)
 		{
 			var data = event.data.substring(8)
 			try
@@ -59,10 +77,10 @@ export function attachToSocket(socket)
 			catch(e){}
 		}
 
-		if(event.data.startsWith('turnstate;'))
+		if(event.data.startsWith('turnstate;') && model.turnstate)
 		{
 			model.turnstate = JSON.parse(event.data.substring(10));	
-			model.turnstate.playedThisTurn = new Set();
+			model.turnstate!.playedThisTurn = new Set();
 
 			console.log(model.turnstate);
 			updateTurnstate();
@@ -83,7 +101,7 @@ export function attachToSocket(socket)
 			var val = JSON.parse(event.data.split(";")[1])
 
 			if(val)
-				document.getElementById('hostButton').style.display = "inline-block";
+				document.getElementById('hostButton')!.style.display = "inline-block";
 		}
 
 		if(event.data.startsWith('registered;'))
@@ -103,7 +121,7 @@ export function attachToSocket(socket)
 		{
 			console.log(event.data);
 			updateGame(JSON.parse(event.data.substring(6)));
-			moveToStartCard();
+			win.moveToStartCard();
 		}
 
 		if(event.data.startsWith("move;"))
@@ -117,47 +135,51 @@ export function attachToSocket(socket)
 		{
 			var [_, typ, count] = event.data.split(";");
 
-			model[typ+ "DrawPileLength"] = count;
+			(model as any)[typ+ "DrawPileLength"] = count;
 
 			var funs ={
 				"pony": updatePonyDiscard,
 				"ship": updateShipDiscard,
 				"goal": updateGoalDiscard
 			};
-			funs[typ]();
+			(funs as any)[typ]();
 		}
 
 		if(event.data.startsWith("swapshuffle;"))
 		{
 			var [_, type, count, ...cards] = event.data.split(";");
 
-			for(var card of model[type + "DiscardPile"])
+			for(var card of (model as any)[type + "DiscardPile"])
 			{
-				delete cardLocations[card];
+				delete win.cardLocations[card];
 			}
 
-			model[type+"DrawPileLength"] = count;
-			model[type+"DiscardPile"] = cards;
+			(model as any)[type+"DrawPileLength"] = count;
+			(model as any)[type+"DiscardPile"] = cards;
 
 			for(var card of cards)
 			{
-				cardLocations[card] = type + "DiscardPile,stack";
+				win.cardLocations[card] = type + "DiscardPile,stack";
 			}
 
 			if(cards.length)
-				cardLocations[cards[cards.length-1]] = type + "DiscardPile,top";
+				win.cardLocations[cards[cards.length-1]] = type + "DiscardPile,top";
 
 			var funs ={
 				"pony": updatePonyDiscard,
 				"ship": updateShipDiscard,
 				"goal": updateGoalDiscard
 			};
-			funs[type]();
+			(funs as any)[type]();
 		}
 
 		if(event.data.startsWith("counts;"))
 		{
-			var [_, name, ponies, ships, ...winnings] = event.data.split(";");
+
+			let _, name:string, ponies, ships;
+			let winnings: string[];
+
+			[_, name, ponies, ships, ...winnings] = event.data.split(";");
 
 			var player = model.players.filter(x => x.name == name)[0];
 
@@ -183,7 +205,8 @@ export function attachToSocket(socket)
 
 		if(event.data.startsWith("goalachieved;"))
 		{
-			var [_, ...achievedCards] = event.data.split(";").map( x => !!x);
+			let _, achievedCards: boolean[];
+			[_, ...achievedCards] = (event.data as string).split(";").map( x => !!x);
 
 			model.currentGoals[0].achieved = achievedCards[0];
 			model.currentGoals[1].achieved = achievedCards[1];
@@ -193,13 +216,13 @@ export function attachToSocket(socket)
 		}
 	};
 
-	socket.onCloseHandler = function(event)
+	socket.onCloseHandler = function(event: MessageEvent)
 	{
 
 		setTimeout(function(){
 			if(!kicked)
 			{
-				document.getElementById('playingArea').style.backgroundColor = "#FFCCCC";
+				document.getElementById('playingArea')!.style.backgroundColor = "#FFCCCC";
 				alert("Failed to connect to the server :(");
 			}
 		}, 300);
@@ -210,18 +233,18 @@ export function attachToSocket(socket)
 
 
 // extra arg is used for goals
-export function broadcastMove(card, startLocation, endLocation, extraArg)
+export function broadcastMove(card: Card, startLocation: Location, endLocation: Location, extraArg?: string)
 {
 	broadcast("move;" + card + ";" + startLocation + ";" + endLocation + ";" + extraArg);
 }
 
 
-export function broadcast(message)
+export function broadcast(message: string)
 {
 	console.log("sending " + message);
 
 	//setTimeout(function(){
-	window.socket.send(message);
+	win.socket.send(message);
 	//},3000);
 }
 
@@ -244,7 +267,7 @@ export function requestDrawGoal()
 }
 
 
-export function requestSwapShuffle(typ)
+export function requestSwapShuffle(typ: "pony" | "ship" | "goal")
 {
 	if(isItMyTurn())
 		broadcast("swapshuffle;" + typ);

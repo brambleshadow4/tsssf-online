@@ -1,20 +1,19 @@
 import cards from "./cards.js";
-import {isBlank} from "./lib.js";
+import {isBlank, Card, Location} from "./lib.js";
+import {GameModel} from "./gameServer.js";
 
-function getCardProp(model, cardFull, prop)
+function getCardProp(model: GameModel, cardFull: Card, prop: any)
 {
+	let turnstate = model.turnstate!;
+	//console.log("getCardProp(" + cardFull + ", " + prop + ")");
 
-
-	var [card, ctxNo] = cardFull.split(":");
-	ctxNo = Number(ctxNo);
-	var cardOverrides = model.turnstate.overrides[card] || {};
+	var [card, ctxNoStr] = cardFull.split(":");
+	let ctxNo: number = Number(ctxNoStr);
+	var cardOverrides = turnstate.overrides[card] || {};
 
 	if(ctxNo != undefined && !isNaN(ctxNo))
 	{
-		if(model.turnstate.changelingContexts[card] && model.turnstate.changelingContexts[card][ctxNo])
-		{
-			cardOverrides = model.turnstate.changelingContexts[card][ctxNo]
-		}
+		cardOverrides = turnstate.getChangeContext(card).list[ctxNo] || cardOverrides;
 	}
 
 	var baseCard = cardOverrides.disguise || card;
@@ -25,13 +24,11 @@ function getCardProp(model, cardFull, prop)
 	}
 	else
 	{
-		if(cardOverrides.disguise && model.turnstate.specialEffects.larsonEffect)
+		if(cardOverrides.disguise && turnstate.specialEffects.larsonEffect)
 			baseCard = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
 	}
 
 	
-
-
 	if(prop == "*")
 		return cardOverrides;
 
@@ -45,7 +42,7 @@ function getCardProp(model, cardFull, prop)
 	if(prop == "card")
 		return card;
 
-	if(prop == "race" && model.turnstate.specialEffects.larsonEffect)
+	if(prop == "race" && turnstate.specialEffects.larsonEffect)
 		return "alicorn";
 
 
@@ -56,12 +53,12 @@ function getCardProp(model, cardFull, prop)
 			baseCard = card;
 		}
 
-		let baseKeywords = (allowOverrides && cardOverrides && cardOverrides.keywords) || [];
+		let baseKeywords = (allowOverrides && cardOverrides?.keywords) || [];
 
-		if(model.turnstate.specialEffects.larsonEffect)
+		if(turnstate.specialEffects.larsonEffect)
 			baseKeywords.push("Princess");
 
-		if(cardOverrides && cardOverrides.disguise)
+		if(cardOverrides?.disguise)
 			baseKeywords = baseKeywords.concat(cards[card].keywords);
 
 		return new Set(cards[baseCard][prop].concat(baseKeywords));
@@ -77,13 +74,15 @@ function getCardProp(model, cardFull, prop)
 
 	if(allowOverrides && cardOverrides && cardOverrides[prop])
 	{
+		//console.log(cardOverrides[prop]);
 		return cardOverrides[prop]
 	}
 
+	//console.log(cards[baseCard][prop]);
 	return cards[baseCard][prop];
 }
 
-function doesCardMatchSelector(model, card, selector)
+function doesCardMatchSelector(model: GameModel, card: Card, selector: string): number
 {
 	//console.log("doesCardMatchSelector " + card + " " + selector);
 
@@ -96,7 +95,7 @@ function doesCardMatchSelector(model, card, selector)
 	if(selector.trim() == "genderSwapped")
 	{
 		var originalGender = cards[card].gender;
-		if(model.turnstate && model.turnstate.overrides && model.turnstate.overrides[card] && model.turnstate.overrides[card].disguise)
+		if(model.turnstate?.overrides && model.turnstate.overrides[card] && model.turnstate.overrides[card].disguise)
 		{
 			originalGender = cards[model.turnstate.overrides[card].disguise].gender
 		}
@@ -121,9 +120,13 @@ function doesCardMatchSelector(model, card, selector)
 	}
 
 
+	var value: string | number | boolean;
+	let prop: any;
+
 	if(selector.indexOf("!=") > -1)
 	{
-		var [prop, value] = selector.split("!=");
+		
+		[prop, value] = selector.split("!=");
 		prop = prop.trim();
 		value = value.trim();
 
@@ -153,7 +156,7 @@ function doesCardMatchSelector(model, card, selector)
 
 	if(selector.indexOf("=") > -1)
 	{
-		var [prop, value] = selector.split("=");
+		[prop, value] = selector.split("=");
 		prop = prop.trim();
 		value = value.trim();
 
@@ -188,12 +191,12 @@ function doesCardMatchSelector(model, card, selector)
 		var invert = false;
 		if(selector.indexOf(" !in ") > -1)
 		{
-			var [value, prop] = selector.split(" !in ");
+			[value, prop] = selector.split(" !in ");
 			invert = true;
 		}
 		else
 		{
-			var [value, prop] = selector.split(" in ");
+			[value, prop] = selector.split(" in ");
 		}
 
 		prop = prop.trim();
@@ -212,12 +215,14 @@ function doesCardMatchSelector(model, card, selector)
 	return falseValue
 }
 
-export function getConnectedPonies(model, ponyLoc, onlyCountDirectlyShipped)
+export function getConnectedPonies(model: GameModel, ponyLoc: Location, onlyCountDirectlyShipped?: boolean)
 {
-	var [typ, x, y] = ponyLoc.split(",");
+	model.turnstate = model.turnstate!;
+
+	var [typ, xs, ys] = ponyLoc.split(",");
 	var thisPony = model.board[ponyLoc].card;
-	x = Number(x)
-	y = Number(y)
+	let x = Number(xs)
+	let y = Number(ys)
 
 	var shipPonyPairs = [
 		["sr," + x + "," + y, "p," + (x+1) + "," + y],
@@ -227,7 +232,7 @@ export function getConnectedPonies(model, ponyLoc, onlyCountDirectlyShipped)
 	]
 
 
-	var connected = new Set();
+	var connected: Set<Card> = new Set();
 	if(!onlyCountDirectlyShipped && model.turnstate.specialEffects.shipWithEverypony.has(thisPony))
 	{
 		for(var key in model.board)
@@ -260,8 +265,7 @@ export function getConnectedPonies(model, ponyLoc, onlyCountDirectlyShipped)
 	return [...connected];
 }
 
-
-function ExistsPony(selector, count)
+function ExistsPony(selector: string, count?: number)
 {
 	if (typeof selector != "string") 
 		throw new Error("Arg 1 of ExistsPonyGeneric needs to be a function");
@@ -269,7 +273,7 @@ function ExistsPony(selector, count)
 		throw new Error("Arg 2 of ExistsPonyGeneric needs to be a number");
 
 	count = count || 1;
-	return function(model)
+	return function(model: GameModel)
 	{
 		var boardCount = 0;
 
@@ -283,12 +287,12 @@ function ExistsPony(selector, count)
 		}
 
 		//console.log(selector + " count " + boardCount);
-		return boardCount >= count;
+		return boardCount >= count!;
 	}
 }
 
 
-function ExistsPonyGeneric(selectFun, count)
+function ExistsPonyGeneric(selectFun: (m:GameModel, p:Card)=>number, count?:number)
 {
 	if (typeof selectFun != "function") 
 		throw new Error("Arg 1 of ExistsPonyGeneric needs to be a function");
@@ -296,7 +300,7 @@ function ExistsPonyGeneric(selectFun, count)
 		throw new Error("Arg 2 of ExistsPonyGeneric needs to be a number");
 
 	count = count || 1;
-	return function(model)
+	return function(model: GameModel)
 	{
 		var boardCount = 0;
 
@@ -310,31 +314,31 @@ function ExistsPonyGeneric(selectFun, count)
 		}
 
 		//console.log(selector + " count " + boardCount);
-		return boardCount >= count;
+		return boardCount >= count!;
 	}
 }
 
 
 
 
-function ExistsChain(selector, count)
+function ExistsChain(selector: string, count: number)
 {
 	if (typeof selector != "string") 
 		throw new Error("Arg 1 of ExistsChain needs to be a string");
 	if (typeof count != "number") 
 		throw new Error("Arg 2 of ExistsChain needs to be a number");
 
-	return function(model)
+	return function(model: GameModel)
 	{
-		function buildChain(key)
+		function buildChain(key: Location)
 		{
 			var workList = [key];
-			var chained = new Set();
+			var chained: Set<Card> = new Set();
 			var explored = new Set();
 
 			while (chained.size < count && workList.length)
 			{
-				var thisKey = workList.shift();
+				var thisKey = workList.shift()!;
 
 				if(explored.has(thisKey))
 					continue;
@@ -373,14 +377,15 @@ function ExistsChain(selector, count)
 	}
 }
 
-function Select(selector, count)
+function Select(selector: string, count?: number)
 {
 	if (typeof selector != "string") 
 		throw new Error("Arg 1 of Select needs to be a string");
 	if (typeof count != "number" && typeof count != "undefined") 
 		throw new Error("Arg 2 of Select needs to be a number");
+	count = count || 1;
 
-	return function(model, connectedPonies)
+	return function(model: GameModel, connectedPonies: Card[])
 	{
 		let centeredCount = 0;
 		for(var card of connectedPonies)
@@ -388,12 +393,15 @@ function Select(selector, count)
 			centeredCount += doesCardMatchSelector(model, card, selector)
 		}
 
-		return centeredCount >= count;
+		return centeredCount >= count!;
 	}
 }
 
-function ExistsPonyShippedTo(mainPonySel, groupSelectionFn, count)
-{
+function ExistsPonyShippedTo(
+	mainPonySel: string,
+	groupSelectionFn:(m:GameModel, p:Card[]) => number,
+	count?: number
+){
 	if (typeof mainPonySel != "string") 
 		throw new Error("Arg 1 of ExistsPonyShippedTo needs to be a string");
 	if (typeof groupSelectionFn != "function") 
@@ -402,7 +410,7 @@ function ExistsPonyShippedTo(mainPonySel, groupSelectionFn, count)
 		throw new Error("Arg 3 of ExistsPonyShippedTo needs to be a number");
 
 	count = count || 1;
-	return function(model)
+	return function(model: GameModel)
 	{
 		for(var key in model.board)
 		{
@@ -423,7 +431,7 @@ function ExistsPonyShippedTo(mainPonySel, groupSelectionFn, count)
 }
 
 
-function ExistsShip(selector1, selector2, count)
+function ExistsShip(selector1: string, selector2: string, count?: number)
 {
 	if (typeof selector1 != "string") 
 		throw new Error("Arg 1 of ExistsShip needs to be a string");
@@ -432,18 +440,20 @@ function ExistsShip(selector1, selector2, count)
 	if (typeof count != "number" && typeof count != "undefined") 
 		throw new Error("Arg 3 of ExistsShip needs to be a number");
 
-	var checkTwoSelectors = function(model, card1, card2)
+	count = count || 1;
+
+	var checkTwoSelectors = function(model: GameModel, card1: Card, card2: Card)
 	{
 		if(doesCardMatchSelector(model, card1, selector1) && doesCardMatchSelector(model, card2, selector2))
 		{
-			return true;
+			return getShipCount(model, card1, card2);
 		}
 		else if (doesCardMatchSelector(model, card1, selector2) && doesCardMatchSelector(model, card2, selector1))
 		{
-			return true;
+			return getShipCount(model, card1, card2);
 		}
 
-		return false;
+		return 0;
 	}
 
 
@@ -452,20 +462,23 @@ function ExistsShip(selector1, selector2, count)
 
 
 
-function PlayPonies(selector, count)
+function PlayPonies(selector: string, count?: number)
 {
 	if (typeof selector != "string") 
 		throw new Error("Arg 1 of PlayPonies needs to be a string");
 	if (typeof count != "number" && typeof count != "undefined") 
 		throw new Error("Arg 2 of PlayPonies needs to be a number");
 
-	return function(model)
+	count = count || 1;
+
+	return function(model: GameModel)
 	{
 		if(model.turnstate)
 		{
-			var matchingPlays = model.turnstate.playedPonies.filter(x => doesCardMatchSelector(model, x, selector));
+			var matchingPlays = model.turnstate!.playedPonies.filter(x => doesCardMatchSelector(model, x, selector));
+			var matchCount = matchingPlays.map(x => getCardProp(model, x, "count") || 1).reduce((a, b) => a + b, 0) as number;
 
-			return (matchingPlays.length >= count);
+			return (matchCount >= count!);
 		}
 
 		return false;
@@ -473,12 +486,12 @@ function PlayPonies(selector, count)
 }
 
 
-function getShipCount(model, pony1, pony2)
+function getShipCount(model: GameModel, pony1: Card, pony2: Card)
 {
 	return Math.max(getCardProp(model, pony1, "count") || 1, getCardProp(model, pony2, "count") || 1)
 }
 
-function PlayShips(selector1, selector2, count)
+function PlayShips(selector1: string, selector2: string, count?: number)
 {
 	if (typeof selector1 != "string") 
 		throw new Error("Arg 1 of PlayShips needs to be a string");
@@ -488,7 +501,7 @@ function PlayShips(selector1, selector2, count)
 		throw new Error("Arg 3 of PlayShips needs to be a number");
 
 	count = count || 1;
-	return function(model)
+	return function(model: GameModel)
 	{
 		if(model.turnstate)
 		{
@@ -509,14 +522,14 @@ function PlayShips(selector1, selector2, count)
 
 			});
 
-			return (matchingPlays.reduce((a,b) => a + b, 0) >= count);
+			return (matchingPlays.reduce((a:number, b:number) => a + b, 0) >= count!);
 		}
 
 		return false;
 	}
 }
 
-function BreakShip(selector1, selector2, count)
+function BreakShip(selector1: string, selector2: string, count?: number)
 {
 	if (typeof selector1 != "string") 
 		throw new Error("Arg 1 of BreakShip needs to be a string");
@@ -526,7 +539,7 @@ function BreakShip(selector1, selector2, count)
 		throw new Error("Arg 3 of BreakShip needs to be a number");
 
 	count = count || 1;
-	return function(model)
+	return function(model: GameModel)
 	{
 
 		if(model.turnstate)
@@ -548,14 +561,14 @@ function BreakShip(selector1, selector2, count)
 
 			});
 
-			return (matchingPlays.reduce((a,b) => a + b, 0)  >= count);
+			return (matchingPlays.reduce((a:number,b:number) => a + b, 0) >= count!);
 		}
 
 		return false;
 	}
 }
 
-function ExistsShipGeneric(compareCardsFun, count)
+function ExistsShipGeneric(compareCardsFun: (m:GameModel, c1: Card, c2: Card) => number, count?: number)
 {
 	if (typeof compareCardsFun != "function") 
 		throw new Error("Arg 1 of ExistsShipGeneric needs to be a function");
@@ -563,8 +576,11 @@ function ExistsShipGeneric(compareCardsFun, count)
 		throw new Error("Arg 2 of ExistsShipGeneric needs to be a number");
 
 	count = count || 1;
-	return function(model)
+
+	return function(model: GameModel)
 	{
+		model.turnstate = model.turnstate!;
+
 		var boardCount = 0;
 
 		var shipWithEverypony = model.turnstate.specialEffects.shipWithEverypony
@@ -573,10 +589,11 @@ function ExistsShipGeneric(compareCardsFun, count)
 		{
 			if(key.startsWith("s") && !isBlank(model.board[key].card))
 			{
-				var [typ, x, y] = key.split(",");
 
-				x = Number(x);
-				y = Number(y);
+				var [typ, xs, ys] = key.split(",");
+
+				let x = Number(xs);
+				let y = Number(ys);
 
 				var card1key = "p," + x + "," + y;
 				var card2key;
@@ -623,14 +640,14 @@ function ExistsShipGeneric(compareCardsFun, count)
 			}
 		}
 
-		return boardCount >= count;
+		return boardCount >= count!;
 	}
 }
 
 
 /************************** Custom Rules **************************/
 
-function PlayLovePoisons(model)
+function PlayLovePoisons(model: GameModel)
 {
 	if(model.turnstate)
 	{
@@ -646,9 +663,9 @@ function PlayLovePoisons(model)
 	return false;
 }
 
-function SwapCount(count)
+function SwapCount(count: number)
 {
-	return function(model)
+	return function(model: GameModel)
 	{
 		if(model.turnstate)
 		{
@@ -659,7 +676,7 @@ function SwapCount(count)
 	}
 }
 
-function ShippedWithOppositeGenderedSelf(model, card1, card2)
+function ShippedWithOppositeGenderedSelf(model: GameModel, card1: Card, card2: Card)
 {
 	var hasSameName = false;
 	var nameset1 = getCardProp(model, card1, "name");
@@ -679,16 +696,19 @@ function ShippedWithOppositeGenderedSelf(model, card1, card2)
 		var gender1 = getCardProp(model, card1, "gender");
 		var gender2 = getCardProp(model, card2, "gender");
 
+		//console.log(gender1)+ " "  + console.log(gender2);
+		//console.log(model);
+
 		return ((gender1 == "male" && gender2 == "female") || (gender1 == "female" && gender2 == "male"))
 	}
 
 	return false;
 }
 
-function ShippedWith2Versions(model, ponyCards)
+function ShippedWith2Versions(model: GameModel, ponyCards: Card[])
 {
 
-	function filterFun(card1, card2)
+	function filterFun(card1: Card, card2: Card)
 	{
 		/*if(getCardProp(model,card2,"name") == getCardProp(model,card1,"name"))
 		{
@@ -722,9 +742,9 @@ function ShippedWith2Versions(model, ponyCards)
 	return false;
 }
 
-function AllOf(...selectors)
+function AllOf(...selectors: string[])
 {
-	return function(model, ponyCards)
+	return function(model: GameModel, ponyCards: Card[])
 	{
 		for(var selector of selectors)
 		{
@@ -737,7 +757,7 @@ function AllOf(...selectors)
 	
 }
 
-function typecheckAllGoals()
+function typecheckAllGoals(cards: {[key: string]: any})
 {
 	for(var card in cards)
 	{
@@ -758,7 +778,7 @@ function typecheckAllGoals()
 
 typecheckAllGoals(cards);
 
-export function evalGoalCard(card, model)
+export function evalGoalCard(card: Card, model: GameModel)
 {
 	try
 	{
@@ -784,9 +804,9 @@ export function evalGoalCard(card, model)
 }
 
 
-function goalLogicParser(text, stack)
+function goalLogicParser(text: string, stack: string[]): any
 {
-	function getFunFromName(name)
+	function getFunFromName(name: string)
 	{
 		switch(name)
 		{
@@ -811,7 +831,7 @@ function goalLogicParser(text, stack)
 
 	var funNames = new Set([])
 
-	function inf(x)
+	function inf(x: number)
 	{
 		return x == -1 ? Infinity : x;
 	}
@@ -848,7 +868,7 @@ function goalLogicParser(text, stack)
 
 			var params = [];
 
-			var param = stack.pop();
+			var param = stack.pop()!;
 			while(param != "(")
 			{
 				if(typeof param == "function")
@@ -866,12 +886,12 @@ function goalLogicParser(text, stack)
 					params.unshift(param.trim());
 				}
 
-				param = stack.pop();
+				param = stack.pop()!;
 			}
 
-			param = stack.pop().trim();
+			param = stack.pop()!.trim();
 
-			var fun = getFunFromName(param);
+			let fun = getFunFromName(param) as Function;
 
 			if(!fun)
 				throw new Error("A function named " + param + " does not exists. stack=" + stack);
@@ -881,6 +901,7 @@ function goalLogicParser(text, stack)
 			stack.push(fun(...params));
 
 			return goalLogicParser(text.substring(1), stack);
+
 		case ",":
 
 			if(token.trim() != "")
@@ -896,7 +917,7 @@ function goalLogicParser(text, stack)
 			}
 			else if(stack.length == 0 && token.trim() != "")
 			{
-				var fun = getFunFromName(token);
+				let fun = getFunFromName(token) as Function;
 				if(fun)
 					return fun;
 				else
@@ -904,11 +925,9 @@ function goalLogicParser(text, stack)
 			}
 			else
 			{
-				throw new Error("Bad stack " + stack);
+				throw new Error("The following tokens could not be parsed successfully: " + stack);
 			}		
 	}
 }
-
-
 	
 export default evalGoalCard;
