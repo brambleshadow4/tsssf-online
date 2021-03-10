@@ -1070,10 +1070,6 @@ export class GameModel
 		}
 	}
 
-
-	
-	
-
 	private shipString(card1:Card, card2: Card): string
 	{
 		if(card1 < card2)

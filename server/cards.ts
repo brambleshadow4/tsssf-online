@@ -934,7 +934,7 @@ var cards: {[card:string]: any} = {
 			},
 			"Core.Goal.ItsMagicalHornsAreTouching":{
 				url:"Goal_It's MagicalHorns Are Touching.png",
-				goalLogic: "ExistsShip(race=unicorn || race=alicorn,race=unicorn || race=alicorn,3)",
+				goalLogic: "ExistsShip(race=unicorn || race=alicorn, race=unicorn || race=alicorn, 3)",
 				points:"1"
 			},
 			"Core.Goal.ItsNotCreepy":{

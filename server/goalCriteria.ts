@@ -476,8 +476,9 @@ function PlayPonies(selector: string, count?: number)
 		if(model.turnstate)
 		{
 			var matchingPlays = model.turnstate!.playedPonies.filter(x => doesCardMatchSelector(model, x, selector));
+			var matchCount = matchingPlays.map(x => getCardProp(model, x, "count") || 1).reduce((a, b) => a + b, 0) as number;
 
-			return (matchingPlays.length >= count!);
+			return (matchCount >= count!);
 		}
 
 		return false;

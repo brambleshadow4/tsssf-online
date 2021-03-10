@@ -359,6 +359,29 @@ export default function(){
 		expectGoalAchieved(game, goal);
 	});
 
+	test("PlayPonies takes into account card.count property", () =>{
+
+		let [game, player] = setupGame();
+		let goal = "Core.Goal.QueenPlatinumsCourt";
+		player.drawGoal(goal);
+
+		let ship1 = "Core.Ship.CanITellYouASecret";
+		let ship2 = "Core.Ship.DudeLooksLikeALady";
+		let flimFlam = "Core.Pony.Flim&Flam";
+		let unicorn = "Core.Pony.HeartlessDictatorRarity";
+		player.grab(ship1, ship2, flimFlam, unicorn);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(unicorn, "hand", "p,1,0");
+
+		expectGoalUnachieved(game, goal);
+
+		player.move(ship1, "hand", "sr,1,0");
+		player.move(flimFlam, "hand", "p,2,0");
+
+		expectGoalAchieved(game, goal);
+	});
+
 	test("ExistsChain", () =>{
 		//expect(0).toBe("unimplemented");
 	});
