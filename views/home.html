@@ -163,6 +163,15 @@
 			{
 				window.location.href = "/join"
 			}
+
+			window.onkeypress = function(e)
+			{
+				if(e.key == "`")
+				{
+					localStorage.playerID=  "1";
+					window.location = "/game?DEV";
+				}
+			}
 		</script>
 	</body>
 </html>

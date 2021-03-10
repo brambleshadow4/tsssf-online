@@ -4,19 +4,16 @@ import {GameModel} from "./gameServer.js";
 
 function getCardProp(model: GameModel, cardFull: Card, prop: any)
 {
-	model.turnstate = model.turnstate!;
-
+	let turnstate = model.turnstate!;
+	//console.log("getCardProp(" + cardFull + ", " + prop + ")");
 
 	var [card, ctxNoStr] = cardFull.split(":");
 	let ctxNo: number = Number(ctxNoStr);
-	var cardOverrides = model.turnstate.overrides[card] || {};
+	var cardOverrides = turnstate.overrides[card] || {};
 
 	if(ctxNo != undefined && !isNaN(ctxNo))
 	{
-		if(model.turnstate.changelingContexts[card] && model.turnstate.changelingContexts[card].list[ctxNo])
-		{
-			cardOverrides = model.turnstate.changelingContexts[card].list[ctxNo]
-		}
+		cardOverrides = turnstate.getChangeContext(card).list[ctxNo] || cardOverrides;
 	}
 
 	var baseCard = cardOverrides.disguise || card;
@@ -27,7 +24,7 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 	}
 	else
 	{
-		if(cardOverrides.disguise && model.turnstate.specialEffects.larsonEffect)
+		if(cardOverrides.disguise && turnstate.specialEffects.larsonEffect)
 			baseCard = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
 	}
 
@@ -45,7 +42,7 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 	if(prop == "card")
 		return card;
 
-	if(prop == "race" && model.turnstate.specialEffects.larsonEffect)
+	if(prop == "race" && turnstate.specialEffects.larsonEffect)
 		return "alicorn";
 
 
@@ -56,12 +53,12 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 			baseCard = card;
 		}
 
-		let baseKeywords = (allowOverrides && cardOverrides && cardOverrides.keywords) || [];
+		let baseKeywords = (allowOverrides && cardOverrides?.keywords) || [];
 
-		if(model.turnstate.specialEffects.larsonEffect)
+		if(turnstate.specialEffects.larsonEffect)
 			baseKeywords.push("Princess");
 
-		if(cardOverrides && cardOverrides.disguise)
+		if(cardOverrides?.disguise)
 			baseKeywords = baseKeywords.concat(cards[card].keywords);
 
 		return new Set(cards[baseCard][prop].concat(baseKeywords));
@@ -77,9 +74,11 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 
 	if(allowOverrides && cardOverrides && cardOverrides[prop])
 	{
+		//console.log(cardOverrides[prop]);
 		return cardOverrides[prop]
 	}
 
+	//console.log(cards[baseCard][prop]);
 	return cards[baseCard][prop];
 }
 
@@ -96,7 +95,7 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 	if(selector.trim() == "genderSwapped")
 	{
 		var originalGender = cards[card].gender;
-		if(model.turnstate && model.turnstate.overrides && model.turnstate.overrides[card] && model.turnstate.overrides[card].disguise)
+		if(model.turnstate?.overrides && model.turnstate.overrides[card] && model.turnstate.overrides[card].disguise)
 		{
 			originalGender = cards[model.turnstate.overrides[card].disguise].gender
 		}

@@ -230,3 +230,19 @@ server.on('upgrade', (request, socket, head) => {
 		tsssfServer.emit('connection', socket, request);
 	});
 });
+
+if(process.argv[3])
+{
+	let baseRules = {
+		cards:["Core.*"],
+		ruleset: "turnsOnly",
+		keepLobbyOpen: true
+	};
+	switch(process.argv[3])
+	{
+		case "1":
+			tsssfServer.openLobby("DEV");
+			tsssfServer.games.DEV.startGame(baseRules, ["Core.Pony.AloeAndLotus"]);
+			break;
+	}
+}

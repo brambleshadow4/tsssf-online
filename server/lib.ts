@@ -41,7 +41,8 @@ export interface GameModel
 export interface ChangelingContextList
 {
 	list: {[prop: string]: any},
-	rollback: string[]
+	currentShips: Card[],
+	previousShips: Card[],
 }
 
 export interface Turnstate
