@@ -1228,7 +1228,6 @@ export class GameModel
 
 		for(let card of hand)
 		{
-			console.log(card);
 			if(isPony(card))
 			{
 				player.hand.push(card);

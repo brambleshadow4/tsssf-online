@@ -70,9 +70,6 @@ app.get("/lobby", function(req,res)
 {
 	var key = Object.keys(req.query)[0].toUpperCase();
 
-	console.log(key);
-	console.log(tsssfServer.games[key]);
-
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
 		sendIfExists("./views/app.html", res);

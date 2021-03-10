@@ -48,3 +48,10 @@ directory with the following items set:
 	CERT=path/to/server.crt
 	KEY=path/to/private.key
 	PASSPHRASE=password
+
+### Unit Tests ###
+
+The unit tests can all at the same time, or individually by specifying the number
+
+	npm run test
+	npm run test 10
