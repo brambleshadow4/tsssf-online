@@ -38,6 +38,7 @@ catch(e){}
 
 app.get('/', file("./views/home.html"));
 app.get('/img/**', fmap("/img/**", "./img/**"));
+app.get('/packs/**', fmap("/packs/**", "./packs/**"));
 
 app.get('/.well-known/**', fmap("/.well-known/**", "./.well-known/**"));
 
@@ -49,7 +50,9 @@ app.get("/game/cardComponent.js", file("./views/game/cardComponent.js"))
 app.get("/game/peripheralComponents.js", file("./views/game/peripheralComponents.js"))
 app.get("/game/boardComponent.js", file("./views/game/boardComponent.js"))
 app.get("/game/popupComponent.js", file("./views/game/popupComponent.js"))
+
 app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
+app.get("/lobby/packOrder.js", file("./views/lobby/packOrder.js"))
 
 
 

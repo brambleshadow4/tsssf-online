@@ -1,0 +1,33 @@
+{
+	"name": "Adventure Pack",
+	"description": "",
+	"format": "pack:1",
+	"root": "tsssf.net/packs",
+	"namespace": "HorriblePeople.AdventurePack",
+	"cards": {
+		"start": {},
+		"pony": {
+			"AdventureExpertDaringDo": {
+				"name": "Daring Do",
+				"race": "pegasus",
+				"gender": "female",
+				"keywords": []
+			},
+			"WritingMentorAKYearling": {
+				"name": "Daring Do",
+				"race": "pegasus",
+				"gender": "female",
+				"keywords": []
+			}
+		},
+		"ship": {},
+		"goal": {
+			"DaringDont": {
+				"name": "Daring Don't",
+				"goalLogic": "ExistsPonyShippedTo(name=Daring Do, AllOf(name=Rainbow Dash, name=Twilight Sparkle))",
+				"points": "2",
+				"noLogic": true
+			}
+		}
+	}
+}

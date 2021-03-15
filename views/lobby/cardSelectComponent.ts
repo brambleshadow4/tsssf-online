@@ -206,3 +206,38 @@ export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: st
 
 	return div;
 }
+
+export function cardBoxSelectComponent(namespace: string)
+{
+	var div = document.createElement('div');
+	div.className = "cardbox";
+	div.setAttribute("deck", namespace + ".*");
+
+	var shield = document.createElement('div');
+	shield.className = "shield";
+	div.appendChild(shield);
+
+	var img = document.createElement('img');
+	img.src = "/packs/" + namespace.split(".").join("/") + "/box.png";
+	div.appendChild(img);
+
+	return div;
+
+
+/*	<div class='cardbox' id='Core-deck-select' deck="Core.*">
+					<div class='shield'></div>
+					<img src="/img/core-box.png" />
+				</div>
+				<div class='cardbox' id='EC-deck-select' deck="EC.*">
+					<div class='shield'></div>
+					<img src="/img/ec-box.png" />
+				</div>
+				<div class='cardbox' id='PU-deck-select' deck="PU.*">
+					<div class='shield'></div>
+					<img src="/img/pu-box.png" />
+				</div>
+				<div class='cardbox' deck="NoHoldsBarred.*">
+					<div class='shield'></div>
+					<img src="/img/noholds-box.png" />
+				</div>*/
+}

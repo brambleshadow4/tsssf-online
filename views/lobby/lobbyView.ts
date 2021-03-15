@@ -69,25 +69,9 @@ var HTML = `
 
 			<div id='chooseCardsInfo'>
 				<h2>Expansions</h2>
-				<div class='cardbox' id='Core-deck-select' deck="Core.*">
-					<div class='shield'></div>
-					<img src="/img/core-box.png" />
-				</div>
-				<div class='cardbox' id='EC-deck-select' deck="EC.*">
-					<div class='shield'></div>
-					<img src="/img/ec-box.png" />
-				</div>
-				<div class='cardbox' id='PU-deck-select' deck="PU.*">
-					<div class='shield'></div>
-					<img src="/img/pu-box.png" />
-				</div>
-				<div class='cardbox' deck="NoHoldsBarred.*">
-					<div class='shield'></div>
-					<img src="/img/noholds-box.png" />
-				</div>
+				<div id='expansions'></div>
 				<h2 class="bothMargins">Individual cards</h2>
-				<div id='cardSelectors'>
-				</div>
+				<div id='cardSelectors'></div>
 			</div>
 
 			<div class='startButtonArea'>

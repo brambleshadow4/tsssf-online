@@ -1,0 +1,87 @@
+{
+	"name": "Dungeon Delvers",
+	"description": "",
+	"format": "pack:1",
+	"root": "tsssf.net/packs",
+	"namespace": "HorriblePeople.DungeonDelvers",
+	"cards": {
+		"start": {},
+		"pony": {
+			"ArchmageTwilightSparkle": {
+				"name": "Twilight Sparkle",
+				"race": "alicorn",
+				"gender": "female",
+				"action": "search",
+				"keywords": [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"MagicalMaestroPinkiePie": {
+				"name": "Pinkie Pie",
+				"race": "earth",
+				"gender": "female",
+				"action": "draw",
+				"keywords": [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"RagingRogueRainbowDash": {
+				"name": "Rainbow Dash",
+				"race": "pegasus",
+				"gender": "female",
+				"action": "newGoal",
+				"keywords": [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"EnchantressRarity": {
+				"name": "Rarity",
+				"race": "unicorn",
+				"gender": "female",
+				"action": "copy",
+				"keywords": [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"BrawlingBruiserApplejack": {
+				"name": "Applejack",
+				"race": "earth",
+				"gender": "female",
+				"action": "replace",
+				"keywords": [
+					"Mane 6",
+					"RPG"
+				]
+			},
+			"Level1Fluttershy": {
+				"name": "Fluttershy",
+				"race": "pegasus",
+				"gender": "female",
+				"action": "swap",
+				"keywords": [
+					"Mane 6",
+					"RPG"
+				]
+			}
+		},
+		"ship": {
+			"PitTrap": {
+				"name": "Pit Trap!"
+			},
+			"TakingIttotheNextLevel": {
+				"name": "Taking It to the Next Level"
+			}
+		},
+		"goal": {
+			"YouMeetInATavern": {
+				"name": "You Meet in a Tavern",
+				"goalLogic": "ExistsShip(RPG in keywords || card=Core.Pony.DruidFluttershy, RPG in keywords || card=Core.Pony.DruidFluttershy)",
+				"points": "1"
+			}
+		}
+	}
+}

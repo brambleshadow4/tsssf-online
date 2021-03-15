@@ -1,0 +1,432 @@
+{
+	"name": "No Holds Barred",
+	"description": "",
+	"format": "pack:1",
+	"root": "tsssf.net/packs",
+	"namespace": "NoHoldsBarred",
+	"cards": {
+		"start": {},
+		"pony": {
+			"CobaltdeCoeur": {
+				"name": "Cobalt de Coeur",
+				"race": "unicorn",
+				"gender": "male",
+				"action": "replace",
+				"keywords": [
+					"Nurse",
+					"OC"
+				]
+			},
+			"Steel": {
+				"name": "Steel",
+				"race": "alicorn",
+				"gender": "male",
+				"keywords": [
+					"OC"
+				]
+			},
+			"Raven": {
+				"name": "Raven",
+				"race": "unicorn",
+				"gender": "female",
+				"keywords": [
+					"OC"
+				]
+			},
+			"ShaiNiShipficFanfilly": {
+				"name": "Shai Ni",
+				"race": "unicorn",
+				"gender": "female",
+				"keywords": [
+					"OC"
+				]
+			},
+			"ChrysanthemumRose": {
+				"name": "Chrysanthemum Rose",
+				"race": "pegasus",
+				"gender": "female",
+				"keywords": [
+					"OC"
+				]
+			},
+			"RainbowPowerMaudPie": {
+				"name": "Maud Pie",
+				"race": "earth",
+				"gender": "female",
+				"keywords": [
+					"Rainbow Power"
+				]
+			},
+			"TimmoPony": {
+				"name": "Timmo Pony",
+				"gender": "male",
+				"keywords": [
+					"Not a Pony",
+					"OC"
+				]
+			},
+			"LogicGate": {
+				"name": "Logic Gate",
+				"race": "unicorn",
+				"gender": "male",
+				"keywords": [
+					"OC"
+				]
+			},
+			"FlickeringOracle": {
+				"name": "Flickering Oracle",
+				"race": "unicorn",
+				"gender": "female",
+				"keywords": [
+					"Changeling",
+					"OC"
+				]
+			},
+			"Adjutant": {
+				"name": "Logic Gate",
+				"race": "alicorn",
+				"gender": "male",
+				"altTimeline": true,
+				"keywords": [
+					"OC"
+				]
+			},
+			"Aeterna": {
+				"name": "Flickering Oracle",
+				"race": "alicorn",
+				"gender": "female",
+				"altTimeline": true,
+				"keywords": [
+					"Changeling",
+					"OC"
+				]
+			},
+			"Sleight": {
+				"name": "Sleight",
+				"race": "pegasus",
+				"gender": "female",
+				"action": "Changeling(nonAlicornFemale)",
+				"keywords": [
+					"Changeling",
+					"OC"
+				]
+			},
+			"Makuru": {
+				"name": "Makuru",
+				"race": "earth",
+				"gender": "male",
+				"keywords": [
+					"OC",
+					"Zebra"
+				]
+			},
+			"Ahcyknnt": {
+				"name": "Ahcyknnt",
+				"race": "alicorn",
+				"gender": "female",
+				"keywords": [
+					"Changeling",
+					"OC"
+				]
+			},
+			"Clipcord": {
+				"name": "Clipcord",
+				"race": "unicorn",
+				"gender": "female",
+				"action": "copy",
+				"keywords": [
+					"OC"
+				]
+			},
+			"SgtBrony": {
+				"name": "Sgt. Brony",
+				"race": "alicorn",
+				"gender": "male",
+				"keywords": [
+					"Hero",
+					"OC"
+				]
+			},
+			"LadykillerGyroTech": {
+				"name": "Ladykiller Gyro Tech",
+				"race": "unicorn",
+				"gender": "male",
+				"keywords": [
+					"OC"
+				]
+			},
+			"ImpyThree": {
+				"name": "Impy Three",
+				"race": "pegasus",
+				"gender": "female",
+				"action": "ship",
+				"keywords": [
+					"Batpony",
+					"OC"
+				]
+			},
+			"LotusHeatPetalSpark": {
+				"name": "Lotus Heat & Petal Spark",
+				"race": "pegasus",
+				"count": 2,
+				"gender": "female",
+				"keywords": [
+					"OC",
+					"Twins"
+				]
+			},
+			"SkyeCandi": {
+				"name": "SkyeCandi",
+				"race": "earth",
+				"gender": "malefemale",
+				"keywords": [
+					"OC",
+					"#horsefamous"
+				]
+			},
+			"BlownWing": {
+				"name": "Blown Wing",
+				"race": "pegasus",
+				"gender": "female",
+				"keywords": [
+					"Object",
+					"OC"
+				]
+			},
+			"Sassaflash": {
+				"name": "Sassaflash",
+				"race": "pegasus",
+				"gender": "female",
+				"action": "replace",
+				"keywords": []
+			},
+			"PrinceArtemis": {
+				"name": "Luna",
+				"race": "alicorn",
+				"gender": "male",
+				"keywords": [
+					"Elder",
+					"Prince"
+				]
+			},
+			"FirefighterCelestia": {
+				"name": "Celestia",
+				"race": "alicorn",
+				"gender": "female",
+				"action": "replace",
+				"keywords": [
+					"Elder",
+					"Princess"
+				]
+			},
+			"SoftShipping": {
+				"name": "Soft Shipping",
+				"race": "pegasus",
+				"gender": "male",
+				"keywords": [
+					"OC"
+				]
+			},
+			"SpacePrincePercy": {
+				"name": "Space Prince Percy",
+				"race": "earth",
+				"gender": "male",
+				"keywords": [
+					"OC"
+				]
+			},
+			"RubyBlossom": {
+				"name": "Ruby Blossom",
+				"race": "earth/unicorn",
+				"gender": "female",
+				"action": "replace",
+				"keywords": [
+					"OC"
+				]
+			},
+			"Abarenbou": {
+				"name": "Abarenbou",
+				"race": "unicorn",
+				"gender": "male",
+				"keywords": [
+					"OC"
+				]
+			},
+			"WaifuThiefFlashSentry": {
+				"name": "Waifu Thief Flash Sentry",
+				"race": "pegasus",
+				"gender": "male",
+				"keywords": [
+					"Villain"
+				]
+			},
+			"VigilantWatch": {
+				"name": "Vigilant Watch",
+				"race": "pegasus",
+				"gender": "male",
+				"keywords": [
+					"OC"
+				]
+			},
+			"LunarOverlordTwilight": {
+				"name": "Twilight Sparkle",
+				"race": "alicorn",
+				"gender": "female",
+				"keywords": [
+					"Villain",
+					"Mane 6"
+				]
+			},
+			"InkyBrushstroke": {
+				"name": "Inky Brushstroke",
+				"race": "pegasus",
+				"gender": "female",
+				"keywords": [
+					"Batpony",
+					"OC"
+				]
+			},
+			"PixelPrism": {
+				"name": "Pixel Prism",
+				"race": "unicorn",
+				"gender": "female",
+				"keywords": [
+					"Dragon",
+					"OC",
+					"#horsefamous"
+				]
+			},
+			"CaptainMwai": {
+				"name": "Captain Mwai",
+				"race": "earth",
+				"gender": "male",
+				"keywords": [
+					"Zebra",
+					"OC",
+					"#horsefamous"
+				]
+			},
+			"TrickCandle": {
+				"name": "Trick Candle",
+				"race": "earth",
+				"gender": "male",
+				"changeGoalPointValues": true,
+				"keywords": [
+					"OC",
+					"#horsefamous"
+				]
+			},
+			"Aria": {
+				"name": "Aria",
+				"gender": "female",
+				"keywords": [
+					"Dragon",
+					"OC"
+				]
+			},
+			"ValveGear": {
+				"name": "Valve Gear",
+				"race": "earth",
+				"gender": "female",
+				"keywords": [
+					"OC",
+					"Object"
+				]
+			},
+			"Plushling": {
+				"name": "Plushling",
+				"gender": "malefemale",
+				"action": "ChangelingNoRedisguise(plushling)",
+				"keywords": [
+					"Changeling",
+					"Object",
+					"OC"
+				]
+			},
+			"Zero": {
+				"name": "Zero",
+				"race": "pegasus",
+				"gender": "male",
+				"action": "newGoal",
+				"keywords": [
+					"Batpony",
+					"OC"
+				]
+			},
+			"SwiftSketch": {
+				"name": "Swift Sketch",
+				"race": "unicorn",
+				"gender": "female",
+				"keywords": [
+					"OC",
+					"#horsefamous"
+				]
+			},
+			"KingVespid": {
+				"name": "King Vespid",
+				"gender": "male",
+				"action": "ChangelingNoRedisguise(replace)",
+				"keywords": [
+					"Changeling",
+					"OC"
+				]
+			},
+			"StarlitDreams": {
+				"name": "Starlit Dreams",
+				"race": "earth",
+				"gender": "female",
+				"keywords": [
+					"Changeling",
+					"OC"
+				]
+			}
+		},
+		"ship": {
+			"ASnugglebytheFire": {
+				"name": "A Snuggle by the Fire"
+			},
+			"LoveontheFriendshipExpress": {
+				"name": "Love on the Friendship Express"
+			},
+			"MurderTurnsMeOn": {
+				"name": "Murder Turns Me On"
+			},
+			"CoffeeIntensifies": {
+				"name": "[Coffee Intensifies]"
+			},
+			"Infestivities": {
+				"name": "Infestivities"
+			}
+		},
+		"goal": {
+			"ThisShipIsDelicious": {
+				"goalLogic": "ExistsPonyShippedTo(name=Pinkie Pie, AllOf(name=Luna,name=Twilight Sparkle,name=Applejack))",
+				"points": "4"
+			},
+			"FromForeignLands": {
+				"goalLogic": "ExistsShip(Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords, Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords)",
+				"points": "2"
+			},
+			"FateBreakers": {
+				"goalLogic": "ExistsShip(name=Logic Gate, name=Flickering Oracle)",
+				"points": "2"
+			},
+			"DarkHorseDanceCard": {
+				"goalLogic": "PlayShips(OC in keywords, OC in keywords, 2)",
+				"points": "3"
+			},
+			"OMiGoshBugHug": {
+				"goalLogic": "ExistsShip(name=Starlit Dreams, card=Core.Start.FanficAuthorTwilight)",
+				"points": "2"
+			},
+			"AfterThisWellNeedRehab": {
+				"goalLogic": "ExistsShip(#horsefamous in keywords,#horsefamous in keywords)",
+				"points": "2"
+			},
+			"WhyIsEveryThingGlowing": {
+				"goalLogic": "ExistsPonyShippedTo(*, Select(OC in keywords, 4))",
+				"points": "1"
+			}
+		}
+	}
+}

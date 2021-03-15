@@ -1,11 +1,12 @@
 import * as LobbyView from "./lobbyView.js";
 
-import {cardSelectComponent} from "./cardSelectComponent.js";
+import {cardSelectComponent, cardBoxSelectComponent} from "./cardSelectComponent.js";
 import {makeCardElement} from "../game/cardComponent.js";
 import {isStart, Card} from "../../server/lib.js";
 import cards from "../../server/cards.js";
 
 import {WebSocketPlus} from "../viewSelector.js";
+import packOrder from "./packOrder.js";
 
 var gameOptionsDiv: HTMLElement;
 var chooseCardsDiv: HTMLElement;
@@ -60,44 +61,36 @@ export function loadView(isOpen: boolean)
 
 		var cardBoxes = document.getElementsByClassName('cardbox')
 
-		var deckInfo: ([string] | [string, string]| [string, string, Element])[] = [
-			["Core", "Core.*", cardBoxes[0]],
-			["Extra Credit", "EC.*", cardBoxes[1]],
-			["Ponyville University","PU.*", cardBoxes[2]],
-			["No Holds Barred", "NoHoldsBarred.*", cardBoxes[3]],
 
-			["<h3>Mini Expansions</h3>"],
-
-			["2014 Con Exclusives", "HorriblePeople.2014ConExclusives.*"],
-			["2015 Con Exclusives", "HorriblePeople.2015ConExclusives.*"],
-			["2015 Workshop Panels", "HorriblePeople.2015Workshop.*"],
-			["Adventure Pack", "HorriblePeople.AdventurePack.*"],
-			["Dungeon Delvers", "HorriblePeople.DungeonDelvers.*"],
-			["Fluffle Puff", "HorriblePeople.FlufflePuff.*"],
-			["Gracious Givers", "HorriblePeople.GraciousGivers.*"],
-			["Hearthswarming", "HorriblePeople.Hearthswarming.*"],
-			["The Mean 6", "HorriblePeople.Mean6.*"],
-			["Weaboo Paradaisu", "HorriblePeople.WeeabooParadaisu.*"],
-			["NewNewCore / Misc", "HorriblePeople.Misc.*"]
-		];
 
 		var cardSelectors = document.getElementById('cardSelectors')!;
 
 		var deckElementList: HTMLElement[] = [];
-		for(var info of deckInfo)
+		for(var info of packOrder)
 		{
-
-			if(info.length == 1)
+			if(info.h)
 			{
-				let el = document.createElement('div');
-				el.innerHTML = info[0] as string;
+				let el = document.createElement('h3');
+				el.innerHTML = info.h as string;
 				cardSelectors.appendChild(el);
 				continue;
 			}
 
+			if(info.length == 1)
+			{
+				
+			}
+
 			info = info as [string, string, Element];
 
-			let el = cardSelectComponent(globals.decks, ...info )
+			let boxSelect = undefined;
+			if(info.box)
+			{
+				boxSelect = cardBoxSelectComponent(info.pack);
+				document.getElementById('expansions')!.appendChild(boxSelect);
+			}
+
+			let el = cardSelectComponent(globals.decks, info.name, info.pack + ".*", boxSelect)
 			deckElementList.push(el)
 			deckElements[info[1]] = el;
 			cardSelectors.appendChild(el);

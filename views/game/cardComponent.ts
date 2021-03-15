@@ -801,11 +801,11 @@ function loadCard(card: Card)
 		var nodes = card.split(".");
 		nodes.pop();
 
-		var urlToImg = "/img/" + nodes.join("/") + "/" + cards[card].url;
+		var urlToImg = "/packs/" + card.split(".").join("/");
 
 		cards[card].keywords = new Set(cards[card].keywords);
-		cards[card].fullUrl = urlToImg;
-		cards[card].thumbnail = urlToImg.replace(".png",".thumb.jpg");
+		cards[card].fullUrl = urlToImg + ".png";
+		cards[card].thumbnail = urlToImg + ".thumb.jpg";
 	}
 }
 

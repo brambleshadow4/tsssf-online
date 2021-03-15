@@ -1,0 +1,70 @@
+{
+	"name": "Hearthswarming",
+	"description": "",
+	"format": "pack:1",
+	"root": "tsssf.net/packs",
+	"namespace": "HorriblePeople.Hearthswarming",
+	"cards": {
+		"start": {},
+		"pony": {
+			"HondoFlanks": {
+				"name": "Hondo Flanks",
+				"race": "unicorn",
+				"gender": "male",
+				"action": "draw",
+				"keywords": []
+			},
+			"CookieCrumbles": {
+				"name": "Cookie Crumbles",
+				"race": "unicorn",
+				"gender": "female",
+				"action": "swap",
+				"keywords": []
+			},
+			"ApplejacksParents": {
+				"name": "Applejack's Parents",
+				"race": "earth",
+				"gender": "malefemale",
+				"count": 2,
+				"keywords": [
+					"Apple"
+				]
+			},
+			"CloudyQuartz": {
+				"name": "Cloudy Quartz",
+				"race": "earth",
+				"gender": "female",
+				"keywords": []
+			},
+			"IgneousRock": {
+				"name": "Igneous Rock",
+				"race": "earth",
+				"gender": "male",
+				"keywords": []
+			},
+			"TwilightVelvet": {
+				"name": "Twilight Velvet",
+				"race": "unicorn",
+				"gender": "female",
+				"action": "swap",
+				"keywords": []
+			},
+			"NightLight": {
+				"name": "Night Light",
+				"race": "unicorn",
+				"gender": "male",
+				"action": "draw",
+				"keywords": []
+			},
+			"RainbowBlaze": {
+				"name": "Rainbow Blaze",
+				"race": "pegasus",
+				"gender": "male",
+				"action": "replace",
+				"keywords": []
+			}
+		},
+		"ship": {},
+		"goal": {}
+	}
+}

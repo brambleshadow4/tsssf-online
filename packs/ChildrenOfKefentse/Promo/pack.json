@@ -1,0 +1,29 @@
+{
+	"name": "ChildrenOfKefentse.Promo",
+	"description": "",
+	"format": "pack:1",
+	"root": "tsssf.net/packs",
+	"namespace": "ChildrenOfKefentse.Promo",
+	"cards": {
+		"start": {
+			"FanficEditorStarlight": {
+				"name": "Starlight Glimmer",
+				"race": "unicorn",
+				"gender": "female",
+				"changeGoalPointValues": true,
+				"keywords": []
+			},
+			"DizzyFrizzyPatronSaintOfShippers": {
+				"name": "Dizzy Frizzy",
+				"race": "earth",
+				"gender": "female",
+				"keywords": [
+					"OC"
+				]
+			}
+		},
+		"pony": {},
+		"ship": {},
+		"goal": {}
+	}
+}

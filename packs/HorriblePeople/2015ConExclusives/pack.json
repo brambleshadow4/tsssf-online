@@ -1,0 +1,64 @@
+{
+	"name": "2015 Con Exclusives",
+	"description": "",
+	"format": "pack:1",
+	"root": "tsssf.net/packs",
+	"namespace": "HorriblePeople.2015ConExclusives",
+	"cards": {
+		"start": {
+			"FanficAuthorDiscord": {
+				"name": "Discord",
+				"race": "alicorn",
+				"gender": "male",
+				"changeGoalPointValues": true
+			}
+		},
+		"pony": {
+			"DreamboatBrad": {
+				"name": "Flash Sentry",
+				"race": "pegasus",
+				"gender": "male",
+				"keywords": []
+			},
+			"AnEntireSwarmOfBreezies": {
+				"name": "An Entire Swarm of Breezies",
+				"race": "pegasus",
+				"gender": "malefemale",
+				"count": 10,
+				"keywords": [
+					"Breezy"
+				]
+			},
+			"FashionIconStevenMagnet": {
+				"name": "Steven Magnet",
+				"race": "earth",
+				"gender": "male",
+				"action": "copy",
+				"keywords": [
+					"Dragon"
+				]
+			},
+			"MistressOfEqualityStarlightGlimmer": {
+				"name": "Starlight Glimmer",
+				"race": "unicorn",
+				"gender": "female",
+				"changeGoalPointValues": true,
+				"keywords": [
+					"Villain"
+				]
+			},
+			"TheTantabus": {
+				"name": "The Tantabus",
+				"keywords": [
+					"Villain"
+				]
+			}
+		},
+		"ship": {
+			"ObjectofAdoration": {
+				"action": "addKeywords(Object)"
+			}
+		},
+		"goal": {}
+	}
+}

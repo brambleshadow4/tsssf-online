@@ -1,0 +1,231 @@
+{
+	"name": "Extra Credit",
+	"description": "",
+	"format": "pack:1",
+	"root": "tsssf.net/packs",
+	"namespace": "EC",
+	"cards": {
+		"start": {},
+		"pony": {},
+		"ship": {
+			"OverACozyCampfire": {
+				"name": "Over a Cozy Campfire"
+			},
+			"TheNoodleIncident": {
+				"name": "The Noodle Incident"
+			},
+			"BlindDate": {
+				"name": "Blind Date",
+				"action": "keywordChange"
+			},
+			"ScienceExperiments": {
+				"name": "Science Experiments!",
+				"action": "clone"
+			},
+			"HighSchoolSweethearts": {
+				"name": "High School Sweethearts"
+			},
+			"PrettiestPonyOfTheYear": {
+				"name": "Prettiest Pony of the Year"
+			},
+			"FillyImFabulous": {
+				"name": "Filly, I'm Fabulous"
+			},
+			"BodyDouble": {
+				"name": "Body Double",
+				"action": "clone"
+			},
+			"FavorForAFriend": {
+				"name": "Favor for a Friend"
+			},
+			"AwkwardDanceParty": {
+				"name": "Awkward Dance Party"
+			},
+			"AMurderMostFoul": {
+				"name": "A Murder Most Foul!"
+			},
+			"SlumberParty": {
+				"name": "Slumber Party"
+			},
+			"LongForgottenMemories": {
+				"name": "Long-Forgotten Memories",
+				"action": "keywordChange"
+			},
+			"TheChosenOnes": {
+				"name": "The Chosen Ones"
+			},
+			"Makeover": {
+				"name": "Makeover!",
+				"action": "genderChange"
+			},
+			"WackyTragicCircumstances": {
+				"name": "Wacky Tragic Circumstances"
+			},
+			"ForbiddenMagicMacguffin": {
+				"name": "Forbidden Magic Macguffin",
+				"action": "keywordChange"
+			},
+			"ClashingOfWills": {
+				"name": "Clashing of Wills"
+			},
+			"SuddenUnexplainedOffspring": {
+				"name": "Sudden Unexplained Offspring"
+			},
+			"WebOfDeceit": {
+				"name": "Web of Deceit",
+				"action": "keywordChange"
+			},
+			"WhatHappensInLasPegasus": {
+				"name": "What Happens In Las Pegasus..."
+			},
+			"ADarkAndTerribleSecret": {
+				"name": "A Dark and Terrible Secret"
+			},
+			"VisitToTheMirrorPool": {
+				"name": "Visit to the Mirror Pool",
+				"action": "clone"
+			},
+			"MayIHaveThisDance": {
+				"name": "May I Have This Dance"
+			},
+			"SnowfallStroll": {
+				"name": "Snowfall Stroll"
+			},
+			"SpontaneousMusicalNumber": {
+				"name": "Spontaneous Musical Number"
+			},
+			"ImpendingDoom": {
+				"name": "Impending Doom"
+			}
+		},
+		"goal": {
+			"FamilyAppreciationDay": {
+				"name": "Family Appreciation Day",
+				"goalLogic": "ExistsChain(Apple in keywords,4)",
+				"points": "2"
+			},
+			"BigMacIsBigMackin": {
+				"name": "Big Mac is Big Mackin'",
+				"goalLogic": "ExistsPonyShippedTo(name=Big Macintosh, Select(gender=female,3))",
+				"points": "2"
+			},
+			"MyWaifu": {
+				"name": "My Waifu",
+				"goalLogic": "ExistsShip(OC in keywords,Mane 6 in keywords)",
+				"points": "2"
+			},
+			"BookClub": {
+				"name": "Book Club",
+				"goalLogic": "ExistsPonyShippedTo(name=Twilight Sparkle, Select(*,5))",
+				"points": "3"
+			},
+			"EnjoyingTheScenery": {
+				"name": "Enjoying the Scenery",
+				"goalLogic": "ExistsPonyShippedTo(name=Rarity, Select(*,4))",
+				"points": "1"
+			},
+			"IronPonyCompetition": {
+				"name": "Iron Pony Competition",
+				"goalLogic": "ExistsPonyShippedTo(name=Rainbow Dash, Select(*,4))",
+				"points": "1"
+			},
+			"CiderSqueezin": {
+				"name": "Cider Squeezin'",
+				"goalLogic": "ExistsPonyShippedTo(name=Applejack, Select(*,4))",
+				"points": "1"
+			},
+			"AintNoPartyLikeAPinkiePieParty": {
+				"name": "Ain't No Party Like a Pinkie Pie Party",
+				"goalLogic": "ExistsPonyShippedTo(name=Pinkie Pie, Select(*,4))",
+				"points": "1"
+			},
+			"Recruitment": {
+				"name": "Recruitment",
+				"goalLogic": "ExistsPonyShippedTo(name=Fluttershy, Select(*,4))",
+				"points": "1"
+			},
+			"PlayingTheGame": {
+				"name": "Playing the Game",
+				"goalLogic": "ExistsPonyShippedTo(gender=male, Select(gender=female, 4))",
+				"points": "1"
+			},
+			"IReallyLikeHerMane": {
+				"name": "I Really Like Her Mane!",
+				"goalLogic": "BreakShip(name=Smarty Pants,*)",
+				"points": "2"
+			},
+			"PickyPicky": {
+				"name": "Picky Picky!",
+				"points": "1"
+			},
+			"BewareTheGroove": {
+				"name": "Beware the Groove",
+				"goalLogic": "BreakShip(Elder in keywords, race=alicorn)",
+				"points": "2"
+			},
+			"ABlessingOfAlicorns": {
+				"name": "A Blessing of Alicorns",
+				"goalLogic": "ExistsPony(race=alicorn, 5)",
+				"points": "2"
+			},
+			"TheresNoThrillLikeIronWill": {
+				"name": "There's No ThrillLike Iron Will",
+				"goalLogic": "ExistsShip(name=Iron Will,Villain in keywords)",
+				"points": "2"
+			},
+			"OfPoniesAndPerilTheMagnumOpus": {
+				"name": "Of Ponies and Peril: The Magnum Opus",
+				"goalLogic": "ExistsChain(altTimeline=true,3)",
+				"points": "2"
+			},
+			"Swinging": {
+				"name": "Swinging",
+				"goalLogic": "ExistsPonyShippedTo(*, AllOf(name=Mr. Cake, name=Mrs. Cake))",
+				"points": "3"
+			},
+			"SpaDay": {
+				"name": "Spa Day",
+				"goalLogic": "ExistsShip(Mane 6 in keywords, name=Aloe & Lotus)",
+				"points": "2"
+			},
+			"NoPoniesCanPonyTwoPoniesToPony": {
+				"name": "No Ponies Can Pony Two Ponies to Pony",
+				"goalLogic": "ExistsPonyShippedTo(*, Select(*, 6))",
+				"points": "4"
+			},
+			"EvilSocietyOfEvil": {
+				"name": "Evil Society of Evil",
+				"goalLogic": "ExistsChain(Villain in keywords, 6)",
+				"points": "3"
+			},
+			"FluttershysHomeForRedeemedEvilDoers": {
+				"name": "Fluttershy's Home for Redeemed Evil-Doers",
+				"goalLogic": "ExistsPonyShippedTo(name=Fluttershy, Select(Villain in keywords, 3))",
+				"points": "2"
+			},
+			"Landslide": {
+				"name": "Landslide",
+				"points": "0"
+			},
+			"FleetAdmiral": {
+				"name": "Fleet Admiral",
+				"goalLogic": "PlayShips(*, *, 7)",
+				"points": "3"
+			},
+			"CoupDetat": {
+				"name": "Coup d'etat",
+				"points": "3"
+			},
+			"FriendsInHighPlaces": {
+				"name": "Friends in High Places",
+				"goalLogic": "ExistsPonyShippedTo(OC in keywords, Select(Princess in keywords, 2))",
+				"points": "3"
+			},
+			"Recolor": {
+				"name": "Recolor",
+				"goalLogic": "ExistsPony(OC in keywords && OC !in keywords_b, 1)",
+				"points": "2"
+			}
+		}
+	}
+}

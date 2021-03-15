@@ -21,7 +21,6 @@ import {
 } from "./lib.js";
 
 
-// @ts-ignore
 import {evalGoalCard, getConnectedPonies} from "./goalCriteria.js"
 import cards from "./cards.js";
 import {logGameHosted, logPlayerJoined} from "./stats.js";
