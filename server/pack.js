@@ -1,4 +1,5 @@
 import fs from "fs";
+import sharp from "sharp";
 
 
 function findPacks(topFolder, path, packs)
@@ -30,6 +31,22 @@ function validatePack(pack, namespace)
 	if(pack.format !== "pack:1") throw new Error("Pack " + filename + " must be in pack:1 format");
 	if(typeof pack.namespace !== "string") throw new Error("Pack " + filename + " needs a namespace");
 	if(typeof pack.cards !== "object") throw new Error("Pack " + filename + " does not have a valid cards property");
+
+	if(pack.cards.pony)
+	{
+		let errors = [];
+		for(var key in pack.cards.pony)
+		{
+			let card = pack.cards.pony[key];
+			if(typeof card.name !== "string") errors.push("pony " + key + " doesn't have a valid name property");
+			if(!Array.isArray(card.keywords)) errors.push("pony " + key + " doesn't have a valid keywords property");
+		}
+
+		if(errors.length)
+		{
+			console.error("ERROR in Pack " + filename + ":\n" + errors.join("\n"));
+		}
+	}
 }
 
 
@@ -60,6 +77,8 @@ for(let namespace of packsSet)
 
 		validatePack(pack, namespace);
 
+
+		let startCards = [];
 		for(let cardType of ["Pony","Start","Ship","Goal"])
 		{
 			let typeKey = cardType.toLowerCase();
@@ -69,6 +88,21 @@ for(let namespace of packsSet)
 				{
 					let cardName = namespace + "." + cardType + "." + key;
 					cards[cardName] = pack.cards[typeKey][key];
+
+					// generate thumbnail
+					let imageName = "./packs/" + cardName.split(".").join("/");
+					let pngImage = imageName + ".png";
+					let thumbImage = imageName + ".thumb.jpg";
+
+					if(fs.existsSync(pngImage) && !fs.existsSync(thumbImage))
+					{
+						sharp(pngImage).resize(197, 272).toFile(thumbImage);
+					}
+
+					if(typeKey == "start")
+					{
+						startCards.push(cardName);
+					}
 				}
 			}
 		};
@@ -76,6 +110,7 @@ for(let namespace of packsSet)
 		packMetadata.pack = namespace;
 		packMetadata.name = pack.name;
 		packMetadata.box = fs.existsSync(filename.replace("pack.json","box.png"));
+		packMetadata.startCards = startCards
 		packs[namespace] = packMetadata;
 	}
 	catch(e)
@@ -98,7 +133,7 @@ if(fs.existsSync("./packs/order.json"))
 		{
 			if(typeof obj == "string" && !packsSet.has(obj))
 			{
-				console.error("Pack " + obj + " does not exist");
+				console.error("ERROR: Pack " + obj + " does not exist");
 			}
 		}
 	}
@@ -106,20 +141,18 @@ if(fs.existsSync("./packs/order.json"))
 	{
 		console.error(e);
 	}
-
-	console.log(order.slice());
 }
 else
 {
 	console.log("order.json not found. Using default order");
-	order = [...packs];
+	order = Object.keys(packs);
 
 	order.sort((a,b) => {
 
 		let anamespace = a.split(".");
 		let bnamespace = b.split(".");
 
-		if(anamespace.length < bnamespace)
+		if(anamespace.length < bnamespace.length)
 			return -1;
 		else if (bnamespace.length < anamespace.length)
 			return 1;
@@ -131,90 +164,6 @@ else
 }
 
 order = order.map( x => packs[x] ? packs[x] : x );
+order = order.filter(x => typeof x == "object" || packs[x]);
 
 fs.writeFileSync("./views/lobby/packOrder.ts", "var order: any[] = " + JSON.stringify(order, undefined,"\t") + "\nexport default order");
-
-/*
-let cards:any = JSON.parse(fs.readFileSync("cards.json", 'utf8'));
-let packs: any = {};
-
-for (let key in cards)
-{
-	//console.log(key);
-	let fullName = key.split(".");
-
-	let namespace = fullName.slice();
-	let cardName = namespace.pop() as string;
-	let cardType = namespace.pop();
-
-
-
-	let cardFileName = "../packs/" + fullName.join("/") + ".png";
-	let namespaceStr = namespace.join('.');
-
-	if(!packs[namespaceStr])
-	{
-		packs[namespaceStr] = {
-			
-			name: namespaceStr,
-			description: "",
-			format: "pack:1",
-			root: "tsssf.net/packs",
-			namespace: namespaceStr,
-			cards:{
-				start:{},
-				pony:{},
-				ship:{},
-				goal:{}
-			}
-		}
-	}
-
-	let oldFileName = cardFileName.replace(cardName + ".png", cards[key].url);
-
-	if(!fs.existsSync(cardFileName) && cards[key].url && fs.existsSync(oldFileName))
-	{
-		fs.renameSync(oldFileName, cardFileName);
-
-		oldFileName = oldFileName.replace(".png",".thumb.jpg");
-		cardFileName = cardFileName.replace(".png",".thumb.jpg");
-
-		fs.renameSync(oldFileName, cardFileName);
-	}
-
-	delete cards[key].url;
-
-	switch(cardType)
-	{
-		case "Pony":
-			packs[namespaceStr].cards.pony[cardName] = cards[key];
-			break;
-		case "Start":
-			packs[namespaceStr].cards.start[cardName] = cards[key];
-			break;
-		case "Ship":
-			packs[namespaceStr].cards.ship[cardName] = cards[key];
-			break;
-		case "Goal":
-			packs[namespaceStr].cards.goal[cardName] = cards[key];
-			break;
-	}
-
-
-}
-
-for(let key in packs)
-{
-	let pack = packs[key];
-
-	let namespace = key.split(".");
-
-
-	let filename = "../packs/" + namespace.join("/") + "/pack.json";
-	console.log(filename);
-
-	fs.writeFileSync(filename, JSON.stringify(pack, undefined, '\t'));
-
-	
-}
-*/

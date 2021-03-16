@@ -122,7 +122,9 @@ export function loadView(isOpen: boolean)
 
 		var startCards = document.getElementById('startCards')!;
 
-		for(var card of Object.keys(cards).filter(x => isStart(x)))
+		var startCardNames = packOrder.map(x => x.startCards || []).reduce((a,b) => a.concat(b), []);
+
+		for(var card of startCardNames)
 		{
 			let cardEl = makeCardElement(card);
 			var shield = document.createElement('div');

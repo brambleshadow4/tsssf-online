@@ -151,10 +151,13 @@ export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: st
 	var no = 0;
 	var shiftSelect = -1;
 
+	var added = 0;
+
 	for (var card in cards)
 	{
 		if(card.startsWith(match) && !isStart(card))
 		{
+			added++;
 			let cardEl = makeCardElement(card);
 			var shield = document.createElement('div');
 
@@ -204,7 +207,10 @@ export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: st
 	
 	div.appendChild(body);
 
-	return div;
+	if(added)
+		return div;
+	else 
+		return document.createElement('div');
 }
 
 export function cardBoxSelectComponent(namespace: string)
