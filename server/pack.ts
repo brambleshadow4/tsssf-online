@@ -1,8 +1,65 @@
-import fs from "fs";
+
+import fs from 'fs';
+
 import sharp from "sharp";
 
 
-function findPacks(topFolder, path, packs)
+function validatePack(pack:any, namespace:string): string[]
+{
+	if(pack.format !== "pack:1") throw new Error("Pack " + filename + " must be in pack:1 format");
+	if(typeof pack.namespace !== "string") throw new Error("Pack " + filename + " needs a namespace");
+	if(typeof pack.cards !== "object") throw new Error("Pack " + filename + " does not have a valid cards property");
+
+	let errors: string[] = [];
+	if(pack.cards.pony)
+	{
+		
+		for(var key in pack.cards.pony)
+		{
+			let card = pack.cards.pony[key];
+
+			//console.log(key);
+			errors = errors.concat(validateCard(key, "Pony", card));
+		}
+	}
+
+	return errors;
+}
+
+
+function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | "Goal", card: any): string[]
+{
+	var errors = [];
+	var genders = new Set(["male","female","malefemale"]);
+	var races = new Set(["earth","pegasus","unicorn","alicorn", "earth/unicorn"]);
+
+	var ponyProps = new Set(["gender","race","name", "keywords"]);
+
+
+	if(cardType == "Pony")
+	{
+		if(typeof card.name !== "string") errors.push("pony " + name + " doesn't have a valid name property");
+		if(!Array.isArray(card.keywords)) errors.push("pony " + name + " doesn't have a valid keywords property");
+
+		if(card.gender && !genders.has(card.gender)) errors.push("pony " + name + " has an invalid gender value: " + card.gender);
+		if(card.race && !races.has(card.race)) errors.push("pony " + name + " has an invalid race value: " + card.race);
+		if(card.altTimeline && card.altTimeline !== true) errors.push("pony " + name + " has an invalid altTimeline value: " + card.race);
+
+		for(var key of Object.keys(card))
+		{
+			if(!ponyProps.has(key))
+			{
+				errors.push("pony " + name + " has an invalid prop: " + key);
+			}
+		}
+		//console.log(card.race);
+	}
+	return errors;
+}
+
+
+
+function findPacks(topFolder:any, path:any, packs:any)
 {
 
 	let files = fs.readdirSync(path);
@@ -26,35 +83,11 @@ function findPacks(topFolder, path, packs)
 	return packs;
 };
 
-function validatePack(pack, namespace)
-{
-	if(pack.format !== "pack:1") throw new Error("Pack " + filename + " must be in pack:1 format");
-	if(typeof pack.namespace !== "string") throw new Error("Pack " + filename + " needs a namespace");
-	if(typeof pack.cards !== "object") throw new Error("Pack " + filename + " does not have a valid cards property");
-
-	if(pack.cards.pony)
-	{
-		let errors = [];
-		for(var key in pack.cards.pony)
-		{
-			let card = pack.cards.pony[key];
-			if(typeof card.name !== "string") errors.push("pony " + key + " doesn't have a valid name property");
-			if(!Array.isArray(card.keywords)) errors.push("pony " + key + " doesn't have a valid keywords property");
-		}
-
-		if(errors.length)
-		{
-			console.error("ERROR in Pack " + filename + ":\n" + errors.join("\n"));
-		}
-	}
-}
-
-
 
 let packsSet = findPacks("./packs/", "./packs", new Set());
-let packs = {};
+let packs: any = {};
 
-let cards = {};
+let cards: any = {};
 
 for(let namespace of packsSet)
 {
@@ -63,7 +96,7 @@ for(let namespace of packsSet)
 	let packJSON = fs.readFileSync(filename, "utf8");
 
 	let pack;
-	let packMetadata = {};
+	let packMetadata: any = {};
 
 	try{
 
@@ -75,7 +108,13 @@ for(let namespace of packsSet)
 			throw new Error("Error parsing JSON file: " + filename);
 		}
 
-		validatePack(pack, namespace);
+
+		var errors = validatePack(pack, namespace);
+		if(errors.length)
+		{
+			console.error("\nERROR in Pack " + filename + ":\n" + errors.join("\n"));
+		}
+		
 
 
 		let startCards = [];
@@ -163,7 +202,7 @@ else
 	})
 }
 
-order = order.map( x => packs[x] ? packs[x] : x );
-order = order.filter(x => typeof x == "object" || packs[x]);
+order = order.map( (x:any) => packs[x] ? packs[x] : x );
+order = order.filter((x:any) => typeof x == "object" || packs[x]);
 
 fs.writeFileSync("./views/lobby/packOrder.ts", "var order: any[] = " + JSON.stringify(order, undefined,"\t") + "\nexport default order");
