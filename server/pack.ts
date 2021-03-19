@@ -1,8 +1,7 @@
 
 import fs from 'fs';
-
 import sharp from "sharp";
-
+import {typecheckGoal} from "./goalCriteria.js";
 
 function validatePack(pack:any, namespace:string): string[]
 {
@@ -17,9 +16,19 @@ function validatePack(pack:any, namespace:string): string[]
 		for(var key in pack.cards.pony)
 		{
 			let card = pack.cards.pony[key];
-
-			//console.log(key);
 			errors = errors.concat(validateCard(key, "Pony", card));
+		}
+
+		for(var key in pack.cards.start)
+		{
+			let card = pack.cards.start[key];
+			errors = errors.concat(validateCard(key, "Start", card));
+		}
+
+		for(var key in pack.cards.goal)
+		{
+			let card = pack.cards.goal[key];
+			errors = errors.concat(validateCard(key, "Goal", card));
 		}
 	}
 
@@ -33,27 +42,64 @@ function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | "Goal",
 	var genders = new Set(["male","female","malefemale"]);
 	var races = new Set(["earth","pegasus","unicorn","alicorn", "earth/unicorn"]);
 
-	var ponyProps = new Set(["gender","race","name", "keywords"]);
+	var ponyProps = new Set(["gender","race","name", "keywords", "action", "altTimeline", "count", "changeGoalPointValues"]);
 
 
-	if(cardType == "Pony")
+	if(cardType == "Pony" || cardType == "Start")
 	{
 		if(typeof card.name !== "string") errors.push("pony " + name + " doesn't have a valid name property");
 		if(!Array.isArray(card.keywords)) errors.push("pony " + name + " doesn't have a valid keywords property");
 
 		if(card.gender && !genders.has(card.gender)) errors.push("pony " + name + " has an invalid gender value: " + card.gender);
 		if(card.race && !races.has(card.race)) errors.push("pony " + name + " has an invalid race value: " + card.race);
-		if(card.altTimeline && card.altTimeline !== true) errors.push("pony " + name + " has an invalid altTimeline value: " + card.race);
+		if(card.altTimeline && card.altTimeline !== true) errors.push("pony " + name + " has an invalid altTimeline value: " + card.altTimeline);
+		if(card.changeGoalPointValues && card.changeGoalPointValues !== true) errors.push("pony " + name + " has an invalid changeGoalPointValues value: " + card.changeGoalPointValues);
+		if(card.count && typeof card.count !== "number") errors.push("pony " + name + " has an invalid count value: " + card.count);
+
 
 		for(var key of Object.keys(card))
 		{
 			if(!ponyProps.has(key))
 			{
-				errors.push("pony " + name + " has an invalid prop: " + key);
+				errors.push("pony " + name + " has an extra prop: " + key);
 			}
 		}
 		//console.log(card.race);
 	}
+
+	if(cardType == "Goal")
+	{
+		if(!card.points)
+			errors.push("goal " + name + " is missing the points property");
+		else
+		{
+			if(typeof card.points !== "number" && typeof card.points !== "string") 
+			{
+				errors.push("goal " + name + " has an invalid points property: " + card.points);
+				return errors;
+			}
+
+			if(isNaN(Number(card.points)))
+			{
+				let [a,b] = card.points.split("-");
+
+				if(isNaN(Number(a)) || isNaN(Number(b)))
+				{
+					errors.push("goal " + name + " has an invalid points value: " + card.points);
+				}
+			}
+		}
+
+		try{
+			typecheckGoal(card);
+		}
+		catch(e)
+		{
+			errors.push("goal " + name + "\n" + e.toString());
+		}
+		
+	}
+
 	return errors;
 }
 

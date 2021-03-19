@@ -19,19 +19,23 @@ Running from source
 
 Prerequisites: Familiarity with node/npm.
 
-###  One time setup
+###  One time setup ###
 
 	git clone <link-to-repo>
 	cd <repo-folder>
 	npm install 
 	npm run tsc
-	cd ./img
-	py generateThumbnails.py
+	npm run buildPacks
+	npm run tsc
 
-Note that the card thumbnails are not stored in the repository. Rather, 
-they are generated programmatically using a python script.
+npm run buildPacks will install any card packs stored in the packs directory, generating the 
+image thumbnails as well as overwritting cards.ts and packOrder.ts.
+Since these files are generated, any future changes to them can be ignored with the following:
 
-### Running the server
+	git update-index --assume-unchanged ./views/lobby/packOrder.ts
+	git update-index --assume-unchanged ./server/cards.ts
+
+### Running the server ###
 
 	node server/server.js
 

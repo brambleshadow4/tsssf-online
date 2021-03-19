@@ -757,42 +757,30 @@ function AllOf(...selectors: string[])
 	
 }
 
-function typecheckAllGoals(cards: {[key: string]: any})
+export function typecheckGoal(card: any)
 {
-	for(var card in cards)
+	if(card.goalFun == undefined)
 	{
-		try
+		card.goalFun = false;
+
+		if(card.goalLogic)
 		{
-			if(cards[card].goalLogic)
-			{
-				var fun = goalLogicParser(cards[card].goalLogic, []);
-				cards[card].goalFun = fun;
-			}
-		}
-		catch(e)
-		{
-			console.error(`Error in logic of ${card}: ${cards[card].goalLogic}\n${e.message}`);
+			var fun = goalLogicParser(card.goalLogic, []);
+			card.goalFun = fun;
 		}
 	}
 }
-
-typecheckAllGoals(cards);
 
 export function evalGoalCard(card: Card, model: GameModel)
 {
 	try
 	{
+		typecheckGoal(cards[card]);
+
 		if(cards[card].goalFun)
 		{
 			return cards[card].goalFun(model);
 		}
-
-		/*if(cards[card].goalLogic)
-		{
-			var fun = goalLogicParser(cards[card].goalLogic, []);
-			cards[card].goalFun = fun;
-			return cards[card].goalFun(model);
-		}*/
 
 		return false;
 	}
