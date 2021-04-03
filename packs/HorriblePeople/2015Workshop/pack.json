@@ -2,7 +2,7 @@
 	"name": "2015 Workshop Panels",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "HorriblePeople.2015Workshop",
 	"cards": {
 		"start": {},

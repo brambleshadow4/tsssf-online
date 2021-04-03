@@ -1,112 +1,12 @@
 
 import fs from 'fs';
 import sharp from "sharp";
-import {typecheckGoal} from "./goalCriteria.js";
 
-function validatePack(pack:any, namespace:string): string[]
-{
-	if(pack.format !== "pack:1") throw new Error("Pack " + filename + " must be in pack:1 format");
-	if(typeof pack.namespace !== "string") throw new Error("Pack " + filename + " needs a namespace");
-	if(typeof pack.cards !== "object") throw new Error("Pack " + filename + " does not have a valid cards property");
-
-	let errors: string[] = [];
-	if(pack.cards.pony)
-	{
-		for(var key in pack.cards.pony)
-		{
-			let card = pack.cards.pony[key];
-			errors = errors.concat(validateCard(key, "Pony", card));
-		}
-
-		for(var key in pack.cards.start)
-		{
-			let card = pack.cards.start[key];
-			errors = errors.concat(validateCard(key, "Start", card));
-		}
-
-		for(var key in pack.cards.goal)
-		{
-			let card = pack.cards.goal[key];
-			errors = errors.concat(validateCard(key, "Goal", card));
-		}
-	}
-
-	return errors;
-}
-
-
-function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | "Goal", card: any): string[]
-{
-	var errors = [];
-	var genders = new Set(["male","female","malefemale"]);
-	var races = new Set(["earth","pegasus","unicorn","alicorn", "earth/unicorn"]);
-
-	var ponyProps = new Set(["gender","race","name", "keywords", "action", "altTimeline", "count", "changeGoalPointValues"]);
-
-
-	if(cardType == "Pony" || cardType == "Start")
-	{
-		if(typeof card.name !== "string") errors.push("pony " + name + " doesn't have a valid name property");
-		if(!Array.isArray(card.keywords)) errors.push("pony " + name + " doesn't have a valid keywords property");
-
-		if(card.gender && !genders.has(card.gender)) errors.push("pony " + name + " has an invalid gender value: " + card.gender);
-		if(card.race && !races.has(card.race)) errors.push("pony " + name + " has an invalid race value: " + card.race);
-		if(card.altTimeline && card.altTimeline !== true) errors.push("pony " + name + " has an invalid altTimeline value: " + card.altTimeline);
-		if(card.changeGoalPointValues && card.changeGoalPointValues !== true) errors.push("pony " + name + " has an invalid changeGoalPointValues value: " + card.changeGoalPointValues);
-		if(card.count && typeof card.count !== "number") errors.push("pony " + name + " has an invalid count value: " + card.count);
-
-
-		for(var key of Object.keys(card))
-		{
-			if(!ponyProps.has(key))
-			{
-				errors.push("pony " + name + " has an extra prop: " + key);
-			}
-		}
-		//console.log(card.race);
-	}
-
-	if(cardType == "Goal")
-	{
-		if(!card.points)
-			errors.push("goal " + name + " is missing the points property");
-		else
-		{
-			if(typeof card.points !== "number" && typeof card.points !== "string") 
-			{
-				errors.push("goal " + name + " has an invalid points property: " + card.points);
-				return errors;
-			}
-
-			if(isNaN(Number(card.points)))
-			{
-				let [a,b] = card.points.split("-");
-
-				if(isNaN(Number(a)) || isNaN(Number(b)))
-				{
-					errors.push("goal " + name + " has an invalid points value: " + card.points);
-				}
-			}
-		}
-
-		try{
-			typecheckGoal(card);
-		}
-		catch(e)
-		{
-			errors.push("goal " + name + "\n" + e.toString());
-		}
-		
-	}
-
-	return errors;
-}
-
+import {validatePack} from "./packLib.js";
 
 
 function findPacks(topFolder:any, path:any, packs:any)
 {
-
 	let files = fs.readdirSync(path);
 
 	let hasPack = files.indexOf("pack.json") > -1;
@@ -154,7 +54,7 @@ for(let namespace of packsSet)
 		}
 
 
-		var errors = validatePack(pack, namespace);
+		var errors = validatePack(pack, namespace, filename, "pack");
 		if(errors.length)
 		{
 			console.error("\nERROR in Pack " + filename + ":\n" + errors.join("\n"));
@@ -250,4 +150,8 @@ else
 order = order.map( (x:any) => packs[x] ? packs[x] : x );
 order = order.filter((x:any) => typeof x == "object" || packs[x]);
 
-fs.writeFileSync("./views/lobby/packOrder.ts", "var order: any[] = " + JSON.stringify(order, undefined,"\t") + "\nexport default order");
+fs.writeFileSync(
+	"./views/lobby/packOrder.ts", "import {PackListItem} from \"../../server/lib.js\";\nvar order: PackListItem[] =" 
+	+ JSON.stringify(order, undefined,"\t")
+	+ "\nexport default order"
+);

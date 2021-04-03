@@ -3,6 +3,14 @@ import * as LobbyView from "./lobbyView.js";
 import {cardSelectComponent, cardBoxSelectComponent} from "./cardSelectComponent.js";
 import {makeCardElement} from "../game/cardComponent.js";
 import {isStart, Card, CardProps} from "../../server/lib.js";
+import {validatePack} from "../../server/packLib.js";
+
+import {
+	PackListHeader,
+	PackListItem,
+	PackListPack
+} from "../../server/lib.js"
+
 
 import * as cm from "../../server/cardManager.js";
 
@@ -41,6 +49,15 @@ globals.decks =  {
 }
 
 
+type GameOptions = {
+
+	cardDecks: string[],
+	startCard: string,
+	keepLobbyOpen: boolean,
+	ruleset: "turnsOnly" | "sandbox",
+	customCards: {cards: {[key: string]: CardProps}, descriptions: PackListItem[]}	
+}
+
 export function loadView(isOpen: boolean)
 {
 	if(window.location.pathname != "/lobby")
@@ -65,113 +82,136 @@ export function loadView(isOpen: boolean)
 		globals.register = register;
 		globals.startGame = startGame;
 
-		var cardBoxes = document.getElementsByClassName('cardbox')
-
-
-
-		var cardSelectors = document.getElementById('cardSelectors')!;
-
-		var deckElementList: HTMLElement[] = [];
-		for(var info of packOrder)
-		{
-			if(info.h)
-			{
-				let el = document.createElement('h3');
-				el.innerHTML = info.h as string;
-				cardSelectors.appendChild(el);
-				continue;
-			}
-
-			if(info.length == 1)
-			{
-				
-			}
-
-			info = info as [string, string, Element];
-
-			let boxSelect = undefined;
-			if(info.box)
-			{
-				boxSelect = cardBoxSelectComponent(info.pack);
-				document.getElementById('expansions')!.appendChild(boxSelect);
-			}
-
-			let el = cardSelectComponent(globals.decks, info.name, info.pack + ".*", boxSelect)
-			deckElementList.push(el)
-			deckElements[info[1]] = el;
-			cardSelectors.appendChild(el);
-		}
-
-
-
-		for(let i=0; i < cardBoxes.length; i++)
-		{
-			let box = cardBoxes[i] as HTMLElement;
-			cardBoxElements[box.getAttribute('value') as string] = box;
-
-			box.onclick = function()
-			{
-
-				if(box.classList.contains('selected'))
-				{
-					box.classList.remove("selected");
-					deckElementList[i].getElementsByTagName('button')[0].click();
-				}
-				else
-				{
-					box.classList.add('selected');
-					deckElementList[i].getElementsByTagName('button')[2].click();
-					//console.log(deckElements[i].getElementsByTagName('button')[2]);
-				}
-			}
-		}
-
-		var startCards = document.getElementById('startCards')!;
-
-		var startCardNames = packOrder.map(x => x.startCards || []).reduce((a,b) => a.concat(b), []);
-
-		for(var card of startCardNames)
-		{
-			let cardEl = makeCardElement(card);
-			var shield = document.createElement('div');
-
-
-			if(card == "Core.Start.FanficAuthorTwilight")
-				cardEl.classList.add('selected');
-
-			cardEl.setAttribute('card', card);
-			//cardEl.setAttribute('no', no++);
-			shield.className ='shield';
-			cardEl.appendChild(shield);
-
-			cardEl.onclick = function(e: Event)
-			{
-				var cards = (cardEl.parentNode as HTMLElement).getElementsByClassName('card');
-
-				for(let el of cards)
-				{
-					el.classList.remove('selected');
-				}
-
-				cardEl.classList.add('selected');
-
-				var infoText = "";
-				switch(cardEl.getAttribute('card'))
-				{	
-					case "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord":
-						infoText = "Goals will not automatically turn green if you use this start card";
-						break;
-				}
-
-				document.getElementById('startCardDetails')!.innerHTML = infoText;
-			}
-
-			startCards.appendChild(cardEl);
-		}
+		document.getElementById('packUpload')!.addEventListener('change', handleFileSelect, false);
 	}
 	else
 	{
 		changePage(undefined, "pageClosed");
+	}
+}
+
+function loadCardPages(options: GameOptions)
+{
+	document.getElementById('uploadErrors')!.innerHTML = "";
+	(document.getElementById('packUpload') as HTMLInputElement).value = "";
+
+	var cardBoxes = document.getElementsByClassName('cardbox')
+	var cardSelectors = document.getElementById('cardSelectors')!;
+	cardSelectors.innerHTML = "";
+
+	document.getElementById('expansions')!.innerHTML = "";
+
+
+	var deckElementList: HTMLElement[] = [];
+
+
+	var allPacks = packOrder;
+
+	if(options.customCards.descriptions.length)
+	{
+		allPacks.push({"h": "Uploads"});
+		allPacks = allPacks.concat(options.customCards.descriptions);
+	}
+
+
+
+	cm.init(["*"], options.customCards.cards);
+
+	console.log(cm.all());
+
+	for(var info of allPacks)
+	{
+		if((info as any).h)
+		{
+			info = info as PackListHeader;
+			let el = document.createElement('h3');
+			el.innerHTML = info.h as string;
+			cardSelectors.appendChild(el);
+			continue;
+		}
+
+		info = info as PackListPack;
+
+
+		let boxSelect = undefined;
+		if(info.box)
+		{
+			boxSelect = cardBoxSelectComponent(info.pack);
+			document.getElementById('expansions')!.appendChild(boxSelect);
+		}
+
+		let el = cardSelectComponent(globals.decks, info.name, info.pack + ".*", boxSelect)
+		deckElementList.push(el)
+		cardSelectors.appendChild(el);
+	}
+
+
+
+
+	for(let i=0; i < cardBoxes.length; i++)
+	{
+		let box = cardBoxes[i] as HTMLElement;
+		cardBoxElements[box.getAttribute('value') as string] = box;
+
+		box.onclick = function()
+		{
+
+			if(box.classList.contains('selected'))
+			{
+				box.classList.remove("selected");
+				deckElementList[i].getElementsByTagName('button')[0].click();
+			}
+			else
+			{
+				box.classList.add('selected');
+				deckElementList[i].getElementsByTagName('button')[2].click();
+				//console.log(deckElements[i].getElementsByTagName('button')[2]);
+			}
+		}
+	}
+
+	var startCards = document.getElementById('startCards')!;
+	startCards.innerHTML = "";
+
+	var startCardNames = packOrder.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
+
+	for(var card of startCardNames)
+	{
+		let cardEl = makeCardElement(card);
+		var shield = document.createElement('div');
+
+
+		if(card == "Core.Start.FanficAuthorTwilight")
+			cardEl.classList.add('selected');
+
+		cardEl.setAttribute('card', card);
+		//cardEl.setAttribute('no', no++);
+		shield.className ='shield';
+		cardEl.appendChild(shield);
+
+		cardEl.onclick = function(e: Event)
+		{
+			var cards = (cardEl.parentNode as HTMLElement).getElementsByClassName('card');
+
+			for(let el of cards)
+			{
+				el.classList.remove('selected');
+			}
+
+			cardEl.classList.add('selected');
+
+			var infoText = "";
+			switch(cardEl.getAttribute('card'))
+			{	
+				case "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord":
+					infoText = "Goals will not automatically turn green if you use this start card";
+					break;
+			}
+
+			document.getElementById('startCardDetails')!.innerHTML = infoText;
+		}
+
+		startCards.appendChild(cardEl);
 	}
 }
 
@@ -197,14 +237,14 @@ function onMessage(event: MessageEvent)
 	{
 		var [_,val] = event.data.split(";");
 
-		var options = JSON.parse(val);
+		var options = JSON.parse(val) as GameOptions;
 
 		if(options)
 		{
-
-
 			ishost = true;
-			document.getElementById('rightSide')!.classList.add('host')
+			document.getElementById('rightSide')!.classList.add('host');
+
+			loadCardPages(options);
 
 			for(var key in cardBoxElements)
 			{
@@ -218,7 +258,7 @@ function onMessage(event: MessageEvent)
 				var boxes = document.getElementsByClassName('cardbox') as HTMLCollectionOf<HTMLElement>;
 				for(var el of boxes)
 				{
-					if(s.has(el.getAttribute('deck')))
+					if(s.has((el as any).getAttribute('deck')))
 					{
 						el.click();
 					}
@@ -241,7 +281,7 @@ function onMessage(event: MessageEvent)
 				var allButtons = document.getElementsByClassName('allButton') as HTMLCollectionOf<HTMLElement>;
 				for(var el of allButtons)
 				{
-					if(s.has(el.getAttribute('deck')))
+					if(s.has((el as any).getAttribute('deck')))
 					{
 						el.click();
 					}
@@ -401,5 +441,50 @@ function loadingPlayerAnimation()
 
 	animCounter++;
 }
+
+
+
+function handleFileSelect(event: any){
+	const reader = new FileReader()
+	reader.onload = handleFileLoad;
+	reader.readAsText(event.target.files[0])
+}
+
+function handleFileLoad(event: any){
+
+	var queuedFileText = event.target.result;
+	var fileName = (document.getElementById('packUpload') as HTMLInputElement).value;
+
+	fileName = fileName.replace(/\\/g, "/");
+	fileName = fileName.substring(fileName.lastIndexOf("/")+1);
+
+	var errorElement = document.getElementById("uploadErrors") as HTMLElement;
+	console.log(queuedFileText);
+
+	var pack: any;
+
+	try
+	{
+		pack = JSON.parse(queuedFileText);
+	}
+	catch(e)
+	{
+		errorElement.innerHTML = "Error parsing JSON file\nPlease use a tool like https://jsonformatter.org/json-parser to resolve any JSON errors";
+		return;
+	}
+
+	let errors = validatePack(pack, "", fileName, "any");
+	
+	if(errors.length)
+	{
+		errorElement.innerHTML = errors.join("\r\n");
+	}
+	else
+	{
+		globals.socket.send("uploadCards;" + queuedFileText);
+		errorElement.innerHTML = "Uploading...";
+	}
+}
+
 
 loadingPlayerAnimation();

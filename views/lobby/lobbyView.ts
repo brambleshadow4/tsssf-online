@@ -72,6 +72,16 @@ var HTML = `
 				<div id='expansions'></div>
 				<h2 class="bothMargins">Individual cards</h2>
 				<div id='cardSelectors'></div>
+				<h2 class="bothMargins">Upload your own cards</h2>
+				
+				<ul>
+					<li>TSSSF.net will not publicly release cards uploaded in this manner</li>
+					<li>TSSSF.net reserves the right to examine any cards uploaded</li>
+				</ul>
+				<div><label>Choose file:</label> <input id='packUpload' type="file" accept=".json" /></div>
+
+				<pre><code id='uploadErrors'></code></pre>
+
 			</div>
 
 			<div class='startButtonArea'>

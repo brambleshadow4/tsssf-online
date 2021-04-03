@@ -737,11 +737,11 @@ export function setDisguise(element: CardElement, disguiseCard: Card)
 {
 	let cards = cm.inPlay();
 
-	console.log("setDisguise " + cards[disguiseCard].thumbnail)
+	console.log("setDisguise " + cards[disguiseCard].thumb)
 
 	var img = document.createElement('img');
 	img.style.height = "100%";
-	img.src = cards[disguiseCard].thumbnail;
+	img.src = cards[disguiseCard].thumb;
 	img.className = "changeling decoration";
 	element.appendChild(img);
 }
@@ -844,7 +844,7 @@ function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 		else if (isPonyOrStart(card))
 			element.classList.add('start');
 
-		var src = cards[card].thumbnail;
+		var src = cards[card].thumb;
 		if(useLarge)
 			src = cards[card].url;
 

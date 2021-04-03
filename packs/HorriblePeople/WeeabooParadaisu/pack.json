@@ -2,7 +2,7 @@
 	"name": "Weaboo Paradaisu",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "HorriblePeople.WeeabooParadaisu",
 	"cards": {
 		"start": {},

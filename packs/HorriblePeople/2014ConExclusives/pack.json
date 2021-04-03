@@ -2,7 +2,7 @@
 	"name": "2014 Con Exclusives",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "HorriblePeople.2014ConExclusives",
 	"cards": {
 		"start": {},

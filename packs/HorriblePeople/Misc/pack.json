@@ -2,7 +2,7 @@
 	"name": "NewNewCore / Misc",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "HorriblePeople.Misc",
 	"cards": {
 		"start": {},

@@ -6,6 +6,7 @@ import {
 	isGoal, 
 	isPony, 
 	isShip,
+	isStart,
 	isBoardLoc,
 	isOffsetLoc,
 	isGoalLoc,
@@ -17,12 +18,16 @@ import {
 	Card,
 	Location,
 	GameModel as GameModelShared,
-	ChangelingContextList
+	CardProps,
+	ChangelingContextList,
+	PackListPack
 } from "./lib.js";
 
 
+import * as cm from "./cardManager.js";
+import {validatePack, flattenPack, mergePacks} from "./packLib.js";
+
 import {evalGoalCard, getConnectedPonies} from "./goalCriteria.js"
-import cards from "./cards.js";
 import {logGameHosted, logPlayerJoined} from "./stats.js";
 
 
@@ -193,7 +198,7 @@ export class TsssfGameServer
 }
 
 
-export class GameModel 
+export class GameModel implements GameModelShared
 {
 	public players: Player[] = [];
 	public startTime?: number = 0;
@@ -211,6 +216,13 @@ export class GameModel
 	} = {};
 
 	public cardDecks: string[] = ["Core.*"];
+	public customCards: {
+		descriptions: PackListPack[], 
+		cards: {[key:string]: CardProps}
+	} = {
+		descriptions: [],
+		cards: {}
+	};
 
 	public ponyDiscardPile: Card[] = [];
 	public shipDiscardPile: Card[] = [];
@@ -224,15 +236,16 @@ export class GameModel
 
 	public runGoalLogic = true;
 
+	public turnstate? = new Turnstate();
+
 	public startCard: Card = "Core.Start.FanficAuthorTwilight";
 
-	private ruleset: string = "";
+	public ruleset: string = "";
 
 	private host?: ws;
 
 	public messageHistory: string[] = [];
 
-	public turnstate?: Turnstate;
 
 	public debug = false;
 
@@ -343,6 +356,48 @@ export class GameModel
 
 						return;
 					}		
+				}
+
+				if(message.startsWith("uploadCards;"))
+				{
+					var json = message.substring("uploadCards;".length);
+
+					console.log("uploading cards");
+					try{
+						var newCards = JSON.parse(json);
+
+						var errors = validatePack(newCards, "", "", "any");
+
+						if(errors.length) return;
+
+						var cards = flattenPack(newCards, true);
+						var description = {
+							name: newCards.name, 
+							pack: "X." + newCards.namespace,
+							box: false, 
+							startCards: Object.keys(newCards).filter( x => isStart(x))
+						};
+
+						if(game.customCards.descriptions.filter(x => x.pack == description.pack).length == 0)
+						{
+							game.customCards.descriptions.push(description);
+						}
+
+						game.customCards.cards = mergePacks(game.customCards.cards, cards);
+
+						if(game.host)
+						{
+							game.sendHostMessage(game.host, true);
+							console.log("host message resent");
+						}
+
+					}
+					catch(e)
+					{
+						return;
+					}
+
+
 				}
 
 
@@ -474,6 +529,8 @@ export class GameModel
 			if(message.startsWith("effects;") && game.turnstate)
 			{	
 				// effects;<card>;prop;value
+
+				let cards = cm.inPlay();
 
 				try{
 					let card, no, prop, value, arg;
@@ -948,6 +1005,8 @@ export class GameModel
 		model.shipDiscardPile = this.shipDiscardPile;
 		model.goalDiscardPile = this.goalDiscardPile;
 
+		model.customCards = this.customCards;
+
 		model.currentGoals = this.currentGoals;
 
 		model.goalDrawPileLength = this.goalDrawPile.length;
@@ -1025,7 +1084,8 @@ export class GameModel
 				cardDecks: this.cardDecks,
 				startCard: this.startCard,
 				ruleset: this.ruleset,
-				keepLobbyOpen: this.keepLobbyOpen
+				keepLobbyOpen: this.keepLobbyOpen,
+				customCards: this.customCards
 			})
 
 		socket.send("ishost;" + payload)
@@ -1131,6 +1191,8 @@ export class GameModel
 			//decks.push("Core.*");
 		}
 
+		cm.init(decks.concat([this.startCard]), this.customCards.cards);
+
 		this.cardDecks = decks;
 		
 		this.goalDiscardPile = [];
@@ -1160,7 +1222,7 @@ export class GameModel
 			logPlayerJoined();
 		}
 
-		for(var cardName in cards)
+		for(var cardName in cm.inPlay())
 		{
 			if(!isCardIncluded(cardName, this))
 				continue;
@@ -1188,7 +1250,8 @@ export class GameModel
 
 		if(options.ruleset == "turnsOnly")
 		{
-			this.turnstate = new Turnstate(this, this.players[0] ? this.players[0].name : "");
+			this.turnstate = new Turnstate();
+			this.turnstate.init(this, this.players[0] ? this.players[0].name : "")
 		}
 		else
 		{
@@ -1272,7 +1335,7 @@ export class GameModel
 	private isChangeling(card:Card)
 	{
 		card = card.split(":")[0];
-		return isPony(card) && cards[card] && cards[card].action && cards[card].action.startsWith("Changeling(");
+		return isPony(card) && cm.inPlay()[card]?.action?.startsWith("Changeling(");
 	}
 
 	public getCurrentShipSet(): Set<string>
@@ -1405,7 +1468,9 @@ export class GameModel
 		var k = rotation.map(x=> x.name).indexOf(ts.currentPlayer);
 		k = (k+1)%rotation.length;
 
-		this.turnstate = new Turnstate(this, rotation[k].name)
+		this.turnstate = new Turnstate();
+		this.turnstate.init(this, rotation[k].name);
+
 		this.toEveryone("turnstate;" + JSON.stringify(this.turnstate!.clientProps()));
 
 		this.checkIfGoalsWereAchieved();
@@ -1755,7 +1820,7 @@ export class Turnstate
 	public brokenShips: [Card,Card][] = [];
 	public brokenShipsNow: [Card,Card][] = [];
 
-	private changelingContexts: {[key:string] : ChangelingContextList} = {};
+	public changelingContexts: {[key:string] : ChangelingContextList} = {};
 
 	public getChangeContext(card: Card): ChangelingContextList
 	{
@@ -1772,8 +1837,8 @@ export class Turnstate
 	public swaps = 0;
 	public swapsNow = 0;
 
-	public shipSet: Set<string>;
-	public positionMap: {[key: string]: string};	
+	public shipSet: Set<string> = new Set();
+	public positionMap: {[key: string]: string} = {};
 	
 	
 	public clientProps()
@@ -1785,20 +1850,21 @@ export class Turnstate
 		}
 	}
 
-	public constructor(model: GameModel, currentPlayerName: string)
+	public constructor(){}
+
+	public init(model: GameModel, currentPlayerName: string)
 	{
 		this.currentPlayer = currentPlayerName;
+		this.shipSet = model.getCurrentShipSet();
+		this.positionMap = model.getCurrentPositionMap();	
 
-		if(model.turnstate)
+		/*if(model.turnstate)
 		{
 			model.turnstate.changelingContexts = {};
 			model.turnstate.specialEffects = {
 				shipWithEverypony: new Set()
 			}
-		}
-
-		this.shipSet = model.getCurrentShipSet();
-		this.positionMap = model.getCurrentPositionMap();	
+		}*/
 	}
 }
 

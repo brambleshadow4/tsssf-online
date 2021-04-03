@@ -64,7 +64,8 @@ app.get("/server/lib.js", file("./server/lib.js"))
 
 app.get("/server/cards.js", file("./server/cards.js"))
 app.get("/server/cardManager.js", file("./server/cardManager.js"))
-app.get("/game/cards.js", file("./server/cards.js"))
+app.get("/server/packLib.js", file("./server/packLib.js"))
+app.get("/server/goalCriteria.js", file("./server/goalCriteria.js"))
 
 app.get("/rulebook.html", file("./views/rulebook.html"))
 app.get("/faq.html", file("./views/faq.html"))

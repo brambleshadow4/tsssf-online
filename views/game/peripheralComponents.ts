@@ -17,6 +17,8 @@ import {
 	Card, Location
 } from "../../server/lib.js";
 
+import * as cm from "../../server/cardManager.js";
+
 import {broadcastMove,
 	broadcast,
 	requestDrawPony,
@@ -51,7 +53,6 @@ let win = window as unknown as {
 	model: GameModel,
 	openSettings: () => void;
 	cardLocations: {[key:string]: Location};
-	currentDeck: {[key: string]: any},
 	createHelpPopup: () => void;
 }
 
@@ -694,7 +695,7 @@ function referencePageRender()
 	var shipReference = document.createElement('div');
 	var goalReference = document.createElement('div');
 
-	var keys = Object.keys(win.currentDeck);
+	var keys = Object.keys(cm.inPlay());
 
 	keys.sort();
 	for(let key of keys)

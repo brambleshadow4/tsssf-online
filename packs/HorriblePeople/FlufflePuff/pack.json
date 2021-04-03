@@ -2,7 +2,7 @@
 	"name": "Fluffle Puff",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "HorriblePeople.FlufflePuff",
 	"cards": {
 		"start": {},

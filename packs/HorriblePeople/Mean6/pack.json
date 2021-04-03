@@ -2,7 +2,7 @@
 	"name": "The Mean 6",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "HorriblePeople.Mean6",
 	"cards": {
 		"start": {},

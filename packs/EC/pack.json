@@ -2,7 +2,7 @@
 	"name": "Extra Credit",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "EC",
 	"cards": {
 		"start": {},

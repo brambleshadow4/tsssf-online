@@ -1,4 +1,5 @@
-import cards from "../../server/cards.js";
+import * as cm from "../../server/cardManager.js";
+
 import {isStart} from "../../server/lib.js" 
 import {makeCardElement} from "../game/cardComponent.js";
 
@@ -153,7 +154,7 @@ export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: st
 
 	var added = 0;
 
-	for (var card in cards)
+	for (var card in cm.all())
 	{
 		if(card.startsWith(match) && !isStart(card))
 		{
@@ -228,22 +229,4 @@ export function cardBoxSelectComponent(namespace: string)
 	div.appendChild(img);
 
 	return div;
-
-
-/*	<div class='cardbox' id='Core-deck-select' deck="Core.*">
-					<div class='shield'></div>
-					<img src="/img/core-box.png" />
-				</div>
-				<div class='cardbox' id='EC-deck-select' deck="EC.*">
-					<div class='shield'></div>
-					<img src="/img/ec-box.png" />
-				</div>
-				<div class='cardbox' id='PU-deck-select' deck="PU.*">
-					<div class='shield'></div>
-					<img src="/img/pu-box.png" />
-				</div>
-				<div class='cardbox' deck="NoHoldsBarred.*">
-					<div class='shield'></div>
-					<img src="/img/noholds-box.png" />
-				</div>*/
 }

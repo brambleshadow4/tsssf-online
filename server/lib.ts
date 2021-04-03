@@ -2,9 +2,8 @@ export type Card = string;
 
 interface CardPropsBase {
 	url: string,
-	thumbnail: string;
-	id: string,
-};
+	thumb: string
+}
 
 export interface ShipProps extends CardPropsBase {
 	action?: string
@@ -40,7 +39,10 @@ export interface GameModel
 
 	// Game properties
 	cardDecks: string[],
-	customCards: {[key: string]: CardProps},
+	customCards: {
+		descriptions: PackListPack[],
+		cards: {[key: string]: CardProps}
+	},
 
 	keepLobbyOpen: boolean,
 	startCard: Card,
@@ -99,7 +101,7 @@ export interface Turnstate
 		larsonEffect?: boolean
 	}
 
-	updateSpecialEffects: () => void,
+	updateSpecialEffects: (board: {[key:string]: {card: Card, element?: HTMLElement}}) => void,
 
 	playedThisTurn: Set<any>,
 
@@ -174,6 +176,20 @@ export function randomizeOrder(arr: any [])
 	return arr;
 }
 
+export interface PackListPack
+{
+	pack: string,
+	name: string,
+	box: boolean,
+	startCards: Card[],
+}
+
+export interface PackListHeader
+{
+	h: string
+}
+
+export type PackListItem = PackListPack | PackListHeader;
 
 export function isBoardLoc(location: Location)
 {

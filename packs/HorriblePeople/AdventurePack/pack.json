@@ -2,7 +2,7 @@
 	"name": "Adventure Pack",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "HorriblePeople.AdventurePack",
 	"cards": {
 		"start": {},

@@ -2,7 +2,7 @@
 	"name": "Dungeon Delvers",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "HorriblePeople.DungeonDelvers",
 	"cards": {
 		"start": {},

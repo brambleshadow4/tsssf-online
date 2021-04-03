@@ -240,17 +240,15 @@ function LoadCards()
 
 	let model = win.model;
 
-	cm.init(model.cardDecks, model.customCards);
+	cm.init(model.cardDecks.concat([model.startCard]), model.customCards.cards);
 
 	let cards = cm.inPlay();
 
 	for(var key in cards)
 	{
 		var img = document.createElement('img');
-		img.src = cards[key].thumbnail;
+		img.src = cards[key].thumb;
 		preloadedImages.appendChild(img);
-
-
 
 		if(cards[key].keywords)
 		{
