@@ -2,8 +2,10 @@ import * as LobbyView from "./lobbyView.js";
 
 import {cardSelectComponent, cardBoxSelectComponent} from "./cardSelectComponent.js";
 import {makeCardElement} from "../game/cardComponent.js";
-import {isStart, Card} from "../../server/lib.js";
-import cards from "../../server/cards.js";
+import {isStart, Card, CardProps} from "../../server/lib.js";
+
+import * as cm from "../../server/cardManager.js";
+
 
 import {WebSocketPlus} from "../viewSelector.js";
 import packOrder from "./packOrder.js";
@@ -24,6 +26,8 @@ var globals = window as unknown as {
 		[key: string]: Set<string>
 	},
 
+	cards: {[key: string]: CardProps},
+
 	socket: WebSocketPlus,
 	register: Function,
 	startGame: Function,
@@ -43,6 +47,8 @@ export function loadView(isOpen: boolean)
 	{
 		history.replaceState(null, "", "/lobby" + window.location.search)
 	}
+
+	cm.init(["*"], {});
 
 	document.body.innerHTML = LobbyView.HTML;
 	document.head.innerHTML = LobbyView.HEAD;

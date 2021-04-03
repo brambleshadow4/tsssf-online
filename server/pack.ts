@@ -12,7 +12,6 @@ function validatePack(pack:any, namespace:string): string[]
 	let errors: string[] = [];
 	if(pack.cards.pony)
 	{
-		
 		for(var key in pack.cards.pony)
 		{
 			let card = pack.cards.pony[key];

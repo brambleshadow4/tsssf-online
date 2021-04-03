@@ -9,12 +9,15 @@ import {
 	isPony,
 	isGoal,
 	Card,
+	CardProps,
+	ShipProps,
+	GoalProps,
 	GameModel,
 	Location,
 	CardElement
 } from "../../server/lib.js";
 
-import cards from "../../server/cards.js";
+import * as cm from "../../server/cardManager.js";
 
 import {
 	moveCard,
@@ -74,11 +77,12 @@ export function endMoveShared()
 
 function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 {
+	let cards = cm.inPlay();
 	if(!isGoal(card))
 		return [];
 
 	var points = [];
-	var pointString = cards[card].points;
+	var pointString = (cards[card] as GoalProps).points;
 	if(pointString.indexOf("-") > -1)
 	{
 		var i = pointString.indexOf("-")
@@ -102,7 +106,7 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 		if(key.startsWith('p,'))
 		{
 			var card = model.board[key].card;
-			if(cards[card] && cards[card].changeGoalPointValues)
+			if(cards[card] && (cards[card] as any).changeGoalPointValues)
 			{
 				changeGoalPointValues = true;
 			}
@@ -121,12 +125,14 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 
 export function makeCardElement(card: Card, location?: Location, isDraggable?: boolean, isDropTarget?: boolean): CardElement
 {
+	let cards = cm.inPlay();
+
 	let imgElement = document.createElement('div') as unknown as CardElement;
 	imgElement.classList.add("card");
 
 	setCardBackground(imgElement, card);
 
-	if(!isBlank(card) && cards[card] && !cards[card].goalLogic && location && isGoalLoc(location))
+	if(!isBlank(card) && cards[card] && !(cards[card] as GoalProps).goalLogic && location && isGoalLoc(location))
 	{
 		var warningSym = document.createElement('img')
 		warningSym.src = "/img/warning.svg";
@@ -170,7 +176,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 					return;
 
 				moveCard(card, "goal," + goalNo, "winnings", false, value)
-				broadcastMove(card, "goal," + goalNo, "winnings", value)
+				broadcastMove(card, "goal," + goalNo, "winnings", "" + value)
 			}
 		}
 
@@ -339,7 +345,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			}
 
 			//console.log(cards[card].action)
-			if(isShip(card) || cards[card].action == "ship")
+			if(isShip(card) || (cards[card] as ShipProps).action == "ship")
 			{
 				document.getElementById('playingArea')!.classList.add('draggingShip');
 			}
@@ -430,7 +436,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				document.getElementById('playingArea')!.classList.add('draggingPony');
 			}
 
-			if(isShip(card) || cards[card].action == "ship")
+			if(isShip(card) || (cards[card] as ShipProps).action == "ship")
 			{
 				document.getElementById('playingArea')!.classList.add('draggingShip');
 			}
@@ -729,7 +735,7 @@ export function updateCardElement(oldElement: HTMLElement, card: Card, location:
 
 export function setDisguise(element: CardElement, disguiseCard: Card)
 {
-	loadCard(disguiseCard);
+	let cards = cm.inPlay();
 
 	console.log("setDisguise " + cards[disguiseCard].thumbnail)
 
@@ -794,26 +800,11 @@ export function addTempSymbol(element: CardElement, symbol: string, tooltip?: st
 	element.appendChild(img);
 }
 
-function loadCard(card: Card)
-{
-	if(cards[card] && !cards[card].fullUrl)
-	{
-		var nodes = card.split(".");
-		nodes.pop();
-
-		var urlToImg = "/packs/" + card.split(".").join("/");
-
-		cards[card].keywords = new Set(cards[card].keywords);
-		cards[card].fullUrl = urlToImg + ".png";
-		cards[card].thumbnail = urlToImg + ".thumb.jpg";
-	}
-}
-
 
 
 function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 {
-	loadCard(card);
+	let cards = cm.inPlay();
 
 	if(isAnon(card))
 	{
@@ -855,7 +846,7 @@ function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 
 		var src = cards[card].thumbnail;
 		if(useLarge)
-			src = cards[card].fullUrl;
+			src = cards[card].url;
 
 		element.style.backgroundImage = "url(\"" + src + "\")";
 
@@ -871,7 +862,7 @@ function enlargeCard()
 	
 	var giantCard = document.createElement('div') as unknown as CardElement;
 	giantCard.classList.add('card');
-	giantCard.id = "giantCard"
+	giantCard.id = "giantCard";
 
 	if(isShip(hoverCard))
 	{

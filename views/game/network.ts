@@ -82,7 +82,7 @@ export function attachToSocket(socket: WebSocketPlus)
 			model.turnstate = JSON.parse(event.data.substring(10));	
 			model.turnstate!.playedThisTurn = new Set();
 
-			console.log(model.turnstate);
+			//console.log(model.turnstate);
 			updateTurnstate();
 		}
 
@@ -119,14 +119,14 @@ export function attachToSocket(socket: WebSocketPlus)
 
 		if(event.data.startsWith("model;"))
 		{
-			console.log(event.data);
+			//console.log(event.data);
 			updateGame(JSON.parse(event.data.substring(6)));
 			win.moveToStartCard();
 		}
 
 		if(event.data.startsWith("move;"))
 		{
-			console.log(event.data);
+			//console.log(event.data);
 			var [_, card, startLocation, endLocation] = event.data.split(";");
 			moveCard(card, startLocation, endLocation, true);
 		}
@@ -241,7 +241,7 @@ export function broadcastMove(card: Card, startLocation: Location, endLocation: 
 
 export function broadcast(message: string)
 {
-	console.log("sending " + message);
+	//console.log("sending " + message);
 
 	//setTimeout(function(){
 	win.socket.send(message);

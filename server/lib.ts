@@ -1,18 +1,60 @@
-export type Card = string
+export type Card = string;
+
+interface CardPropsBase {
+	url: string,
+	thumbnail: string;
+	id: string,
+};
+
+export interface ShipProps extends CardPropsBase {
+	action?: string
+}
+
+export interface PonyProps extends CardPropsBase {
+	name: string,
+	gender?: "male" | "female" | "malefemale",
+	race?: "earth" | "pegasus" | "unicorn" | "alicorn",
+	keywords: Set<string>,
+	altTimeline?: true,
+	count?: number,
+
+	action?: string
+}
+
+export interface GoalProps extends CardPropsBase {
+	points: string,
+	goalLogic?: string,
+	goalFun?: Function
+}
+
+
+export type CardProps = PonyProps & GoalProps & ShipProps;
+
+
 export type Location = string;
 
 export type CardElement = HTMLElement & {brand: "card"}
 
 export interface GameModel
 {
+
+	// Game properties
+	cardDecks: string[],
+	customCards: {[key: string]: CardProps},
+
+	keepLobbyOpen: boolean,
+	startCard: Card,
+	ruleset: string,
+
+	players: any[],
+
+	// Game state
 	board: {
 		[key:string]: {
 			card: Card,
 			element?: CardElement,
 		}
 	},
-
-	cardDecks: string[],
 
 	ponyDiscardPile: Card[],
 	shipDiscardPile: Card[],
@@ -25,15 +67,6 @@ export interface GameModel
 	currentGoals: {card: Card, achieved: boolean}[],
 
 	turnstate?: Turnstate,
-
-
-	keepLobbyOpen: boolean,
-
-	players: any[],
-
-
-	startCard: Card,
-	ruleset: string,
 
 	messageHistory: string[],
 }

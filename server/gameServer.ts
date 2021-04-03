@@ -236,11 +236,7 @@ export class GameModel
 
 	public debug = false;
 
-	constructor()
-	{
-		
-
-	}
+	constructor(){}
 
 	public onConnection(socket: ws & {isAlive: boolean, isDead:boolean}, request:any, client:any)
 	{
