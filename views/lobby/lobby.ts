@@ -113,11 +113,7 @@ function loadCardPages(options: GameOptions)
 		allPacks = allPacks.concat(options.customCards.descriptions);
 	}
 
-
-
 	cm.init(["*"], options.customCards.cards);
-
-	console.log(cm.all());
 
 	for(var info of allPacks)
 	{
@@ -273,6 +269,9 @@ function onMessage(event: MessageEvent)
 						el.classList.add('selected');
 
 						var deck = getPackString(card);
+
+						console.log(deckElements);
+						console.log(deck);
 
 						deckElements[deck].getElementsByTagName('button')[1].click();
 					}
@@ -459,7 +458,6 @@ function handleFileLoad(event: any){
 	fileName = fileName.substring(fileName.lastIndexOf("/")+1);
 
 	var errorElement = document.getElementById("uploadErrors") as HTMLElement;
-	console.log(queuedFileText);
 
 	var pack: any;
 

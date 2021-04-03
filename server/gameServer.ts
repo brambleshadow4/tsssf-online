@@ -257,7 +257,7 @@ export class GameModel implements GameModelShared
 		socket.isDead = false;
 		
 		socket.on('message', handleCrash(this.onMessage(this, socket)));
-		socket.on('close', handleCrash(this.onClose));
+		socket.on('close', handleCrash(this.onClose(this, socket)));
 
 		if(!this.host)
 		{
@@ -834,6 +834,8 @@ export class GameModel implements GameModelShared
 						break;
 					}
 				}
+
+				console.log(game.players.length);
 
 				game.sendLobbyList();
 			}

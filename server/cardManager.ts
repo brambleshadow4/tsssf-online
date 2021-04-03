@@ -37,8 +37,6 @@ export function init(filter: string[], customCards: {[key:string]: CardProps})
 	let patterns = filter.filter(x => x.indexOf("*") > -1);
 	let selectedCards = new Set(filter.filter(x => x.indexOf("*") == -1));
 
-	console.log(selectedCards);
-
 	for(var key in newAllCards)
 	{
 		if(selectedCards.has(key))
@@ -58,8 +56,6 @@ export function init(filter: string[], customCards: {[key:string]: CardProps})
 			}
 		}
 	}
-
-	console.log(newGameCards);
 
 	gameCards = newGameCards;
 }
