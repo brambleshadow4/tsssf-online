@@ -1,4 +1,5 @@
 import {GameModel, Player} from "./gameServer.js";
+import * as cm from "./cardManager.js";
 import {test, expect} from "./testFramework.js";
 import {
 	isPony,
@@ -34,6 +35,8 @@ function expectGoalAchieved(game: GameModel, goal: Card)
 function setupGame():[GameModel, MockPlayer]
 {	
 	let game = new GameModel();
+
+	cm.init(["*"], {});
 
 	let fakeSocket = {
 		isAlive: true,

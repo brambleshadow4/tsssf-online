@@ -686,7 +686,7 @@
 		},
 		"goal": {
 			"BuddingCuriosity": {
-				"goalLogic": "ExistsShitGeneric(ShippedWithOppositeGenderedSelf)",
+				"goalLogic": "ExistsShipGeneric(ShippedWithOppositeGenderedSelf)",
 				"points": "3"
 			},
 			"CargoShip": {

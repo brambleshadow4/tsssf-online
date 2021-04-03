@@ -1,4 +1,6 @@
-import cards from "./cards.js";
+
+import * as cm from "./cardManager.js";
+
 import {isBlank, Card, Location} from "./lib.js";
 import {GameModel} from "./gameServer.js";
 
@@ -6,6 +8,8 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 {
 	let turnstate = model.turnstate!;
 	//console.log("getCardProp(" + cardFull + ", " + prop + ")");
+
+	let cards = cm.inPlay();
 
 	var [card, ctxNoStr] = cardFull.split(":");
 	let ctxNo: number = Number(ctxNoStr);
@@ -48,20 +52,21 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 
 	if(prop == "keywords")
 	{
-		if(cards[card].action && cards[card].action.indexOf("plushling") >= 0)
+		if(cards[card].action && cards[card].action!.indexOf("plushling") >= 0)
 		{
 			baseCard = card;
 		}
 
-		let baseKeywords = (allowOverrides && cardOverrides?.keywords) || [];
+		let overrideKeywords = (allowOverrides && cardOverrides?.keywords) || [];
 
 		if(turnstate.specialEffects.larsonEffect)
-			baseKeywords.push("Princess");
+			overrideKeywords.push("Princess");
 
 		if(cardOverrides?.disguise)
-			baseKeywords = baseKeywords.concat(cards[card].keywords);
+			overrideKeywords = overrideKeywords.concat(cards[card].keywords);
 
-		return new Set(cards[baseCard][prop].concat(baseKeywords));
+		let baseKeywords = [...(cards[baseCard].keywords)];
+		return new Set(baseKeywords.concat(overrideKeywords));
 	}
 
 	if(prop == "name")
@@ -79,13 +84,14 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 	}
 
 	//console.log(cards[baseCard][prop]);
-	return cards[baseCard][prop];
+	return (cards[baseCard] as any)[prop];
 }
 
 function doesCardMatchSelector(model: GameModel, card: Card, selector: string): number
 {
 	//console.log("doesCardMatchSelector " + card + " " + selector);
 
+	let cards = cm.inPlay();
 	let trueValue = getCardProp(model, card, "count") || 1;
 	let falseValue = 0;
 
@@ -317,8 +323,6 @@ function ExistsPonyGeneric(selectFun: (m:GameModel, p:Card)=>number, count?:numb
 		return boardCount >= count!;
 	}
 }
-
-
 
 
 function ExistsChain(selector: string, count: number)
@@ -654,7 +658,7 @@ function PlayLovePoisons(model: GameModel)
 		var matchingPlays = model.turnstate.playedShips.filter(function(x)
 		{
 			var [ship, pony1, pony2] = x;
-			return cards[ship].action == "lovePoison";
+			return cm.inPlay()[ship].action == "lovePoison";
 		});
 
 		return (matchingPlays.length >= 2);
@@ -695,9 +699,6 @@ function ShippedWithOppositeGenderedSelf(model: GameModel, card1: Card, card2: C
 	{
 		var gender1 = getCardProp(model, card1, "gender");
 		var gender2 = getCardProp(model, card2, "gender");
-
-		//console.log(gender1)+ " "  + console.log(gender2);
-		//console.log(model);
 
 		return ((gender1 == "male" && gender2 == "female") || (gender1 == "female" && gender2 == "male"))
 	}
@@ -761,11 +762,15 @@ export function typecheckGoal(card: any)
 {
 	if(card.goalFun == undefined)
 	{
+		//console.log("typechecking goal");
+		//console.log(card);
 		card.goalFun = false;
 
 		if(card.goalLogic)
 		{
 			var fun = goalLogicParser(card.goalLogic, []);
+
+			//console.log(fun);
 			card.goalFun = fun;
 		}
 	}
@@ -773,13 +778,15 @@ export function typecheckGoal(card: any)
 
 export function evalGoalCard(card: Card, model: GameModel)
 {
+	let cards = cm.inPlay();
+
 	try
 	{
 		typecheckGoal(cards[card]);
 
 		if(cards[card].goalFun)
 		{
-			return cards[card].goalFun(model);
+			return cards[card].goalFun!(model);
 		}
 
 		return false;

@@ -10,7 +10,8 @@
 				"name": "Discord",
 				"race": "alicorn",
 				"gender": "male",
-				"changeGoalPointValues": true
+				"changeGoalPointValues": true,
+				"keywords": []
 			}
 		},
 		"pony": {
