@@ -32,6 +32,11 @@
 				tab-size: 4;
 			}
 
+			th
+			{
+				border-bottom: solid 1px black;
+			}
+
 			img
 			{
 				width: 100%;
@@ -46,6 +51,23 @@
 			.text-namespace { color: blue; }
 			.text-cardtype { color: purple; }
 			.text-cardkey {color: orange; }
+
+			table,tr,td
+			{
+				border-collapse: collapse;
+				vertical-align: top;
+			}
+
+			td
+			{
+				padding: 2px;
+				padding-left: 7px;
+			}
+
+			tr.alt
+			{
+				background-color: #E0E0E0;
+			}
 
 		</style>
 	</head>
@@ -282,7 +304,64 @@
 
 				<h2 id='appendix-b'>Appendix B: Pony, Ship, + Goal Attributes</h2>
 
+				<p>For examples of cards which use the attributes explained in this section, see the various pack.json files used by tsssf.net.</p>
+
+				<div class='inset'>
+					<div><a href="/packs/Core/pack.json">Core/pack.json</a></div>
+					<div><a href="/packs/EC/pack.json">EC/pack.json</a></div>
+					<div><a href="/packs/PU/pack.json">PU/pack.json</a></div>
+					<div><a href="/packs/NoHoldsBarred/pack.json">NoHoldsBarred/pack.json</a></div>
+				</div>
+
 				<h3>Pony Attributes</h3>
+
+				<table>
+					<tr>
+						<th>Attribute</th><th>Valid Values</th><th>Notes/Description</th>
+					<tr>
+						<td>name</td><td>Any string, required</td><td>Should be the simplest name of the pony in question, e.g. Twilight Sparkle for cards like Twilight Sparkle</td>
+					</tr>
+
+					<tr class='alt'><td rowspan="5">race</td><td>"earth"</td><td></td></tr>
+					<tr class='alt'><td>"pegasus"</td><td></td></tr>
+					<tr class='alt'><td>"unicorn"</td><td></td></tr>
+					<tr class='alt'><td>"alicorn"</td><td></td></tr>
+					<tr class='alt'><td>"earth/unicorn"</td><td>Counts as both a earth pony and a unicorn for all goals</td></tr>
+
+					<tr><td rowspan="3">gender</td><td>"male"</td></tr>
+					<tr><td>"female"</td></tr>
+					<tr><td>"malefemale"</td><td>Counts as both male and female for all goals</td></tr>
+
+					<tr class='alt'><td>keywords</td><td>Any string array</td><td>Contains all non-name keywords for the pony</td></tr>
+
+					<tr><td>altTimeline</td><td>true</td><td>Gives a card the altTimeline/apocalypse/hour glass symbol</td></tr>
+
+					<tr class='alt'><td>changeGoalPointValues</td><td>true</td><td>When this card is on the grid, prevents goal cards from being worth their normal amount of points</td></tr>
+
+					<tr><td>count</td><td>any number</td><td>Changes how many ponies this card counts as, e.g. 2 for Aloe & Lotus</td></tr>
+
+					<tr class='alt'><td rowspan="10">action</td><td>"swap"</td><td></td></tr>
+					<tr class='alt'><td>"3swap"</td><td></td></tr>
+					<tr class='alt'><td>"replace"</td><td></td></tr>
+					<tr class='alt'><td>"search"</td><td></td></tr>
+					<tr class='alt'><td>"copy"</td><td></td></tr>
+					<tr class='alt'><td>"draw"</td><td></td></tr>
+					<tr class='alt'><td>"newGoal"</td><td></td></tr>
+					<tr class='alt'><td>"playFromDiscard"</td><td></td></tr>
+					<tr class='alt'><td>"Changeling(&lt;type&gt;)"</td><td>Allows the card to set a disguise when played and when moved. &lt;type&gt; can be any of the following:
+					<div class='inset'>
+						earth<br>
+						pegasus<br>
+						unicorn<br>
+						alicorn<br>
+						nonAlicornFemale<br>
+						plushling<br>
+						replace
+					</div>
+					</td></tr>
+					<tr class='alt'><td>"ChangelingNoRedisguise(&lt;type&gt;)"</td><td>Same as Changeling(&lt;type&gt;), but the card cannot redisguise when moved
+					</td></tr>
+				</table>
 
 				<h3>Ship Attributes</h3>
 

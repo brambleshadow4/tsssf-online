@@ -51,6 +51,14 @@ app.get("/game/peripheralComponents.js", file("./views/game/peripheralComponents
 app.get("/game/boardComponent.js", file("./views/game/boardComponent.js"))
 app.get("/game/popupComponent.js", file("./views/game/popupComponent.js"))
 
+
+app.get("/info/addYourOwnCards", file("./views/addYourOwnCards/addYourOwnCards.html"))
+app.get("/info/highlight.min.css", file("./views/addYourOwnCards/highlight.min.css"))
+app.get("/info/highlight.min.js", file("./views/addYourOwnCards/highlight.min.js"))
+
+app.get("/info/upload1.png", file("./views/addYourOwnCards/upload1.png"))
+app.get("/info/upload2.png", file("./views/addYourOwnCards/upload2.png"))
+
 app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
 app.get("/lobby/packOrder.js", file("./views/lobby/packOrder.js"))
 
