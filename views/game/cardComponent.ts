@@ -736,9 +736,6 @@ export function updateCardElement(oldElement: HTMLElement, card: Card, location:
 export function setDisguise(element: CardElement, disguiseCard: Card)
 {
 	let cards = cm.inPlay();
-
-	console.log("setDisguise " + cards[disguiseCard].thumb)
-
 	var img = document.createElement('img');
 	img.style.height = "100%";
 	img.src = cards[disguiseCard].thumb;
@@ -845,7 +842,7 @@ function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 			element.classList.add('start');
 
 		var src = cards[card].thumb;
-		if(useLarge)
+		if(useLarge || !src)
 			src = cards[card].url;
 
 		element.style.backgroundImage = "url(\"" + src + "\")";

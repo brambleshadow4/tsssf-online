@@ -246,18 +246,23 @@ function LoadCards()
 
 	for(var key in cards)
 	{
-		var img = document.createElement('img');
-		img.src = cards[key].thumb;
-		preloadedImages.appendChild(img);
-
-		if(cards[key].keywords)
+		
+		if(cards[key].thumb)
 		{
-			for(var keyword of cards[key].keywords)
+			var img = document.createElement('img');
+
+
+			img.src = cards[key].thumb;
+			preloadedImages.appendChild(img);
+
+			if(cards[key].keywords)
 			{
-				keywordSet.add(keyword);
+				for(var keyword of cards[key].keywords)
+				{
+					keywordSet.add(keyword);
+				}
 			}
 		}
-
 	}
 
 	allKeywords = [...keywordSet.keys()].sort();

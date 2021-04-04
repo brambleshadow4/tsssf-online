@@ -31,25 +31,25 @@ export function validatePack(pack:any, namespace:string, filename: string, forma
 		for(var key in pack.cards.pony)
 		{
 			let card = pack.cards.pony[key];
-			errors = errors.concat(validateCard(key, "Pony", card));
+			errors = errors.concat(validateCard(key, "Pony", pack.format, card));
 		}
 
 		for(var key in pack.cards.start)
 		{
 			let card = pack.cards.start[key];
-			errors = errors.concat(validateCard(key, "Start", card));
+			errors = errors.concat(validateCard(key, "Start", pack.format, card));
 		}
 
 		for(var key in pack.cards.goal)
 		{
 			let card = pack.cards.goal[key];
-			errors = errors.concat(validateCard(key, "Goal", card));
+			errors = errors.concat(validateCard(key, "Goal", pack.format, card));
 		}
 
 		for(var key in pack.cards.ship)
 		{
 			let card = pack.cards.ship[key];
-			errors = errors.concat(validateCard(key, "Ship", card));
+			errors = errors.concat(validateCard(key, "Ship", pack.format, card));
 		}
 	}
 
@@ -57,14 +57,18 @@ export function validatePack(pack:any, namespace:string, filename: string, forma
 }
 
 
-export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | "Goal", card: any): string[]
+export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | "Goal", packFormat: string, card: any): string[]
 {
 	var errors = [];
 	var genders = new Set(["male","female","malefemale"]);
 	var races = new Set(["earth","pegasus","unicorn","alicorn", "earth/unicorn"]);
 
-	var ponyProps = new Set(["gender","race","name", "keywords", "action", "altTimeline", "count", "changeGoalPointValues"]);
+	var ponyProps = new Set(["gender","race","name", "keywords", "action", "altTimeline", "count", "changeGoalPointValues", "url", "thumb"]);
 
+	if(packFormat.startsWith("link"))
+	{
+		if(typeof card.url !== "string" || card.url.length == 0) errors.push("card " + name + " doesn't have a valid url property");
+	}
 
 	if(cardType == "Pony" || cardType == "Start")
 	{
@@ -142,9 +146,9 @@ export function flattenPack(pack: any, isExternal: boolean)
 					let filePath = pack.root + "/" + cardName.replace(/\./g, "/");
 					pack.cards[typeKey][key].url = filePath + ".png";
 					pack.cards[typeKey][key].thumb = filePath + ".thumb.jpg";
-
-					cardName = "X." + cardName;
 				}
+
+				cardName = isExternal ? "X." + cardName : cardName;	
 
 				newCards[cardName] = pack.cards[typeKey][key];
 			}

@@ -70,14 +70,15 @@ var HTML = `
 			<div id='chooseCardsInfo'>
 				<h2>Expansions</h2>
 				<div id='expansions'></div>
-				<h2 class="bothMargins">Individual cards</h2>
+				<h2 class="bothMargins">Individual Cards</h2>
 				<div id='cardSelectors'></div>
-				<h2 class="bothMargins">Upload your own cards</h2>
-				
-				<ul>
-					<li>TSSSF.net will not publicly release cards uploaded in this manner</li>
-					<li>TSSSF.net reserves the right to examine any cards uploaded</li>
-				</ul>
+				<h2 class="bothMargins">Upload Your Own Cards</h2>
+				<p>
+					Please note that TSSSF.net will not publish cards uploaded in this manner; 
+					they will only be available during this game. TSSSF.net reserves the right to
+					examine any file uploaded to its severs.
+				</p>
+				<p>If you are an artist and would like to feature your shipfic cards on this website, reach out to us on our discord</p>
 				<div><label>Choose file:</label> <input id='packUpload' type="file" accept=".json" /></div>
 
 				<pre><code id='uploadErrors'></code></pre>

@@ -244,7 +244,8 @@ if(process.argv[3])
 	{
 		case "1":
 			tsssfServer.openLobby("DEV");
-			tsssfServer.games.DEV.startGame(baseRules, ["Core.Pony.AloeAndLotus"]);
+			tsssfServer.games.DEV.setLobbyOptions(baseRules);
+			tsssfServer.games.DEV.startGame(["Core.Pony.AloeAndLotus"]);
 			break;
 	}
 }

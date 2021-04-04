@@ -95,10 +95,11 @@ function setupGame():[GameModel, MockPlayer]
 	} as MockPlayer;
 
 	game.players.push(fakePlayer);
-	game.startGame({
+	game.setLobbyOptions({
 		cardDecks: ["Core.*"],
 		ruleset: "turnsOnly"
 	});
+	game.startGame();
 
 	return [game, fakePlayer];
 }

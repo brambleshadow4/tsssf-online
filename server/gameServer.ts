@@ -332,27 +332,34 @@ export class GameModel implements GameModelShared
 					game.sendHostMessage( socket, game.host == socket);		
 				}
 
-				if(message.startsWith("startgame;"))
+				if(message.startsWith("setLobbyOptions;"))
 				{
 					if(game.host == socket)
 					{
-
 						var options = {
 							cardDecks:["Core.*"],
 							ruleset: "turnsOnly",
 						};
 						try 
 						{
-							options = JSON.parse(message.substring(10))
+							options = JSON.parse(message.substring("setLobbyOptions;".length))
 						}
 						catch(e){ }
 
-						
-						game.startGame(options);
-					
-						game.toEveryone( "startgame;");
-						game.sendHostMessage( game.host, true)
-				
+						game.setLobbyOptions(options);
+
+						return;
+					}	
+				}
+
+				if(message.startsWith("startgame;"))
+				{
+
+					if(game.host == socket)
+					{
+						game.startGame();					
+						game.toEveryone("startgame;");
+						game.sendHostMessage(game.host, true)
 
 						return;
 					}		
@@ -362,7 +369,6 @@ export class GameModel implements GameModelShared
 				{
 					var json = message.substring("uploadCards;".length);
 
-					console.log("uploading cards");
 					try{
 						var newCards = JSON.parse(json);
 
@@ -388,16 +394,14 @@ export class GameModel implements GameModelShared
 						if(game.host)
 						{
 							game.sendHostMessage(game.host, true);
-							console.log("host message resent");
 						}
 
 					}
 					catch(e)
 					{
+						console.log(e);
 						return;
 					}
-
-
 				}
 
 
@@ -835,8 +839,6 @@ export class GameModel implements GameModelShared
 					}
 				}
 
-				console.log(game.players.length);
-
 				game.sendLobbyList();
 			}
 
@@ -1088,7 +1090,7 @@ export class GameModel implements GameModelShared
 				ruleset: this.ruleset,
 				keepLobbyOpen: this.keepLobbyOpen,
 				customCards: this.customCards
-			})
+			});
 
 		socket.send("ishost;" + payload)
 	}
@@ -1137,8 +1139,30 @@ export class GameModel implements GameModelShared
 
 	
 
-	public startGame(options: any, preset?: any)
+	public setLobbyOptions(options: any)
+	{
+		this.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
+		this.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
+		this.keepLobbyOpen = !!options.keepLobbyOpen;
+		this.ruleset = options.ruleset.substring(0,200);
+
+
+		var decks = ["Core.*"];
+		if(options.cardDecks)
+		{
+			//var allowedDecks = ["PU.*","EC.*"]
+			decks = options.cardDecks; //.filter( x => allowedDecks.indexOf(x) > -1);
+			//decks.push("Core.*");
+		}
+
+		cm.init(decks.concat([this.startCard]), this.customCards.cards);
+
+		this.cardDecks = decks;
+	}
+
+	public startGame(preset?: any)
 	{	
+		this.isLobbyOpen = this.keepLobbyOpen;
 
 		if(!preset)
 		{
@@ -1156,12 +1180,9 @@ export class GameModel implements GameModelShared
 				return false;
 		}
 
-		
-
-
 		this.startTime = new Date().getTime();
 
-		this.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
+		
 
 		this.cardLocations = {};
 		this.board = {
@@ -1177,26 +1198,9 @@ export class GameModel implements GameModelShared
 		}
 
 		this.isInGame = true;
-
-		this.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
-
-		this.isLobbyOpen = this.keepLobbyOpen = !!options.keepLobbyOpen;
-
-
 		this.cardLocations[this.startCard] = "p,0,0";
 
-		var decks = ["Core.*"];
-		if(options.cardDecks)
-		{
-			//var allowedDecks = ["PU.*","EC.*"]
-			decks = options.cardDecks; //.filter( x => allowedDecks.indexOf(x) > -1);
-			//decks.push("Core.*");
-		}
 
-		cm.init(decks.concat([this.startCard]), this.customCards.cards);
-
-		this.cardDecks = decks;
-		
 		this.goalDiscardPile = [];
 		this.ponyDiscardPile = [];
 		this.shipDiscardPile = [];
@@ -1247,10 +1251,12 @@ export class GameModel implements GameModelShared
 		}
 
 		randomizeOrder(this.players);
+		randomizeOrder(this.goalDrawPile);
+		randomizeOrder(this.ponyDrawPile);
+		randomizeOrder(this.shipDrawPile);
 
-		this.ruleset = options.ruleset.substring(0,200);
 
-		if(options.ruleset == "turnsOnly")
+		if(this.ruleset == "turnsOnly")
 		{
 			this.turnstate = new Turnstate();
 			this.turnstate.init(this, this.players[0] ? this.players[0].name : "")
@@ -1259,15 +1265,9 @@ export class GameModel implements GameModelShared
 		{
 			delete this.turnstate;
 		}
-
-		randomizeOrder(this.goalDrawPile);
-		randomizeOrder(this.ponyDrawPile);
-		randomizeOrder(this.shipDrawPile);
-
+		
 		if(preset)
 			this.loadPreset(preset);
-
-		
 	}
 
 	private loadPreset(hand: Card[])

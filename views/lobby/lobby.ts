@@ -25,7 +25,7 @@ var ishost = false;
 var sentName = false;
 
 var cardBoxElements: {[key: string]: Element} = {};
-var deckElements: {[key: string]: Element} = {}
+var cardSelectorElements: {[key: string]: Element} = {}
 
 
 var globals = window as unknown as {
@@ -105,7 +105,7 @@ function loadCardPages(options: GameOptions)
 	var deckElementList: HTMLElement[] = [];
 
 
-	var allPacks = packOrder;
+	var allPacks = packOrder.slice();
 
 	if(options.customCards.descriptions.length)
 	{
@@ -114,6 +114,8 @@ function loadCardPages(options: GameOptions)
 	}
 
 	cm.init(["*"], options.customCards.cards);
+
+	console.log(options.customCards);
 
 	for(var info of allPacks)
 	{
@@ -138,6 +140,7 @@ function loadCardPages(options: GameOptions)
 
 		let el = cardSelectComponent(globals.decks, info.name, info.pack + ".*", boxSelect)
 		deckElementList.push(el)
+		cardSelectorElements[info.pack] = el;
 		cardSelectors.appendChild(el);
 	}
 
@@ -161,7 +164,7 @@ function loadCardPages(options: GameOptions)
 			{
 				box.classList.add('selected');
 				deckElementList[i].getElementsByTagName('button')[2].click();
-				//console.log(deckElements[i].getElementsByTagName('button')[2]);
+				//console.log(cardSelectorElements[i].getElementsByTagName('button')[2]);
 			}
 		}
 	}
@@ -214,7 +217,7 @@ function loadCardPages(options: GameOptions)
 function getPackString(card: Card)
 {
 	var dotPos = card.substring(0, card.lastIndexOf(".")).lastIndexOf(".")
-	return card.substring(0, dotPos+1) + "*";
+	return card.substring(0, dotPos);
 }
 
 
@@ -270,10 +273,7 @@ function onMessage(event: MessageEvent)
 
 						var deck = getPackString(card);
 
-						console.log(deckElements);
-						console.log(deck);
-
-						deckElements[deck].getElementsByTagName('button')[1].click();
+						cardSelectorElements[deck].getElementsByTagName('button')[1].click();
 					}
 				}
 
@@ -354,7 +354,7 @@ function register()
 	globals.socket.send("register;" + (localStorage["playerID"] || 0) + ";" + name);
 }
 
-function startGame()
+function setLobbyOptions()
 {
 	var cardDecks = document.getElementsByClassName('cardbox');
 	var options: any = {cardDecks:[]};
@@ -374,7 +374,13 @@ function startGame()
 
 	options.keepLobbyOpen = !!input('keepLobbyOpen').checked;
 
-	globals.socket.send("startgame;" + JSON.stringify(options));
+	globals.socket.send("setLobbyOptions;" +  JSON.stringify(options));
+}
+
+function startGame()
+{
+	setLobbyOptions();
+	globals.socket.send("startgame;");
 }
 
 
@@ -443,13 +449,16 @@ function loadingPlayerAnimation()
 
 
 
-function handleFileSelect(event: any){
+function handleFileSelect(event: any)
+{
 	const reader = new FileReader()
 	reader.onload = handleFileLoad;
 	reader.readAsText(event.target.files[0])
 }
 
-function handleFileLoad(event: any){
+function handleFileLoad(event: any)
+{
+	setLobbyOptions();
 
 	var queuedFileText = event.target.result;
 	var fileName = (document.getElementById('packUpload') as HTMLInputElement).value;
