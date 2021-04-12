@@ -381,7 +381,7 @@ export class GameModel implements GameModelShared
 							name: newCards.name, 
 							pack: "X." + newCards.namespace,
 							box: false, 
-							startCards: Object.keys(newCards).filter( x => isStart(x))
+							startCards: Object.keys(cards).filter( x => isStart(x))
 						};
 
 						if(game.customCards.descriptions.filter(x => x.pack == description.pack).length == 0)

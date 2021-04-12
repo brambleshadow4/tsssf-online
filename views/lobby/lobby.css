@@ -102,6 +102,24 @@ h2
 	margin-top: 0px;
 }
 
+h2 span, h2 img
+{
+	display: inline-block;
+	vertical-align: middle;
+}
+
+h2 a, h2 a:visited
+{
+	color: black;
+}
+
+h2 img
+{
+	margin-left: 5px;
+}
+
+
+
 .main > div
 {
 	margin-bottom: 28px;

@@ -173,8 +173,13 @@ function loadCardPages(options: GameOptions)
 	startCards.innerHTML = "";
 
 	var startCardNames = packOrder.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
+	var customStartCards = options.customCards.descriptions.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
 
-	for(var card of startCardNames)
+	console.log(customStartCards);
+
+	var allStartCards = startCardNames.concat(customStartCards)
+
+	for(var card of allStartCards)
 	{
 		let cardEl = makeCardElement(card);
 		var shield = document.createElement('div');

@@ -20,7 +20,7 @@
 				padding: 0 .5in .5in .5in;
 			}
 
-			h1
+			h1, h2
 			{
 				border-bottom: solid 1px black;
 			}
@@ -47,6 +47,8 @@
 				padding-left: 30px;
 			}
 
+			.hidden{visibility: hidden;}
+
 			.text-root { color: green; }
 			.text-namespace { color: blue; }
 			.text-cardtype { color: purple; }
@@ -58,15 +60,42 @@
 				vertical-align: top;
 			}
 
+			table
+			{
+				margin: 0px 40px;
+				background-color: #F0F0F0;
+			}
+
 			td
 			{
 				padding: 2px;
 				padding-left: 7px;
 			}
 
-			tr.alt
+			tr.alt, div.alt
 			{
 				background-color: #E0E0E0;
+			}
+
+			.hangingIndent
+			{
+				display: flex;
+			}
+
+			.function-doc
+			{
+				padding: 10px;
+				background-color: #F0F0F0;
+			}
+
+			.figure > div
+			{
+				margin: auto;
+			}
+
+			.figure table
+			{
+				margin: auto;
 			}
 
 		</style>
@@ -160,7 +189,7 @@
 
 				<h2>Step 2: Add Additional Attributes to Each Card</h2>
 
-				<p>Now that every card has an image associated with it, it's time to add oaddditional attributes specific to whether it's a pony card, a ship card, or a goal card.</p>
+				<p>Now that every card has an image associated with it, it's time to add additional attributes specific to whether it's a pony card, a ship card, or a goal card.</p>
 
 				<p>There's many, many more attributes used by TSSSF.net across all the cards, but the above example should be enough to get you started. See <a href="#appendix-b">Appendix B: Pony, Ship, + Goal attributes</a> for a complete list, or check out the core deck's <a href="/packs/Core/pack.json">pack.json</a> file for even more examples. 
 
@@ -315,11 +344,12 @@
 
 				<h3>Pony Attributes</h3>
 
-				<table>
+				<div class='figure'><table>
 					<tr>
 						<th>Attribute</th><th>Valid Values</th><th>Notes/Description</th>
+					</tr>
 					<tr>
-						<td>name</td><td>Any string, required</td><td>Should be the simplest name of the pony in question, e.g. Twilight Sparkle for cards like Twilight Sparkle</td>
+						<td>name</td><td>Any string, required</td><td>Should be the simplest name of the pony in question, e.g. Twilight Sparkle for cards like Fanfic Author Twilight</td>
 					</tr>
 
 					<tr class='alt'><td rowspan="5">race</td><td>"earth"</td><td></td></tr>
@@ -340,7 +370,7 @@
 
 					<tr><td>count</td><td>any number</td><td>Changes how many ponies this card counts as, e.g. 2 for Aloe & Lotus</td></tr>
 
-					<tr class='alt'><td rowspan="10">action</td><td>"swap"</td><td></td></tr>
+					<tr class='alt'><td rowspan="12">action</td><td>"swap"</td><td></td></tr>
 					<tr class='alt'><td>"3swap"</td><td></td></tr>
 					<tr class='alt'><td>"replace"</td><td></td></tr>
 					<tr class='alt'><td>"search"</td><td></td></tr>
@@ -348,6 +378,8 @@
 					<tr class='alt'><td>"draw"</td><td></td></tr>
 					<tr class='alt'><td>"newGoal"</td><td></td></tr>
 					<tr class='alt'><td>"playFromDiscard"</td><td></td></tr>
+					<tr class='alt'><td>"ship"</td><td>Allows the pony card to be played as a ship as well</td></tr>
+					<tr class='alt'><td>"shipWithEverypony"</td><td>Special ability for HorriblePeople.GraciousGivers.Pony.PrincessCelestAI</td></tr>
 					<tr class='alt'><td>"Changeling(&lt;type&gt;)"</td><td>Allows the card to set a disguise when played and when moved. &lt;type&gt; can be any of the following:
 					<div class='inset'>
 						earth<br>
@@ -361,13 +393,296 @@
 					</td></tr>
 					<tr class='alt'><td>"ChangelingNoRedisguise(&lt;type&gt;)"</td><td>Same as Changeling(&lt;type&gt;), but the card cannot redisguise when moved
 					</td></tr>
-				</table>
+				</table></div>
 
 				<h3>Ship Attributes</h3>
 
+				<div class='figure'><table>
+					<tr>
+						<th>Attribute</th><th>Valid Values</th><th>Notes/Description</th>
+					</tr>
+					<tr><td rowspan=10>action</td><td>"genderChange"</td><td></td></tr>
+					<tr><td>"raceChange"</td><td></td></tr>
+					<tr><td>"timelineChange"</td><td></td></tr>
+					<tr><td>"lovePoison"</td><td></td></tr>
+					<tr><td>"makePrincess"</td><td></td></tr>
+					<tr><td>"keywordChange"</td><td></td></tr>
+					<tr><td>"clone"</td><td></td></tr>
+					<tr><td>"addKeywords(&lt;list&gt;)"</td><td>&lt;list&gt; is a list of keywords (no quotation marks) separated by commas, e.g. <br>Object<br>Nightmare, Villain</td></tr>
+					<tr><td>"raceGenderChange"</td><td></td></tr>
+					<tr><td>"keywordChange"</td><td></td></tr>
+
+				</table></div>
+
+
 				<h3>Goal Attributes</h3>
 
+				<table>
+					<tr>
+						<th>Attribute</th><th>Valid Values</th><th>Notes/Description</th>
+					</tr>
+					<tr><td rowspan=2>points</td><td>any number in quotes, e.g. "3"</td><td></td></tr>
+					<tr><td>two integers (second one larger than the first), separated by a hyphen in quotes<br>e.g."3-4"</td><td>Used for cards which can be worth different point values, depending on certain criteria</td></tr>
+					<tr class='alt'><td>goalLogic</td><td>See <a href="#appendix-c">Appendix C: Goal Logic</a></td><td></td>
+
+				</table>
+
 				<h2 id='appendix-c'>Appendix C: Goal Logic</h2>
+
+				<p>Goal logic is an attribute on goal cards which specifies the criteria needed to achieve a goal. Because there are many different kinds of goals and criteria, goal logic is expressed in its own language and has its own specific syntax. To give you an idea to what the language looks like, here are a few examples of the text written on various goal cards and the goal logic associated with it.</p>
+
+
+				<table>
+					<tr><th>Card Text</th><th>Goal Logic</th></tr>
+					<tr><td>Win this goal when 6 earth pony/earth pony ships are on the grid</td><td><code>ExistsShip(race=earth,race=earth,6)</code></td></tr>
+					<tr class='alt'><td>Win this goal when at least 5 time travelers are on the grid</td><td><code>ExistsPony(altTimeline=true, 5)</code></td></tr>
+					<tr><td>Win this Goal when Rainbow Dash is shipped with any 3 females</td><td><code>ExistsPonyShippedTo(name=Rainbow Dash, Select(gender=female,3))</code></td></tr>
+					<tr class='alt'><td>Win this goal when 6 ponies with the Mane 6 keyword are shipped in a chain</td><td><code>ExistsChain(Mane 6 in keywords, 6)</code></td></tr>
+					<tr><td>Win this goal when you break up Shining Armor with any female except Twilight Sparkle</td><td><code>BreakShip(name=Shining Armor, gender=female && name != Twilight Sparkle)</code></td></tr>
+
+				</table> 
+
+				<h3>Goal functions</h3>
+
+				<p>Valid goal logic consists of a single goal function with all its criteria/count parameters passed in to it. Each goal function checks something different, so make sure you use the right one for your goal</p>
+
+				<div class='figure'>
+
+					<div class='function-doc'>
+						<div>ExistsPony</div>
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>ExistsPony(&lt;criterion&gt;)</code><br>
+								<code>ExistsPony(&lt;criterion&gt;, &lt;count&gt;)</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks for whether a pony matching criterion is on the grid. If count is provided, checks that there are &lt;count&gt; distinct ponies which match the criterion</div>
+						</div>
+					</div>
+
+					<div class='function-doc alt'>
+						<div>ExistsShip</div>
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>ExistsShip(&lt;criterion1&gt;, &lt;criterion2&gt;)</code><br>
+								<code>ExistsShip(&lt;criterion1&gt;, &lt;criterion2&gt;, &lt;count&gt;)</code>
+							</div>
+						</div>
+			
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks for whether a pony matching criterion1 is shipped with a pony matching criterion2. If count is provided, checks that there are &lt;count&gt; distinct ships which match the criteria</div>
+						</div>
+
+					</div>
+
+					
+
+
+					<div class='function-doc'>
+						<div>ExistsPonyShippedTo</div>
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>ExistsPonyShippedTo(&lt;criterion1&gt;, Select(&lt;criterion2&gt;, &lt;count&gt;))</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks for whether a pony matching criterion1 is shipped with count other ponies, each of which match criterion2</div>
+						</div>
+
+						<div style="height: 20px"></div>
+
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>ExistsPonyShippedTo(&lt;criterion1&gt;, AllOf(&lt;criterion2&gt;, &lt;criterion3&gt;, ...))</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks for whether a pony matching criterion1 is shipped with several ponies, each of which matches a different criterion specified in AllOf. AllOf takes in any number of criterion parameters, each separated by a comma</div>
+						</div>
+
+						<div style="height: 20px"></div>
+
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>ExistsPonyShippedTo(&lt;criterion&gt;, ShippedWith2Versions)</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks for whether a pony matching the criterion is shipped with two different versions of a pony</div>
+						</div>
+						
+					</div>
+
+
+
+					<div class='function-doc alt'>
+						<div>ExistsChain</div>
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>ExistsChain(&lt;criterion&gt;, &lt;count&gt;)</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks for whether a chain of size count exists on the grid, where each pony in the chain matches the specified criterion.</div>
+						</div>
+						
+					</div>
+
+					<div class='function-doc'>
+						<div>PlayPonies</div>
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>PlayPonies(&lt;criterion&gt;, &lt;count&gt;)</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks for whether a player has played count ponies this turn where the pony matches the specified criterion.</div>
+						</div>
+						
+					</div>
+
+					<div class='function-doc alt'>
+						<div>PlayShips</div>
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>PlayShips(&lt;criterion1&gt;, &lt;criterion2&gt;, &lt;count&gt;)</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks for whether a player has played count ships this turn where one of the two ponies matches criterion1 and the other matches criterion2</div>
+						</div>
+						
+					</div>
+
+					
+
+					<div class='function-doc'>
+						<div>BreakShip</div>
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>BreakShip(&lt;criterion1&gt;, &lt;criterion2&gt;)</code><br>
+								<code>BreakShip(&lt;criterion1&gt;, &lt;criterion2&gt;, &lt;count&gt;)</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks for whether a player has broken a ship this turn where one of the ponies matches criterion1 and the other criterion2. If count is provided, checks that such a ship has been broken count times this turn (it can be the same ship multiple times, or several different ships)</div>
+						</div>
+						
+					</div>
+
+					<div class='function-doc alt'>
+						<div>SwapCount</div>
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>SwapCount(&lt;count&gt;)</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks whether at least count different cards have been swapped this turn.</div>
+						</div>
+						
+					</div>
+				</div>
+
+
+				<p>There's a few other niche goal functions, but they exist primarily for special cards</p>
+
+				<div class='figure'>
+					<div class='function-doc'>
+						<div>PlayLovePoisons</div>
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>PlayLovePoisons</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks whether two love poison cards have been played this turn</div>
+						</div>
+					
+					</div>
+
+					<div class='function-doc'>
+						<div>ExistsShipGeneric</div>
+						<div class='inset hangingIndent'>
+							<div>Syntax:&nbsp;</div>
+							<div>
+								<code>ExistsShipGeneric(ShippedWithOppositeGenderedSelf)</code>
+							</div>
+						</div>
+						<div class='inset hangingIndent'>
+							<div>Use:&nbsp;</div>
+							<div>Checks whether any ship exists between a pony and a gender-swapped version of the same pony.</div>
+						</div>
+						
+					</div>
+				</div>
+
+				<!--
+				<div class='function-doc'>
+					<div>funName</div>
+					<div class='inset hangingIndent'>
+						<div>Syntax:&nbsp;</div>
+						<div>
+							<code>myCode</code>
+						</div>
+					</div>
+					<div class='inset hangingIndent'>
+						<div>Use:&nbsp;</div>
+						<div></div>
+					</div>
+					
+				</div>
+				-->
+
+
+				<h3>Criteria</h3>
+
+				<p>Criteria are what actually determine if a particular pony card matches or not based on the <a href="#appendix-b">pony card's attributes</a>. They are passed in as parameters to goal functions</p>
+
+				<div class='figure'><table>
+					<tr><td><code>&lt;attribute&gt; = &lt;value&gt;</code></td><td>Matches when the card has attribute set to value</td></tr>
+					<tr><td><code>&lt;attribute&gt; != &lt;value&gt;</code></td><td>Matches when the card does NOT have attribute set to value</td></tr>
+					<tr><td><code>&lt;value&gt; in keywords</code></td><td>Matches when the card has value in its keywords</td></tr>
+					<tr><td><code>&lt;value&gt; !in keywords</code></td><td>Matches when the card does NOT have value in its keywords</td></tr>
+					<tr><td><code>genderSwapped</code></td><td>Matches cards which have had their gender swapped</td></tr>
+					<tr><td><code>*</code></td><td>Matches every card</td></tr>
+				</table></div>
+
+				<p>Criteria do not use quotation marks anywhere for simplicity's sake. Whitespace between operators like = and != is not necessary, though may help readability. For names which contain two or more words, the whitespace in the name will not be removed, but the whitespace before and after the name will. Names and attributes are cAsE sEnSiTiVe</p>
+
+				<p>You can combine multiple criteria into a single check with the following criteria</p>
+
+				<div class='figure'><table>
+					<tr><td><code>&lt;criterion1&gt; || &lt;criterion2&gt;</code></td><td>Matches when the card matches criterion1, criterion2, or both</td></tr>
+					<tr><td><code>&lt;criterion1&gt; && &lt;criterion2&gt;</code></td><td>Matches when the card matches both criterion1 and criterion2</td></tr>
+				</table></div>
+
+				<p>During the game, cards can sometimes change genders, change races, or gain new keywords. Thus, it is sometimes helpful for criteria to test what the card's original attributes were, rather than what they are now. This can be accommodated by adding "_b" (b for base) to an attribute's name. Here's an example for a criterion which uses this to test if a card has been changed into an alicorn</p>
+
+				<div class='figure' style="text-align: center;"><code>race=alicorn && race_b != alicorn</code></div>
 
 
 			</div>
