@@ -198,6 +198,9 @@ export class TsssfGameServer
 }
 
 
+const UPLOAD_LIMIT = 1024*1024;
+//const UPLOAD_LIMIT = 500;
+
 export class GameModel implements GameModelShared
 {
 	public players: Player[] = [];
@@ -218,10 +221,12 @@ export class GameModel implements GameModelShared
 	public cardDecks: string[] = ["Core.*"];
 	public customCards: {
 		descriptions: PackListPack[], 
-		cards: {[key:string]: CardProps}
+		cards: {[key:string]: CardProps},
+		currentSize: number
 	} = {
 		descriptions: [],
-		cards: {}
+		cards: {},
+		currentSize: 0
 	};
 
 	public ponyDiscardPile: Card[] = [];
@@ -365,8 +370,18 @@ export class GameModel implements GameModelShared
 					}		
 				}
 
-				if(message.startsWith("uploadCards;"))
+				if(message.startsWith("uploadCards;") && game.host == socket)
 				{
+					if(game.customCards.currentSize > UPLOAD_LIMIT || message.length > UPLOAD_LIMIT)
+					{
+						console.log(UPLOAD_LIMIT);
+						console.log(game.customCards.currentSize);
+						console.log(message.length);
+						socket.send("uploadCardsError;Upload limit reached for this lobby.");
+						console.log("failed to upload");
+						return;
+					}	
+
 					var json = message.substring("uploadCards;".length);
 
 					try{
@@ -375,6 +390,13 @@ export class GameModel implements GameModelShared
 						var errors = validatePack(newCards, "", "", "any");
 
 						if(errors.length) return;
+
+						
+						if (!fs.existsSync("uploads")){
+							fs.mkdirSync("uploads");
+						}
+
+						fs.writeFileSync("uploads/" + getFileName() + ".json", json)
 
 						var cards = flattenPack(newCards, true);
 						var description = {
@@ -390,6 +412,8 @@ export class GameModel implements GameModelShared
 						}
 
 						game.customCards.cards = mergePacks(game.customCards.cards, cards);
+
+						game.customCards.currentSize = JSON.stringify(game.customCards.cards).length + JSON.stringify(game.customCards.descriptions).length;
 
 						if(game.host)
 						{
@@ -1870,6 +1894,21 @@ export class Turnstate
 	}
 }
 
+function getFileName()
+{
+	var now = new Date();
+
+	function pad(n: number)
+	{
+		if(n < 10)
+			return "0" + n
+		else 
+			return "" + n
+	}
+
+	return now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + (now.getDate()) + " " + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds())
+}
+
 function handleCrash(this: any, fun: Function)
 {
 	return function(this: any, ...args: any[])
@@ -1879,17 +1918,7 @@ function handleCrash(this: any, fun: Function)
 		}
 		catch(e)
 		{
-			var now = new Date();
-
-			function pad(n: number)
-			{
-				if(n < 10)
-					return "0" + n
-				else 
-					return "" + n
-			}
-
-			var s = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + (now.getDate()) + " " + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds())
+			
 
 			var data = [];
 
@@ -1899,7 +1928,7 @@ function handleCrash(this: any, fun: Function)
 			data.push("GAMES")
 			data.push(util.inspect(this, {depth:Infinity}))
 
-			fs.writeFileSync("CRASH " + s + ".txt", data.join("\n"))
+			fs.writeFileSync("CRASH " + getFileName() + ".txt", data.join("\n"))
 			throw e
 		}
 	}
