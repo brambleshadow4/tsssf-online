@@ -103,7 +103,7 @@ for(let namespace of packsSet)
 	}
 }
 
-fs.writeFileSync("./server/cards.ts", "var cards: {[key: string]: any} = " + JSON.stringify(cards, undefined,"\t") + "\nexport default cards");
+fs.writeFileSync("./server/cards.ts", "//auto-generated file using npm run buildPacks\nvar cards: {[key: string]: any} = " + JSON.stringify(cards, undefined,"\t") + "\nexport default cards");
 
 var order;
 if(fs.existsSync("./packs/order.json"))
@@ -151,7 +151,7 @@ order = order.map( (x:any) => packs[x] ? packs[x] : x );
 order = order.filter((x:any) => typeof x == "object" || packs[x]);
 
 fs.writeFileSync(
-	"./views/lobby/packOrder.ts", "import {PackListItem} from \"../../server/lib.js\";\nvar order: PackListItem[] =" 
+	"./views/lobby/packOrder.ts", "//auto-generated file using npm run buildPacks\nimport {PackListItem} from \"../../server/lib.js\";\nvar order: PackListItem[] =" 
 	+ JSON.stringify(order, undefined,"\t")
 	+ "\nexport default order"
 );

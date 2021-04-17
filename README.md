@@ -29,11 +29,7 @@ Prerequisites: Familiarity with node/npm.
 	npm run tsc
 
 npm run buildPacks will install any card packs stored in the packs directory, generating the 
-image thumbnails as well as overwritting cards.ts and packOrder.ts.
-Since these files are generated, any future changes to them can be ignored with the following:
-
-	git update-index --assume-unchanged ./views/lobby/packOrder.ts
-	git update-index --assume-unchanged ./server/cards.ts
+image thumbnails as well as overwritting cards.ts and packOrder.ts. Hence, the need to build twice.
 
 ### Running the server ###
 
