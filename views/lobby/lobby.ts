@@ -109,13 +109,13 @@ function loadCardPages(options: GameOptions)
 
 	if(options.customCards.descriptions.length)
 	{
-		allPacks.push({"h": "Uploads"});
+		allPacks.push({"h": "Uploads", "id":"uploadBanner"});
 		allPacks = allPacks.concat(options.customCards.descriptions);
 	}
 
 	cm.init(["*"], options.customCards.cards);
 
-	console.log(options.customCards);
+	var uploadHeader: HTMLElement | undefined;
 
 	for(var info of allPacks)
 	{
@@ -124,6 +124,11 @@ function loadCardPages(options: GameOptions)
 			info = info as PackListHeader;
 			let el = document.createElement('h3');
 			el.innerHTML = info.h as string;
+
+			if(info.id == "uploadBanner")
+			{
+				uploadHeader = el;
+			}
 			cardSelectors.appendChild(el);
 			continue;
 		}
@@ -175,7 +180,11 @@ function loadCardPages(options: GameOptions)
 	var startCardNames = packOrder.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
 	var customStartCards = options.customCards.descriptions.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
 
-	console.log(customStartCards);
+
+	if(customStartCards.length && uploadHeader)
+	{
+		uploadHeader.innerHTML += "<br><span class='subheading'>Uploaded start cards are in the 'Start Card' section</span>";
+	}
 
 	var allStartCards = startCardNames.concat(customStartCards)
 

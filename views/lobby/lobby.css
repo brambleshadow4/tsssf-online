@@ -73,6 +73,11 @@
 	margin-top: .83em
 }
 
+.subheading
+{
+	font-size: .8em;
+}
+
 input[type='text']
 {
 	width: 300px;

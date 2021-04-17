@@ -186,7 +186,8 @@ export interface PackListPack
 
 export interface PackListHeader
 {
-	h: string
+	h: string,
+	id?: string
 }
 
 export type PackListItem = PackListPack | PackListHeader;
