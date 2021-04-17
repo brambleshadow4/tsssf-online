@@ -345,6 +345,13 @@ function onMessage(event: MessageEvent)
 			sentName = false;
 		}
 	}
+
+	if(event.data.startsWith("uploadCardsError;"))
+	{
+		var error = event.data.substring("uploadCardsError;".length);
+
+		document.getElementById('uploadErrors')!.innerHTML = error;
+	}
 }
 
 

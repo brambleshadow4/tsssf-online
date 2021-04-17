@@ -130,6 +130,11 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 	let imgElement = document.createElement('div') as unknown as CardElement;
 	imgElement.classList.add("card");
 
+	if(card.startsWith("X."))
+	{
+		imgElement.classList.add('custom');
+	}
+
 	setCardBackground(imgElement, card);
 
 	if(!isBlank(card) && cards[card] && !(cards[card] as GoalProps).goalLogic && location && isGoalLoc(location))

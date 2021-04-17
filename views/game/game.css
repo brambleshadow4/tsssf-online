@@ -77,6 +77,11 @@
 }
 
 
+body.cardsUnapproved .card.custom
+{
+	background-image: none !important;
+}
+
 .card
 {
 	/*filter: grayscale(100%);*/

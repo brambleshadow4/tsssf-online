@@ -89,7 +89,8 @@ import {
 	updateGoals,
 	updateHand,
 	initPeripherals,
-	openCardSelect
+	openCardSelect,
+	customCardsPopup
 } from "./peripheralComponents.js";
 
 import
@@ -152,6 +153,9 @@ var offsetId = 0;
 var hoverCard = "";
 var hoverCardDiv;
 
+var customCardWarningShown = false;
+var showingHelpPopup = false;
+
 
 var haveCardsLoaded = false;
 
@@ -193,6 +197,7 @@ export function loadView()
 	{
 		sessionStorage["shownHelp"] = "true";
 		win.createHelpPopup();
+		showingHelpPopup = true;
 	}
 
 	attachToSocket(win.socket);
@@ -225,10 +230,13 @@ var allKeywords: string[] = [];
 // Preloading all the cards makes everything feel instant.
 
 
-function LoadCards()
+function LoadCards(): void
 {
 	if(haveCardsLoaded)
 		return;
+
+	document.body.classList.add("cardsUnapproved");
+
 
 	var keywordSet: Set<string> = new Set();
 
@@ -244,9 +252,34 @@ function LoadCards()
 
 	let cards = cm.inPlay();
 
+	let customCardsInUse = false
+
 	for(var key in cards)
 	{
 		
+		if(key.startsWith("X.") && !customCardsInUse)
+		{
+			customCardsInUse = true;
+
+			document.body.classList.add("cardsUnapproved");
+
+			(async function(){
+				
+				await customCardsPopup();
+
+				document.body.classList.remove("cardsUnapproved");
+
+				if(showingHelpPopup)
+				{
+					win.createHelpPopup();
+				}
+
+				showingHelpPopup = false;
+
+			})();
+			
+		}
+
 		if(cards[key].thumb)
 		{
 			var img = document.createElement('img');
@@ -266,6 +299,7 @@ function LoadCards()
 	}
 
 	allKeywords = [...keywordSet.keys()].sort();
+
 }
 
 
@@ -518,7 +552,7 @@ function updateEffects()
 	}
 }
 
-export function updateGame(newModel?: GameModel)
+export async function updateGame(newModel?: GameModel)
 {
 
 	if(newModel)
@@ -536,6 +570,7 @@ export function updateGame(newModel?: GameModel)
 
 
 	LoadCards();
+
 
 	var flyingCards = document.getElementsByClassName('flying');
 	while(flyingCards.length)

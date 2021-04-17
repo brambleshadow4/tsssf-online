@@ -199,7 +199,7 @@ export class TsssfGameServer
 
 
 const UPLOAD_LIMIT = 1024*1024;
-//const UPLOAD_LIMIT = 500;
+//const UPLOAD_LIMIT = 2000;
 
 export class GameModel implements GameModelShared
 {
@@ -383,48 +383,52 @@ export class GameModel implements GameModelShared
 					}	
 
 					var json = message.substring("uploadCards;".length);
-
+					var newCards;
 					try{
-						var newCards = JSON.parse(json);
-
-						var errors = validatePack(newCards, "", "", "any");
-
-						if(errors.length) return;
-
-						
-						if (!fs.existsSync("uploads")){
-							fs.mkdirSync("uploads");
-						}
-
-						fs.writeFileSync("uploads/" + getFileName() + ".json", json)
-
-						var cards = flattenPack(newCards, true);
-						var description = {
-							name: newCards.name, 
-							pack: "X." + newCards.namespace,
-							box: false, 
-							startCards: Object.keys(cards).filter( x => isStart(x))
-						};
-
-						if(game.customCards.descriptions.filter(x => x.pack == description.pack).length == 0)
-						{
-							game.customCards.descriptions.push(description);
-						}
-
-						game.customCards.cards = mergePacks(game.customCards.cards, cards);
-
-						game.customCards.currentSize = JSON.stringify(game.customCards.cards).length + JSON.stringify(game.customCards.descriptions).length;
-
-						if(game.host)
-						{
-							game.sendHostMessage(game.host, true);
-						}
-
+						newCards = JSON.parse(json);
 					}
 					catch(e)
 					{
-						console.log(e);
+						socket.send("uploadCardsError;Bad JSON file");
 						return;
+					}
+
+					var errors = validatePack(newCards, "", "", "any");
+
+					if(errors.length)
+					{
+						socket.send("uploadCardsError;Errors in card pack");
+						return;
+					}
+
+					
+					if (!fs.existsSync("uploads"))
+					{
+						fs.mkdirSync("uploads");
+					}
+
+					fs.writeFileSync("uploads/" + getFileName() + ".json", json)
+
+					var cards = flattenPack(newCards, true);
+					var description = {
+						name: newCards.name, 
+						pack: "X." + newCards.namespace,
+						box: false, 
+						startCards: Object.keys(cards).filter( x => isStart(x))
+					};
+
+					if(game.customCards.descriptions.filter(x => x.pack == description.pack).length == 0)
+					{
+						game.customCards.descriptions.push(description);
+					}
+
+					game.customCards.cards = mergePacks(game.customCards.cards, cards);
+
+					game.customCards.currentSize = JSON.stringify(game.customCards.cards).length + JSON.stringify(game.customCards.descriptions).length;
+
+					if(game.host)
+					{
+						game.sendHostMessage(game.host, true);
 					}
 				}
 
@@ -838,6 +842,13 @@ export class GameModel implements GameModelShared
 
 				if(game.isInGame)
 					connectedPlayers = connectedPlayers.filter(x => game.isRegistered(x));
+
+				// if host changes when lobby, deslect any uploaded cards.
+				// 
+				if(!game.isInGame)
+				{
+					game.cardDecks = game.cardDecks.filter( (x: Card)=> !x.startsWith("X."))
+				}
 
 				if(connectedPlayers.length)
 				{
