@@ -71,6 +71,7 @@ export interface Player
 
 
 const TEMP_DISCONNECT_TIME = 15*1000;
+const NO_MOVE_EXPIRE_TIME = 60*60*1000; // 1 hour
 export class TsssfGameServer
 {
 	public games: {[key:string] : GameModel};
@@ -82,32 +83,52 @@ export class TsssfGameServer
 		this.wsServer = new ws.Server({ noServer: true });
 		this.games = {};
 
-		const interval = setInterval(function ping(this:TsssfGameServer)
+		let games = this.games;
+
+		const interval = setInterval(function ping()
 		{
-			for(var key in this.games)
+
+			for(var key in games)
 			{
-				var anyPlayersAlive = false;
-				for(var i=0; i < this.games[key].players.length; i++)
+				// no move expiration
+				let timeSinceLastMove = new Date().getTime() - games[key].lastMessageTimestamp;
+
+				if(timeSinceLastMove > NO_MOVE_EXPIRE_TIME)
 				{
-					if(this.games[key].players[i].socket.isAlive)
+					for(var player of games[key].players)
+					{
+						player.socket.send("closed;");
+						player.socket.close();
+					}
+					delete games[key];
+					return; 
+				}
+
+				// no player alive expiration
+
+				var anyPlayersAlive = false;
+				for(var i=0; i < games[key].players.length; i++)
+				{
+					if(games[key].players[i].socket.isAlive)
 					{
 						anyPlayersAlive = true;
 						break;
 					}
 				}
 
+
 				if(!anyPlayersAlive)
 				{
-					this.games[key].deathCount++;
+					games[key].deathCount++;
 
-					if(this.games[key].deathCount >= 4)
+					if(games[key].deathCount >= 4)
 					{
-						delete this.games[key];
+						delete games[key];
 					}
 				}
 				else
 				{
-					this.games[key].deathCount = 0;
+					games[key].deathCount = 0;
 				}
 			}
 
@@ -229,6 +250,8 @@ export class GameModel implements GameModelShared
 		currentSize: 0
 	};
 
+	public lastMessageTimestamp: number;
+
 	public ponyDiscardPile: Card[] = [];
 	public shipDiscardPile: Card[] = [];
 	public goalDiscardPile: Card[] = [];
@@ -254,7 +277,10 @@ export class GameModel implements GameModelShared
 
 	public debug = false;
 
-	constructor(){}
+	constructor(){
+
+		this.lastMessageTimestamp = new Date().getTime();
+	}
 
 	public onConnection(socket: ws & {isAlive: boolean, isDead:boolean}, request:any, client:any)
 	{
@@ -280,6 +306,7 @@ export class GameModel implements GameModelShared
 				return;
 
 			game.messageHistory.push(message);
+			game.lastMessageTimestamp = new Date().getTime();
 
 			if(message.startsWith("handshake;"))
 			{
@@ -374,11 +401,7 @@ export class GameModel implements GameModelShared
 				{
 					if(game.customCards.currentSize > UPLOAD_LIMIT || message.length > UPLOAD_LIMIT)
 					{
-						console.log(UPLOAD_LIMIT);
-						console.log(game.customCards.currentSize);
-						console.log(message.length);
 						socket.send("uploadCardsError;Upload limit reached for this lobby.");
-						console.log("failed to upload");
 						return;
 					}	
 
