@@ -2,7 +2,7 @@
 	"name": "Ponyville University",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "PU",
 	"cards": {
 		"start": {},

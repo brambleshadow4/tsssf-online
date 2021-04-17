@@ -2,7 +2,7 @@
 	"name": "No Holds Barred",
 	"description": "",
 	"format": "pack:1",
-	"root": "tsssf.net/packs",
+	"root": "https://tsssf.net/packs",
 	"namespace": "NoHoldsBarred",
 	"cards": {
 		"start": {},
