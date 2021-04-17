@@ -1,0 +1,39 @@
+{
+	"name": "Weaboo Paradaisu",
+	"description": "",
+	"format": "pack:1",
+	"root": "https://tsssf.net/packs",
+	"namespace": "HorriblePeople.WeeabooParadaisu",
+	"cards": {
+		"start": {},
+		"pony": {
+			"NihonponniNaritaiTwilightSparkle": {
+				"name": "Twilight Sparkle",
+				"race": "unicorn",
+				"gender": "female",
+				"keywords": [
+					"Mane 6"
+				]
+			},
+			"SenpaiFlashSentrykun": {
+				"name": "Flash Sentry",
+				"race": "pegasus",
+				"gender": "male",
+				"keywords": []
+			}
+		},
+		"ship": {
+			"HanabiMatsuri": {
+				"name": "Hanabi Matsuri"
+			},
+			"OnsenFieldTrip": {
+				"name": "Onsen Field Trip"
+			},
+			"BeautifulHenshin": {
+				"name": "Beautiful Henshin",
+				"action": "makePrincess"
+			}
+		},
+		"goal": {}
+	}
+}

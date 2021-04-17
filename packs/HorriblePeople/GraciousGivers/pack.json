@@ -1,0 +1,136 @@
+{
+	"name": "Gracious Givers",
+	"description": "",
+	"format": "pack:1",
+	"root": "https://tsssf.net/packs",
+	"namespace": "HorriblePeople.GraciousGivers",
+	"cards": {
+		"start": {},
+		"pony": {
+			"WishyWashy": {
+				"name": "Wishy-Washy",
+				"race": "unicorn",
+				"gender": "female",
+				"keywords": [
+					"OC"
+				]
+			},
+			"NightwatchduCoeur": {
+				"name": "Nightwatch du Coeur",
+				"race": "pegasus",
+				"gender": "male",
+				"keywords": [
+					"Guard",
+					"OC"
+				]
+			},
+			"Manyara": {
+				"name": "Manyara",
+				"race": "unicorn",
+				"gender": "female",
+				"keywords": [
+					"Abada",
+					"Elder",
+					"OC"
+				]
+			},
+			"PrettyPrincess": {
+				"name": "Pretty Princess",
+				"race": "earth",
+				"gender": "female",
+				"action": "replace",
+				"keywords": [
+					"OC",
+					"Object",
+					"Pooltoy"
+				]
+			},
+			"WonderboltsCaptainSpitfire": {
+				"name": "Spitfire",
+				"race": "pegasus",
+				"gender": "female",
+				"keywords": [
+					"Wonderbolt"
+				]
+			},
+			"PrincessBigMacintosh": {
+				"name": "Big Macintosh",
+				"race": "alicorn",
+				"gender": "male",
+				"keywords": [
+					"Apple",
+					"Princess"
+				]
+			},
+			"BunnyHareRabbit": {
+				"name": "Bunny Hare Rabbit",
+				"race": "earth",
+				"gender": "male",
+				"keywords": [
+					"OC"
+				]
+			},
+			"JumpinJackFlashSentry": {
+				"name": "Flash Sentry",
+				"race": "pegasus",
+				"gender": "male",
+				"keywords": [
+					"Jerk"
+				]
+			},
+			"LunarGuardFrank": {
+				"name": "Lunar Guard Frank",
+				"race": "pegasus",
+				"gender": "male",
+				"action": "search",
+				"keywords": [
+					"Batpony"
+				]
+			},
+			"TheSmooze": {
+				"name": "The Smooze",
+				"keywords": [
+					"Elder",
+					"Object",
+					"Villain"
+				]
+			},
+			"DuchessChrysalis": {
+				"name": "Chrysalis",
+				"gender": "female",
+				"action": "swap",
+				"keywords": [
+					"Elder",
+					"Changeling"
+				]
+			},
+			"PrincessCelestAI": {
+				"name": "Celestia",
+				"race": "alicorn",
+				"gender": "female",
+				"action": "shipWithEverypony",
+				"keywords": [
+					"AI",
+					"Princess"
+				]
+			}
+		},
+		"ship": {
+			"InItforthePlot": {},
+			"BestFriends": {},
+			"DunkedInTheDatingPool": {
+				"action": "raceGenderChange"
+			}
+		},
+		"goal": {
+			"AHoardOfPrincesses": {
+				"goalLogic": "ExistsPonyShippedTo(Dragon in keywords, Select(Princess in keywords, 3))",
+				"points": "3"
+			},
+			"MaterialGirl": {
+				"goalLogic": "ExistsPonyShippedTo(name=Twilight Sparkle, Select(Object in keywords, 3))",
+				"points": "0"
+			}
+		}
+	}
+}

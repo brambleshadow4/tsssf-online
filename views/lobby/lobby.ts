@@ -1,11 +1,22 @@
 import * as LobbyView from "./lobbyView.js";
 
-import {cardSelectComponent} from "./cardSelectComponent.js";
+import {cardSelectComponent, cardBoxSelectComponent} from "./cardSelectComponent.js";
 import {makeCardElement} from "../game/cardComponent.js";
-import {isStart, Card} from "../../server/lib.js";
-import cards from "../../server/cards.js";
+import {isStart, Card, CardProps} from "../../server/lib.js";
+import {validatePack} from "../../server/packLib.js";
+
+import {
+	PackListHeader,
+	PackListItem,
+	PackListPack
+} from "../../server/lib.js"
+
+
+import * as cm from "../../server/cardManager.js";
+
 
 import {WebSocketPlus} from "../viewSelector.js";
+import packOrder from "./packOrder.js";
 
 var gameOptionsDiv: HTMLElement;
 var chooseCardsDiv: HTMLElement;
@@ -14,7 +25,7 @@ var ishost = false;
 var sentName = false;
 
 var cardBoxElements: {[key: string]: Element} = {};
-var deckElements: {[key: string]: Element} = {}
+var cardSelectorElements: {[key: string]: Element} = {}
 
 
 var globals = window as unknown as {
@@ -22,6 +33,8 @@ var globals = window as unknown as {
 	decks: {
 		[key: string]: Set<string>
 	},
+
+	cards: {[key: string]: CardProps},
 
 	socket: WebSocketPlus,
 	register: Function,
@@ -36,12 +49,23 @@ globals.decks =  {
 }
 
 
+type GameOptions = {
+
+	cardDecks: string[],
+	startCard: string,
+	keepLobbyOpen: boolean,
+	ruleset: "turnsOnly" | "sandbox",
+	customCards: {cards: {[key: string]: CardProps}, descriptions: PackListItem[]}	
+}
+
 export function loadView(isOpen: boolean)
 {
 	if(window.location.pathname != "/lobby")
 	{
 		history.replaceState(null, "", "/lobby" + window.location.search)
 	}
+
+	cm.init(["*"], {});
 
 	document.body.innerHTML = LobbyView.HTML;
 	document.head.innerHTML = LobbyView.HEAD;
@@ -58,115 +82,7 @@ export function loadView(isOpen: boolean)
 		globals.register = register;
 		globals.startGame = startGame;
 
-		var cardBoxes = document.getElementsByClassName('cardbox')
-
-		var deckInfo: ([string] | [string, string]| [string, string, Element])[] = [
-			["Core", "Core.*", cardBoxes[0]],
-			["Extra Credit", "EC.*", cardBoxes[1]],
-			["Ponyville University","PU.*", cardBoxes[2]],
-			["No Holds Barred", "NoHoldsBarred.*", cardBoxes[3]],
-
-			["<h3>Mini Expansions</h3>"],
-
-			["2014 Con Exclusives", "HorriblePeople.2014ConExclusives.*"],
-			["2015 Con Exclusives", "HorriblePeople.2015ConExclusives.*"],
-			["2015 Workshop Panels", "HorriblePeople.2015Workshop.*"],
-			["Adventure Pack", "HorriblePeople.AdventurePack.*"],
-			["Dungeon Delvers", "HorriblePeople.DungeonDelvers.*"],
-			["Fluffle Puff", "HorriblePeople.FlufflePuff.*"],
-			["Gracious Givers", "HorriblePeople.GraciousGivers.*"],
-			["Hearthswarming", "HorriblePeople.Hearthswarming.*"],
-			["The Mean 6", "HorriblePeople.Mean6.*"],
-			["Weaboo Paradaisu", "HorriblePeople.WeeabooParadaisu.*"],
-			["NewNewCore / Misc", "HorriblePeople.Misc.*"]
-		];
-
-		var cardSelectors = document.getElementById('cardSelectors')!;
-
-		var deckElementList: HTMLElement[] = [];
-		for(var info of deckInfo)
-		{
-
-			if(info.length == 1)
-			{
-				let el = document.createElement('div');
-				el.innerHTML = info[0] as string;
-				cardSelectors.appendChild(el);
-				continue;
-			}
-
-			info = info as [string, string, Element];
-
-			let el = cardSelectComponent(globals.decks, ...info )
-			deckElementList.push(el)
-			deckElements[info[1]] = el;
-			cardSelectors.appendChild(el);
-		}
-
-
-
-		for(let i=0; i < cardBoxes.length; i++)
-		{
-			let box = cardBoxes[i] as HTMLElement;
-			cardBoxElements[box.getAttribute('value') as string] = box;
-
-			box.onclick = function()
-			{
-
-				if(box.classList.contains('selected'))
-				{
-					box.classList.remove("selected");
-					deckElementList[i].getElementsByTagName('button')[0].click();
-				}
-				else
-				{
-					box.classList.add('selected');
-					deckElementList[i].getElementsByTagName('button')[2].click();
-					//console.log(deckElements[i].getElementsByTagName('button')[2]);
-				}
-			}
-		}
-
-		var startCards = document.getElementById('startCards')!;
-
-		for(var card of Object.keys(cards).filter(x => isStart(x)))
-		{
-			let cardEl = makeCardElement(card);
-			var shield = document.createElement('div');
-
-
-			if(card == "Core.Start.FanficAuthorTwilight")
-				cardEl.classList.add('selected');
-
-			cardEl.setAttribute('card', card);
-			//cardEl.setAttribute('no', no++);
-			shield.className ='shield';
-			cardEl.appendChild(shield);
-
-			cardEl.onclick = function(e: Event)
-			{
-				var cards = (cardEl.parentNode as HTMLElement).getElementsByClassName('card');
-
-				for(let el of cards)
-				{
-					el.classList.remove('selected');
-				}
-
-				cardEl.classList.add('selected');
-
-				var infoText = "";
-				switch(cardEl.getAttribute('card'))
-				{	
-					case "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord":
-						infoText = "Goals will not automatically turn green if you use this start card";
-						break;
-				}
-
-				document.getElementById('startCardDetails')!.innerHTML = infoText;
-			}
-
-			startCards.appendChild(cardEl);
-		}
+		document.getElementById('packUpload')!.addEventListener('change', handleFileSelect, false);
 	}
 	else
 	{
@@ -174,10 +90,148 @@ export function loadView(isOpen: boolean)
 	}
 }
 
+function loadCardPages(options: GameOptions)
+{
+	document.getElementById('uploadErrors')!.innerHTML = "";
+	(document.getElementById('packUpload') as HTMLInputElement).value = "";
+
+	var cardBoxes = document.getElementsByClassName('cardbox')
+	var cardSelectors = document.getElementById('cardSelectors')!;
+	cardSelectors.innerHTML = "";
+
+	document.getElementById('expansions')!.innerHTML = "";
+
+
+	var deckElementList: HTMLElement[] = [];
+
+
+	var allPacks = packOrder.slice();
+
+	if(options.customCards.descriptions.length)
+	{
+		allPacks.push({"h": "Uploads", "id":"uploadBanner"});
+		allPacks = allPacks.concat(options.customCards.descriptions);
+	}
+
+	cm.init(["*"], options.customCards.cards);
+
+	var uploadHeader: HTMLElement | undefined;
+
+	for(var info of allPacks)
+	{
+		if((info as any).h)
+		{
+			info = info as PackListHeader;
+			let el = document.createElement('h3');
+			el.innerHTML = info.h as string;
+
+			if(info.id == "uploadBanner")
+			{
+				uploadHeader = el;
+			}
+			cardSelectors.appendChild(el);
+			continue;
+		}
+
+		info = info as PackListPack;
+
+
+		let boxSelect = undefined;
+		if(info.box)
+		{
+			boxSelect = cardBoxSelectComponent(info.pack);
+			document.getElementById('expansions')!.appendChild(boxSelect);
+		}
+
+		let el = cardSelectComponent(globals.decks, info.name, info.pack + ".*", boxSelect)
+		deckElementList.push(el)
+		cardSelectorElements[info.pack] = el;
+		cardSelectors.appendChild(el);
+	}
+
+
+
+
+	for(let i=0; i < cardBoxes.length; i++)
+	{
+		let box = cardBoxes[i] as HTMLElement;
+		cardBoxElements[box.getAttribute('value') as string] = box;
+
+		box.onclick = function()
+		{
+
+			if(box.classList.contains('selected'))
+			{
+				box.classList.remove("selected");
+				deckElementList[i].getElementsByTagName('button')[0].click();
+			}
+			else
+			{
+				box.classList.add('selected');
+				deckElementList[i].getElementsByTagName('button')[2].click();
+				//console.log(cardSelectorElements[i].getElementsByTagName('button')[2]);
+			}
+		}
+	}
+
+	var startCards = document.getElementById('startCards')!;
+	startCards.innerHTML = "";
+
+	var startCardNames = packOrder.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
+	var customStartCards = options.customCards.descriptions.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
+
+
+	if(customStartCards.length && uploadHeader)
+	{
+		uploadHeader.innerHTML += "<br><span class='subheading'>Uploaded start cards are in the 'Start Card' section</span>";
+	}
+
+	var allStartCards = startCardNames.concat(customStartCards)
+
+	for(var card of allStartCards)
+	{
+		let cardEl = makeCardElement(card);
+		var shield = document.createElement('div');
+
+
+		if(card == "Core.Start.FanficAuthorTwilight")
+			cardEl.classList.add('selected');
+
+		cardEl.setAttribute('card', card);
+		//cardEl.setAttribute('no', no++);
+		shield.className ='shield';
+		cardEl.appendChild(shield);
+
+		cardEl.onclick = function(e: Event)
+		{
+			var cards = (cardEl.parentNode as HTMLElement).getElementsByClassName('card');
+
+			for(let el of cards)
+			{
+				el.classList.remove('selected');
+			}
+
+			cardEl.classList.add('selected');
+
+			var infoText = "";
+			switch(cardEl.getAttribute('card'))
+			{	
+				case "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord":
+					infoText = "Goals will not automatically turn green if you use this start card";
+					break;
+			}
+
+			document.getElementById('startCardDetails')!.innerHTML = infoText;
+		}
+
+		startCards.appendChild(cardEl);
+	}
+}
+
 function getPackString(card: Card)
 {
 	var dotPos = card.substring(0, card.lastIndexOf(".")).lastIndexOf(".")
-	return card.substring(0, dotPos+1) + "*";
+	return card.substring(0, dotPos);
 }
 
 
@@ -196,14 +250,14 @@ function onMessage(event: MessageEvent)
 	{
 		var [_,val] = event.data.split(";");
 
-		var options = JSON.parse(val);
+		var options = JSON.parse(val) as GameOptions;
 
 		if(options)
 		{
-
-
 			ishost = true;
-			document.getElementById('rightSide')!.classList.add('host')
+			document.getElementById('rightSide')!.classList.add('host');
+
+			loadCardPages(options);
 
 			for(var key in cardBoxElements)
 			{
@@ -217,7 +271,7 @@ function onMessage(event: MessageEvent)
 				var boxes = document.getElementsByClassName('cardbox') as HTMLCollectionOf<HTMLElement>;
 				for(var el of boxes)
 				{
-					if(s.has(el.getAttribute('deck')))
+					if(s.has((el as any).getAttribute('deck')))
 					{
 						el.click();
 					}
@@ -233,14 +287,14 @@ function onMessage(event: MessageEvent)
 
 						var deck = getPackString(card);
 
-						deckElements[deck].getElementsByTagName('button')[1].click();
+						cardSelectorElements[deck].getElementsByTagName('button')[1].click();
 					}
 				}
 
 				var allButtons = document.getElementsByClassName('allButton') as HTMLCollectionOf<HTMLElement>;
 				for(var el of allButtons)
 				{
-					if(s.has(el.getAttribute('deck')))
+					if(s.has((el as any).getAttribute('deck')))
 					{
 						el.click();
 					}
@@ -300,6 +354,13 @@ function onMessage(event: MessageEvent)
 			sentName = false;
 		}
 	}
+
+	if(event.data.startsWith("uploadCardsError;"))
+	{
+		var error = event.data.substring("uploadCardsError;".length);
+
+		document.getElementById('uploadErrors')!.innerHTML = error;
+	}
 }
 
 
@@ -314,7 +375,7 @@ function register()
 	globals.socket.send("register;" + (localStorage["playerID"] || 0) + ";" + name);
 }
 
-function startGame()
+function setLobbyOptions()
 {
 	var cardDecks = document.getElementsByClassName('cardbox');
 	var options: any = {cardDecks:[]};
@@ -334,7 +395,13 @@ function startGame()
 
 	options.keepLobbyOpen = !!input('keepLobbyOpen').checked;
 
-	globals.socket.send("startgame;" + JSON.stringify(options));
+	globals.socket.send("setLobbyOptions;" +  JSON.stringify(options));
+}
+
+function startGame()
+{
+	setLobbyOptions();
+	globals.socket.send("startgame;");
 }
 
 
@@ -400,5 +467,52 @@ function loadingPlayerAnimation()
 
 	animCounter++;
 }
+
+
+
+function handleFileSelect(event: any)
+{
+	const reader = new FileReader()
+	reader.onload = handleFileLoad;
+	reader.readAsText(event.target.files[0])
+}
+
+function handleFileLoad(event: any)
+{
+	setLobbyOptions();
+
+	var queuedFileText = event.target.result;
+	var fileName = (document.getElementById('packUpload') as HTMLInputElement).value;
+
+	fileName = fileName.replace(/\\/g, "/");
+	fileName = fileName.substring(fileName.lastIndexOf("/")+1);
+
+	var errorElement = document.getElementById("uploadErrors") as HTMLElement;
+
+	var pack: any;
+
+	try
+	{
+		pack = JSON.parse(queuedFileText);
+	}
+	catch(e)
+	{
+		errorElement.innerHTML = "Error parsing JSON file\nPlease use a tool like https://jsonformatter.org/json-parser to resolve any JSON errors";
+		return;
+	}
+
+	let errors = validatePack(pack, "", fileName, "any");
+	
+	if(errors.length)
+	{
+		errorElement.innerHTML = errors.join("\r\n");
+	}
+	else
+	{
+		globals.socket.send("uploadCards;" + queuedFileText);
+		errorElement.innerHTML = "Uploading...";
+	}
+}
+
 
 loadingPlayerAnimation();

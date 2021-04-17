@@ -6,6 +6,7 @@ import {
 	isGoal, 
 	isPony, 
 	isShip,
+	isStart,
 	isBoardLoc,
 	isOffsetLoc,
 	isGoalLoc,
@@ -17,13 +18,16 @@ import {
 	Card,
 	Location,
 	GameModel as GameModelShared,
-	ChangelingContextList
+	CardProps,
+	ChangelingContextList,
+	PackListPack
 } from "./lib.js";
 
 
-// @ts-ignore
+import * as cm from "./cardManager.js";
+import {validatePack, flattenPack, mergePacks} from "./packLib.js";
+
 import {evalGoalCard, getConnectedPonies} from "./goalCriteria.js"
-import cards from "./cards.js";
 import {logGameHosted, logPlayerJoined} from "./stats.js";
 
 
@@ -67,6 +71,7 @@ export interface Player
 
 
 const TEMP_DISCONNECT_TIME = 15*1000;
+const NO_MOVE_EXPIRE_TIME = 60*60*1000; // 1 hour
 export class TsssfGameServer
 {
 	public games: {[key:string] : GameModel};
@@ -78,32 +83,52 @@ export class TsssfGameServer
 		this.wsServer = new ws.Server({ noServer: true });
 		this.games = {};
 
-		const interval = setInterval(function ping(this:TsssfGameServer)
+		let games = this.games;
+
+		const interval = setInterval(function ping()
 		{
-			for(var key in this.games)
+
+			for(var key in games)
 			{
-				var anyPlayersAlive = false;
-				for(var i=0; i < this.games[key].players.length; i++)
+				// no move expiration
+				let timeSinceLastMove = new Date().getTime() - games[key].lastMessageTimestamp;
+
+				if(timeSinceLastMove > NO_MOVE_EXPIRE_TIME)
 				{
-					if(this.games[key].players[i].socket.isAlive)
+					for(var player of games[key].players)
+					{
+						player.socket.send("closed;");
+						player.socket.close();
+					}
+					delete games[key];
+					return; 
+				}
+
+				// no player alive expiration
+
+				var anyPlayersAlive = false;
+				for(var i=0; i < games[key].players.length; i++)
+				{
+					if(games[key].players[i].socket.isAlive)
 					{
 						anyPlayersAlive = true;
 						break;
 					}
 				}
 
+
 				if(!anyPlayersAlive)
 				{
-					this.games[key].deathCount++;
+					games[key].deathCount++;
 
-					if(this.games[key].deathCount >= 4)
+					if(games[key].deathCount >= 4)
 					{
-						delete this.games[key];
+						delete games[key];
 					}
 				}
 				else
 				{
-					this.games[key].deathCount = 0;
+					games[key].deathCount = 0;
 				}
 			}
 
@@ -194,7 +219,10 @@ export class TsssfGameServer
 }
 
 
-export class GameModel 
+const UPLOAD_LIMIT = 1024*1024;
+//const UPLOAD_LIMIT = 2000;
+
+export class GameModel implements GameModelShared
 {
 	public players: Player[] = [];
 	public startTime?: number = 0;
@@ -212,6 +240,17 @@ export class GameModel
 	} = {};
 
 	public cardDecks: string[] = ["Core.*"];
+	public customCards: {
+		descriptions: PackListPack[], 
+		cards: {[key:string]: CardProps},
+		currentSize: number
+	} = {
+		descriptions: [],
+		cards: {},
+		currentSize: 0
+	};
+
+	public lastMessageTimestamp: number;
 
 	public ponyDiscardPile: Card[] = [];
 	public shipDiscardPile: Card[] = [];
@@ -225,22 +264,22 @@ export class GameModel
 
 	public runGoalLogic = true;
 
+	public turnstate? = new Turnstate();
+
 	public startCard: Card = "Core.Start.FanficAuthorTwilight";
 
-	private ruleset: string = "";
+	public ruleset: string = "";
 
 	private host?: ws;
 
 	public messageHistory: string[] = [];
 
-	public turnstate?: Turnstate;
 
 	public debug = false;
 
-	constructor()
-	{
-		
+	constructor(){
 
+		this.lastMessageTimestamp = new Date().getTime();
 	}
 
 	public onConnection(socket: ws & {isAlive: boolean, isDead:boolean}, request:any, client:any)
@@ -249,7 +288,7 @@ export class GameModel
 		socket.isDead = false;
 		
 		socket.on('message', handleCrash(this.onMessage(this, socket)));
-		socket.on('close', handleCrash(this.onClose));
+		socket.on('close', handleCrash(this.onClose(this, socket)));
 
 		if(!this.host)
 		{
@@ -267,6 +306,7 @@ export class GameModel
 				return;
 
 			game.messageHistory.push(message);
+			game.lastMessageTimestamp = new Date().getTime();
 
 			if(message.startsWith("handshake;"))
 			{
@@ -324,30 +364,95 @@ export class GameModel
 					game.sendHostMessage( socket, game.host == socket);		
 				}
 
-				if(message.startsWith("startgame;"))
+				if(message.startsWith("setLobbyOptions;"))
 				{
 					if(game.host == socket)
 					{
-
 						var options = {
 							cardDecks:["Core.*"],
 							ruleset: "turnsOnly",
 						};
 						try 
 						{
-							options = JSON.parse(message.substring(10))
+							options = JSON.parse(message.substring("setLobbyOptions;".length))
 						}
 						catch(e){ }
 
-						
-						game.startGame(options);
-					
-						game.toEveryone( "startgame;");
-						game.sendHostMessage( game.host, true)
-				
+						game.setLobbyOptions(options);
+
+						return;
+					}	
+				}
+
+				if(message.startsWith("startgame;"))
+				{
+
+					if(game.host == socket)
+					{
+						game.startGame();					
+						game.toEveryone("startgame;");
+						game.sendHostMessage(game.host, true)
 
 						return;
 					}		
+				}
+
+				if(message.startsWith("uploadCards;") && game.host == socket)
+				{
+					if(game.customCards.currentSize > UPLOAD_LIMIT || message.length > UPLOAD_LIMIT)
+					{
+						socket.send("uploadCardsError;Upload limit reached for this lobby.");
+						return;
+					}	
+
+					var json = message.substring("uploadCards;".length);
+					var newCards;
+					try{
+						newCards = JSON.parse(json);
+					}
+					catch(e)
+					{
+						socket.send("uploadCardsError;Bad JSON file");
+						return;
+					}
+
+					var errors = validatePack(newCards, "", "", "any");
+
+					if(errors.length)
+					{
+						socket.send("uploadCardsError;Errors in card pack");
+						return;
+					}
+
+					
+					if (!fs.existsSync("uploads"))
+					{
+						fs.mkdirSync("uploads");
+					}
+
+					fs.writeFileSync("uploads/" + getFileName() + ".json", json)
+
+					var cards = flattenPack(newCards, true);
+					var description = {
+						name: newCards.name, 
+						pack: "X." + newCards.namespace,
+						box: false, 
+						startCards: Object.keys(cards).filter( x => isStart(x))
+					};
+
+					if(game.customCards.descriptions.filter(x => x.pack == description.pack).length == 0)
+					{
+						game.customCards.descriptions.push(description);
+					}
+
+					game.customCards.cards = mergePacks(game.customCards.cards, cards);
+
+					game.customCards.currentSize = JSON.stringify(game.customCards.cards).length + JSON.stringify(game.customCards.descriptions).length;
+
+					if(game.host)
+					{
+						game.sendHostMessage(game.host, true);
+					}
 				}
 
 
@@ -479,6 +584,8 @@ export class GameModel
 			if(message.startsWith("effects;") && game.turnstate)
 			{	
 				// effects;<card>;prop;value
+
+				let cards = cm.inPlay();
 
 				try{
 					let card, no, prop, value, arg;
@@ -759,6 +866,13 @@ export class GameModel
 				if(game.isInGame)
 					connectedPlayers = connectedPlayers.filter(x => game.isRegistered(x));
 
+				// if host changes when lobby, deslect any uploaded cards.
+				// 
+				if(!game.isInGame)
+				{
+					game.cardDecks = game.cardDecks.filter( (x: Card)=> !x.startsWith("X."))
+				}
+
 				if(connectedPlayers.length)
 				{
 					game.host = connectedPlayers[0].socket;
@@ -953,6 +1067,8 @@ export class GameModel
 		model.shipDiscardPile = this.shipDiscardPile;
 		model.goalDiscardPile = this.goalDiscardPile;
 
+		model.customCards = this.customCards;
+
 		model.currentGoals = this.currentGoals;
 
 		model.goalDrawPileLength = this.goalDrawPile.length;
@@ -1030,8 +1146,9 @@ export class GameModel
 				cardDecks: this.cardDecks,
 				startCard: this.startCard,
 				ruleset: this.ruleset,
-				keepLobbyOpen: this.keepLobbyOpen
-			})
+				keepLobbyOpen: this.keepLobbyOpen,
+				customCards: this.customCards
+			});
 
 		socket.send("ishost;" + payload)
 	}
@@ -1080,8 +1197,30 @@ export class GameModel
 
 	
 
-	public startGame(options: any, preset?: any)
+	public setLobbyOptions(options: any)
+	{
+		this.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
+		this.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
+		this.keepLobbyOpen = !!options.keepLobbyOpen;
+		this.ruleset = options.ruleset.substring(0,200);
+
+
+		var decks = ["Core.*"];
+		if(options.cardDecks)
+		{
+			//var allowedDecks = ["PU.*","EC.*"]
+			decks = options.cardDecks; //.filter( x => allowedDecks.indexOf(x) > -1);
+			//decks.push("Core.*");
+		}
+
+		cm.init(decks.concat([this.startCard]), this.customCards.cards);
+
+		this.cardDecks = decks;
+	}
+
+	public startGame(preset?: any)
 	{	
+		this.isLobbyOpen = this.keepLobbyOpen;
 
 		if(!preset)
 		{
@@ -1099,12 +1238,9 @@ export class GameModel
 				return false;
 		}
 
-		
-
-
 		this.startTime = new Date().getTime();
 
-		this.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
+		
 
 		this.cardLocations = {};
 		this.board = {
@@ -1120,24 +1256,9 @@ export class GameModel
 		}
 
 		this.isInGame = true;
-
-		this.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
-
-		this.isLobbyOpen = this.keepLobbyOpen = !!options.keepLobbyOpen;
-
-
 		this.cardLocations[this.startCard] = "p,0,0";
 
-		var decks = ["Core.*"];
-		if(options.cardDecks)
-		{
-			//var allowedDecks = ["PU.*","EC.*"]
-			decks = options.cardDecks; //.filter( x => allowedDecks.indexOf(x) > -1);
-			//decks.push("Core.*");
-		}
 
-		this.cardDecks = decks;
-		
 		this.goalDiscardPile = [];
 		this.ponyDiscardPile = [];
 		this.shipDiscardPile = [];
@@ -1165,7 +1286,7 @@ export class GameModel
 			logPlayerJoined();
 		}
 
-		for(var cardName in cards)
+		for(var cardName in cm.inPlay())
 		{
 			if(!isCardIncluded(cardName, this))
 				continue;
@@ -1188,26 +1309,23 @@ export class GameModel
 		}
 
 		randomizeOrder(this.players);
+		randomizeOrder(this.goalDrawPile);
+		randomizeOrder(this.ponyDrawPile);
+		randomizeOrder(this.shipDrawPile);
 
-		this.ruleset = options.ruleset.substring(0,200);
 
-		if(options.ruleset == "turnsOnly")
+		if(this.ruleset == "turnsOnly")
 		{
-			this.turnstate = new Turnstate(this, this.players[0] ? this.players[0].name : "");
+			this.turnstate = new Turnstate();
+			this.turnstate.init(this, this.players[0] ? this.players[0].name : "")
 		}
 		else
 		{
 			delete this.turnstate;
 		}
-
-		randomizeOrder(this.goalDrawPile);
-		randomizeOrder(this.ponyDrawPile);
-		randomizeOrder(this.shipDrawPile);
-
+		
 		if(preset)
 			this.loadPreset(preset);
-
-		
 	}
 
 	private loadPreset(hand: Card[])
@@ -1277,7 +1395,7 @@ export class GameModel
 	private isChangeling(card:Card)
 	{
 		card = card.split(":")[0];
-		return isPony(card) && cards[card] && cards[card].action && cards[card].action.startsWith("Changeling(");
+		return isPony(card) && cm.inPlay()[card]?.action?.startsWith("Changeling(");
 	}
 
 	public getCurrentShipSet(): Set<string>
@@ -1410,7 +1528,9 @@ export class GameModel
 		var k = rotation.map(x=> x.name).indexOf(ts.currentPlayer);
 		k = (k+1)%rotation.length;
 
-		this.turnstate = new Turnstate(this, rotation[k].name)
+		this.turnstate = new Turnstate();
+		this.turnstate.init(this, rotation[k].name);
+
 		this.toEveryone("turnstate;" + JSON.stringify(this.turnstate!.clientProps()));
 
 		this.checkIfGoalsWereAchieved();
@@ -1760,7 +1880,7 @@ export class Turnstate
 	public brokenShips: [Card,Card][] = [];
 	public brokenShipsNow: [Card,Card][] = [];
 
-	private changelingContexts: {[key:string] : ChangelingContextList} = {};
+	public changelingContexts: {[key:string] : ChangelingContextList} = {};
 
 	public getChangeContext(card: Card): ChangelingContextList
 	{
@@ -1777,8 +1897,8 @@ export class Turnstate
 	public swaps = 0;
 	public swapsNow = 0;
 
-	public shipSet: Set<string>;
-	public positionMap: {[key: string]: string};	
+	public shipSet: Set<string> = new Set();
+	public positionMap: {[key: string]: string} = {};
 	
 	
 	public clientProps()
@@ -1790,21 +1910,37 @@ export class Turnstate
 		}
 	}
 
-	public constructor(model: GameModel, currentPlayerName: string)
+	public constructor(){}
+
+	public init(model: GameModel, currentPlayerName: string)
 	{
 		this.currentPlayer = currentPlayerName;
+		this.shipSet = model.getCurrentShipSet();
+		this.positionMap = model.getCurrentPositionMap();	
 
-		if(model.turnstate)
+		/*if(model.turnstate)
 		{
 			model.turnstate.changelingContexts = {};
 			model.turnstate.specialEffects = {
 				shipWithEverypony: new Set()
 			}
-		}
-
-		this.shipSet = model.getCurrentShipSet();
-		this.positionMap = model.getCurrentPositionMap();	
+		}*/
 	}
+}
+
+function getFileName()
+{
+	var now = new Date();
+
+	function pad(n: number)
+	{
+		if(n < 10)
+			return "0" + n
+		else 
+			return "" + n
+	}
+
+	return now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + (now.getDate()) + " " + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds())
 }
 
 function handleCrash(this: any, fun: Function)
@@ -1816,17 +1952,7 @@ function handleCrash(this: any, fun: Function)
 		}
 		catch(e)
 		{
-			var now = new Date();
-
-			function pad(n: number)
-			{
-				if(n < 10)
-					return "0" + n
-				else 
-					return "" + n
-			}
-
-			var s = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + (now.getDate()) + " " + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds())
+			
 
 			var data = [];
 
@@ -1836,7 +1962,7 @@ function handleCrash(this: any, fun: Function)
 			data.push("GAMES")
 			data.push(util.inspect(this, {depth:Infinity}))
 
-			fs.writeFileSync("CRASH " + s + ".txt", data.join("\n"))
+			fs.writeFileSync("CRASH " + getFileName() + ".txt", data.join("\n"))
 			throw e
 		}
 	}

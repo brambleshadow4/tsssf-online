@@ -1,0 +1,321 @@
+{
+	"name": "Ponyville University",
+	"description": "",
+	"format": "pack:1",
+	"root": "https://tsssf.net/packs",
+	"namespace": "PU",
+	"cards": {
+		"start": {},
+		"pony": {
+			"StarQuarterbackSnips": {
+				"name": "Snips",
+				"race": "unicorn",
+				"gender": "male",
+				"action": "newGoal",
+				"keywords": [
+					"Uni"
+				]
+			},
+			"FraternityBroSnails": {
+				"name": "Snails",
+				"race": "unicorn",
+				"gender": "male",
+				"action": "search",
+				"keywords": [
+					"Uni"
+				]
+			},
+			"DragRacingChampionScootaloo": {
+				"name": "Scootaloo",
+				"race": "pegasus",
+				"gender": "female",
+				"action": "replace",
+				"keywords": [
+					"CMC",
+					"Uni"
+				]
+			},
+			"ShoestringBudgetScootaloo": {
+				"name": "Scootaloo",
+				"race": "pegasus",
+				"gender": "female",
+				"action": "search",
+				"keywords": [
+					"CMC",
+					"PCC"
+				]
+			},
+			"MusicalMajorSweetieBelle": {
+				"name": "Sweetie Belle",
+				"race": "unicorn",
+				"gender": "female",
+				"action": "swap",
+				"keywords": [
+					"CMC",
+					"Uni"
+				]
+			},
+			"CollegeRadioHostSweetieBelle": {
+				"name": "Sweetie Belle",
+				"race": "unicorn",
+				"gender": "female",
+				"action": "newGoal",
+				"keywords": [
+					"CMC",
+					"PCC"
+				]
+			},
+			"MBAAppleBloom": {
+				"name": "Apple Bloom",
+				"race": "earth",
+				"gender": "female",
+				"action": "search",
+				"keywords": [
+					"Apple",
+					"CMC",
+					"Uni"
+				]
+			},
+			"TeachersAssistantAppleBloom": {
+				"name": "Apple Bloom",
+				"race": "earth",
+				"gender": "female",
+				"action": "draw",
+				"keywords": [
+					"Apple",
+					"CMC",
+					"PCC"
+				]
+			},
+			"ConspicuouslyBlankBabs": {
+				"name": "Babs",
+				"race": "earth",
+				"gender": "female",
+				"action": "replace",
+				"keywords": [
+					"Apple",
+					"CMC",
+					"PCC"
+				]
+			},
+			"BabsSeedLifeOfTheParty": {
+				"name": "Babs",
+				"race": "earth",
+				"gender": "female",
+				"action": "swap",
+				"keywords": [
+					"Apple",
+					"CMC",
+					"Uni"
+				]
+			},
+			"ChemistryGeniusTwist": {
+				"name": "Twist",
+				"race": "earth",
+				"gender": "female",
+				"keywords": [
+					"PCC"
+				]
+			},
+			"ComicArtistSpike": {
+				"name": "Spike",
+				"race": "earth",
+				"gender": "male",
+				"action": "draw",
+				"keywords": [
+					"Dragon",
+					"PCC"
+				]
+			},
+			"EveryponyLovesSpike": {
+				"name": "Spike",
+				"race": "earth",
+				"gender": "male",
+				"keywords": [
+					"Dragon",
+					"Uni"
+				]
+			},
+			"SororitySisterSilverSpoon": {
+				"name": "Silver Spoon",
+				"race": "earth",
+				"gender": "female",
+				"action": "copy",
+				"keywords": [
+					"Uni"
+				]
+			},
+			"IronLadyDiamondTiara": {
+				"name": "Diamond Tiara",
+				"race": "earth",
+				"gender": "female",
+				"action": "draw",
+				"keywords": [
+					"Uni"
+				]
+			},
+			"UltimateFrisbeeChampPipsqueak": {
+				"name": "Pipsqueak",
+				"race": "earth",
+				"gender": "male",
+				"action": "swap",
+				"keywords": [
+					"PCC"
+				]
+			},
+			"CampusReporterFeatherweight": {
+				"name": "Featherweight",
+				"race": "pegasus",
+				"gender": "male",
+				"action": "replace",
+				"keywords": [
+					"PCC"
+				]
+			},
+			"PerformanceArtistPoundCake": {
+				"name": "Pound Cake",
+				"race": "pegasus",
+				"gender": "male",
+				"action": "copy",
+				"keywords": [
+					"Uni"
+				]
+			},
+			"AntiConfectioneryRebelPumpkinCake": {
+				"name": "Pumpkin Cake",
+				"race": "unicorn",
+				"gender": "female",
+				"action": "newGoal",
+				"keywords": [
+					"PCC"
+				]
+			},
+			"MrsRobinsonCheerilee": {
+				"name": "Cheerilee",
+				"race": "earth",
+				"gender": "female",
+				"keywords": []
+			},
+			"FledglingActivistPrincessSkyla": {
+				"name": "Skyla",
+				"race": "alicorn",
+				"gender": "female",
+				"action": "copy",
+				"keywords": [
+					"Princess",
+					"Uni"
+				]
+			}
+		},
+		"ship": {
+			"MoreThanRoommates": {
+				"name": "More Than Roommates"
+			},
+			"SpringBreak": {
+				"name": "Spring Break!"
+			},
+			"IsThisSeatTaken": {
+				"name": "Is This Seat Taken?"
+			},
+			"CramSession": {
+				"name": "Cram Session"
+			},
+			"BrandNewRoommate": {
+				"name": "Brand New Roommate"
+			},
+			"AdvancedMagicSeminar": {
+				"name": "Advanced Magic Seminar"
+			},
+			"MysteriousExchangeStudent": {
+				"name": "Mysterious Exchange Student"
+			},
+			"ServingCommunityService": {
+				"name": "Serving Community Service"
+			},
+			"ChemistryLabExplosion": {
+				"name": "Chemistry Lab Explosion!",
+				"action": "lovePoison"
+			},
+			"RightsRallyBakeSale": {
+				"name": "Rights Rally Bake Sale"
+			},
+			"HidingFromTheDeansSecretPolice": {
+				"name": "Hiding from the Dean's Secret Police"
+			},
+			"PreAssignedLabPartners": {
+				"name": "Pre-Assigned Lab Partners"
+			},
+			"BattleOfTheBands": {
+				"name": "Battle of the Bands"
+			},
+			"InThisDimensionImAPromQueen": {
+				"name": "In This Dimension, I'm a Prom Queen",
+				"action": "keywordChange"
+			},
+			"RomanticCultHazing": {
+				"name": "Romantic Cult Hazing"
+			},
+			"WorstFieldTripEver": {
+				"name": "Worst Field Trip Ever",
+				"action": "keywordChange"
+			},
+			"WalkOfShame": {
+				"name": "Walk of Shame"
+			},
+			"MostAdorableStalkingEver": {
+				"name": "Most Adorable Stalking Ever"
+			},
+			"RadicalSelfExplorationExperiment": {
+				"name": "Radical Self-Exploration Experiment",
+				"action": "keywordChange"
+			},
+			"MetYouOnTheNightlyPatrol": {
+				"name": "Met You on the Nightly Patrol"
+			},
+			"ATripToTheDarkRoom": {
+				"name": "A Trip to the Dark Room"
+			},
+			"RushWeek": {
+				"name": "Rush Week"
+			},
+			"AfternoonVisitToTheLocalMilkshakeJoint": {
+				"name": "Afternoon Visit to the Local Milkshake Joint"
+			},
+			"SordidLoveTriangle": {
+				"name": "Sordid Love Triangle"
+			},
+			"LoveAtFirstSight": {
+				"name": "Love at First Sight"
+			},
+			"SplittingAMealPlan": {
+				"name": "Splitting a Meal Plan"
+			}
+		},
+		"goal": {
+			"Besties": {
+				"goalLogic": "ExistsShip(Uni in keywords, Uni in keywords)",
+				"points": "2"
+			},
+			"CutieMarkCourtship": {
+				"goalLogic": "ExistsShip(CMC in keywords, CMC in keywords)",
+				"points": "2"
+			},
+			"Internship": {
+				"goalLogic": "ExistsShip(Uni in keywords || PCC in keywords, Villain in keywords)",
+				"points": "2"
+			},
+			"RevengeOfTheNerds": {
+				"goalLogic": "ExistsShip(Uni in keywords || PCC in keywords, Mane 6 in keywords)",
+				"points": "1"
+			},
+			"SchoolwideFestivities": {
+				"goalLogic": "ExistsChain(Uni in keywords || PCC in keywords, 6)",
+				"points": "3"
+			},
+			"WhereforeArtThouPoneo": {
+				"goalLogic": "ExistsShip(Uni in keywords, PCC in keywords)",
+				"points": "2"
+			}
+		}
+	}
+}

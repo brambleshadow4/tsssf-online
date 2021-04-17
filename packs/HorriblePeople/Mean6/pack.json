@@ -1,0 +1,98 @@
+{
+	"name": "The Mean 6",
+	"description": "",
+	"format": "pack:1",
+	"root": "https://tsssf.net/packs",
+	"namespace": "HorriblePeople.Mean6",
+	"cards": {
+		"start": {},
+		"pony": {
+			"NightlightSparkle": {
+				"name": "Twilight Sparkle",
+				"race": "alicorn",
+				"gender": "female",
+				"action": "search",
+				"keywords": [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"Nightjack": {
+				"name": "Applejack",
+				"race": "earth",
+				"gender": "female",
+				"keywords": [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"NightmarePie": {
+				"name": "Pinkie Pie",
+				"race": "earth",
+				"gender": "female",
+				"action": "draw",
+				"keywords": [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"Nightmarity": {
+				"name": "Rarity",
+				"race": "unicorn",
+				"gender": "female",
+				"action": "copy",
+				"keywords": [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"NightmareDash": {
+				"name": "Rainbow Dash",
+				"race": "pegasus",
+				"gender": "female",
+				"action": "swap",
+				"keywords": [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"NightmareShy": {
+				"name": "Fluttershy",
+				"race": "pegasus",
+				"gender": "female",
+				"keywords": [
+					"Nightmare",
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"Spikemare": {
+				"name": "Spike",
+				"race": "earth",
+				"gender": "male",
+				"action": "newGoal",
+				"keywords": [
+					"Nightmare",
+					"Villain",
+					"Dragon"
+				]
+			}
+		},
+		"ship": {
+			"TheNightmareBecomesYou": {
+				"action": "addKeywords(Nightmare, Villain)"
+			}
+		},
+		"goal": {
+			"DarkestDay": {
+				"goalLogic": "ExistsChain(Nightmare in keywords, 3)",
+				"points": "2"
+			}
+		}
+	}
+}

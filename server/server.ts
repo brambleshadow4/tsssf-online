@@ -38,6 +38,7 @@ catch(e){}
 
 app.get('/', file("./views/home.html"));
 app.get('/img/**', fmap("/img/**", "./img/**"));
+app.get('/packs/**', fmap("/packs/**", "./packs/**"));
 
 app.get('/.well-known/**', fmap("/.well-known/**", "./.well-known/**"));
 
@@ -49,7 +50,17 @@ app.get("/game/cardComponent.js", file("./views/game/cardComponent.js"))
 app.get("/game/peripheralComponents.js", file("./views/game/peripheralComponents.js"))
 app.get("/game/boardComponent.js", file("./views/game/boardComponent.js"))
 app.get("/game/popupComponent.js", file("./views/game/popupComponent.js"))
+
+
+app.get("/info/addYourOwnCards", file("./views/addYourOwnCards/addYourOwnCards.html"))
+app.get("/info/highlight.min.css", file("./views/addYourOwnCards/highlight.min.css"))
+app.get("/info/highlight.min.js", file("./views/addYourOwnCards/highlight.min.js"))
+
+app.get("/info/upload1.png", file("./views/addYourOwnCards/upload1.png"))
+app.get("/info/upload2.png", file("./views/addYourOwnCards/upload2.png"))
+
 app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
+app.get("/lobby/packOrder.js", file("./views/lobby/packOrder.js"))
 
 
 
@@ -60,7 +71,9 @@ app.get("/server/lib.js", file("./server/lib.js"))
 
 
 app.get("/server/cards.js", file("./server/cards.js"))
-app.get("/game/cards.js", file("./server/cards.js"))
+app.get("/server/cardManager.js", file("./server/cardManager.js"))
+app.get("/server/packLib.js", file("./server/packLib.js"))
+app.get("/server/goalCriteria.js", file("./server/goalCriteria.js"))
 
 app.get("/rulebook.html", file("./views/rulebook.html"))
 app.get("/faq.html", file("./views/faq.html"))
@@ -239,7 +252,8 @@ if(process.argv[3])
 	{
 		case "1":
 			tsssfServer.openLobby("DEV");
-			tsssfServer.games.DEV.startGame(baseRules, ["Core.Pony.AloeAndLotus"]);
+			tsssfServer.games.DEV.setLobbyOptions(baseRules);
+			tsssfServer.games.DEV.startGame(["Core.Pony.AloeAndLotus"]);
 			break;
 	}
 }

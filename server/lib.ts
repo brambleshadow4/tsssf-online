@@ -1,18 +1,62 @@
-export type Card = string
+export type Card = string;
+
+interface CardPropsBase {
+	url: string,
+	thumb: string
+}
+
+export interface ShipProps extends CardPropsBase {
+	action?: string
+}
+
+export interface PonyProps extends CardPropsBase {
+	name: string,
+	gender?: "male" | "female" | "malefemale",
+	race?: "earth" | "pegasus" | "unicorn" | "alicorn",
+	keywords: Set<string>,
+	altTimeline?: true,
+	count?: number,
+
+	action?: string
+}
+
+export interface GoalProps extends CardPropsBase {
+	points: string,
+	goalLogic?: string,
+	goalFun?: Function
+}
+
+
+export type CardProps = PonyProps & GoalProps & ShipProps;
+
+
 export type Location = string;
 
 export type CardElement = HTMLElement & {brand: "card"}
 
 export interface GameModel
 {
+
+	// Game properties
+	cardDecks: string[],
+	customCards: {
+		descriptions: PackListPack[],
+		cards: {[key: string]: CardProps}
+	},
+
+	keepLobbyOpen: boolean,
+	startCard: Card,
+	ruleset: string,
+
+	players: any[],
+
+	// Game state
 	board: {
 		[key:string]: {
 			card: Card,
 			element?: CardElement,
 		}
 	},
-
-	cardDecks: string[],
 
 	ponyDiscardPile: Card[],
 	shipDiscardPile: Card[],
@@ -25,15 +69,6 @@ export interface GameModel
 	currentGoals: {card: Card, achieved: boolean}[],
 
 	turnstate?: Turnstate,
-
-
-	keepLobbyOpen: boolean,
-
-	players: any[],
-
-
-	startCard: Card,
-	ruleset: string,
 
 	messageHistory: string[],
 }
@@ -66,7 +101,7 @@ export interface Turnstate
 		larsonEffect?: boolean
 	}
 
-	updateSpecialEffects: () => void,
+	updateSpecialEffects: (board: {[key:string]: {card: Card, element?: HTMLElement}}) => void,
 
 	playedThisTurn: Set<any>,
 
@@ -141,6 +176,21 @@ export function randomizeOrder(arr: any [])
 	return arr;
 }
 
+export interface PackListPack
+{
+	pack: string,
+	name: string,
+	box: boolean,
+	startCards: Card[],
+}
+
+export interface PackListHeader
+{
+	h: string,
+	id?: string
+}
+
+export type PackListItem = PackListPack | PackListHeader;
 
 export function isBoardLoc(location: Location)
 {

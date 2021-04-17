@@ -1,0 +1,60 @@
+{
+	"name": "2015 Workshop Panels",
+	"description": "",
+	"format": "pack:1",
+	"root": "https://tsssf.net/packs",
+	"namespace": "HorriblePeople.2015Workshop",
+	"cards": {
+		"start": {},
+		"pony": {
+			"Batmare": {
+				"name": "Applejack",
+				"race": "pegasus",
+				"gender": "female",
+				"keywords": [
+					"Batpony",
+					"Hero"
+				]
+			},
+			"SonataDusk": {
+				"name": "Sonata Dusk",
+				"race": "earth",
+				"gender": "female",
+				"keywords": [
+					"Siren",
+					"Villain"
+				]
+			},
+			"MLGProButtonMash": {
+				"name": "Button Mash",
+				"race": "earth",
+				"gender": "male",
+				"keywords": [
+					"Dropout",
+					"Gamer"
+				]
+			},
+			"ShiaLeBeouffalo": {
+				"name": "Shia LeBeouffalo",
+				"race": "earth",
+				"gender": "male",
+				"keywords": [
+					"Actual Cannibal",
+					"Buffalo",
+					"Meme"
+				]
+			},
+			"AlicornBigMacintosh": {
+				"name": "Big Macintosh",
+				"race": "alicorn",
+				"gender": "male",
+				"keywords": [
+					"Apple",
+					"Princess"
+				]
+			}
+		},
+		"ship": {},
+		"goal": {}
+	}
+}

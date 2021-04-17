@@ -10,7 +10,7 @@
 		"goalDrawPile" 
 		"shipDrawPile"
 		"winnings"  - this client's winnings (completed goals)
-		"hand" - this client's hand
+		"hand" - this client's hands
 		"player" - an opponent
 		"<placement>,<x>,<y>" is a board location where 
 			<placement> is "p" for pony or "sr" for ship right or "sd" for ship down
@@ -59,7 +59,7 @@
 
 */
 
-import cards from "../../server/cards.js";
+import * as cm from "../../server/cardManager.js";
 import {
 	isPony, 
 	isGoal, 
@@ -75,6 +75,7 @@ import {
 	getNeighborKeys,
 	GameModel as GameModelShared,
 	Card, Location,
+	CardProps, GoalProps, ShipProps, PonyProps,
 	Turnstate,
 	CardElement
 } from "../../server/lib.js";
@@ -88,7 +89,8 @@ import {
 	updateGoals,
 	updateHand,
 	initPeripherals,
-	openCardSelect
+	openCardSelect,
+	customCardsPopup
 } from "./peripheralComponents.js";
 
 import
@@ -139,8 +141,7 @@ let win = window as unknown as {
 	toggleFullScreen: Function,
 	createHelpPopup: Function,
 	socket: WebSocketPlus,
-	updateGame: Function,
-	currentDeck: {[key:string]: any},
+	updateGame: Function
 }
 
 win.model = {} as GameModel;
@@ -151,6 +152,9 @@ var offsetId = 0;
 
 var hoverCard = "";
 var hoverCardDiv;
+
+var customCardWarningShown = false;
+var showingHelpPopup = false;
 
 
 var haveCardsLoaded = false;
@@ -193,6 +197,7 @@ export function loadView()
 	{
 		sessionStorage["shownHelp"] = "true";
 		win.createHelpPopup();
+		showingHelpPopup = true;
 	}
 
 	attachToSocket(win.socket);
@@ -223,61 +228,78 @@ export function loadView()
 var allKeywords: string[] = [];
 
 // Preloading all the cards makes everything feel instant.
-var currentDeck: {[key:string]: any};
 
 
-function LoadCards()
+function LoadCards(): void
 {
 	if(haveCardsLoaded)
 		return;
+
+	document.body.classList.add("cardsUnapproved");
+
 
 	var keywordSet: Set<string> = new Set();
 
 	haveCardsLoaded = true;
 
+
+
 	var preloadedImages = document.getElementById('preloadedImages')!;
 
-
-	win.currentDeck = currentDeck = {};
 	let model = win.model;
+
+	cm.init(model.cardDecks.concat([model.startCard]), model.customCards.cards);
+
+	let cards = cm.inPlay();
+
+	let customCardsInUse = false
 
 	for(var key in cards)
 	{
-		currentDeck[key] = cards[key];
-	}
-
-	for(var key in currentDeck)
-	{
-		if(isCardIncluded(key, model))
+		
+		if(key.startsWith("X.") && !customCardsInUse)
 		{
-			/*var nodes = key.split(".");
-			nodes.pop();
-			var urlToImg = "/img/" + nodes.join("/") + "/" + currentDeck[key].url;
+			customCardsInUse = true;
 
-			currentDeck[key].keywords = new Set(currentDeck[key].keywords);
+			document.body.classList.add("cardsUnapproved");
 
-			currentDeck[key].fullUrl = urlToImg;
-			currentDeck[key].thumbnail = urlToImg.replace(".png",".thumb.jpg");*/
+			(async function(){
+				
+				await customCardsPopup();
 
+				document.body.classList.remove("cardsUnapproved");
+
+				if(showingHelpPopup)
+				{
+					win.createHelpPopup();
+				}
+
+				showingHelpPopup = false;
+
+			})();
+			
+		}
+
+		if(cards[key].thumb)
+		{
 			var img = document.createElement('img');
-			img.src = currentDeck[key].thumbnail;
+
+
+			img.src = cards[key].thumb;
 			preloadedImages.appendChild(img);
 
-			if(currentDeck[key].keywords)
+			if(cards[key].keywords)
 			{
-				for(var keyword of currentDeck[key].keywords)
+				for(var keyword of cards[key].keywords)
 				{
 					keywordSet.add(keyword);
 				}
 			}
 		}
-		else
-		{
-			delete currentDeck[key];
-		}
 	}
 
 	allKeywords = [...keywordSet.keys()].sort();
+
 }
 
 
@@ -530,7 +552,7 @@ function updateEffects()
 	}
 }
 
-export function updateGame(newModel?: GameModel)
+export async function updateGame(newModel?: GameModel)
 {
 
 	if(newModel)
@@ -548,6 +570,7 @@ export function updateGame(newModel?: GameModel)
 
 
 	LoadCards();
+
 
 	var flyingCards = document.getElementsByClassName('flying');
 	while(flyingCards.length)
@@ -621,7 +644,7 @@ export function isValidMove(cardDragged: Card, targetCard: Card, endLocation: Lo
 		return !model.board[offsetLoc];
 	}
 
-	return (targetCard == "blank:ship" && (isShip(cardDragged) || cards[cardDragged].action == "ship")
+	return (targetCard == "blank:ship" && (isShip(cardDragged) || cm.inPlay()[cardDragged].action == "ship")
 		|| (targetCard == "blank:pony" && isPonyOrStart(cardDragged))
 	);
 }
@@ -924,7 +947,7 @@ var playEventHandlers = [];
 
 async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation: Location})
 {
-	var cardInfo = currentDeck[e.card];
+	var cardInfo = cm.inPlay()[e.card];
 	let model = win.model;
 	let cardLocations = win.cardLocations;
 
@@ -959,7 +982,7 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 
 	if(isShip(e.card))
 	{
-		var cardInfo = currentDeck[e.card];
+		var cardInfo = cm.inPlay()[e.card];
 		if(isShip(e.card) && isBoardLoc(e.endLocation))
 		{
 			if(model.turnstate)
@@ -1054,7 +1077,7 @@ function getNeighborCards(shipCard: Card)
 
 function getCardAction(card: Card)
 {	
-	var cardInfo = currentDeck[card];
+	var cardInfo = cm.inPlay()[card];
 
 	if(!cardInfo.action) { return; }
 
@@ -1089,7 +1112,7 @@ function getCardAction(card: Card)
 
 function doActionOnSwap(card: Card)
 {
-	var cardInfo = win.currentDeck[card];
+	var cardInfo = cm.inPlay()[card] as PonyProps;
 	if(cardInfo.action && cardInfo.action.startsWith("Changeling("))
 	{
 		return true;
@@ -1107,8 +1130,9 @@ function changelingAction(type: string)
 
 		if(model.turnstate)
 		{
-			var cardNames = Object.keys(currentDeck);
-			var disguises = cardNames.filter(x => isPony(x) && currentDeck[x].count == undefined && x != card);
+			let cards = cm.inPlay();
+			var cardNames = Object.keys(cards);
+			var disguises = cardNames.filter(x => isPony(x) && cards[x].count == undefined && x != card);
 
 			var newDisguise = "";
 
@@ -1118,12 +1142,12 @@ function changelingAction(type: string)
 				case "unicorn":
 				case "earth":
 				case "pegasus":
-					disguises = disguises.filter(x => currentDeck[x].race == type);
+					disguises = disguises.filter(x => cards[x].race == type);
 					break;
 				case "nonAlicornFemale":
 					disguises = disguises.filter(x => !(
-						currentDeck[x].race == "alicorn" 
-						&& (currentDeck[x].gender == "female" || currentDeck[x].gender=="malefemale"))
+						cards[x].race == "alicorn" 
+						&& (cards[x].gender == "female" || cards[x].gender == "malefemale"))
 					);
 
 					console.log(disguises);
@@ -1190,13 +1214,14 @@ function getCardProp(card: Card, prop: string)
 	if(cardObj && cardObj[prop])
 		return cardObj[prop]
 
-	return currentDeck[baseCard][prop];
+	return (cm.inPlay()[baseCard] as any)[prop];
 }
 
 function setCardProp(card: Card, prop: string, value: any)
 {
 	let model = win.model;
-	let isChangeling = currentDeck[card].action && currentDeck[card].action.startsWith("Changeling(");
+	let cardProps = cm.inPlay()[card];
+	let isChangeling = cardProps.action && cardProps.action.startsWith("Changeling(");
 
 	if(model.turnstate)
 	{
@@ -1236,7 +1261,7 @@ function setCardProp(card: Card, prop: string, value: any)
 async function makePrincessAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !currentDeck[x].keywords.has("Changeling")), true);
+	var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling")), true);
 
 	if(ponyCard)
 	{
@@ -1297,7 +1322,7 @@ async function shipWithEveryponyAction(ponyCard: Card)
 async function cloneAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !currentDeck[x].count), true);
+	var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !cm.inPlay()[x].count), true);
 
 	if(!ponyCard) return;
 
@@ -1422,7 +1447,7 @@ function addKeywordsAction(...keywords: string[])
 async function raceChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	ponies = ponies.filter(x => !currentDeck[x].keywords.has("Changeling"));
+	ponies = ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling"));
 
 	if(ponies.length == 0)
 		return;
@@ -1443,7 +1468,7 @@ async function raceChangeAction(shipCard: Card)
 async function raceGenderChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	ponies = ponies.filter(x => !currentDeck[x].keywords.has("Changeling"));
+	ponies = ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling"));
 
 	if(ponies.length == 0)
 		return;

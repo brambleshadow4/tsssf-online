@@ -69,25 +69,20 @@ var HTML = `
 
 			<div id='chooseCardsInfo'>
 				<h2>Expansions</h2>
-				<div class='cardbox' id='Core-deck-select' deck="Core.*">
-					<div class='shield'></div>
-					<img src="/img/core-box.png" />
-				</div>
-				<div class='cardbox' id='EC-deck-select' deck="EC.*">
-					<div class='shield'></div>
-					<img src="/img/ec-box.png" />
-				</div>
-				<div class='cardbox' id='PU-deck-select' deck="PU.*">
-					<div class='shield'></div>
-					<img src="/img/pu-box.png" />
-				</div>
-				<div class='cardbox' deck="NoHoldsBarred.*">
-					<div class='shield'></div>
-					<img src="/img/noholds-box.png" />
-				</div>
-				<h2 class="bothMargins">Individual cards</h2>
-				<div id='cardSelectors'>
-				</div>
+				<div id='expansions'></div>
+				<h2 class="bothMargins">Individual Cards</h2>
+				<div id='cardSelectors'></div>
+				<h2 class="bothMargins"><a href="/info/addYourOwnCards" target="_blank"><span>Add Your Own Cards</span><img height="30px" src="/img/help-blue.svg"></a></h2>
+				<p>
+					Please note that TSSSF.net will not publish cards uploaded in this manner; 
+					they will only be available during this game. TSSSF.net reserves the right to
+					examine any file uploaded to its servers.
+				</p>
+				<p>If you are an artist and would like to feature your shipfic cards on this website, reach out to us on our <a href="https://discord.gg/WQVBUgv">discord</a></p>
+				<div><label>Choose file:</label> <input id='packUpload' type="file" accept=".json" /></div>
+
+				<pre><code id='uploadErrors'></code></pre>
+
 			</div>
 
 			<div class='startButtonArea'>

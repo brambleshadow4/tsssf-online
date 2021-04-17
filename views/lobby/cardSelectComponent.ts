@@ -1,4 +1,5 @@
-import cards from "../../server/cards.js";
+import * as cm from "../../server/cardManager.js";
+
 import {isStart} from "../../server/lib.js" 
 import {makeCardElement} from "../game/cardComponent.js";
 
@@ -151,10 +152,13 @@ export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: st
 	var no = 0;
 	var shiftSelect = -1;
 
-	for (var card in cards)
+	var added = 0;
+
+	for (var card in cm.all())
 	{
 		if(card.startsWith(match) && !isStart(card))
 		{
+			added++;
 			let cardEl = makeCardElement(card);
 			var shield = document.createElement('div');
 
@@ -203,6 +207,26 @@ export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: st
 	}
 	
 	div.appendChild(body);
+
+	if(added)
+		return div;
+	else 
+		return document.createElement('div');
+}
+
+export function cardBoxSelectComponent(namespace: string)
+{
+	var div = document.createElement('div');
+	div.className = "cardbox";
+	div.setAttribute("deck", namespace + ".*");
+
+	var shield = document.createElement('div');
+	shield.className = "shield";
+	div.appendChild(shield);
+
+	var img = document.createElement('img');
+	img.src = "/packs/" + namespace.split(".").join("/") + "/box.png";
+	div.appendChild(img);
 
 	return div;
 }

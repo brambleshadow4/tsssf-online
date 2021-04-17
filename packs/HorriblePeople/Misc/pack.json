@@ -1,0 +1,54 @@
+{
+	"name": "NewNewCore / Misc",
+	"description": "",
+	"format": "pack:1",
+	"root": "https://tsssf.net/packs",
+	"namespace": "HorriblePeople.Misc",
+	"cards": {
+		"start": {},
+		"pony": {
+			"Kefentse": {
+				"name": "Kefentse",
+				"race": "alicorn",
+				"gender": "female",
+				"action": "copy",
+				"keywords": [
+					"OC"
+				]
+			},
+			"MajorGeneralDashHugInspector": {
+				"name": "Rainbow Dash",
+				"race": "pegasus",
+				"gender": "female",
+				"altTimeline": true,
+				"action": "newGoal",
+				"keywords": [
+					"Mane 6",
+					"Villain"
+				]
+			},
+			"Minty": {
+				"name": "Minty",
+				"race": "earth",
+				"gender": "female",
+				"keywords": []
+			},
+			"StarCatcher": {
+				"name": "Celestia",
+				"race": "pegasus",
+				"gender": "female",
+				"action": "search",
+				"keywords": []
+			}
+		},
+		"ship": {
+			"AllGoodThingsMustEnd": {
+				"name": "All Good Things Must End"
+			},
+			"GiftOnTheDoorstep": {
+				"name": "Gift on the Doorstep"
+			}
+		},
+		"goal": {}
+	}
+}

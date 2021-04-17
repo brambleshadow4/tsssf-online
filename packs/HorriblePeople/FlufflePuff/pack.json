@@ -1,0 +1,46 @@
+{
+	"name": "Fluffle Puff",
+	"description": "",
+	"format": "pack:1",
+	"root": "https://tsssf.net/packs",
+	"namespace": "HorriblePeople.FlufflePuff",
+	"cards": {
+		"start": {},
+		"pony": {
+			"FlufflePuff": {
+				"name": "Fluffle Puff",
+				"race": "earth",
+				"gender": "female",
+				"keywords": [
+					"Fluffy Pony",
+					"OC"
+				]
+			},
+			"Chryssi": {
+				"name": "Chrysalis",
+				"race": "alicorn",
+				"gender": "female",
+				"keywords": [
+					"Changeling",
+					"Queen",
+					"Villain"
+				]
+			}
+		},
+		"ship": {
+			"AShockingRelationship": {
+				"name": "A Shocking Relationship"
+			},
+			"GettingDownToBusiness": {
+				"name": "Getting Down to Business"
+			}
+		},
+		"goal": {
+			"TheFunCave": {
+				"name": "The Fun Cave",
+				"goalLogic": "ExistsShip(name=Fluffle Puff, name=Chrysalis)",
+				"points": "3"
+			}
+		}
+	}
+}

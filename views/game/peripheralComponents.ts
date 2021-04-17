@@ -17,6 +17,8 @@ import {
 	Card, Location
 } from "../../server/lib.js";
 
+import * as cm from "../../server/cardManager.js";
+
 import {broadcastMove,
 	broadcast,
 	requestDrawPony,
@@ -51,7 +53,6 @@ let win = window as unknown as {
 	model: GameModel,
 	openSettings: () => void;
 	cardLocations: {[key:string]: Location};
-	currentDeck: {[key: string]: any},
 	createHelpPopup: () => void;
 }
 
@@ -694,7 +695,7 @@ function referencePageRender()
 	var shipReference = document.createElement('div');
 	var goalReference = document.createElement('div');
 
-	var keys = Object.keys(win.currentDeck);
+	var keys = Object.keys(cm.inPlay());
 
 	keys.sort();
 	for(let key of keys)
@@ -850,6 +851,34 @@ function createHelpPopup()
 			render: referencePageRender
 		}
 	]);
+}
+
+export function customCardsPopup()
+{
+	return createPopup([
+	{
+		name: "",
+		render: function(resolve){
+
+			var div = document.createElement('div');
+
+			div.innerHTML = `
+			<h1>Custom Cards in Use</h1>
+
+			<div>
+				<div><img src="img/art-aryatheeditor.jpg" style="height: 200px"/></div>
+				<div><a target="_blank" href="https://www.deviantart.com/aryatheeditor/art/Oof-807426031">Art by Arya The Editor</a></div>
+			</div>
+
+			<p style="margin-left: 30px; margin-right: 30px;">It looks like the game's host has uploaded custom cards to use in this game.<br>Hopefully, they have good taste</p>
+
+			<div><button>Okay</button></div>`;
+
+			div.getElementsByTagName('button')[0].onclick = resolve;
+
+			return div;
+		}
+	}], true);
 }
 
 function quickStartPage()

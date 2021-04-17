@@ -1,0 +1,62 @@
+{
+	"name": "2014 Con Exclusives",
+	"description": "",
+	"format": "pack:1",
+	"root": "https://tsssf.net/packs",
+	"namespace": "HorriblePeople.2014ConExclusives",
+	"cards": {
+		"start": {},
+		"pony": {
+			"MaudPieReallyLikesRocks": {
+				"name": "Maud Pie",
+				"race": "earth",
+				"gender": "female",
+				"keywords": []
+			},
+			"QueenBeeSunsetShimmer": {
+				"name": "Sunset Shimmer",
+				"race": "unicorn",
+				"gender": "female",
+				"keywords": [
+					"Villain"
+				]
+			},
+			"BlazinHotWildFire": {
+				"name": "Wild Fire",
+				"race": "pegasus",
+				"gender": "female",
+				"keywords": [
+					"OC"
+				]
+			},
+			"TestSubjectCheerilee": {
+				"name": "Cheerilee",
+				"race": "earth",
+				"gender": "female",
+				"keywords": []
+			},
+			"LunaQueenOfTheBats": {
+				"name": "Luna",
+				"race": "alicorn",
+				"gender": "female",
+				"keywords": [
+					"Batpony",
+					"Elder",
+					"Princess",
+					"Villain"
+				]
+			},
+			"CiderMatronAppleBloom": {
+				"name": "Apple Bloom",
+				"race": "earth",
+				"gender": "female",
+				"keywords": [
+					"Apple",
+					"CMC"
+				]
+			}
+		},
+		"ship": {},
+		"goal": {}
+	}
+}
