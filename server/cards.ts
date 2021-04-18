@@ -1423,6 +1423,7 @@ var cards: {[key: string]: any} = {
 	},
 	"HorriblePeople.GraciousGivers.Pony.DuchessChrysalis": {
 		"name": "Chrysalis",
+		"race": "alicorn",
 		"gender": "female",
 		"action": "swap",
 		"keywords": [
@@ -1982,6 +1983,7 @@ var cards: {[key: string]: any} = {
 	},
 	"NoHoldsBarred.Pony.Plushling": {
 		"name": "Plushling",
+		"race": "alicorn",
 		"gender": "malefemale",
 		"action": "ChangelingNoRedisguise(plushling)",
 		"keywords": [
@@ -2011,6 +2013,7 @@ var cards: {[key: string]: any} = {
 	},
 	"NoHoldsBarred.Pony.KingVespid": {
 		"name": "King Vespid",
+		"race": "alicorn",
 		"gender": "male",
 		"action": "ChangelingNoRedisguise(replace)",
 		"keywords": [
