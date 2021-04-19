@@ -335,6 +335,7 @@
 			},
 			"Plushling": {
 				"name": "Plushling",
+				"race": "alicorn",
 				"gender": "malefemale",
 				"action": "ChangelingNoRedisguise(plushling)",
 				"keywords": [
@@ -364,6 +365,7 @@
 			},
 			"KingVespid": {
 				"name": "King Vespid",
+				"race": "alicorn",
 				"gender": "male",
 				"action": "ChangelingNoRedisguise(replace)",
 				"keywords": [

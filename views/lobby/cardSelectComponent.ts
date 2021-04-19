@@ -12,7 +12,7 @@ export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: st
 	header.className = "cardSelect-header";
 	var nameSpan = document.createElement('span');
 	nameSpan.className = "name"
-	nameSpan.innerHTML = name;
+	nameSpan.innerHTML = name.replace(/</g,"&lt;").replace(/>/g, "&gt;");
 
 	var img = document.createElement('span');
 	img.className = 'collapse';

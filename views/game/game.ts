@@ -456,7 +456,7 @@ function updateEffects()
 	if(larsonEffect)
 	{
 		var newCards = Object.keys(model.board)
-			.filter( x => x.startsWith("p,"))
+			.filter( x => x.startsWith("p,") && !isBlank(model.board[x].card))
 			.map(x => model.board[x].card);
 
 		var newObj = {} as any;

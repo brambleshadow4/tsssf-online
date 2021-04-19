@@ -1940,7 +1940,25 @@ function getFileName()
 			return "" + n
 	}
 
-	return now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + (now.getDate()) + " " + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds())
+	function pad3(n: number)
+	{
+		if(n < 10)
+		{
+			return "00" + n
+		}
+		else if(n < 100)
+		{
+			return "0" + n;
+		}
+		else
+		{
+			return "" + n
+		}
+	}
+
+	return now.getUTCFullYear() + "-" + pad((now.getUTCMonth() + 1)) + "-" + pad((now.getUTCDate())) 
+		+ " " + pad(now.getUTCHours()) + pad(now.getUTCMinutes()) + pad(now.getUTCSeconds())
+		+ " " + pad3(now.getUTCMilliseconds())
 }
 
 function handleCrash(this: any, fun: Function)

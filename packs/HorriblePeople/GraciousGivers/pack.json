@@ -97,6 +97,7 @@
 			},
 			"DuchessChrysalis": {
 				"name": "Chrysalis",
+				"race": "alicorn",
 				"gender": "female",
 				"action": "swap",
 				"keywords": [
