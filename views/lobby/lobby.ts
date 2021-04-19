@@ -248,7 +248,7 @@ function onMessage(event: MessageEvent)
 
 	if(event.data.startsWith("ishost;"))
 	{
-		var [_,val] = event.data.split(";");
+		var val = event.data.substring(event.data.indexOf(";")+1);
 
 		var options = JSON.parse(val) as GameOptions;
 
