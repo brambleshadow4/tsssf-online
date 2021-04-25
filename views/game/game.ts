@@ -277,7 +277,6 @@ function LoadCards(): void
 				showingHelpPopup = false;
 
 			})();
-			
 		}
 
 		if(cards[key].thumb)
@@ -286,14 +285,14 @@ function LoadCards(): void
 
 
 			img.src = cards[key].thumb;
-			preloadedImages.appendChild(img);
+			preloadedImages.appendChild(img);	
+		}
 
-			if(cards[key].keywords)
+		if(cards[key].keywords)
+		{
+			for(var keyword of cards[key].keywords)
 			{
-				for(var keyword of cards[key].keywords)
-				{
-					keywordSet.add(keyword);
-				}
+				keywordSet.add(keyword);
 			}
 		}
 	}
