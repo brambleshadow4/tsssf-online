@@ -44,6 +44,7 @@ import {
 
 import {
 	createPopup,
+	createTabbedPopup,
 	htmlTab
 } from "./popupComponent.js"
 
@@ -213,7 +214,7 @@ export function updatePonyDiscard(cardOnTop?: Card)
 		
 		if(model.ponyDiscardPile.length)
 		{
-			var card = await openCardSelect("Discarded ponies", model.ponyDiscardPile);
+			var card = await openCardSelect("Discarded ponies", "", model.ponyDiscardPile);
 
 			if(card && isItMyTurn())
 			{
@@ -252,7 +253,7 @@ export function updateShipDiscard(tempCard?: Card)
 		
 		if(model.shipDiscardPile.length)
 		{
-			var card = await openCardSelect("Discarded ships", model.shipDiscardPile);
+			var card = await openCardSelect("Discarded ships", "",  model.shipDiscardPile);
 
 			if(card && isItMyTurn())
 			{
@@ -293,7 +294,7 @@ export function updateGoalDiscard(tempCard?: Card)
 	{
 		if(model.goalDiscardPile.length)
 		{
-			var card = await openCardSelect("Discarded goals", model.goalDiscardPile);
+			var card = await openCardSelect("Discarded goals", "", model.goalDiscardPile);
 			var openGoal = model.currentGoals.map(x => x.card).indexOf("blank:goal");
 
 
@@ -432,7 +433,7 @@ export function updatePlayerList()
 
 		div.onclick = function()
 		{
-			openCardSelect(player.name + "'s won goals", player.winnings.map((x: Winning) => x.card));
+			openCardSelect("Goals", player.name + "'s won goals", player.winnings.map((x: Winning) => x.card));
 		}
 
 		playerList.appendChild(div);
@@ -589,100 +590,99 @@ function updateCardRowHeight()
 }
 
 
-export function openCardSelect(title: string, cards: Card[], miniMode?: boolean)
+export function openCardSelect(title: string, heading: string, cards: Card[], miniMode?: boolean)
 {
-	return createPopup([{
-		render: function(closePopupWithVal: any){
+	return createPopup(title, !!miniMode, function(closePopupWithVal: any){
 
-			var div = document.createElement('div');
-			div.classList.add("popupPage")
+		var div = document.createElement('div');
+		div.classList.add("popupPage")
 
+		if(heading)
+		{
 			var h1 = document.createElement('h1');
-			h1.innerHTML = title;
+			h1.innerHTML = heading;
 			div.appendChild(h1);
-
-			let cards2 = cards.slice();
-
-			cards2.sort();
-
-			for(let card of cards2)
-			{
-				var cardElement = makeCardElement(card);
-				div.appendChild(cardElement);
-
-				cardElement.onclick = function()
-				{
-					closePopupWithVal(card);
-				}
-			}
-
-			return div;
 		}
-	}], miniMode) 
+		
+
+		let cards2 = cards.slice();
+
+		cards2.sort();
+
+		for(let card of cards2)
+		{
+			var cardElement = makeCardElement(card);
+			div.appendChild(cardElement);
+
+			cardElement.onclick = function()
+			{
+				closePopupWithVal(card);
+			}
+		}
+
+		return div;
+	})
 }
 
 
 win.openSettings = function()
 {
-	return createPopup([{
-		name: "",
-		render: function(closeFn: (value?: any) => any)
+	return createPopup("Host Settings", false, function(closeFn: (value?: any) => any)
+	{
+		var div = document.createElement('div')
+		div.className = "popupPage";
+
+		div.innerHTML = `
+
+		<h1>Host Settings</h1>
+
+		<div class='checkboxContainer'><input type='checkbox' id='keepLobbyOpen'/><label for='keepLobbyOpen'>Let players join mid-game</label></div>
+		<div><button id='newGameButton'>New Game</button><span class='buttonDescription'>Ends the current game and returns everypony to the lobby.</span></div>
+
+		<h2>Kick players</h2>
+		<p>Kicking a player removes them from the lobby and releases any cards they have to the discard</p>
+
+		<div id='kickButtons'></div>
+		`
+
+
+		for(let player of win.model.players)
 		{
-			var div = document.createElement('div')
-			div.className = "popupPage";
-
-			div.innerHTML = `
-
-			<h1>Host Settings</h1>
-
-			<div class='checkboxContainer'><input type='checkbox' id='keepLobbyOpen'/><label for='keepLobbyOpen'>Let players join mid-game</label></div>
-			<div><button id='newGameButton'>New Game</button><span class='buttonDescription'>Ends the current game and returns everypony to the lobby.</span></div>
-
-			<h2>Kick players</h2>
-			<p>Kicking a player removes them from the lobby and releases any cards they have to the discard</p>
-
-			<div id='kickButtons'></div>
-			`
-
-
-			for(let player of win.model.players)
+			var button = document.createElement('button');
+			button.innerHTML = "Kick " + player.name;
+			button.onclick = function()
 			{
-				var button = document.createElement('button');
-				button.innerHTML = "Kick " + player.name;
-				button.onclick = function()
-				{
-					broadcast("kick;" + player.name);
-					closeFn();
-				}
-
-				var innerDiv = document.createElement('div')
-				innerDiv.appendChild(button)
-				div.querySelector("#kickButtons")!.appendChild(innerDiv);
-			}
-
-			let newGameButton = div.querySelector("#newGameButton") as HTMLButtonElement;
-
-			newGameButton.onclick = function()
-			{
+				broadcast("kick;" + player.name);
 				closeFn();
-				broadcast("startlobby;");
 			}
 
-			let keepLobbyOpen = div.querySelector("#keepLobbyOpen") as HTMLInputElement;
-
-			if(win.model.keepLobbyOpen)
-			{
-				keepLobbyOpen.checked = true;
-			}
-
-			keepLobbyOpen.onclick = function()
-			{
-				broadcast("keepLobbyOpen;" + (keepLobbyOpen.checked ? 1 : 0));
-			}		
-
-			return div;
+			var innerDiv = document.createElement('div')
+			innerDiv.appendChild(button)
+			div.querySelector("#kickButtons")!.appendChild(innerDiv);
 		}
-	}])
+
+		let newGameButton = div.querySelector("#newGameButton") as HTMLButtonElement;
+
+		newGameButton.onclick = function()
+		{
+			closeFn();
+			broadcast("startlobby;");
+		}
+
+		let keepLobbyOpen = div.querySelector("#keepLobbyOpen") as HTMLInputElement;
+
+		if(win.model.keepLobbyOpen)
+		{
+			keepLobbyOpen.checked = true;
+		}
+
+		keepLobbyOpen.onclick = function()
+		{
+			broadcast("keepLobbyOpen;" + (keepLobbyOpen.checked ? 1 : 0));
+		}		
+
+		return div;
+	});
 }
 
 function referencePageRender()
@@ -739,7 +739,7 @@ function referencePageRender()
 
 function createHelpPopup()
 {
-	createPopup([
+	createTabbedPopup([
 		{
 			name: "Quick Start",
 			render: quickStartPage
@@ -855,30 +855,26 @@ function createHelpPopup()
 
 export function customCardsPopup()
 {
-	return createPopup([
-	{
-		name: "",
-		render: function(resolve){
+	return createPopup("Custom Cards", true, function(resolve){
 
-			var div = document.createElement('div');
+		var div = document.createElement('div');
 
-			div.innerHTML = `
-			<h1>Custom Cards in Use</h1>
+		div.innerHTML = `
+		<h1>Custom Cards in Use</h1>
 
-			<div>
-				<div><img src="img/art-aryatheeditor.jpg" style="height: 200px"/></div>
-				<div><a target="_blank" href="https://www.deviantart.com/aryatheeditor/art/Oof-807426031">Art by Arya The Editor</a></div>
-			</div>
+		<div>
+			<div><img src="img/art-aryatheeditor.jpg" style="height: 200px"/></div>
+			<div><a target="_blank" href="https://www.deviantart.com/aryatheeditor/art/Oof-807426031">Art by Arya The Editor</a></div>
+		</div>
 
-			<p style="margin-left: 30px; margin-right: 30px;">It looks like the game's host has uploaded custom cards to use in this game.<br>Hopefully, they have good taste</p>
+		<p style="margin-left: 30px; margin-right: 30px;">It looks like the game's host has uploaded custom cards to use in this game.<br>Hopefully, they have good taste</p>
 
-			<div><button>Okay</button></div>`;
+		<div><button>Okay</button></div>`;
 
-			div.getElementsByTagName('button')[0].onclick = resolve;
+		div.getElementsByTagName('button')[0].onclick = resolve;
 
-			return div;
-		}
-	}], true);
+		return div;
+	});
 }
 
 function quickStartPage()

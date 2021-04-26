@@ -612,7 +612,7 @@ export async function updateGame(newModel?: GameModel)
 
 
 
-export function isItMyTurn()
+export function isItMyTurn(): boolean
 {
 	let model = win.model;
 	return model.turnstate == undefined || model.turnstate.currentPlayer == model.playerName;
@@ -1179,7 +1179,7 @@ function changelingAction(type: string)
 			if(!disguises.length && !newDisguise)
 				return;
 
-			newDisguise = newDisguise || await openCardSelect("Choose a pony to disguise as", disguises);
+			newDisguise = newDisguise || await openCardSelect("Select Disguise", "Choose a pony to disguise as", disguises);
 
 			if(!newDisguise)
 				return
@@ -1260,7 +1260,7 @@ function setCardProp(card: Card, prop: string, value: any)
 async function makePrincessAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling")), true);
+	var ponyCard = await openCardSelect("Special", "Choose a new princess", ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling")), true);
 
 	if(ponyCard)
 	{
@@ -1275,7 +1275,7 @@ async function makePrincessAction(shipCard: Card)
 async function genderChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a pony to change gender", ponies, true);
+	var ponyCard = await openCardSelect("Gender Change", "Choose a pony to change gender", ponies, true);
 
 	if(!ponyCard) return;
 
@@ -1310,7 +1310,7 @@ async function shipWithEveryponyAction(ponyCard: Card)
 		}
 	}
 
-	var chosen = await openCardSelect("Choose a pony to ship with everypony", ponies, true);
+	var chosen = await openCardSelect("Special", "Choose a pony to ship with everypony", ponies, true);
 
 	if(chosen)
 	{
@@ -1321,7 +1321,7 @@ async function shipWithEveryponyAction(ponyCard: Card)
 async function cloneAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !cm.inPlay()[x].count), true);
+	var ponyCard = await openCardSelect("Clone", "Choose a pony to count as two ponies", ponies.filter(x => !cm.inPlay()[x].count), true);
 
 	if(!ponyCard) return;
 
@@ -1335,7 +1335,7 @@ async function cloneAction(shipCard: Card)
 async function timelineChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a pony to gain the <br> time traveller symbol", ponies, true);
+	var ponyCard = await openCardSelect("Timeline Change","Choose a pony to gain the <br> time traveller symbol", ponies, true);
 
 	if(!ponyCard) return;
 
@@ -1351,7 +1351,7 @@ async function keywordChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
 
-	var output = await createPopup([{"render":function(accept)
+	var output = await createPopup("Keyword Change", true, function(accept)
 	{
 		var element = document.createElement('div');
 		element.className = "popupPage"
@@ -1415,7 +1415,7 @@ async function keywordChangeAction(shipCard: Card)
 		return element;
 
 
-	}}], true);
+	});
 
 	if(output && win.model.turnstate)
 	{
@@ -1429,7 +1429,7 @@ function addKeywordsAction(...keywords: string[])
 	return async function(shipCard: Card)
 	{
 		var ponies = getNeighborCards(shipCard);
-		var ponyCard = await openCardSelect("Choose a pony to gain keywords", ponies, true);
+		var ponyCard = await openCardSelect("Keyword Change","Choose a pony to gain keywords", ponies, true);
 
 		if(!ponyCard) return;
 
@@ -1489,7 +1489,7 @@ async function raceGenderChangeAction(shipCard: Card)
 
 function raceChangePopup(ponies: Card[])
 {
-	return createPopup([{render: function(acceptFn)
+	return createPopup("Race Change", true, function(acceptFn)
 	{
 		var selectedPony: Card;
 		var selectedRace: string;
@@ -1587,12 +1587,12 @@ function raceChangePopup(ponies: Card[])
 
 		return div;
 
-	}}],true)
+	});
 }
 
 function raceGenderChangePopup(ponies: Card[])
 {
-	return createPopup([{render: function(acceptFn)
+	return createPopup("Change Gender", true, function(acceptFn)
 	{
 		var selectedPony = "";
 		var selectedRace = "";
@@ -1728,7 +1728,6 @@ function raceGenderChangePopup(ponies: Card[])
 		div.appendChild(buttonDiv)
 
 		return div;
-
-	}}],true)
+	});
 }
 

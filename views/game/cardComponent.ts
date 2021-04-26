@@ -664,64 +664,61 @@ function removeShiftHover(element: CardElement)
 
 function pointsPopup(points: number[])
 {
-	return createPopup([
+	return createPopup("Choose Point Amount", true, function(accept: ((value?: any) => any)) 
 	{
-		name: "",
-		render: function(accept: ((value?: any) => any)) 
+		var div = document.createElement('div');
+		div.className = "pointAmountPopup";
+
+		let x: ElementCreationOptions;
+
+		/*var p = document.createElement('p');
+		p.innerHTML = "Choose how many points you should get";
+		(p as any).style = "padding: 10px; padding-top: 20px;"
+		div.appendChild(p);*/
+
+		for(let val of points)
 		{
-			var div = document.createElement('div');
-
-			let x: ElementCreationOptions;
-
-			var p = document.createElement('p');
-			p.innerHTML = "Choose how many points you should get";
-			(p as any).style = "padding: 10px; padding-top: 20px;"
-			div.appendChild(p);
-
-			for(let val of points)
+			if(val == -1)
 			{
-				if(val == -1)
+				let customDiv = document.createElement('div');
+
+				
+				let input = document.createElement('input');
+				input.type = "number";
+
+
+				input.value = "" + (points.reduce((a,b) => Math.max(a,b), 0) + 1);
+				
+
+				let button = document.createElement('button');
+				button.innerHTML = "Other";
+				button.onclick = function()
 				{
-					let customDiv = document.createElement('div');
-
-					
-					let input = document.createElement('input');
-					input.type = "number";
-
-
-					input.value = "" + (points.reduce((a,b) => Math.max(a,b), 0) + 1);
-					
-
-					let button = document.createElement('button');
-					button.innerHTML = "Other";
-					button.onclick = function()
+					if(!isNaN(Number(input.value)))
 					{
-						if(!isNaN(Number(input.value)))
-						{
-							accept(Number(input.value));
-						}
+						accept(Number(input.value));
 					}
-
-					customDiv.appendChild(input);
-					customDiv.appendChild(button);
-
-					div.appendChild(customDiv);
 				}
-				else
-				{
-					let button = document.createElement('button');
-					button.innerHTML = "" + val;
-					button.onclick = function(){
-						accept(val);
-					};
 
-					div.appendChild(button);
-				}
+				customDiv.appendChild(input);
+				customDiv.appendChild(button);
+
+				div.appendChild(customDiv);
 			}
+			else
+			{
+				let button = document.createElement('button');
+				button.innerHTML = "" + val;
+				button.onclick = function(){
+					accept(val);
+				};
 
-			return div;
+				div.appendChild(button);
+			}
 		}
-	}], true);
+
+		return div;
+	});
 }
 
 
