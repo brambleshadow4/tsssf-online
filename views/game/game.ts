@@ -666,13 +666,18 @@ export async function moveCard(
 	card: Card,
 	startLocation: Location,
 	endLocation: Location, 
-	forceCardToMove?: boolean, 
-	extraArg?: any
+	options?:{
+		forceCardToMove?: boolean,
+		extraArg?: any,
+		noAnimiation?: boolean
+	}
 ){
 	var startPos = {};
 	const vh = window.innerHeight/100;
 	let model = win.model;
 	let cardLocations = win.cardLocations;
+
+	options = options || {};
 
 	if(cardLocations[card] == endLocation)
 	{
@@ -853,7 +858,7 @@ export async function moveCard(
 	else if(endLocation == "winnings")
 	{
 
-		model.winnings.push({card, value: Number(extraArg) || 0});
+		model.winnings.push({card, value: Number(options.extraArg) || 0});
 		updateFun = updateWinnings;
 
 		var enddiv = document.getElementById("winnings")!;
@@ -914,7 +919,7 @@ export async function moveCard(
 	// run animation (if applicable)
 	
 
-	if(startLocation != "limbo" 
+	if(startLocation != "limbo" && !options.noAnimiation
 		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation)) // not going from discard to discard
 		&& (isDiscardLoc(endLocation)
 			|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
@@ -932,7 +937,7 @@ export async function moveCard(
 
 	clearActionButtons();
 
-	if(!forceCardToMove)
+	if(!options.forceCardToMove)
 	{
 		await doPlayEvent({card, startLocation, endLocation});
 	}

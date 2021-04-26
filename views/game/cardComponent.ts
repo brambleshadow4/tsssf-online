@@ -180,7 +180,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				if(value == undefined)
 					return;
 
-				moveCard(card, "goal," + goalNo, "winnings", false, value)
+				moveCard(card, "goal," + goalNo, "winnings", {extraArg: value})
 				broadcastMove(card, "goal," + goalNo, "winnings", "" + value)
 			}
 		}
@@ -303,46 +303,9 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				addGoalCheck(imgElement, Number(location.split(',')[1]));
 			}
 
-			var trashTarget: string | undefined;
-			if(isPony(card))
-				trashTarget = "ponyDiscardPile";
-			else if (isShip(card))
-				trashTarget = "shipDiscardPile";
-			else if(isGoal(card))
-				trashTarget = "goalDiscardPile";
-
-
-			if(trashTarget && !location.startsWith(trashTarget))
-			{
-				var trashTargetEl = document.getElementById(trashTarget)!;
-
-				var top = trashTargetEl.getBoundingClientRect().top
-				var left = trashTargetEl.getBoundingClientRect().left
-
-				//alert(window.innerHeight + " " + top + " " + trashTargetEl.getBoundingClientRect().top);
-
-				trashButton = document.createElement('img');
-				trashButton.src = "/img/trash.svg";
-				trashButton.style.position = "absolute";
-				trashButton.style.top = top + "px";
-				trashButton.style.left = left + "px"
-				trashButton.style.width = "13vh";
-
-				trashButton.style.zIndex = "3";
-
-
-				document.body.appendChild(trashButton);
-
-				trashButton.ontouchstart = function(e)
-				{
-					e.preventDefault();
-					e.stopPropagation();
-
-					endMoveShared();
-					moveCard(card, location!, trashTarget + ",top");
-					broadcastMove(card, location!, trashTarget + ",top");
-				}
-			}
+			
+			showTrashButton(card, location);
+			
 
 			if(isPonyOrStart(card))
 			{
@@ -452,6 +415,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			ghostCard.style.top = e.pageY + "px";
 			ghostCard.style.left = e.pageX + "px"
 			
+			showTrashButton(card, location!);
 
 			ghostCardDragHandler = function(e: DragEvent)
 			{
@@ -596,6 +560,67 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 
 
 	return imgElement as unknown as CardElement;
+}
+
+function showTrashButton(card: Card, location:Location)
+{
+	var trashTarget: string | undefined;
+	if(isPony(card))
+		trashTarget = "ponyDiscardPile";
+	else if (isShip(card))
+		trashTarget = "shipDiscardPile";
+	else if(isGoal(card))
+		trashTarget = "goalDiscardPile";
+
+	if(trashTarget && !location.startsWith(trashTarget))
+	{
+		var trashTargetEl = document.getElementById(trashTarget)!;
+
+		var top = trashTargetEl.getBoundingClientRect().top
+		var left = trashTargetEl.getBoundingClientRect().left
+
+		//alert(window.innerHeight + " " + top + " " + trashTargetEl.getBoundingClientRect().top);
+
+		trashButton = document.createElement('img');
+		trashButton.src = "/img/trash.svg";
+		trashButton.style.position = "absolute";
+		trashButton.style.top = top + "px";
+		trashButton.style.left = left + "px"
+		trashButton.style.width = "13vh";
+
+		trashButton.style.zIndex = "3";
+
+
+		document.body.appendChild(trashButton);
+
+		trashButton.ontouchstart = function(e)
+		{
+			e.preventDefault();
+			e.stopPropagation();
+
+			endMoveShared();
+			moveCard(card, location!, trashTarget + ",top");
+			broadcastMove(card, location!, trashTarget + ",top");
+		}
+
+	
+		trashButton.ondragover= function(e)
+		{
+			var draggedCard = getDataTransfer().split(";")[0];
+			e.preventDefault();
+		}
+		
+
+		trashButton.ondrop = function(e)
+		{
+			e.preventDefault();
+			e.stopPropagation();
+
+			endMoveShared();
+			moveCard(card, location!, trashTarget + ",top", {noAnimiation: true});
+			broadcastMove(card, location!, trashTarget + ",top");
+		}
+	}
 }
 
 
