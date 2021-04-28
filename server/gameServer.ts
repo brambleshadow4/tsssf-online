@@ -1725,7 +1725,6 @@ export class GameModel implements GameModelShared
 				this.turnstate.getChangeContext(card).currentShips = getConnectedPonies(this, endLocation);
 			}
 
-
 			if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
 			{
 				this.turnstate.updateSpecialEffects(this.board);
@@ -1861,6 +1860,7 @@ export class Turnstate
 
 	public updateSpecialEffects(board: {[key: string]: {card: Card}})
 	{
+
 		delete this.specialEffects["larsonEffect"];
 		for(var key in board)
 		{
@@ -1916,7 +1916,9 @@ export class Turnstate
 	{
 		this.currentPlayer = currentPlayerName;
 		this.shipSet = model.getCurrentShipSet();
-		this.positionMap = model.getCurrentPositionMap();	
+		this.positionMap = model.getCurrentPositionMap();
+
+		this.updateSpecialEffects(model.board);	
 
 		/*if(model.turnstate)
 		{

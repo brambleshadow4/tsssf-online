@@ -27,12 +27,17 @@ function expectGoalUnachieved(game: GameModel, goal: Card)
 function expectGoalAchieved(game: GameModel, goal: Card)
 {
 	let i = game.currentGoals.map(x => x.card).indexOf(goal);
+
 	expect(i >= 0 && i <= 3).toBe(true);
 	expect(game.currentGoals[i].achieved).toBe(true);
 }
 
 
-function setupGame():[GameModel, MockPlayer]
+function setupGame(setupOptions?:{
+	cardDecks?: string[],
+	startCard?: string
+
+}):[GameModel, MockPlayer]
 {	
 	let game = new GameModel();
 
@@ -96,8 +101,9 @@ function setupGame():[GameModel, MockPlayer]
 
 	game.players.push(fakePlayer);
 	game.setLobbyOptions({
-		cardDecks: ["Core.*"],
-		ruleset: "turnsOnly"
+		cardDecks: setupOptions?.cardDecks || ["Core.*"],
+		ruleset: "turnsOnly",
+		startCard: setupOptions?.startCard
 	});
 	game.startGame();
 
@@ -384,6 +390,65 @@ export default function(){
 		player.move(flimFlam, "hand", "p,2,0");
 
 		expectGoalAchieved(game, goal);
+	});
+
+	test("Alicorn Big Mac + Star Student Twilight achieve Pretty Pretty Princess", () =>{
+
+		let [game, player] = setupGame({
+			cardDecks: ["Core.*", "HorriblePeople.2015Workshop.*"],
+			startCard: "ChildrenOfKefentse.Promo.Start.FanficEditorStarlight"
+		});
+		
+		let goal = "Core.Goal.PrettyPrettyPrincess";
+		player.drawGoal(goal);
+
+		let twi = "Core.Pony.StarStudentTwilight";
+		let bigmac = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+
+		player.grab(ship1, ship2, twi, bigmac);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(bigmac, "hand", "p,1,0");
+
+		expectGoalUnachieved(game, goal);
+
+		player.move(ship2, "hand", "sr,1,0");
+		player.move(twi, "hand", "p,2,0");
+
+		expectGoalAchieved(game, goal);
+	});
+
+	test("larson effect still applies when turn ends", () =>{
+
+		let [game, player] = setupGame({
+			cardDecks: ["Core.*", "HorriblePeople.2015Workshop.*"],
+			startCard: "ChildrenOfKefentse.Promo.Start.FanficEditorStarlight"
+		});
+		
+		let goal = "Core.Goal.PrettyPrettyPrincess";
+		player.drawGoal(goal);
+
+		let twi = "Core.Pony.StarStudentTwilight";
+		let bigmac = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+
+		player.grab(ship1, ship2, twi, bigmac);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(bigmac, "hand", "p,1,0");
+
+		player.move(ship2, "hand", "sr,1,0");
+		player.move(twi, "hand", "p,2,0");
+
+		expectGoalAchieved(game, goal);
+
+		player.endTurn();
+
+		expectGoalAchieved(game, goal);
+
 	});
 
 	test("ExistsChain", () =>{

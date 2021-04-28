@@ -46,8 +46,11 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 	if(prop == "card")
 		return card;
 
-	if(prop == "race" && turnstate.specialEffects.larsonEffect)
+	if(prop == "race" && allowOverrides && turnstate.specialEffects.larsonEffect)
+	{
+		//console.log("alicorn");
 		return "alicorn";
+	}
 
 
 	if(prop == "keywords")
@@ -59,13 +62,15 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 
 		let overrideKeywords = (allowOverrides && cardOverrides?.keywords) || [];
 
-		if(turnstate.specialEffects.larsonEffect)
+		if(allowOverrides && turnstate.specialEffects.larsonEffect)
 			overrideKeywords.push("Princess");
 
 		if(cardOverrides?.disguise)
 			overrideKeywords = overrideKeywords.concat(cards[card].keywords);
 
 		let baseKeywords = [...(cards[baseCard].keywords)];
+
+		//console.log("dud");
 		return new Set(baseKeywords.concat(overrideKeywords));
 	}
 
@@ -74,8 +79,11 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 		var s = new Set();
 		s.add(cards[baseCard].name);
 		s.add(cards[card].name);
+		//console.log(s);
 		return s;
 	}
+
+	
 
 	if(allowOverrides && cardOverrides && cardOverrides[prop])
 	{
@@ -83,7 +91,7 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 		return cardOverrides[prop]
 	}
 
-	//console.log(cards[baseCard][prop]);
+	//console.log((cards[baseCard] as any)[prop]);
 	return (cards[baseCard] as any)[prop];
 }
 
@@ -288,6 +296,8 @@ function ExistsPony(selector: string, count?: number)
 			if(key.startsWith("p,"))
 			{
 				//console.log("checking card " + model.board[key].card);
+				//console.log("does match " + selector + " " + model.board[key].card + " " + doesCardMatchSelector(model, model.board[key].card, selector));
+
 				boardCount += doesCardMatchSelector(model, model.board[key].card, selector)
 			}
 		}
