@@ -451,6 +451,34 @@ export default function(){
 
 	});
 
+	test("larson effect always transforms changelings", () =>{
+
+		let [game, player] = setupGame({
+			cardDecks: ["Core.*", "HorriblePeople.2015Workshop.*"]}
+		);
+		
+		let goal = "Core.Goal.ItsNotExactlyCheating";
+		player.drawGoal(goal);
+
+		let changeling = "Core.Pony.UnicornChangeling";
+		let bigmac = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+
+		player.grab(ship1, ship2, changeling, bigmac);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(bigmac, "hand", "p,1,0");
+
+		player.move(ship2, "hand", "sr,-1,0");
+		player.move(changeling, "hand", "p,-1,0");
+
+		expectGoalAchieved(game, goal);
+		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
+		expectGoalAchieved(game, goal);
+
+	});
+
 	test("ExistsChain", () =>{
 		//expect(0).toBe("unimplemented");
 	});

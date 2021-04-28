@@ -26,10 +26,12 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 	{
 		baseCard = card;
 	}
-	else
+
+	let cardAction = cards[card].action || "";
+
+	if(cardAction.startsWith("Changeling") && turnstate.specialEffects.larsonEffect)
 	{
-		if(cardOverrides.disguise && turnstate.specialEffects.larsonEffect)
-			baseCard = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+		baseCard = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
 	}
 
 	

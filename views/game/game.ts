@@ -428,9 +428,12 @@ function updateEffects()
 	for(var card in turnStateChangelings)
 	{
 		let newDisguise = getCardProp(card, "disguise");
+		let action = cm.inPlay()[card].action || "";
 
-		if(larsonEffect && newDisguise)
+		if(larsonEffect && action.startsWith("Changeling"))
+		{
 			newDisguise = larsonEffect;
+		}
 
 		if(!isBoardLoc(cardLocations[card]))
 		{
@@ -484,7 +487,10 @@ function updateEffects()
 				else
 					decs.keywords.push("Princess");
 
-				if(decs.disguise)
+				let action = cm.inPlay()[card].action || "";
+				console.log(action);
+
+				if(action.startsWith("Changeling"))
 					decs.disguise = larsonEffect;
 			}
 
