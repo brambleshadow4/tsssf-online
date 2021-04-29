@@ -78,11 +78,7 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 
 	if(prop == "name")
 	{
-		var s = new Set();
-		s.add(cards[baseCard].name);
-		s.add(cards[card].name);
-		//console.log(s);
-		return s;
+		return new Set([...cards[baseCard].name, ...cards[card].name])
 	}
 
 	

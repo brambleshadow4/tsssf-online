@@ -72,7 +72,25 @@ export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | 
 
 	if(cardType == "Pony" || cardType == "Start")
 	{
-		if(typeof card.name !== "string") errors.push("pony " + name + " doesn't have a valid name property");
+		if(typeof card.name !== "string")
+		{	
+
+			if(isNaN(card.name.length))
+			{
+				errors.push("pony " + name + " doesn't have a valid name property");
+			}
+			else
+			{
+				for(var i = 0; i < card.name.length; i++)
+				{
+					if(typeof card.name[i] !== "string")
+					{
+						errors.push("pony " + name + " doesn't have a valid name property");
+						break;
+					}
+				}
+			}
+		}
 		if(!Array.isArray(card.keywords)) errors.push("pony " + name + " doesn't have a valid keywords property");
 
 		if(card.gender && !genders.has(card.gender)) errors.push("pony " + name + " has an invalid gender value: " + card.gender);
@@ -141,6 +159,8 @@ export function flattenPack(pack: any, isExternal: boolean)
 			{
 				let cardName = pack.namespace + "." + cardType + "." + key;
 
+
+
 				if(isExternal && pack.format.startsWith("pack"))
 				{
 					let filePath = pack.root + "/" + cardName.replace(/\./g, "/");
@@ -150,7 +170,15 @@ export function flattenPack(pack: any, isExternal: boolean)
 
 				cardName = isExternal ? "X." + cardName : cardName;	
 
+				var names = pack.cards[typeKey][key].name;
+
 				newCards[cardName] = pack.cards[typeKey][key];
+
+				if(typeof names == "string")
+				{
+					newCards[cardName].name = [names] as any;
+				}
+				
 			}
 		}
 	};

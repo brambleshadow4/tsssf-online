@@ -34,11 +34,11 @@
 				]
 			},
 			"ShaiNiShipficFanfilly": {
-				"name": "Shai Ni",
+				"name": ["Shai Ni", "Twilight Sparkle"],
 				"race": "unicorn",
 				"gender": "female",
 				"keywords": [
-					"OC"
+					"OC", "Mane 6"
 				]
 			},
 			"ChrysanthemumRose": {

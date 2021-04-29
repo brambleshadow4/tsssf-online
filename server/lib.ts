@@ -10,7 +10,7 @@ export interface ShipProps extends CardPropsBase {
 }
 
 export interface PonyProps extends CardPropsBase {
-	name: string,
+	name: Set<string>,
 	gender?: "male" | "female" | "malefemale",
 	race?: "earth" | "pegasus" | "unicorn" | "alicorn",
 	keywords: Set<string>,

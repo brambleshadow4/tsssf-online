@@ -17,7 +17,7 @@
 		},
 		"pony": {
 			"AloeAndLotus": {
-				"name": "Aloe & Lotus",
+				"name": ["Aloe & Lotus", "Aloe", "Lotus"],
 				"race": "earth",
 				"gender": "female",
 				"count": 2,
@@ -233,7 +233,7 @@
 				]
 			},
 			"Flim&Flam": {
-				"name": "Flim & Flam",
+				"name": ["Flim & Flam", "Flim", "Flam"],
 				"race": "unicorn",
 				"gender": "male",
 				"action": "swap",

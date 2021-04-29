@@ -12,19 +12,20 @@ export function init(filter: string[], customCards: {[key:string]: CardProps})
 	for(var key in cards)
 	{
 		newAllCards[key] = JSON.parse(JSON.stringify(cards[key]));
+		newAllCards[key].name = new Set(newAllCards[key].name);
 
 		var urlToImg = "/packs/" + key.split(".").join("/");
 
 		newAllCards[key].keywords = new Set(newAllCards[key].keywords);
 		newAllCards[key].url = urlToImg + ".png";
 		newAllCards[key].thumb = urlToImg + ".thumb.jpg";
-
 	}
 
 	// customCards must 
 	for(var key in customCards)
 	{
 		newAllCards[key] = JSON.parse(JSON.stringify(customCards[key]));
+		newAllCards[key].name = new Set(newAllCards[key].name);
 		newAllCards[key].id = key;
 	}
 
