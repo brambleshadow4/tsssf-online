@@ -40,6 +40,10 @@ app.get('/', file("./views/home.html"));
 app.get('/img/**', fmap("/img/**", "./img/**"));
 app.get('/packs/**', fmap("/packs/**", "./packs/**"));
 
+
+app.get("/favicon.ico", file("./img/favicon.ico"))
+
+
 app.get('/.well-known/**', fmap("/.well-known/**", "./.well-known/**"));
 
 app.get("/game/game.js", file("./views/game/game.js"))
