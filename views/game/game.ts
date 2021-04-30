@@ -529,6 +529,11 @@ function updateEffects()
 			{
 				addTempSymbol(element, "star", "This pony is shipped with every other pony on the grid");
 			}
+
+			if(decs.fullCopy)
+			{
+				addTempSymbol(element, "star", "Copying " + decs.fullCopy.substring(decs.fullCopy.lastIndexOf(".")+1));
+			}
 		}	
 	}	
 
@@ -1116,6 +1121,7 @@ function getCardAction(card: Card)
 		case "raceGenderChange": return raceGenderChangeAction;
 		case "shipWithEverypony": return shipWithEveryponyAction;
 		case "timelineChange": return timelineChangeAction;
+		case "fullCopy": return fullCopyAction;
 		
 	}		
 }
@@ -1137,7 +1143,6 @@ function changelingAction(type: string)
 	let cardLocations = win.cardLocations;
 	return async function(card: Card)
 	{
-
 		if(model.turnstate)
 		{
 			let cards = cm.inPlay();
@@ -1200,6 +1205,27 @@ function changelingAction(type: string)
 			//broadcastEffects();
 		}
 	}
+}
+
+async function fullCopyAction(card: Card)
+{
+	let model = win.model;
+	if(model.turnstate)
+	{
+
+
+		var copyOptions = Object.keys(model.board).filter(x => x.startsWith("p,") && model.board[x].card && !isBlank(model.board[x].card)).map(x => model.board[x].card);
+
+		copyOptions = copyOptions.filter(x => x != card);
+
+		if(!copyOptions.length) { return; }
+
+
+		var cardToCopy = await openCardSelect("Copy", "Choose a pony to copy", copyOptions);
+
+		setCardProp(card, "fullCopy", cardToCopy);
+	}
+	
 }
 
 

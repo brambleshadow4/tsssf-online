@@ -23,7 +23,7 @@ export interface PonyProps extends CardPropsBase {
 export interface GoalProps extends CardPropsBase {
 	points: string,
 	goalLogic?: string,
-	goalFun?: Function
+	goalFun?: (model: GameModel) => boolean
 }
 
 

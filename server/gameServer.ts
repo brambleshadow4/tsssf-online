@@ -614,6 +614,10 @@ export class GameModel implements GameModelShared
 						value = Number(value);
 						if(isNaN(value)) return;
 					}
+					else if(prop == "fullCopy")
+					{
+						if(!cards[value]) return;
+					}
 					else
 					{
 						if(!PROP_VALUES[prop] || !PROP_VALUES[prop][value]) return;

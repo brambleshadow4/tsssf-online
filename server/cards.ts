@@ -2396,6 +2396,7 @@ var cards: {[key: string]: any} = {
 		],
 		"race": "unicorn",
 		"gender": "female",
+		"action": "fullCopy",
 		"keywords": [
 			"Dragon",
 			"OC",

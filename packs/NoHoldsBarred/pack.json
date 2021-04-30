@@ -290,6 +290,7 @@
 				"name": "Pixel Prism",
 				"race": "unicorn",
 				"gender": "female",
+				"action": "fullCopy",
 				"keywords": [
 					"Dragon",
 					"OC",
