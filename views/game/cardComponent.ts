@@ -325,18 +325,43 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 	function completeMoveShared()
 	{
 		var [card, startLoc] = getDataTransfer().split(";")
+		var modifiedStartLoc = startLoc;
+
+		var doReactiveMoveBack = false;
+		var offsetLoc = "";
+		var offsetCard = "";
 
 		if(location && isBoardLoc(location))
 		{
 			var model = globals.model;
 			if(model.board[location] && model.board[location].card && isPonyOrStart(model.board[location].card))
 			{
-				var [_,x,y] = location.split(",");
-				var offsetLoc = "offset," + x + "," + y;
-				let offsetCard = model.board[location].card;
+				offsetCard = model.board[location].card;
 
-				moveCard(offsetCard, location, offsetLoc);
-				broadcastMove(offsetCard, location, offsetLoc);
+				var [_,x,y] = location.split(",");
+				offsetLoc = "offset," + x + "," + y;
+
+
+
+				if(startLoc == "hand")
+				{
+					moveCard(offsetCard, location, "ponyDiscardPile,top");
+					broadcastMove(offsetCard, location, "ponyDiscardPile,top");	
+				}
+				else if(startLoc ==  "ponyDiscardPile,top")
+				{
+					moveCard(offsetCard, location, offsetLoc);
+					broadcastMove(offsetCard, location, offsetLoc);	
+
+					doReactiveMoveBack = true;
+				}
+				else
+				{
+					moveCard(offsetCard, location, offsetLoc);
+					broadcastMove(offsetCard, location, offsetLoc);	
+				}
+				
+					
 			}
 			else
 			{
@@ -347,10 +372,23 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 
 		moveCard(card, startLoc, location!);
 		broadcastMove(card, startLoc, location!);
+
+		if(doReactiveMoveBack)
+		{
+			moveCard(offsetCard, offsetLoc, "ponyDiscardPile,top");
+			broadcastMove(offsetCard, offsetLoc, "ponyDiscardPile,top");	
+		}
 	}
 
 	if(isDraggable && location)
 	{
+		var isInterruptCard = cm.inPlay()[card].action == "interrupt" && location == "hand";
+
+		if(isInterruptCard)
+		{
+			imgElement.classList.add("interrupt");
+		}
+
 		imgElement.onmousedown = function(e)
 		{
 			e.stopPropagation();
@@ -365,8 +403,6 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 	
 		imgElement.ondragstart = function(e: DragEvent)
 		{
-			
-
 			if(inTouchEvent)
 			{
 				e.preventDefault();
@@ -374,7 +410,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				return;
 			}
 
-			if (isDkeyPressed || !isItMyTurn())
+			if (isDkeyPressed || (!isItMyTurn() && !isInterruptCard))
 			{
 				e.preventDefault();
 				return;
@@ -467,7 +503,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 
 		imgElement.ondragenter= function(e)
 		{
-			var draggedCard = getDataTransfer().split(";")[0];
+			var [draggedCard, srcLocation] = getDataTransfer().split(";");
 
 			if(this == offsetGhost)
 			{
@@ -481,8 +517,10 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 
 			if(isValidMove(draggedCard, card, location!))
 			{
-				if (isBlank(card))
+				if (isBlank(card) || srcLocation == "hand" || srcLocation == "ponyDiscardPile,top")
+				{
 					setCardBackground(imgElement, draggedCard)
+				}
 				else
 				{
 					let [_, xs, ys] = location!.split(",");

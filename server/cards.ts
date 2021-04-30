@@ -1477,6 +1477,7 @@ var cards: {[key: string]: any} = {
 		],
 		"race": "earth",
 		"gender": "male",
+		"action": "interrupt",
 		"keywords": [
 			"Actual Cannibal",
 			"Buffalo",

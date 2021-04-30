@@ -71,6 +71,7 @@ import {
 	isDiscardLoc,
 	isBlank,
 	isPonyOrStart,
+	isStart,
 	isCardIncluded,
 	getNeighborKeys,
 	GameModel as GameModelShared,
@@ -648,13 +649,23 @@ export function isValidMove(cardDragged: Card, targetCard: Card, endLocation: Lo
 	if(cardDragged == targetCard) return false;
 	let model = win.model;
 
+	if(isStart(targetCard) && !isBoardLoc(win.cardLocations[cardDragged] ))
+	{
+		return false;
+	}
+
 	if(isPonyOrStart(targetCard) && isPonyOrStart(cardDragged))
 	{
 		var offsetLoc = endLocation.replace("p,","offset,");
 		return !model.board[offsetLoc];
 	}
 
-	return (targetCard == "blank:ship" && (isShip(cardDragged) || cm.inPlay()[cardDragged].action == "ship")
+	if(!isItMyTurn())
+	{
+		return false;
+	}
+
+	return (targetCard == "blank:ship"    && (isShip(cardDragged) || cm.inPlay()[cardDragged].action == "ship")
 		|| (targetCard == "blank:pony" && isPonyOrStart(cardDragged))
 	);
 }

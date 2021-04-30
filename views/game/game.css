@@ -340,6 +340,11 @@ input[type="number"]
 	cursor: not-allowed;
 }
 
+.nomove .card.interrupt, .nomove .card.interrupt.grab 
+{
+	cursor: grab;
+}
+
 #cardRow  div
 {
 	display: inline-block;
