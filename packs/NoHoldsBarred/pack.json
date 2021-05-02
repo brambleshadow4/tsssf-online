@@ -34,11 +34,11 @@
 				]
 			},
 			"ShaiNiShipficFanfilly": {
-				"name": "Shai Ni",
+				"name": "Shai Ni/Twilight Sparkle",
 				"race": "unicorn",
 				"gender": "female",
 				"keywords": [
-					"OC"
+					"OC", "Mane 6"
 				]
 			},
 			"ChrysanthemumRose": {
@@ -178,7 +178,7 @@
 			"SkyeCandi": {
 				"name": "SkyeCandi",
 				"race": "earth",
-				"gender": "malefemale",
+				"gender": "male/female",
 				"keywords": [
 					"OC",
 					"#horsefamous"
@@ -290,6 +290,7 @@
 				"name": "Pixel Prism",
 				"race": "unicorn",
 				"gender": "female",
+				"action": "fullCopy",
 				"keywords": [
 					"Dragon",
 					"OC",
@@ -336,7 +337,7 @@
 			"Plushling": {
 				"name": "Plushling",
 				"race": "alicorn",
-				"gender": "malefemale",
+				"gender": "male/female",
 				"action": "ChangelingNoRedisguise(plushling)",
 				"keywords": [
 					"Changeling",

@@ -17,7 +17,7 @@
 		},
 		"pony": {
 			"AloeAndLotus": {
-				"name": "Aloe & Lotus",
+				"name": "Aloe/Lotus",
 				"race": "earth",
 				"gender": "female",
 				"count": 2,
@@ -233,7 +233,7 @@
 				]
 			},
 			"Flim&Flam": {
-				"name": "Flim & Flam",
+				"name": "Flim/Flam",
 				"race": "unicorn",
 				"gender": "male",
 				"action": "swap",
@@ -541,7 +541,7 @@
 			"TheWonderbolts": {
 				"name": "The Wonderbolts",
 				"race": "pegasus",
-				"gender": "malefemale",
+				"gender": "male/female",
 				"keywords": []
 			},
 			"Tom": {

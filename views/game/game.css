@@ -340,6 +340,11 @@ input[type="number"]
 	cursor: not-allowed;
 }
 
+.nomove .card.interrupt, .nomove .card.interrupt.grab 
+{
+	cursor: grab;
+}
+
 #cardRow  div
 {
 	display: inline-block;
@@ -439,14 +444,18 @@ input[type="number"]
 
 #popupCloseButton
 {
-	width: 10vh;
-	height: 10vh;
-	top: -4vh;
-	right: -4vh;
-	z-index: 6;
-
-	position: absolute;
+	width: 32px;
+	height: 32px;
 	cursor: pointer;
+}
+
+.popupTabs > .closeButtonTab
+{
+	padding: 0px;
+	font-size: 0;
+	position: absolute;
+	right: 10px;
+
 }
 
 .popupTabs
@@ -455,6 +464,7 @@ input[type="number"]
 	bottom: calc(100%);
 	display: flex;
 	flex-direction: row;
+	width: 100%;
 }
 
 .popupTabs > div:first-child
@@ -480,6 +490,34 @@ input[type="number"]
 	padding: 10px;
 }
 
+
+.popupTitleBar
+{
+	text-align: left;
+	background-color: #d9d9d9;
+}
+.popupTitleBar > *
+{
+	display: inline-block;
+	vertical-align: middle;
+	height: 32px;
+	font-size: 0;
+	
+}
+
+.popupTitleBar > span
+{
+	margin-left: 10px;
+	font-size: 12pt;
+	line-height: 32px;
+}
+
+.popupTitleBar #popupCloseButton
+{
+	float: right;
+}
+
+
 .popupPage
 {
 	padding: 20px;
@@ -494,7 +532,7 @@ input[type="number"]
 #popupContent
 {
 	overflow-y: auto;
-	height: 100%;
+	height: calc(100% - 32px);
 }
 
 .popupContainer
@@ -565,6 +603,11 @@ input[type="number"]
 	box-shadow: 0 0 8px 8px blue;
 }
 
+
+.pointAmountPopup
+{
+	margin-top: 10px;
+}
 
 iframe
 {

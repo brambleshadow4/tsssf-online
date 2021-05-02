@@ -1,16 +1,36 @@
 
 import * as cm from "./cardManager.js";
 
-import {isBlank, Card, Location} from "./lib.js";
+import {slashStringToSet, isBlank, Card, CardProps, CardSetProps, Location} from "./lib.js";
 import {GameModel} from "./gameServer.js";
 
-function getCardProp(model: GameModel, cardFull: Card, prop: any)
+
+
+
+function toSetProps(props: CardProps): CardSetProps
+{
+	return {
+		action: props.action,
+		name: slashStringToSet(props.name),
+		gender: slashStringToSet(props.gender) as any,
+		race: slashStringToSet(props.race) as any,
+		keywords: new Set(props.keywords),
+		altTimeline: props.altTimeline ? new Set([true]) : new Set(),
+		count: props.count,
+		card: "",
+	}
+}
+
+
+function getCardProp<T extends keyof CardSetProps>(model: GameModel, cardFull: Card, prop: T): CardSetProps[T]
 {
 	let turnstate = model.turnstate!;
 	//console.log("getCardProp(" + cardFull + ", " + prop + ")");
 
 	let cards = cm.inPlay();
 
+
+	// step 1, determine the baseCard, if any
 	var [card, ctxNoStr] = cardFull.split(":");
 	let ctxNo: number = Number(ctxNoStr);
 	var cardOverrides = turnstate.overrides[card] || {};
@@ -20,72 +40,127 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any)
 		cardOverrides = turnstate.getChangeContext(card).list[ctxNo] || cardOverrides;
 	}
 
-	var baseCard = cardOverrides.disguise || card;
+	var predisguise = card;
+	var baseCard = cardOverrides.fullCopy || cardOverrides.disguise || card;
 
 	if(ctxNo == 0)
 	{
 		baseCard = card;
 	}
-	else
+
+	let cardAction = cards[card].action || "";
+
+	if(cardAction.startsWith("Changeling") && turnstate.specialEffects.larsonEffect)
 	{
-		if(cardOverrides.disguise && turnstate.specialEffects.larsonEffect)
-			baseCard = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+		baseCard = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
 	}
 
-	
-	if(prop == "*")
-		return cardOverrides;
-
-	var allowOverrides = true;
-	if(prop.endsWith("_b"))
-	{
-		allowOverrides = false;
-		prop = prop.substring(prop, prop.length-2);
-	}
 
 	if(prop == "card")
-		return card;
-
-	if(prop == "race" && turnstate.specialEffects.larsonEffect)
-		return "alicorn";
-
-
-	if(prop == "keywords")
 	{
-		if(cards[card].action && cards[card].action!.indexOf("plushling") >= 0)
+		let props = toSetProps(cards[card]);
+		props.card = cardFull;
+		return props[prop];
+	}
+
+
+	/*
+	 * step 2, determine the merge mode: top, merge, base, or pdomerge
+	 * 
+	 * There are three levels:
+ 	 *   predisguise => base => overrides
+ 	 * 
+ 	 * top mode checks whichever property is on top, does not merge any other attributes in
+ 	 * merge mode checks all levels, merging properties into a single set containing them all
+ 	 * base only checks the base level
+ 	 * pdo merges predisguise and overrides, leaving out 
+ 	 * 
+	 */
+
+
+	var mergeMode: "top" | "base" | "merge" | "pdomerge" = "top";
+
+	if(prop.endsWith("_b"))
+	{
+		mergeMode = "base"
+		prop = prop.substring(0, prop.length-2) as T;
+	}
+	else if (prop == "count")
+	{
+		mergeMode = "top";
+	}
+	else if (cardOverrides.fullCopy)
+	{
+		mergeMode = "merge";
+	}
+	else if(prop == "keywords" && cards[card].action && cards[card].action!.indexOf("plushling") >= 0)
+	{
+		mergeMode = "pdomerge"
+	}
+	else if (prop == "keywords" || prop == "name")
+	{
+		mergeMode = "merge";
+	}
+
+
+	if(prop == "race" && mergeMode != "base" && turnstate.specialEffects.larsonEffect)
+	{
+		let props = toSetProps(cards[card]);
+		props.race = new Set(["alicorn"])
+		return props[prop];
+	}
+
+
+	// step 3, do the merge.
+
+	var allProps = [
+		toSetProps(cards[predisguise]),
+		toSetProps(cards[baseCard]),
+		toSetProps(cardOverrides)
+	];
+
+	var props = allProps.map( x => x[prop]);
+
+	if (props[0] == undefined || (props[0] as any).size == undefined)
+	{
+		switch(mergeMode)
 		{
-			baseCard = card;
+			case "base":
+				return props[1];
+
+			default:
+				return props[2] || props[1] || props[0];
 		}
-
-		let overrideKeywords = (allowOverrides && cardOverrides?.keywords) || [];
-
-		if(turnstate.specialEffects.larsonEffect)
-			overrideKeywords.push("Princess");
-
-		if(cardOverrides?.disguise)
-			overrideKeywords = overrideKeywords.concat(cards[card].keywords);
-
-		let baseKeywords = [...(cards[baseCard].keywords)];
-		return new Set(baseKeywords.concat(overrideKeywords));
 	}
 
-	if(prop == "name")
+	let setProps = props as Set<string>[];
+
+
+	switch(mergeMode)
 	{
-		var s = new Set();
-		s.add(cards[baseCard].name);
-		s.add(cards[card].name);
-		return s;
-	}
+		case "top":
 
-	if(allowOverrides && cardOverrides && cardOverrides[prop])
-	{
-		//console.log(cardOverrides[prop]);
-		return cardOverrides[prop]
-	}
+			if(setProps[2].size > 0)
+				return props[2];
 
-	//console.log(cards[baseCard][prop]);
-	return (cards[baseCard] as any)[prop];
+			else if(setProps[1].size > 0)
+				return props[1];
+
+			else
+				return props[0];
+
+		case "base":
+			return props[1];
+
+		case "merge":
+			return new Set([...setProps[0], ...setProps[1], ...setProps[2]]) as any;
+
+		case "pdomerge":
+			return new Set([...setProps[0], ...setProps[2]]) as any;
+
+	}
 }
+
 
 function doesCardMatchSelector(model: GameModel, card: Card, selector: string): number
 {
@@ -100,13 +175,12 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 
 	if(selector.trim() == "genderSwapped")
 	{
-		var originalGender = cards[card].gender;
-		if(model.turnstate?.overrides && model.turnstate.overrides[card] && model.turnstate.overrides[card].disguise)
-		{
-			originalGender = cards[model.turnstate.overrides[card].disguise].gender
-		}
+		var originalGender = getCardProp(model, card, "gender_b" as any) as Set<"male" | "female">;
+		var currentGender = getCardProp(model, card, "gender");
 
-		return (getCardProp(model, card, "gender") != originalGender ? trueValue : falseValue);
+		var combined = new Set([...originalGender, ...currentGender]);
+
+		return originalGender.size == 1 && currentGender.size == 1 && combined.has("male") && combined.has("female") ? trueValue : falseValue;
 	}
 
 	var clauses = selector.split("&&");
@@ -143,21 +217,8 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 
 		var cardValue = getCardProp(model, card, prop);
 
-		if(prop == "name")
-		{
-			return cardValue.has(value) ? falseValue : trueValue;
-		}
+		return cardValue.has(value) ? falseValue : trueValue;
 
-		if(prop == "gender" && cardValue == "malefemale")
-		{
-			return trueValue;
-		}
-
-		if(prop == "race" && cardValue == "earth/unicorn")
-		{	
-			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
-		}
-		return (cardValue != value ? trueValue : falseValue);
 	}
 
 	if(selector.indexOf("=") > -1)
@@ -171,25 +232,11 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 		if(value == "false")
 			value = false;
 
-
 		var cardValue = getCardProp(model, card, prop);
 
-		//if(prop == "race")
 
-		if(prop == "name")
-		{
-			return cardValue.has(value) ? trueValue : falseValue;
-		}
-
-		if(prop == "gender" && cardValue == "malefemale")
-			return trueValue;
 		
-		if(prop == "race" && cardValue == "earth/unicorn")
-			return (value == "earth" || value == "unicorn" ? trueValue : falseValue);
-
-		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
-
-		return (cardValue == value ? trueValue : falseValue);
+		return cardValue.has(value) ? trueValue : falseValue;
 	}
 
 	if(selector.indexOf(" in ") > -1 || selector.indexOf(" !in ") > -1)
@@ -288,6 +335,8 @@ function ExistsPony(selector: string, count?: number)
 			if(key.startsWith("p,"))
 			{
 				//console.log("checking card " + model.board[key].card);
+				//console.log("does match " + selector + " " + model.board[key].card + " " + doesCardMatchSelector(model, model.board[key].card, selector));
+
 				boardCount += doesCardMatchSelector(model, model.board[key].card, selector)
 			}
 		}
@@ -492,7 +541,7 @@ function PlayPonies(selector: string, count?: number)
 
 function getShipCount(model: GameModel, pony1: Card, pony2: Card)
 {
-	return Math.max(getCardProp(model, pony1, "count") || 1, getCardProp(model, pony2, "count") || 1)
+	return Math.max(getCardProp(model, pony1, "count") || 1, getCardProp(model, pony1, "count") || 1)
 }
 
 function PlayShips(selector1: string, selector2: string, count?: number)
@@ -700,7 +749,7 @@ function ShippedWithOppositeGenderedSelf(model: GameModel, card1: Card, card2: C
 		var gender1 = getCardProp(model, card1, "gender");
 		var gender2 = getCardProp(model, card2, "gender");
 
-		return ((gender1 == "male" && gender2 == "female") || (gender1 == "female" && gender2 == "male"))
+		return ((gender1.has("male") && gender2.has("female")) || (gender1.has("female") && gender2.has("male")));
 	}
 
 	return false;
@@ -776,7 +825,7 @@ export function typecheckGoal(card: any)
 	}
 }
 
-export function evalGoalCard(card: Card, model: GameModel)
+export function evalGoalCard(card: Card, model: GameModel): boolean
 {
 	let cards = cm.inPlay();
 

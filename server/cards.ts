@@ -16,7 +16,7 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"Core.Pony.AloeAndLotus": {
-		"name": "Aloe & Lotus",
+		"name": "Aloe/Lotus",
 		"race": "earth",
 		"gender": "female",
 		"count": 2,
@@ -232,7 +232,7 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"Core.Pony.Flim&Flam": {
-		"name": "Flim & Flam",
+		"name": "Flim/Flam",
 		"race": "unicorn",
 		"gender": "male",
 		"action": "swap",
@@ -540,7 +540,7 @@ var cards: {[key: string]: any} = {
 	"Core.Pony.TheWonderbolts": {
 		"name": "The Wonderbolts",
 		"race": "pegasus",
-		"gender": "malefemale",
+		"gender": "male/female",
 		"keywords": []
 	},
 	"Core.Pony.Tom": {
@@ -1028,7 +1028,7 @@ var cards: {[key: string]: any} = {
 	},
 	"EC.Goal.SpaDay": {
 		"name": "Spa Day",
-		"goalLogic": "ExistsShip(Mane 6 in keywords, name=Aloe & Lotus)",
+		"goalLogic": "ExistsShip(Mane 6 in keywords, name=Aloe && name=Lotus)",
 		"points": "2"
 	},
 	"EC.Goal.NoPoniesCanPonyTwoPoniesToPony": {
@@ -1128,7 +1128,7 @@ var cards: {[key: string]: any} = {
 	"HorriblePeople.2015ConExclusives.Pony.AnEntireSwarmOfBreezies": {
 		"name": "An Entire Swarm of Breezies",
 		"race": "pegasus",
-		"gender": "malefemale",
+		"gender": "male/female",
 		"count": 10,
 		"keywords": [
 			"Breezy"
@@ -1199,6 +1199,7 @@ var cards: {[key: string]: any} = {
 		"name": "Shia LeBeouffalo",
 		"race": "earth",
 		"gender": "male",
+		"action": "interrupt",
 		"keywords": [
 			"Actual Cannibal",
 			"Buffalo",
@@ -1471,7 +1472,7 @@ var cards: {[key: string]: any} = {
 	"HorriblePeople.Hearthswarming.Pony.ApplejacksParents": {
 		"name": "Applejack's Parents",
 		"race": "earth",
-		"gender": "malefemale",
+		"gender": "male/female",
 		"count": 2,
 		"keywords": [
 			"Apple"
@@ -1682,11 +1683,12 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"NoHoldsBarred.Pony.ShaiNiShipficFanfilly": {
-		"name": "Shai Ni",
+		"name": "Shai Ni/Twilight Sparkle",
 		"race": "unicorn",
 		"gender": "female",
 		"keywords": [
-			"OC"
+			"OC",
+			"Mane 6"
 		]
 	},
 	"NoHoldsBarred.Pony.ChrysanthemumRose": {
@@ -1826,7 +1828,7 @@ var cards: {[key: string]: any} = {
 	"NoHoldsBarred.Pony.SkyeCandi": {
 		"name": "SkyeCandi",
 		"race": "earth",
-		"gender": "malefemale",
+		"gender": "male/female",
 		"keywords": [
 			"OC",
 			"#horsefamous"
@@ -1938,6 +1940,7 @@ var cards: {[key: string]: any} = {
 		"name": "Pixel Prism",
 		"race": "unicorn",
 		"gender": "female",
+		"action": "fullCopy",
 		"keywords": [
 			"Dragon",
 			"OC",
@@ -1984,7 +1987,7 @@ var cards: {[key: string]: any} = {
 	"NoHoldsBarred.Pony.Plushling": {
 		"name": "Plushling",
 		"race": "alicorn",
-		"gender": "malefemale",
+		"gender": "male/female",
 		"action": "ChangelingNoRedisguise(plushling)",
 		"keywords": [
 			"Changeling",

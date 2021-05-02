@@ -106,7 +106,7 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 		if(key.startsWith('p,'))
 		{
 			var card = model.board[key].card;
-			if(cards[card] && (cards[card] as any).changeGoalPointValues)
+			if(cards[card] && cards[card].changeGoalPointValues)
 			{
 				changeGoalPointValues = true;
 			}
@@ -180,7 +180,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				if(value == undefined)
 					return;
 
-				moveCard(card, "goal," + goalNo, "winnings", false, value)
+				moveCard(card, "goal," + goalNo, "winnings", {extraArg: value})
 				broadcastMove(card, "goal," + goalNo, "winnings", "" + value)
 			}
 		}
@@ -303,46 +303,9 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				addGoalCheck(imgElement, Number(location.split(',')[1]));
 			}
 
-			var trashTarget: string | undefined;
-			if(isPony(card))
-				trashTarget = "ponyDiscardPile";
-			else if (isShip(card))
-				trashTarget = "shipDiscardPile";
-			else if(isGoal(card))
-				trashTarget = "goalDiscardPile";
-
-
-			if(trashTarget && !location.startsWith(trashTarget))
-			{
-				var trashTargetEl = document.getElementById(trashTarget)!;
-
-				var top = trashTargetEl.getBoundingClientRect().top
-				var left = trashTargetEl.getBoundingClientRect().left
-
-				//alert(window.innerHeight + " " + top + " " + trashTargetEl.getBoundingClientRect().top);
-
-				trashButton = document.createElement('img');
-				trashButton.src = "/img/trash.svg";
-				trashButton.style.position = "absolute";
-				trashButton.style.top = top + "px";
-				trashButton.style.left = left + "px"
-				trashButton.style.width = "13vh";
-
-				trashButton.style.zIndex = "3";
-
-
-				document.body.appendChild(trashButton);
-
-				trashButton.ontouchstart = function(e)
-				{
-					e.preventDefault();
-					e.stopPropagation();
-
-					endMoveShared();
-					moveCard(card, location!, trashTarget + ",top");
-					broadcastMove(card, location!, trashTarget + ",top");
-				}
-			}
+			
+			showTrashButton(card, location);
+			
 
 			if(isPonyOrStart(card))
 			{
@@ -362,18 +325,43 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 	function completeMoveShared()
 	{
 		var [card, startLoc] = getDataTransfer().split(";")
+		var modifiedStartLoc = startLoc;
+
+		var doReactiveMoveBack = false;
+		var offsetLoc = "";
+		var offsetCard = "";
 
 		if(location && isBoardLoc(location))
 		{
 			var model = globals.model;
 			if(model.board[location] && model.board[location].card && isPonyOrStart(model.board[location].card))
 			{
-				var [_,x,y] = location.split(",");
-				var offsetLoc = "offset," + x + "," + y;
-				let offsetCard = model.board[location].card;
+				offsetCard = model.board[location].card;
 
-				moveCard(offsetCard, location, offsetLoc);
-				broadcastMove(offsetCard, location, offsetLoc);
+				var [_,x,y] = location.split(",");
+				offsetLoc = "offset," + x + "," + y;
+
+
+
+				if(startLoc == "hand")
+				{
+					moveCard(offsetCard, location, "ponyDiscardPile,top");
+					broadcastMove(offsetCard, location, "ponyDiscardPile,top");	
+				}
+				else if(startLoc ==  "ponyDiscardPile,top")
+				{
+					moveCard(offsetCard, location, offsetLoc);
+					broadcastMove(offsetCard, location, offsetLoc);	
+
+					doReactiveMoveBack = true;
+				}
+				else
+				{
+					moveCard(offsetCard, location, offsetLoc);
+					broadcastMove(offsetCard, location, offsetLoc);	
+				}
+				
+					
 			}
 			else
 			{
@@ -384,10 +372,23 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 
 		moveCard(card, startLoc, location!);
 		broadcastMove(card, startLoc, location!);
+
+		if(doReactiveMoveBack)
+		{
+			moveCard(offsetCard, offsetLoc, "ponyDiscardPile,top");
+			broadcastMove(offsetCard, offsetLoc, "ponyDiscardPile,top");	
+		}
 	}
 
 	if(isDraggable && location)
 	{
+		var isInterruptCard = cm.inPlay()[card].action == "interrupt" && location == "hand";
+
+		if(isInterruptCard)
+		{
+			imgElement.classList.add("interrupt");
+		}
+
 		imgElement.onmousedown = function(e)
 		{
 			e.stopPropagation();
@@ -402,8 +403,6 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 	
 		imgElement.ondragstart = function(e: DragEvent)
 		{
-			
-
 			if(inTouchEvent)
 			{
 				e.preventDefault();
@@ -411,7 +410,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				return;
 			}
 
-			if (isDkeyPressed || !isItMyTurn())
+			if (isDkeyPressed || (!isItMyTurn() && !isInterruptCard))
 			{
 				e.preventDefault();
 				return;
@@ -452,6 +451,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			ghostCard.style.top = e.pageY + "px";
 			ghostCard.style.left = e.pageX + "px"
 			
+			showTrashButton(card, location!);
 
 			ghostCardDragHandler = function(e: DragEvent)
 			{
@@ -503,7 +503,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 
 		imgElement.ondragenter= function(e)
 		{
-			var draggedCard = getDataTransfer().split(";")[0];
+			var [draggedCard, srcLocation] = getDataTransfer().split(";");
 
 			if(this == offsetGhost)
 			{
@@ -517,8 +517,10 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 
 			if(isValidMove(draggedCard, card, location!))
 			{
-				if (isBlank(card))
+				if (isBlank(card) || srcLocation == "hand" || srcLocation == "ponyDiscardPile,top")
+				{
 					setCardBackground(imgElement, draggedCard)
+				}
 				else
 				{
 					let [_, xs, ys] = location!.split(",");
@@ -598,6 +600,67 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 	return imgElement as unknown as CardElement;
 }
 
+function showTrashButton(card: Card, location:Location)
+{
+	var trashTarget: string | undefined;
+	if(isPony(card))
+		trashTarget = "ponyDiscardPile";
+	else if (isShip(card))
+		trashTarget = "shipDiscardPile";
+	else if(isGoal(card))
+		trashTarget = "goalDiscardPile";
+
+	if(trashTarget && !location.startsWith(trashTarget))
+	{
+		var trashTargetEl = document.getElementById(trashTarget)!;
+
+		var top = trashTargetEl.getBoundingClientRect().top
+		var left = trashTargetEl.getBoundingClientRect().left
+
+		//alert(window.innerHeight + " " + top + " " + trashTargetEl.getBoundingClientRect().top);
+
+		trashButton = document.createElement('img');
+		trashButton.src = "/img/trash.svg";
+		trashButton.style.position = "absolute";
+		trashButton.style.top = top + "px";
+		trashButton.style.left = left + "px"
+		trashButton.style.width = "13vh";
+
+		trashButton.style.zIndex = "3";
+
+
+		document.body.appendChild(trashButton);
+
+		trashButton.ontouchstart = function(e)
+		{
+			e.preventDefault();
+			e.stopPropagation();
+
+			endMoveShared();
+			moveCard(card, location!, trashTarget + ",top");
+			broadcastMove(card, location!, trashTarget + ",top");
+		}
+
+	
+		trashButton.ondragover= function(e)
+		{
+			var draggedCard = getDataTransfer().split(";")[0];
+			e.preventDefault();
+		}
+		
+
+		trashButton.ondrop = function(e)
+		{
+			e.preventDefault();
+			e.stopPropagation();
+
+			endMoveShared();
+			moveCard(card, location!, trashTarget + ",top", {noAnimiation: true});
+			broadcastMove(card, location!, trashTarget + ",top");
+		}
+	}
+}
+
 
 var touchStartNum = 0;
 
@@ -664,64 +727,61 @@ function removeShiftHover(element: CardElement)
 
 function pointsPopup(points: number[])
 {
-	return createPopup([
+	return createPopup("Choose Point Amount", true, function(accept: ((value?: any) => any)) 
 	{
-		name: "",
-		render: function(accept: ((value?: any) => any)) 
+		var div = document.createElement('div');
+		div.className = "pointAmountPopup";
+
+		let x: ElementCreationOptions;
+
+		/*var p = document.createElement('p');
+		p.innerHTML = "Choose how many points you should get";
+		(p as any).style = "padding: 10px; padding-top: 20px;"
+		div.appendChild(p);*/
+
+		for(let val of points)
 		{
-			var div = document.createElement('div');
-
-			let x: ElementCreationOptions;
-
-			var p = document.createElement('p');
-			p.innerHTML = "Choose how many points you should get";
-			(p as any).style = "padding: 10px; padding-top: 20px;"
-			div.appendChild(p);
-
-			for(let val of points)
+			if(val == -1)
 			{
-				if(val == -1)
+				let customDiv = document.createElement('div');
+
+				
+				let input = document.createElement('input');
+				input.type = "number";
+
+
+				input.value = "" + (points.reduce((a,b) => Math.max(a,b), 0) + 1);
+				
+
+				let button = document.createElement('button');
+				button.innerHTML = "Other";
+				button.onclick = function()
 				{
-					let customDiv = document.createElement('div');
-
-					
-					let input = document.createElement('input');
-					input.type = "number";
-
-
-					input.value = "" + (points.reduce((a,b) => Math.max(a,b), 0) + 1);
-					
-
-					let button = document.createElement('button');
-					button.innerHTML = "Other";
-					button.onclick = function()
+					if(!isNaN(Number(input.value)))
 					{
-						if(!isNaN(Number(input.value)))
-						{
-							accept(Number(input.value));
-						}
+						accept(Number(input.value));
 					}
-
-					customDiv.appendChild(input);
-					customDiv.appendChild(button);
-
-					div.appendChild(customDiv);
 				}
-				else
-				{
-					let button = document.createElement('button');
-					button.innerHTML = "" + val;
-					button.onclick = function(){
-						accept(val);
-					};
 
-					div.appendChild(button);
-				}
+				customDiv.appendChild(input);
+				customDiv.appendChild(button);
+
+				div.appendChild(customDiv);
 			}
+			else
+			{
+				let button = document.createElement('button');
+				button.innerHTML = "" + val;
+				button.onclick = function(){
+					accept(val);
+				};
 
-			return div;
+				div.appendChild(button);
+			}
 		}
-	}], true);
+
+		return div;
+	});
 }
 
 

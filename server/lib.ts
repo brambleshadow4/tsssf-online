@@ -1,5 +1,7 @@
 export type Card = string;
 
+
+
 interface CardPropsBase {
 	url: string,
 	thumb: string
@@ -11,11 +13,12 @@ export interface ShipProps extends CardPropsBase {
 
 export interface PonyProps extends CardPropsBase {
 	name: string,
-	gender?: "male" | "female" | "malefemale",
-	race?: "earth" | "pegasus" | "unicorn" | "alicorn",
-	keywords: Set<string>,
+	gender: "male" | "female",
+	race: "earth" | "pegasus" | "unicorn" | "alicorn",
+	keywords: string[],
 	altTimeline?: true,
 	count?: number,
+	changeGoalPointValues?: true,
 
 	action?: string
 }
@@ -23,11 +26,24 @@ export interface PonyProps extends CardPropsBase {
 export interface GoalProps extends CardPropsBase {
 	points: string,
 	goalLogic?: string,
-	goalFun?: Function
+	goalFun?: (model: GameModel) => boolean
 }
 
 
 export type CardProps = PonyProps & GoalProps & ShipProps;
+
+export type CardSetProps = {
+
+	action?: string,
+	name: Set<string>,
+	gender: Set<"male" | "female">,
+	race: Set<"earth" | "pegasus" | "unicorn" | "alicorn">
+	keywords: Set<string>,
+	altTimeline: Set<true>,
+	count?: number,
+	changeGoalPointValues?: true,
+	card: string
+}
 
 
 export type Location = string;
@@ -218,6 +234,13 @@ export function isDiscardLoc(location: Location)
 		location.startsWith("ponyDiscardPile,") || 
 		location.startsWith('goalDiscardPile,')
 }
+
+export function slashStringToSet(s: string | undefined): Set<string>
+{
+	if(s == undefined) return new Set();
+	return new Set(s.split("/"));
+}
+
 
 
 export function isCardIncluded(card: Card, model:{startCard: Card, cardDecks: string[]})

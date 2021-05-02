@@ -5,32 +5,41 @@ import {GameModel} from "./gameServer.js";
 var allCards: {[key:string]: CardProps} = {};
 var gameCards: {[key:string]: CardProps} = {};
 
+
+function slashStringToSet(s: string | undefined): Set<string>
+{
+	if(s === undefined){
+		return new Set();
+	}
+
+	return new Set(s.split("/"));
+}
+
+
 export function init(filter: string[], customCards: {[key:string]: CardProps})
 {
 	let newAllCards: {[key: string]: any} = {};
 
+	// convert base cards
 	for(var key in cards)
 	{
 		newAllCards[key] = JSON.parse(JSON.stringify(cards[key]));
 
 		var urlToImg = "/packs/" + key.split(".").join("/");
-
-		newAllCards[key].keywords = new Set(newAllCards[key].keywords);
 		newAllCards[key].url = urlToImg + ".png";
 		newAllCards[key].thumb = urlToImg + ".thumb.jpg";
-
 	}
 
-	// customCards must 
+	// convert custom cards
 	for(var key in customCards)
 	{
 		newAllCards[key] = JSON.parse(JSON.stringify(customCards[key]));
-		newAllCards[key].id = key;
 	}
 
 	allCards = newAllCards;
 
 
+	// set gameCards global
 	var newGameCards: {[key:string]: CardProps} = {}
 
 

@@ -1,13 +1,32 @@
 var oldPopupAccept: undefined | ((value?: any) => any) ;
 
-export function createPopup(
-	tabs:{
+export function createPopup(title: string, miniMode: boolean, renderFun: (acceptFun: (value?: any) => any) => HTMLElement)
+{
+	var className = miniMode ? "mini" : "normal";
+
+	return createPopupShared(className, title, renderFun);
+	
+}
+
+
+export function createTabbedPopup(tabs: {
 		render: (acceptFun: (value?: any) => any) => HTMLElement,
 		name?: string,
-	}[],
-	miniMode?: boolean)
+	}[]
+)
 {
+	return createPopupShared("normal", undefined, undefined, tabs);
+}
 
+function createPopupShared(
+	className: string,
+	title?: string,
+	renderFun?: (acceptFun: (value?: any) => any) => HTMLElement,
+	tabs?: {
+		render: (acceptFun: (value?: any) => any) => HTMLElement,
+		name?: string,
+	}[])
+{
 	if(oldPopupAccept)
 		oldPopupAccept();
 
@@ -24,10 +43,9 @@ export function createPopup(
 
 		var div = document.createElement('div');
 		div.className = "popup";
-		if(miniMode)
-			div.className += " mini";
-		else
-			div.className += " normal"
+
+		div.className += " " + className
+
 
 		// When we call a tab's render function, we send it the newAccept function
 		// so that the render can close the popup with value val
@@ -46,7 +64,7 @@ export function createPopup(
 		
 		var initialContent;
 
-		if(tabs.length > 1)
+		if(tabs)
 		{
 			var tabDiv = document.createElement('div');
 			tabDiv.className = 'popupTabs';
@@ -75,9 +93,24 @@ export function createPopup(
 				}
 			}
 
+			let closeTab = document.createElement('div');
+			closeTab.className = "closeButtonTab";
+			closeTab.appendChild(closeButton);
+			tabDiv.appendChild(closeTab);
+
 			tabDiv.children[0].classList.add('selected');
 
+
 			div.appendChild(tabDiv);
+		}
+
+		if(title)
+		{
+			var titleBar = document.createElement('div');
+			titleBar.className = "popupTitleBar";
+			titleBar.innerHTML = "<span>" + title + "</span>";
+			titleBar.appendChild(closeButton);
+			div.appendChild(titleBar);
 		}
 
 		var container = document.createElement('div');
@@ -85,14 +118,17 @@ export function createPopup(
 
 		div.appendChild(container)
 
-		container.appendChild(tabs[0].render(newAccept));
-
-		div.appendChild(closeButton);
+		if(tabs)
+		{
+			container.appendChild(tabs[0].render(newAccept));
+		}
+		else if (renderFun)
+		{
+			container.appendChild(renderFun(newAccept));
+		}
 
 		parent.appendChild(div)
-
 		document.body.appendChild(parent);
-
 	}
 
 	return new Promise(handler);

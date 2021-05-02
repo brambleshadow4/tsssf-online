@@ -71,8 +71,10 @@ import {
 	isDiscardLoc,
 	isBlank,
 	isPonyOrStart,
+	isStart,
 	isCardIncluded,
 	getNeighborKeys,
+	slashStringToSet,
 	GameModel as GameModelShared,
 	Card, Location,
 	CardProps, GoalProps, ShipProps, PonyProps,
@@ -277,7 +279,6 @@ function LoadCards(): void
 				showingHelpPopup = false;
 
 			})();
-			
 		}
 
 		if(cards[key].thumb)
@@ -286,14 +287,14 @@ function LoadCards(): void
 
 
 			img.src = cards[key].thumb;
-			preloadedImages.appendChild(img);
+			preloadedImages.appendChild(img);	
+		}
 
-			if(cards[key].keywords)
+		if(cards[key].keywords)
+		{
+			for(var keyword of cards[key].keywords)
 			{
-				for(var keyword of cards[key].keywords)
-				{
-					keywordSet.add(keyword);
-				}
+				keywordSet.add(keyword);
 			}
 		}
 	}
@@ -429,9 +430,12 @@ function updateEffects()
 	for(var card in turnStateChangelings)
 	{
 		let newDisguise = getCardProp(card, "disguise");
+		let action = cm.inPlay()[card].action || "";
 
-		if(larsonEffect && newDisguise)
+		if(larsonEffect && action.startsWith("Changeling"))
+		{
 			newDisguise = larsonEffect;
+		}
 
 		if(!isBoardLoc(cardLocations[card]))
 		{
@@ -485,7 +489,10 @@ function updateEffects()
 				else
 					decs.keywords.push("Princess");
 
-				if(decs.disguise)
+				let action = cm.inPlay()[card].action || "";
+				console.log(action);
+
+				if(action.startsWith("Changeling"))
 					decs.disguise = larsonEffect;
 			}
 
@@ -523,6 +530,11 @@ function updateEffects()
 			if(decs.shipWithEverypony)
 			{
 				addTempSymbol(element, "star", "This pony is shipped with every other pony on the grid");
+			}
+
+			if(decs.fullCopy)
+			{
+				addTempSymbol(element, "star", "Copying " + decs.fullCopy.substring(decs.fullCopy.lastIndexOf(".")+1));
 			}
 		}	
 	}	
@@ -613,7 +625,7 @@ export async function updateGame(newModel?: GameModel)
 
 
 
-export function isItMyTurn()
+export function isItMyTurn(): boolean
 {
 	let model = win.model;
 	return model.turnstate == undefined || model.turnstate.currentPlayer == model.playerName;
@@ -638,13 +650,23 @@ export function isValidMove(cardDragged: Card, targetCard: Card, endLocation: Lo
 	if(cardDragged == targetCard) return false;
 	let model = win.model;
 
+	if(isStart(targetCard) && !isBoardLoc(win.cardLocations[cardDragged] ))
+	{
+		return false;
+	}
+
 	if(isPonyOrStart(targetCard) && isPonyOrStart(cardDragged))
 	{
 		var offsetLoc = endLocation.replace("p,","offset,");
 		return !model.board[offsetLoc];
 	}
 
-	return (targetCard == "blank:ship" && (isShip(cardDragged) || cm.inPlay()[cardDragged].action == "ship")
+	if(!isItMyTurn())
+	{
+		return false;
+	}
+
+	return (targetCard == "blank:ship"    && (isShip(cardDragged) || cm.inPlay()[cardDragged].action == "ship")
 		|| (targetCard == "blank:pony" && isPonyOrStart(cardDragged))
 	);
 }
@@ -667,13 +689,18 @@ export async function moveCard(
 	card: Card,
 	startLocation: Location,
 	endLocation: Location, 
-	forceCardToMove?: boolean, 
-	extraArg?: any
+	options?:{
+		forceCardToMove?: boolean,
+		extraArg?: any,
+		noAnimiation?: boolean
+	}
 ){
 	var startPos = {};
 	const vh = window.innerHeight/100;
 	let model = win.model;
 	let cardLocations = win.cardLocations;
+
+	options = options || {};
 
 	if(cardLocations[card] == endLocation)
 	{
@@ -854,7 +881,7 @@ export async function moveCard(
 	else if(endLocation == "winnings")
 	{
 
-		model.winnings.push({card, value: Number(extraArg) || 0});
+		model.winnings.push({card, value: Number(options.extraArg) || 0});
 		updateFun = updateWinnings;
 
 		var enddiv = document.getElementById("winnings")!;
@@ -915,7 +942,7 @@ export async function moveCard(
 	// run animation (if applicable)
 	
 
-	if(startLocation != "limbo" 
+	if(startLocation != "limbo" && !options.noAnimiation
 		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation)) // not going from discard to discard
 		&& (isDiscardLoc(endLocation)
 			|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
@@ -933,7 +960,7 @@ export async function moveCard(
 
 	clearActionButtons();
 
-	if(!forceCardToMove)
+	if(!options.forceCardToMove)
 	{
 		await doPlayEvent({card, startLocation, endLocation});
 	}
@@ -1106,6 +1133,7 @@ function getCardAction(card: Card)
 		case "raceGenderChange": return raceGenderChangeAction;
 		case "shipWithEverypony": return shipWithEveryponyAction;
 		case "timelineChange": return timelineChangeAction;
+		case "fullCopy": return fullCopyAction;
 		
 	}		
 }
@@ -1121,13 +1149,13 @@ function doActionOnSwap(card: Card)
 	return false;
 }
 
+
 function changelingAction(type: string)
 {
 	let model = win.model;
 	let cardLocations = win.cardLocations;
 	return async function(card: Card)
 	{
-
 		if(model.turnstate)
 		{
 			let cards = cm.inPlay();
@@ -1142,13 +1170,15 @@ function changelingAction(type: string)
 				case "unicorn":
 				case "earth":
 				case "pegasus":
-					disguises = disguises.filter(x => cards[x].race == type);
+
+
+					disguises = disguises.filter(x => slashStringToSet(cards[x].race).has(type));
 					break;
 				case "nonAlicornFemale":
 					disguises = disguises.filter(x => !(
-						cards[x].race == "alicorn" 
-						&& (cards[x].gender == "female" || cards[x].gender == "malefemale"))
-					);
+						slashStringToSet(cards[x].race).has("alicorn")
+						&& slashStringToSet(cards[x].gender).has("female")
+					));
 
 					console.log(disguises);
 					break;
@@ -1180,7 +1210,7 @@ function changelingAction(type: string)
 			if(!disguises.length && !newDisguise)
 				return;
 
-			newDisguise = newDisguise || await openCardSelect("Choose a pony to disguise as", disguises);
+			newDisguise = newDisguise || await openCardSelect("Select Disguise", "Choose a pony to disguise as", disguises);
 
 			if(!newDisguise)
 				return
@@ -1190,6 +1220,27 @@ function changelingAction(type: string)
 			//broadcastEffects();
 		}
 	}
+}
+
+async function fullCopyAction(card: Card)
+{
+	let model = win.model;
+	if(model.turnstate)
+	{
+
+
+		var copyOptions = Object.keys(model.board).filter(x => x.startsWith("p,") && model.board[x].card && !isBlank(model.board[x].card)).map(x => model.board[x].card);
+
+		copyOptions = copyOptions.filter(x => x != card);
+
+		if(!copyOptions.length) { return; }
+
+
+		var cardToCopy = await openCardSelect("Copy", "Choose a pony to copy", copyOptions);
+
+		setCardProp(card, "fullCopy", cardToCopy);
+	}
+	
 }
 
 
@@ -1261,7 +1312,9 @@ function setCardProp(card: Card, prop: string, value: any)
 async function makePrincessAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a new princess", ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling")), true);
+
+
+	var ponyCard = await openCardSelect("Special", "Choose a new princess", ponies.filter(x => cm.inPlay()[x].keywords.indexOf("Changeling") === -1), true);
 
 	if(ponyCard)
 	{
@@ -1276,7 +1329,7 @@ async function makePrincessAction(shipCard: Card)
 async function genderChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a pony to change gender", ponies, true);
+	var ponyCard = await openCardSelect("Gender Change", "Choose a pony to change gender", ponies, true);
 
 	if(!ponyCard) return;
 
@@ -1311,7 +1364,7 @@ async function shipWithEveryponyAction(ponyCard: Card)
 		}
 	}
 
-	var chosen = await openCardSelect("Choose a pony to ship with everypony", ponies, true);
+	var chosen = await openCardSelect("Special", "Choose a pony to ship with everypony", ponies, true);
 
 	if(chosen)
 	{
@@ -1322,7 +1375,7 @@ async function shipWithEveryponyAction(ponyCard: Card)
 async function cloneAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a pony to count as two ponies", ponies.filter(x => !cm.inPlay()[x].count), true);
+	var ponyCard = await openCardSelect("Clone", "Choose a pony to count as two ponies", ponies.filter(x => !cm.inPlay()[x].count), true);
 
 	if(!ponyCard) return;
 
@@ -1336,7 +1389,7 @@ async function cloneAction(shipCard: Card)
 async function timelineChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Choose a pony to gain the <br> time traveller symbol", ponies, true);
+	var ponyCard = await openCardSelect("Timeline Change","Choose a pony to gain the <br> time traveller symbol", ponies, true);
 
 	if(!ponyCard) return;
 
@@ -1352,7 +1405,7 @@ async function keywordChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
 
-	var output = await createPopup([{"render":function(accept)
+	var output = await createPopup("Keyword Change", true, function(accept)
 	{
 		var element = document.createElement('div');
 		element.className = "popupPage"
@@ -1416,7 +1469,7 @@ async function keywordChangeAction(shipCard: Card)
 		return element;
 
 
-	}}], true);
+	});
 
 	if(output && win.model.turnstate)
 	{
@@ -1430,7 +1483,7 @@ function addKeywordsAction(...keywords: string[])
 	return async function(shipCard: Card)
 	{
 		var ponies = getNeighborCards(shipCard);
-		var ponyCard = await openCardSelect("Choose a pony to gain keywords", ponies, true);
+		var ponyCard = await openCardSelect("Keyword Change","Choose a pony to gain keywords", ponies, true);
 
 		if(!ponyCard) return;
 
@@ -1447,7 +1500,7 @@ function addKeywordsAction(...keywords: string[])
 async function raceChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	ponies = ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling"));
+	ponies = ponies.filter(x => cm.inPlay()[x].keywords.indexOf("Changeling") == -1);
 
 	if(ponies.length == 0)
 		return;
@@ -1468,7 +1521,7 @@ async function raceChangeAction(shipCard: Card)
 async function raceGenderChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	ponies = ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling"));
+	ponies = ponies.filter(x => cm.inPlay()[x].keywords.indexOf("Changeling") == -1);
 
 	if(ponies.length == 0)
 		return;
@@ -1490,7 +1543,7 @@ async function raceGenderChangeAction(shipCard: Card)
 
 function raceChangePopup(ponies: Card[])
 {
-	return createPopup([{render: function(acceptFn)
+	return createPopup("Race Change", true, function(acceptFn)
 	{
 		var selectedPony: Card;
 		var selectedRace: string;
@@ -1588,12 +1641,12 @@ function raceChangePopup(ponies: Card[])
 
 		return div;
 
-	}}],true)
+	});
 }
 
 function raceGenderChangePopup(ponies: Card[])
 {
-	return createPopup([{render: function(acceptFn)
+	return createPopup("Change Gender", true, function(acceptFn)
 	{
 		var selectedPony = "";
 		var selectedRace = "";
@@ -1729,7 +1782,6 @@ function raceGenderChangePopup(ponies: Card[])
 		div.appendChild(buttonDiv)
 
 		return div;
-
-	}}],true)
+	});
 }
 

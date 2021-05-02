@@ -8,6 +8,8 @@ import {
 	Card, Location
 } from "./lib.js";
 
+import {typecheckGoal} from "./goalCriteria.js";
+
 interface MockPlayer extends Player
 {
 	grab(...cards: Card[]): void;
@@ -27,12 +29,17 @@ function expectGoalUnachieved(game: GameModel, goal: Card)
 function expectGoalAchieved(game: GameModel, goal: Card)
 {
 	let i = game.currentGoals.map(x => x.card).indexOf(goal);
+
 	expect(i >= 0 && i <= 3).toBe(true);
 	expect(game.currentGoals[i].achieved).toBe(true);
 }
 
 
-function setupGame():[GameModel, MockPlayer]
+function setupGame(setupOptions?:{
+	cardDecks?: string[],
+	startCard?: string
+
+}):[GameModel, MockPlayer]
 {	
 	let game = new GameModel();
 
@@ -96,8 +103,9 @@ function setupGame():[GameModel, MockPlayer]
 
 	game.players.push(fakePlayer);
 	game.setLobbyOptions({
-		cardDecks: ["Core.*"],
-		ruleset: "turnsOnly"
+		cardDecks: setupOptions?.cardDecks || ["Core.*"],
+		ruleset: "turnsOnly",
+		startCard: setupOptions?.startCard
 	});
 	game.startGame();
 
@@ -116,6 +124,13 @@ function hasShipPair(ships: [string, string][], pony1: string, pony2: string)
 	}
 
 	return false;
+}
+
+function evalGoalLogic(model: GameModel, goalLogic: string): boolean
+{
+	let fakeCard = { goalLogic };
+	typecheckGoal(fakeCard);
+	return (fakeCard as any).goalFun(model);
 }
 
 
@@ -384,6 +399,170 @@ export default function(){
 		player.move(flimFlam, "hand", "p,2,0");
 
 		expectGoalAchieved(game, goal);
+	});
+
+	test("Alicorn Big Mac + Star Student Twilight achieve Pretty Pretty Princess", () =>{
+
+		let [game, player] = setupGame({
+			cardDecks: ["Core.*", "HorriblePeople.2015Workshop.*"],
+			startCard: "ChildrenOfKefentse.Promo.Start.FanficEditorStarlight"
+		});
+		
+		let goal = "Core.Goal.PrettyPrettyPrincess";
+		player.drawGoal(goal);
+
+		let twi = "Core.Pony.StarStudentTwilight";
+		let bigmac = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+
+		player.grab(ship1, ship2, twi, bigmac);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(bigmac, "hand", "p,1,0");
+
+		expectGoalUnachieved(game, goal);
+
+		player.move(ship2, "hand", "sr,1,0");
+		player.move(twi, "hand", "p,2,0");
+
+		expectGoalAchieved(game, goal);
+	});
+
+	test("larson effect still applies when turn ends", () =>{
+
+		let [game, player] = setupGame({
+			cardDecks: ["Core.*", "HorriblePeople.2015Workshop.*"],
+			startCard: "ChildrenOfKefentse.Promo.Start.FanficEditorStarlight"
+		});
+		
+		let goal = "Core.Goal.PrettyPrettyPrincess";
+		player.drawGoal(goal);
+
+		let twi = "Core.Pony.StarStudentTwilight";
+		let bigmac = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+
+		player.grab(ship1, ship2, twi, bigmac);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(bigmac, "hand", "p,1,0");
+
+		player.move(ship2, "hand", "sr,1,0");
+		player.move(twi, "hand", "p,2,0");
+
+		expectGoalAchieved(game, goal);
+
+		player.endTurn();
+
+		expectGoalAchieved(game, goal);
+
+	});
+
+	test("larson effect always transforms changelings", () =>{
+
+		let [game, player] = setupGame({
+			cardDecks: ["Core.*", "HorriblePeople.2015Workshop.*"]}
+		);
+		
+		let goal = "Core.Goal.ItsNotExactlyCheating";
+		player.drawGoal(goal);
+
+		let changeling = "Core.Pony.UnicornChangeling";
+		let bigmac = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+
+		player.grab(ship1, ship2, changeling, bigmac);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(bigmac, "hand", "p,1,0");
+
+		player.move(ship2, "hand", "sr,-1,0");
+		player.move(changeling, "hand", "p,-1,0");
+
+		expectGoalAchieved(game, goal);
+		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
+		expectGoalAchieved(game, goal);
+
+	});
+
+	test("fullCopy keeps both genders", () => {
+
+		let [game, player] = setupGame({
+			cardDecks: ["Core.*", "NoHoldsBarred.*"]}
+		);
+
+		let pixelPrism = "NoHoldsBarred.Pony.PixelPrism";
+		let male = "Core.Pony.BigMacintosh";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+
+		player.grab(pixelPrism, ship1, male, ship2);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(male, "hand", "p,1,0");
+		player.move(ship2, "hand", "sd,0,0");
+		player.move(pixelPrism, "hand", "p,0,1");
+
+		expect(evalGoalLogic(game, "ExistsShip(gender=male, gender=female, 2)")).toBe(false);
+
+		player.setEffect(pixelPrism, "fullCopy", male);
+
+		expect(evalGoalLogic(game, "ExistsShip(gender=male, gender=female, 2)")).toBe(true);
+		expect(evalGoalLogic(game, "ExistsShip(gender=female, gender=female, 1)")).toBe(true);
+	});
+
+	test("fullCopy keeps both races", () => {
+
+		let [game, player] = setupGame({
+			cardDecks: ["Core.*", "NoHoldsBarred.*"]}
+		);
+
+		let pixelPrism = "NoHoldsBarred.Pony.PixelPrism";
+		let male = "Core.Pony.BigMacintosh";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+
+		player.grab(pixelPrism, ship1, male, ship2);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(male, "hand", "p,1,0");
+		player.move(ship2, "hand", "sd,0,0");
+		player.move(pixelPrism, "hand", "p,0,1");
+
+		expect(evalGoalLogic(game, "ExistsPony(race=earth, 2)")).toBe(false);
+		expect(evalGoalLogic(game, "ExistsPony(race=unicorn, 2)")).toBe(true);
+
+		player.setEffect(pixelPrism, "fullCopy", male);
+		
+		expect(evalGoalLogic(game, "ExistsPony(race=earth, 2)")).toBe(true);
+		expect(evalGoalLogic(game, "ExistsPony(race=unicorn, 2)")).toBe(true);
+	});
+
+	test("fullCopy keeps both names", () => {
+
+		let [game, player] = setupGame({
+			cardDecks: ["Core.*", "NoHoldsBarred.*"]}
+		);
+
+		let pixelPrism = "NoHoldsBarred.Pony.PixelPrism";
+		let male = "Core.Pony.BigMacintosh";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+
+		player.grab(pixelPrism, ship1, male, ship2);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(male, "hand", "p,1,0");
+		player.move(ship2, "hand", "sd,0,0");
+		player.move(pixelPrism, "hand", "p,0,1");
+
+		player.setEffect(pixelPrism, "fullCopy", male);
+		
+		expect(evalGoalLogic(game, "ExistsShip(name=Twilight Sparkle, name=Big Macintosh, 2)")).toBe(true);
+		expect(evalGoalLogic(game, "ExistsShip(name=Twilight Sparkle, name=Pixel Prism)")).toBe(true);
 	});
 
 	test("ExistsChain", () =>{
