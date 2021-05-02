@@ -24,7 +24,7 @@
 			"AnEntireSwarmOfBreezies": {
 				"name": "An Entire Swarm of Breezies",
 				"race": "pegasus",
-				"gender": "malefemale",
+				"gender": "male/female",
 				"count": 10,
 				"keywords": [
 					"Breezy"

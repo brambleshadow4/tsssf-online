@@ -106,7 +106,7 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 		if(key.startsWith('p,'))
 		{
 			var card = model.board[key].card;
-			if(cards[card] && (cards[card] as any).changeGoalPointValues)
+			if(cards[card] && cards[card].changeGoalPointValues)
 			{
 				changeGoalPointValues = true;
 			}

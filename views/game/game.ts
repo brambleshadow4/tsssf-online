@@ -74,6 +74,7 @@ import {
 	isStart,
 	isCardIncluded,
 	getNeighborKeys,
+	slashStringToSet,
 	GameModel as GameModelShared,
 	Card, Location,
 	CardProps, GoalProps, ShipProps, PonyProps,
@@ -1148,6 +1149,7 @@ function doActionOnSwap(card: Card)
 	return false;
 }
 
+
 function changelingAction(type: string)
 {
 	let model = win.model;
@@ -1168,13 +1170,15 @@ function changelingAction(type: string)
 				case "unicorn":
 				case "earth":
 				case "pegasus":
-					disguises = disguises.filter(x => cards[x].race == type);
+
+
+					disguises = disguises.filter(x => slashStringToSet(cards[x].race).has(type));
 					break;
 				case "nonAlicornFemale":
 					disguises = disguises.filter(x => !(
-						cards[x].race == "alicorn" 
-						&& (cards[x].gender == "female" || cards[x].gender == "malefemale"))
-					);
+						slashStringToSet(cards[x].race).has("alicorn")
+						&& slashStringToSet(cards[x].gender).has("female")
+					));
 
 					console.log(disguises);
 					break;
@@ -1308,7 +1312,9 @@ function setCardProp(card: Card, prop: string, value: any)
 async function makePrincessAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Special", "Choose a new princess", ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling")), true);
+
+
+	var ponyCard = await openCardSelect("Special", "Choose a new princess", ponies.filter(x => cm.inPlay()[x].keywords.indexOf("Changeling") === -1), true);
 
 	if(ponyCard)
 	{
@@ -1494,7 +1500,7 @@ function addKeywordsAction(...keywords: string[])
 async function raceChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	ponies = ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling"));
+	ponies = ponies.filter(x => cm.inPlay()[x].keywords.indexOf("Changeling") == -1);
 
 	if(ponies.length == 0)
 		return;
@@ -1515,7 +1521,7 @@ async function raceChangeAction(shipCard: Card)
 async function raceGenderChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	ponies = ponies.filter(x => !cm.inPlay()[x].keywords.has("Changeling"));
+	ponies = ponies.filter(x => cm.inPlay()[x].keywords.indexOf("Changeling") == -1);
 
 	if(ponies.length == 0)
 		return;

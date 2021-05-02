@@ -678,7 +678,6 @@ export class GameModel implements GameModelShared
 								game.turnstate.shipSet.add(game.shipString(newChangeling, pony));
 							}
 						}
-
 					}
 					else if(prop == "keywords")
 					{

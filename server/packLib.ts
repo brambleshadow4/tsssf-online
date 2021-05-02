@@ -56,12 +56,33 @@ export function validatePack(pack:any, namespace:string, filename: string, forma
 	return errors;
 }
 
+function validateSlashSet(obj: any, validValues: Set<string>): boolean
+{
+	if(obj === undefined) return true;
+	if(typeof obj !== "string") return false;
+
+
+	let s:string = obj;
+
+	var items = s.split("/");
+
+	for(let item of items)
+	{
+		if(!validValues.has(item))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 
 export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | "Goal", packFormat: string, card: any): string[]
 {
 	var errors = [];
-	var genders = new Set(["male","female","malefemale"]);
-	var races = new Set(["earth","pegasus","unicorn","alicorn", "earth/unicorn"]);
+	var genders = new Set(["male","female"]);
+	var races = new Set(["earth","pegasus","unicorn","alicorn"]);
 
 	var ponyProps = new Set(["gender","race","name", "keywords", "action", "altTimeline", "count", "changeGoalPointValues", "url", "thumb"]);
 
@@ -70,31 +91,14 @@ export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | 
 		if(typeof card.url !== "string" || card.url.length == 0) errors.push("card " + name + " doesn't have a valid url property");
 	}
 
-	if(cardType == "Pony" || cardType == "Start")
+	if(cardType == "Pony" || cardType == "Start") 
 	{
-		if(typeof card.name !== "string")
-		{	
-
-			if(isNaN(card.name.length))
-			{
-				errors.push("pony " + name + " doesn't have a valid name property");
-			}
-			else
-			{
-				for(var i = 0; i < card.name.length; i++)
-				{
-					if(typeof card.name[i] !== "string")
-					{
-						errors.push("pony " + name + " doesn't have a valid name property");
-						break;
-					}
-				}
-			}
-		}
+		if(typeof card.name !== "string") errors.push("pony " + name + " doesn't have a valid name property");
+		
 		if(!Array.isArray(card.keywords)) errors.push("pony " + name + " doesn't have a valid keywords property");
 
-		if(card.gender && !genders.has(card.gender)) errors.push("pony " + name + " has an invalid gender value: " + card.gender);
-		if(card.race && !races.has(card.race)) errors.push("pony " + name + " has an invalid race value: " + card.race);
+		if(!validateSlashSet(card.gender, genders)) errors.push("pony " + name + " has an invalid gender value: " + card.gender);
+		if(!validateSlashSet(card.race, races)) errors.push("pony " + name + " has an invalid race value: " + card.race);
 		if(card.altTimeline && card.altTimeline !== true) errors.push("pony " + name + " has an invalid altTimeline value: " + card.altTimeline);
 		if(card.changeGoalPointValues && card.changeGoalPointValues !== true) errors.push("pony " + name + " has an invalid changeGoalPointValues value: " + card.changeGoalPointValues);
 		if(card.count && typeof card.count !== "number") errors.push("pony " + name + " has an invalid count value: " + card.count);
@@ -145,18 +149,34 @@ export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | 
 	return errors;
 }
 
+type Pack = {
 
-export function flattenPack(pack: any, isExternal: boolean)
+	"namespace": string,
+	"format": "pack:1" | "link:1",
+	"root"?: string,
+	"cards":{
+		"pony"?: {[key:string]: CardProps},
+		"start"?: {[key:string]: CardProps},
+		"ship"?: {[key:string]: CardProps},
+		"goal"?: {[key:string]: CardProps}
+	}
+}
+
+
+export function flattenPack(pack: Pack, isExternal: boolean)
 {
 	let newCards: {[key:string]: CardProps} = {};
 	for(let cardType of ["Pony","Start","Ship","Goal"])
 	{
-		let typeKey = cardType.toLowerCase();
+		let typeKey = cardType.toLowerCase() as "pony" | "start" | "ship" | "goal";
 
 		if(pack.cards[typeKey])
 		{
 			for(let key in pack.cards[typeKey])
 			{
+
+				var group = pack.cards[typeKey] as {[key:string]: CardProps};
+
 				let cardName = pack.namespace + "." + cardType + "." + key;
 
 
@@ -164,15 +184,15 @@ export function flattenPack(pack: any, isExternal: boolean)
 				if(isExternal && pack.format.startsWith("pack"))
 				{
 					let filePath = pack.root + "/" + cardName.replace(/\./g, "/");
-					pack.cards[typeKey][key].url = filePath + ".png";
-					pack.cards[typeKey][key].thumb = filePath + ".thumb.jpg";
+					group[key].url = filePath + ".png";
+					group[key].thumb = filePath + ".thumb.jpg";
 				}
 
 				cardName = isExternal ? "X." + cardName : cardName;	
 
-				var names = pack.cards[typeKey][key].name;
+				var names = group[key].name;
 
-				newCards[cardName] = pack.cards[typeKey][key];
+				newCards[cardName] = group[key];
 
 				if(typeof names == "string")
 				{

@@ -24,7 +24,7 @@
 			"ApplejacksParents": {
 				"name": "Applejack's Parents",
 				"race": "earth",
-				"gender": "malefemale",
+				"gender": "male/female",
 				"count": 2,
 				"keywords": [
 					"Apple"

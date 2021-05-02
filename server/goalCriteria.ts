@@ -1,10 +1,28 @@
 
 import * as cm from "./cardManager.js";
 
-import {isBlank, Card, Location} from "./lib.js";
+import {slashStringToSet, isBlank, Card, CardProps, CardSetProps, Location} from "./lib.js";
 import {GameModel} from "./gameServer.js";
 
-function getCardProp(model: GameModel, cardFull: Card, prop: any): Set<any>
+
+
+
+function toSetProps(props: CardProps): CardSetProps
+{
+	return {
+		action: props.action,
+		name: slashStringToSet(props.name),
+		gender: slashStringToSet(props.gender) as any,
+		race: slashStringToSet(props.race) as any,
+		keywords: new Set(props.keywords),
+		altTimeline: props.altTimeline ? new Set([true]) : new Set(),
+		count: props.count,
+		card: "",
+	}
+}
+
+
+function getCardProp<T extends keyof CardSetProps>(model: GameModel, cardFull: Card, prop: T): CardSetProps[T]
 {
 	let turnstate = model.turnstate!;
 	//console.log("getCardProp(" + cardFull + ", " + prop + ")");
@@ -39,7 +57,11 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any): Set<any>
 
 
 	if(prop == "card")
-		return new Set([predisguise]);
+	{
+		let props = toSetProps(cards[card]);
+		props.card = cardFull;
+		return props[prop];
+	}
 
 
 
@@ -59,12 +81,12 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any): Set<any>
 	*/
 	//
 
-	var mergeMode = "top";
+	var mergeMode: "top" | "base" | "merge" | "pdomerge" = "top";
 
 	if(prop.endsWith("_b"))
 	{
 		mergeMode = "base"
-		prop = prop.substring(prop, prop.length-2);
+		prop = prop.substring(0, prop.length-2) as T;
 	}
 	else if (prop == "count")
 	{
@@ -86,93 +108,74 @@ function getCardProp(model: GameModel, cardFull: Card, prop: any): Set<any>
 
 	if(prop == "race" && mergeMode != "base" && turnstate.specialEffects.larsonEffect)
 	{
-		//console.log("alicorn");
-		return new Set(["alicorn"]);
+		let props = toSetProps(cards[card]);
+		props.race = new Set(["alicorn"])
+		return props[prop];
 	}
 
 
 	// step 3, do the merge.
 
-	var props = [
-		(cards[predisguise] as any)[prop],
-		(cards[baseCard] as any)[prop],
-		cardOverrides[prop]
+	var allProps = [
+		toSetProps(cards[predisguise]),
+		toSetProps(cards[baseCard]),
+		toSetProps(cardOverrides)
 	];
 
-	if(prop != "name" && prop != "keywords" && prop != "count")
-	{
-		props = props.map( x => x == undefined ? new Set() : new Set([x]));
-	}
+	var props = allProps.map( x => x[prop]);
 
-	if(prop != "count")
-	{
-		props = props.map(x => x == undefined ? new Set() : x);
-	}
-	
 
 
 	var returnSet: Set<any> = new Set();
+
+
+	if (props[0] == undefined || (props[0] as any).size == undefined)
+	{
+		switch(mergeMode)
+		{
+			case "base":
+				return props[1];
+
+			default:
+				return props[2] || props[1] || props[0];
+		}
+	}
+
+	let setProps = props as Set<string>[];
+
 
 	switch(mergeMode)
 	{
 		case "top":
 
-			if (prop == "count")
-			{
-				return props[2] || props[1] || props[0];
-			}
-			
+			if(setProps[2].size > 0)
+				return props[2];
 
-			if(props[2].size > 0)
-				returnSet = props[2];
-			else if(props[1].size > 0)
-				returnSet = props[1];
+			else if(setProps[1].size > 0)
+				return props[1];
+
 			else
-				returnSet = props[0];
-			break;
+				return props[0];
+
 		case "base":
-			returnSet = props[1];
-			break;
+			return props[1];
+
 		case "merge":
-			returnSet = new Set([...props[0], ...props[1], ...props[2]]);
-			break;
+			return new Set([...setProps[0], ...setProps[1], ...setProps[2]]) as any;
+
 		case "pdomerge":
-			returnSet = new Set([...props[0], ...props[2]]);
-			break;
+			return new Set([...setProps[0], ...setProps[2]]) as any;
+
 	}
-
-	// step 4: perform subsituites.
-
-	if (returnSet.has("malefemale"))
-	{
-		returnSet.delete("malefemale");
-		returnSet.add("male");
-		returnSet.add("female");
-	}
-
-	if (returnSet.has("earth/unicorn"))
-	{
-		returnSet.delete("earth/unicorn");
-		returnSet.add("earth");
-		returnSet.add("unicorn");
-	}
-
-	//console.log(returnSet);
-
-	return returnSet;
 }
 
-function getCardCount(model: GameModel, cardFull: Card)
-{
-	return getCardProp(model, cardFull, "count") as unknown as number;
-}
 
 function doesCardMatchSelector(model: GameModel, card: Card, selector: string): number
 {
 	//console.log("doesCardMatchSelector " + card + " " + selector);
 
 	let cards = cm.inPlay();
-	let trueValue = getCardCount(model, card) || 1;
+	let trueValue = getCardProp(model, card, "count") || 1;
 	let falseValue = 0;
 
 	if(selector.trim() == "*")
@@ -180,8 +183,9 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 
 	if(selector.trim() == "genderSwapped")
 	{
-		var originalGender = getCardProp(model, card, "gender_b");
+		var originalGender = getCardProp(model, card, "gender_b" as any) as Set<"male" | "female">;
 		var currentGender = getCardProp(model, card, "gender");
+
 		var combined = new Set([...originalGender, ...currentGender]);
 
 		return originalGender.size == 1 && currentGender.size == 1 && combined.has("male") && combined.has("female") ? trueValue : falseValue;
@@ -423,7 +427,7 @@ function ExistsChain(selector: string, count: number)
 				var chained = buildChain(key);				
 				var ponyCards = [...chained].map(x => model.board[x].card);
 
-				var chainCount = ponyCards.map(x => getCardCount(model, x) || 1).reduce((a,b) => a + b, 0)
+				var chainCount = ponyCards.map(x => getCardProp(model, x, "count") || 1).reduce((a,b) => a + b, 0)
 
 				if(chainCount >= count && ponyCards.length > 1)
 					return true;
@@ -533,7 +537,7 @@ function PlayPonies(selector: string, count?: number)
 		if(model.turnstate)
 		{
 			var matchingPlays = model.turnstate!.playedPonies.filter(x => doesCardMatchSelector(model, x, selector));
-			var matchCount = matchingPlays.map(x => getCardCount(model, x) || 1).reduce((a, b) => a + b, 0) as number;
+			var matchCount = matchingPlays.map(x => getCardProp(model, x, "count") || 1).reduce((a, b) => a + b, 0) as number;
 
 			return (matchCount >= count!);
 		}
@@ -545,7 +549,7 @@ function PlayPonies(selector: string, count?: number)
 
 function getShipCount(model: GameModel, pony1: Card, pony2: Card)
 {
-	return Math.max(getCardCount(model, pony1) || 1, getCardCount(model, pony1) || 1)
+	return Math.max(getCardProp(model, pony1, "count") || 1, getCardProp(model, pony1, "count") || 1)
 }
 
 function PlayShips(selector1: string, selector2: string, count?: number)

@@ -73,12 +73,6 @@ for(let namespace of packsSet)
 					let cardName = namespace + "." + cardType + "." + key;
 					cards[cardName] = pack.cards[typeKey][key];
 
-					let name = cards[cardName].name ;
-					if(name&& typeof name == "string")
-					{
-						cards[cardName].name = [name];
-					}
-
 					// generate thumbnail
 					let imageName = "./packs/" + cardName.split(".").join("/");
 					let pngImage = imageName + ".png";
