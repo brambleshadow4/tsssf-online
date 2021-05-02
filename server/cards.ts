@@ -1028,7 +1028,7 @@ var cards: {[key: string]: any} = {
 	},
 	"EC.Goal.SpaDay": {
 		"name": "Spa Day",
-		"goalLogic": "ExistsShip(Mane 6 in keywords, name=Aloe & Lotus)",
+		"goalLogic": "ExistsShip(Mane 6 in keywords, name=Aloe && name=Lotus)",
 		"points": "2"
 	},
 	"EC.Goal.NoPoniesCanPonyTwoPoniesToPony": {

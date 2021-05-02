@@ -64,8 +64,6 @@ function getCardProp<T extends keyof CardSetProps>(model: GameModel, cardFull: C
 	}
 
 
-
-	// 
 	/*
 	 * step 2, determine the merge mode: top, merge, base, or pdomerge
 	 * 
@@ -77,9 +75,8 @@ function getCardProp<T extends keyof CardSetProps>(model: GameModel, cardFull: C
  	 * base only checks the base level
  	 * pdo merges predisguise and overrides, leaving out 
  	 * 
+	 */
 
-	*/
-	//
 
 	var mergeMode: "top" | "base" | "merge" | "pdomerge" = "top";
 
@@ -123,11 +120,6 @@ function getCardProp<T extends keyof CardSetProps>(model: GameModel, cardFull: C
 	];
 
 	var props = allProps.map( x => x[prop]);
-
-
-
-	var returnSet: Set<any> = new Set();
-
 
 	if (props[0] == undefined || (props[0] as any).size == undefined)
 	{
