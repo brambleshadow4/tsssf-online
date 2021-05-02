@@ -7,7 +7,7 @@
 
 			body
 			{
-				background-image: url(/img/tileBackground2.png);
+				background-image: url(/img/tileBackground2.jpg);
 				background-size: 40%;
 			}
 
@@ -362,18 +362,18 @@
 						<th>Attribute</th><th>Valid Values</th><th>Notes/Description</th>
 					</tr>
 					<tr>
-						<td>name</td><td>Any string, required<br>Any string array</td><td>Should be the simplest name of the pony in question, e.g. Twilight Sparkle for cards like Fanfic Author Twilight</td>
+						<td>name</td><td>Any string, required<br>"name1/name2/..."</td><td>Should be the simplest name of the pony in question, e.g. Twilight Sparkle for cards like Fanfic Author Twilight</td>
 					</tr>
 
 					<tr class='alt'><td rowspan="5">race</td><td>"earth"</td><td></td></tr>
 					<tr class='alt'><td>"pegasus"</td><td></td></tr>
 					<tr class='alt'><td>"unicorn"</td><td></td></tr>
 					<tr class='alt'><td>"alicorn"</td><td></td></tr>
-					<tr class='alt'><td>"earth/unicorn"</td><td>Counts as both a earth pony and a unicorn for all goals</td></tr>
+					<tr class='alt'><td>"race1/race2/..."</td><td>Any combination of the above races separated by a slash. Will count as each of those races.</td></tr>
 
 					<tr><td rowspan="3">gender</td><td>"male"</td></tr>
 					<tr><td>"female"</td></tr>
-					<tr><td>"malefemale"</td><td>Counts as both male and female for all goals</td></tr>
+					<tr><td>"male/female"</td><td>Counts as both male and female for all goals</td></tr>
 
 					<tr class='alt'><td>keywords</td><td>Any string array</td><td>Contains all non-name keywords for the pony</td></tr>
 
@@ -383,14 +383,16 @@
 
 					<tr><td>count</td><td>any number</td><td>Changes how many ponies this card counts as, e.g. 2 for Aloe & Lotus</td></tr>
 
-					<tr class='alt'><td rowspan="12">action</td><td>"swap"</td><td></td></tr>
+					<tr class='alt'><td rowspan="14">action</td><td>"swap"</td><td></td></tr>
 					<tr class='alt'><td>"3swap"</td><td></td></tr>
 					<tr class='alt'><td>"replace"</td><td></td></tr>
 					<tr class='alt'><td>"search"</td><td></td></tr>
 					<tr class='alt'><td>"copy"</td><td></td></tr>
+					<tr class='alt'><td>"fullCopy"</td><td>Copies a card's power as well as all its symbols, names, keywords, etc.</td></tr>
 					<tr class='alt'><td>"draw"</td><td></td></tr>
 					<tr class='alt'><td>"newGoal"</td><td></td></tr>
 					<tr class='alt'><td>"playFromDiscard"</td><td></td></tr>
+					<tr class='alt'><td>"interrupt"</td><td>Allows the card to a pony card which was just played, even if it's not that player's turn.</td></tr>
 					<tr class='alt'><td>"ship"</td><td>Allows the pony card to be played as a ship as well</td></tr>
 					<tr class='alt'><td>"shipWithEverypony"</td><td>Special ability for HorriblePeople.GraciousGivers.Pony.PrincessCelestAI</td></tr>
 					<tr class='alt'><td>"Changeling(&lt;type&gt;)"</td><td>Allows the card to set a disguise when played and when moved. &lt;type&gt; can be any of the following:

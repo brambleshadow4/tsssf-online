@@ -33,7 +33,7 @@ export function init(filter: string[], customCards: {[key:string]: CardProps})
 	// convert custom cards
 	for(var key in customCards)
 	{
-		newAllCards[key] = JSON.parse(JSON.stringify(cards[key]));
+		newAllCards[key] = JSON.parse(JSON.stringify(customCards[key]));
 	}
 
 	allCards = newAllCards;

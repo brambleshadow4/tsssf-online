@@ -174,12 +174,8 @@ export function flattenPack(pack: Pack, isExternal: boolean)
 		{
 			for(let key in pack.cards[typeKey])
 			{
-
 				var group = pack.cards[typeKey] as {[key:string]: CardProps};
-
 				let cardName = pack.namespace + "." + cardType + "." + key;
-
-
 
 				if(isExternal && pack.format.startsWith("pack"))
 				{
@@ -192,13 +188,7 @@ export function flattenPack(pack: Pack, isExternal: boolean)
 
 				var names = group[key].name;
 
-				newCards[cardName] = group[key];
-
-				if(typeof names == "string")
-				{
-					newCards[cardName].name = [names] as any;
-				}
-				
+				newCards[cardName] = group[key];				
 			}
 		}
 	};
