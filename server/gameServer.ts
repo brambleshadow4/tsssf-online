@@ -656,8 +656,17 @@ export class GameModel implements GameModelShared
 						var oldChangeling = card + ":" + oldEntry;
 						var newChangeling = card + ":" + newEntry;
 
+
+						// rollback the played pony
+
+						if(cc.disguiseCausedByDirectPlay && game.turnstate.playedPonies[game.turnstate.playedPonies.length - 1] == oldChangeling)
+						{
+							game.turnstate.playedPonies[game.turnstate.playedPonies.length - 1] = newChangeling;
+						}
+
 						let previousShips = new Set(cc.previousShips);
-						for(var pony of cc.currentShips)
+
+						for(var pony of cc.currentlyShippedTo)
 						{
 							
 							// replace the [pony, changeling:old] ship with [pony, changeling:new]
@@ -722,8 +731,7 @@ export class GameModel implements GameModelShared
 				}
 				catch(e)
 				{
-				}
-				
+				}				
 			}
 
 			if(message.startsWith("draw;"))
@@ -1596,6 +1604,17 @@ export class GameModel implements GameModelShared
 			this.getPlayer(socket)!.hand.splice(i, 1);
 		}
 
+		if(startLocation == "hand" || startLocation == "ponyDiscardPile,top")
+		{
+			if(this.turnstate && this.isChangeling(card))
+			{
+				let cc = this.turnstate.getChangeContext(card);
+				cc.previousShips = [];
+				cc.disguiseCausedByDirectPlay = true;
+			}
+				
+		}
+
 		if(startLocation == "winnings")
 		{
 			let player = this.getPlayer(socket)!
@@ -1609,7 +1628,9 @@ export class GameModel implements GameModelShared
 			{
 				if(this.turnstate && this.isChangeling(card))
 				{
-					this.turnstate.getChangeContext(card).previousShips = getConnectedPonies(this, startLocation);
+					let cc = this.turnstate.getChangeContext(card);;
+					cc.previousShips = getConnectedPonies(this, startLocation);
+					cc.disguiseCausedByDirectPlay = false;
 				}
 
 
@@ -1725,7 +1746,7 @@ export class GameModel implements GameModelShared
 			// ship slide next to a changeling card rollback
 			if(isBoardLoc(endLocation) && this.isChangeling(card))
 			{			
-				this.turnstate.getChangeContext(card).currentShips = getConnectedPonies(this, endLocation);
+				this.turnstate.getChangeContext(card).currentlyShippedTo = getConnectedPonies(this, endLocation);
 			}
 
 			if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
@@ -1760,22 +1781,22 @@ export class GameModel implements GameModelShared
 					this.turnstate.playedShips.push([card, shippedPonies[0], shippedPonies[1]]);
 					delete this.turnstate.tentativeShips[card];
 
-					// remove changeling rollback
-
 					var noCtxShipped = shippedPonies.map(x => x.split(":")[0]);
 					
 					if(this.isChangeling(noCtxShipped[0]))
 					{
 						let cc = this.turnstate.getChangeContext(noCtxShipped[0]);
-						cc.currentShips = [];
-						cc.previousShips = [];
+						cc.disguiseCausedByDirectPlay = false;
+						cc.currentlyShippedTo = getConnectedPonies(this, endLocation);
+						cc.previousShips = cc.currentlyShippedTo.filter(x => x != noCtxShipped[1]);
 					}
 
 					if(this.isChangeling(noCtxShipped[1]))
 					{
 						let cc = this.turnstate.getChangeContext(noCtxShipped[1]);
-						cc.currentShips = [];
-						cc.previousShips = [];
+						cc.disguiseCausedByDirectPlay = false;
+						cc.currentlyShippedTo = getConnectedPonies(this, endLocation);
+						cc.previousShips = cc.currentlyShippedTo.filter(x => x != noCtxShipped[0]);
 					}
 				}
 				else
@@ -1888,7 +1909,9 @@ export class Turnstate
 	public getChangeContext(card: Card): ChangelingContextList
 	{
 		if(!this.changelingContexts[card])
-			this.changelingContexts[card] = {list:[], previousShips:[], currentShips: []};
+		{
+			this.changelingContexts[card] = {list:[], previousShips:[], currentlyShippedTo: [], disguiseCausedByDirectPlay: false};
+		}
 
 		return this.changelingContexts[card];
 	}

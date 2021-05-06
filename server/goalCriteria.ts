@@ -749,7 +749,7 @@ function ShippedWithOppositeGenderedSelf(model: GameModel, card1: Card, card2: C
 		var gender1 = getCardProp(model, card1, "gender");
 		var gender2 = getCardProp(model, card2, "gender");
 
-		return ((gender1.has("male") && gender2.has("female")) || (gender1.has("female") && gender2.has("male")));
+		return gender1.size == 1 && gender2.size == 1 && new Set([...gender1, ...gender2]).size == 2;
 	}
 
 	return false;

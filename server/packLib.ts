@@ -110,7 +110,7 @@ export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | 
 				errors.push("pony " + name + " has an extra prop: " + key);
 			}
 		}
-		//console.log(card.race);
+		
 	}
 
 	if(cardType == "Goal")
