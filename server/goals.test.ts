@@ -201,7 +201,7 @@ export default function(){
 
 		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 
-		expect(game.turnstate!.brokenShipsNow.length).toBe(0);
+		expect(game.turnstate!.brokenShips.length).toBe(0);
 
 	});
 
@@ -243,8 +243,8 @@ export default function(){
 			player.move(ship4, "hand", "sd,1,0");
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
-			expect(game.turnstate!.brokenShipsNow.length).toBe(1);
-			expect(hasShipPair(game.turnstate!.brokenShipsNow, "Core.Start.FanficAuthorTwilight", changeling + ":1")).toBe(true);
+			expect(game.turnstate!.brokenShips.length).toBe(1);
+			expect(hasShipPair(game.turnstate!.brokenShips, "Core.Start.FanficAuthorTwilight", changeling + ":1")).toBe(true);
 
 		});
 
@@ -288,13 +288,13 @@ export default function(){
 		player.move(changeling, "p,2,0", "p,1,1");
 		player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
-		expect(game.turnstate?.brokenShipsNow.length).toBe(1);
+		expect(game.turnstate?.brokenShips.length).toBe(1);
 
-		let ship = new Set(game.turnstate?.brokenShipsNow[0]);
+		let ship = new Set(game.turnstate?.brokenShips[0]);
 		expect(ship.has(changeling + ":1")).toBe(true)
 		expect(ship.has(pony)).toBe(true);
 
-		expect(game.turnstate?.playedShips.length).toBe(3);
+		expect(game.turnstate?.playedShipCards.length).toBe(3);
 	});
 
 	test("BreakShip: It's not evil w/ changeling", () =>{
@@ -347,11 +347,14 @@ export default function(){
 		player.move(pony1, "p,1,0", "offset,1,0");
 		player.move(changeling, "hand", "p,1,0");
 
-		expect(game.turnstate!.brokenShipsNow.length).toBe(2);
+		expect(game.turnstate!.brokenShips.length).toBe(2);
 
 		player.setEffect(changeling, "disguise", "Core.Pony.VinylScratch");
 
-		expect(game.turnstate!.brokenShipsNow.length).toBe(2);
+		expect(game.turnstate!.brokenShips.length).toBe(2);
+		expect(game.turnstate!.playedShips.length).toBe(4);
+
+		console.log(game.turnstate);
 	});
 
 	test("genderSwapped + CharityAuction", () => {
@@ -590,13 +593,13 @@ export default function(){
 		expect(evalGoalLogic(game, "ExistsShip(name=Twilight Sparkle, name=Pixel Prism)")).toBe(true);
 	});
 
-	test("ExistsChain", () =>{
+	//test("ExistsChain", () =>{
 		//expect(0).toBe("unimplemented");
-	});
+	//});
 
-	test("PlayShips", () =>{
+	//test("PlayShips", () =>{
 		//expect(0).toBe("unimplemented");
-	});
+	//});
 
 	// accidental play doesn't count as two plays
 

@@ -560,7 +560,7 @@ function PlayShips(selector1: string, selector2: string, count?: number)
 		{
 			var matchingPlays = model.turnstate.playedShips.map(function(x){
 
-				var [ship, pony1, pony2] = x;
+				var [pony1, pony2] = x;
 
 				if(doesCardMatchSelector(model, pony1, selector1) && doesCardMatchSelector(model, pony2, selector2))
 				{
@@ -597,7 +597,7 @@ function BreakShip(selector1: string, selector2: string, count?: number)
 
 		if(model.turnstate)
 		{
-			var matchingPlays = model.turnstate.brokenShipsNow.map(function(x){
+			var matchingPlays = model.turnstate.brokenShips.map(function(x){
 
 				var [pony1, pony2] = x;
 
@@ -610,7 +610,7 @@ function BreakShip(selector1: string, selector2: string, count?: number)
 					return getShipCount(model, pony1, pony2);
 				}
 
-				return 0
+				return 0;
 
 			});
 
@@ -704,11 +704,9 @@ function PlayLovePoisons(model: GameModel)
 {
 	if(model.turnstate)
 	{
-		var matchingPlays = model.turnstate.playedShips.filter(function(x)
-		{
-			var [ship, pony1, pony2] = x;
-			return cm.inPlay()[ship].action == "lovePoison";
-		});
+		let cards = cm.inPlay();
+		var matchingPlays = model.turnstate.playedShipCards.filter( x => cards[x].action == "lovePoison")
+	
 
 		return (matchingPlays.length >= 2);
 	}
@@ -722,7 +720,7 @@ function SwapCount(count: number)
 	{
 		if(model.turnstate)
 		{
-			return model.turnstate.swapsNow >= count;
+			return model.turnstate.swaps >= count;
 		}
 
 		return false;
@@ -773,7 +771,9 @@ function ShippedWith2Versions(model: GameModel, ponyCards: Card[])
 		for(var item of set1)
 		{
 			if(set2.has(item))
+			{
 				return true;
+			}
 		}
 		return false;	
 	}
@@ -786,7 +786,9 @@ function ShippedWith2Versions(model: GameModel, ponyCards: Card[])
 		var match = ponyCards.filter(x => filterFun(card, x))
 
 		if(match.length > 1)
+		{
 			return true;
+		}
 	}
 
 	return false;
@@ -799,7 +801,9 @@ function AllOf(...selectors: string[])
 		for(var selector of selectors)
 		{
 			if(ponyCards.filter(x => doesCardMatchSelector(model, x, selector)).length == 0)
+			{
 				return 0;
+			}
 		}
 
 		return 1;
