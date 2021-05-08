@@ -1,6 +1,6 @@
 import {GameModel, Player} from "./gameServer.js";
 import * as cm from "./cardManager.js";
-import {test, expect} from "./testFramework.js";
+import {test, expect, beforeEach, group} from "./testFramework.js";
 import {
 	isPony,
 	isShip,
@@ -114,16 +114,18 @@ function setupGame(setupOptions?:{
 
 function hasShipPair(ships: [string, string][], pony1: string, pony2: string)
 {
+
+	let val = false;
 	for(let i =0; i<ships.length; i++)
 	{
 		if ((ships[i][0] == pony1 && ships[i][1] == pony2)
 			|| (ships[i][0] == pony2 && ships[i][1] == pony1))
 		{
-			return true;
+			val = true;
 		}
 	}
 
-	return false;
+	expect(val).toBe(true);
 }
 
 function evalGoalLogic(model: GameModel, goalLogic: string): boolean
@@ -201,76 +203,163 @@ export default function(){
 
 		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 
-		expect(game.turnstate!.brokenShipsNow.length).toBe(0);
+		expect(game.turnstate!.brokenShips.length).toBe(0);
 
 	});
 
-	test("changeling redisguising breaks up existing ships", () =>{
+	group("changeling redisguise", () =>{
 
-		let [game, player] = setupGame();
+
+		let game: GameModel;
+		let player: MockPlayer;
 		let ship1 = "Core.Ship.BadPonyGoToMyRoom"
 		let ship2 = "Core.Ship.BoredOnASundayAfternoon"
 		let ship3 = "Core.Ship.CheckingItOffMyList";
 		let ship4 = "Core.Ship.CabinInTheWoodsAwooo";
+		let startCard = "Core.Start.FanficAuthorTwilight";
 
 		let p1 = "Core.Pony.BigMacintosh";
 		let p2 = "Core.Pony.BonBon";
 		let changeling = "Core.Pony.UnicornChangeling";
-		
-		[ship1, ship2, ship3, ship4, p1, p2, changeling].forEach(x => player.grab(x));
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(changeling, "hand", "p,1,0");
-		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
+		beforeEach(() => {
+			[game, player] = setupGame();
+			
+			[ship1, ship2, ship3, ship4, p1, p2, changeling].forEach(x => player.grab(x));
 
-		player.move(ship2, "hand", "sd,0,0");
-		player.move(p1, "hand", "p,0,1");
+			player.move(ship2, "hand", "sd,0,0");
+			player.move(p1, "hand", "p,0,1");
 
-		player.move(ship3, "hand", "sr,0,1");
-		player.move(p2, "hand", "p,1,1");
+			player.move(ship3, "hand", "sr,0,1");
+			player.move(p2, "hand", "p,1,1");
 
-		expect(game.turnstate!.brokenShipsNow.length).toBe(0);
+			player.endTurn();
+		});
 
-		player.move(ship4, "hand", "sd,1,0");
-		player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
-		expect(game.turnstate!.brokenShipsNow.length).toBe(2);
-		expect(hasShipPair(game.turnstate!.brokenShipsNow, "Core.Start.FanficAuthorTwilight", changeling + ":1")).toBe(true);
-		expect(hasShipPair(game.turnstate!.brokenShipsNow, p2, changeling + ":1")).toBe(true);
 
-	});
 
-	test("break ship by love poison changeling to the same card", () =>{
+		test("changeling redisguising breaks up existing ships", () =>{
 
-		let [game, player] = setupGame();
+			player.move(ship1, "hand", "sr,0,0");
+			player.move(changeling, "hand", "p,1,0");
+			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
+
+			player.move(ship4, "hand", "sd,1,0");
+			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
+
+			// last ship is slide between p2 (Bon Bon) and changeling
+
+			expect(game.turnstate!.brokenShips.length).toBe(1);
+			hasShipPair(game.turnstate!.brokenShips, startCard, changeling + ":1");
+
+		});
+
+		test("changeling redisguise doesn't change what pony was played", () =>{
+
+			player.move(ship1, "hand", "sr,0,0");
+			player.move(changeling, "hand", "p,1,0");
+			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
+
+
+			expect(game.turnstate!.playedPonies.length).toBe(1);
+			expect(game.turnstate!.playedPonies[0]).toBe(changeling + ":1");
+
+			player.move(ship4, "hand", "sd,1,0");
+			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
+
+			expect(game.turnstate!.playedPonies.length).toBe(1);
+			expect(game.turnstate!.playedPonies[0]).toBe(changeling + ":1");
+		});
+
+		test("changeling redisguise counts played cards correctly", () =>{
+
+			player.move(ship1, "hand", "sr,0,0");
+			player.move(changeling, "hand", "p,1,0");
+			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
+			player.move(ship4, "hand", "sd,1,0");
+
+			let playedShips = game.turnstate!.playedShips;
+			expect(playedShips.length).toBe(2);
+			hasShipPair(playedShips, changeling+":1", p2)
+			hasShipPair(game.turnstate!.playedShips, changeling+":1", startCard)
+
+			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
+
+			playedShips = game.turnstate!.playedShips;
+			expect(playedShips.length).toBe(3);
+			hasShipPair(playedShips, changeling+":1", startCard)
+			hasShipPair(playedShips, changeling+":2", startCard)
+			hasShipPair(playedShips, changeling+":2", p2)
+		});
+
+	})
+
+	
+	group("love poison changeling", () =>{
+
+
+		let game: GameModel, player: MockPlayer;
 		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
 		let ship2 = "Core.Ship.BoredOnASundayAfternoon"
 		let lovePoison = "Core.Ship.LovePoisonIsNoJoke";
 
 		let pony = "Core.Pony.DramaticallyWoundedRarity";
 		let changeling = "Core.Pony.UnicornChangeling";
-		
-		[ship1, ship2, lovePoison, pony, changeling].forEach(x => player.grab(x));
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(pony, "hand", "p,1,0");
+		// start - pony - change:1
+		//           |   
+		//       chnage:2
 
-		player.move(ship2, "hand", "sr,1,0");
-		player.move(changeling, "hand", "p,2,0");
-		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
+		beforeEach(() =>{
 
-		player.move(lovePoison, "hand", "sd,1,0");
-		player.move(changeling, "p,2,0", "p,1,1");
-		player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
+			[game, player] = setupGame();
+			[ship1, ship2, lovePoison, pony, changeling].forEach(x => player.grab(x));
 
-		expect(game.turnstate?.brokenShipsNow.length).toBe(1);
 
-		let ship = new Set(game.turnstate?.brokenShipsNow[0]);
-		expect(ship.has(changeling + ":1")).toBe(true)
-		expect(ship.has(pony)).toBe(true);
+			player.move(ship1, "hand", "sr,0,0");
+			player.move(pony, "hand", "p,1,0");
+			player.endTurn();
 
-		expect(game.turnstate?.playedShips.length).toBe(3);
-	});
+			player.move(ship2, "hand", "sr,1,0");
+			player.move(changeling, "hand", "p,2,0");
+			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
+		});
+
+
+		test("love poison changeling breaks 1 ship", () =>{
+
+			let brokenShips = game.turnstate!.brokenShips;
+			expect(brokenShips.length).toBe(0);
+
+			player.move(lovePoison, "hand", "sd,1,0");
+			player.move(changeling, "p,2,0", "p,1,1");
+			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
+
+			brokenShips = game.turnstate!.brokenShips;
+			expect(brokenShips.length).toBe(1);
+			hasShipPair(brokenShips, changeling+":1", pony)
+		});
+
+		test("love poison changeling counts as 2 played ships", () =>{
+
+			let playedShips = game.turnstate!.playedShips;
+			expect(playedShips.length).toBe(1);
+			hasShipPair(playedShips, changeling+":1", pony)
+
+			player.move(lovePoison, "hand", "sd,1,0");
+			player.move(changeling, "p,2,0", "p,1,1");
+			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
+
+			playedShips = game.turnstate!.playedShips;
+			expect(playedShips.length).toBe(2);
+			hasShipPair(playedShips, changeling+":1", pony)
+			hasShipPair(playedShips, changeling+":2", pony)
+			
+		});
+	})
+
+	
 
 	test("BreakShip: It's not evil w/ changeling", () =>{
 
@@ -303,9 +392,10 @@ export default function(){
 	});
 
 
-	test("Changling moved onto board with replace ability only breaks ships once", ()=>{
+	test("Replace changling only breaks ships once", ()=>{
 
 		let [game, player] = setupGame();
+		let start = "Core.Start.FanficAuthorTwilight";
 		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
 		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
 		let pony1 = "Core.Pony.DramaticallyWoundedRarity";
@@ -322,11 +412,22 @@ export default function(){
 		player.move(pony1, "p,1,0", "offset,1,0");
 		player.move(changeling, "hand", "p,1,0");
 
-		expect(game.turnstate!.brokenShipsNow.length).toBe(2);
+		expect(game.turnstate!.brokenShips.length).toBe(2);
+		hasShipPair(game.turnstate!.brokenShips, start, pony1)
+		hasShipPair(game.turnstate!.brokenShips, pony2, pony1)
 
 		player.setEffect(changeling, "disguise", "Core.Pony.VinylScratch");
 
-		expect(game.turnstate!.brokenShipsNow.length).toBe(2);
+		expect(game.turnstate!.brokenShips.length).toBe(2);
+		hasShipPair(game.turnstate!.brokenShips, start, pony1)
+		hasShipPair(game.turnstate!.brokenShips, pony2, pony1)
+
+
+		expect(game.turnstate!.playedShips.length).toBe(4);
+		hasShipPair(game.turnstate!.playedShips, pony1, start)
+		hasShipPair(game.turnstate!.playedShips, pony1, pony2)
+		hasShipPair(game.turnstate!.playedShips, start, changeling+":1")
+		hasShipPair(game.turnstate!.playedShips, pony2, changeling+":1")
 	});
 
 	test("genderSwapped + CharityAuction", () => {
@@ -565,13 +666,13 @@ export default function(){
 		expect(evalGoalLogic(game, "ExistsShip(name=Twilight Sparkle, name=Pixel Prism)")).toBe(true);
 	});
 
-	test("ExistsChain", () =>{
+	//test("ExistsChain", () =>{
 		//expect(0).toBe("unimplemented");
-	});
+	//});
 
-	test("PlayShips", () =>{
+	//test("PlayShips", () =>{
 		//expect(0).toBe("unimplemented");
-	});
+	//});
 
 	// accidental play doesn't count as two plays
 

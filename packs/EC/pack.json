@@ -209,7 +209,7 @@
 			},
 			"FleetAdmiral": {
 				"name": "Fleet Admiral",
-				"goalLogic": "PlayShips(*, *, 7)",
+				"goalLogic": "PlayShipCards(*, 7)",
 				"points": "3"
 			},
 			"CoupDetat": {

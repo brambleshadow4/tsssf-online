@@ -92,8 +92,9 @@ export interface GameModel
 export interface ChangelingContextList
 {
 	list: {[prop: string]: any},
-	currentShips: Card[],
-	previousShips: Card[],
+	method?: "play" | "replace" | "lovePoison" | "swap" | "ship",
+	shipRollbackPony: Card,
+	preSwapShippedTo: Card[]
 }
 
 export interface Turnstate
@@ -105,12 +106,11 @@ export interface Turnstate
 		}
 	}
 
-	tentativeShips: {
-		[key: string]: any
-	}
 
-	playedShips: [Card, Card, Card][],
+	playedShips: [Card, Card][],
+	playedShipCards: Card[],
 	playedPonies: Card[],
+
 
 	specialEffects:{
 		shipWithEverypony: Set<Card>,
@@ -121,8 +121,8 @@ export interface Turnstate
 
 	playedThisTurn: Set<any>,
 
-	brokenShips: string[][],
-	brokenShipsNow: string[][],
+	brokenShipsCommitted: Card[][],
+	brokenShips: Card[][],
 
 	positionMap: {
 		[card:string]: Location
@@ -132,8 +132,8 @@ export interface Turnstate
 		[card:string]: ChangelingContextList
 	},
 
+	swapsCommitted: number,
 	swaps: number,
-	swapsNow: number,
 
 	shipSet: Set<string>,
 

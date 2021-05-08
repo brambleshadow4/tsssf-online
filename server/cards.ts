@@ -713,7 +713,7 @@ var cards: {[key: string]: any} = {
 		"points": "3"
 	},
 	"Core.Goal.Epidemic": {
-		"goalLogic": "PlayLovePoisons",
+		"goalLogic": "PlayShipCards(action=lovePoison, 2)",
 		"points": "3"
 	},
 	"Core.Goal.Fabulosity": {
@@ -1053,7 +1053,7 @@ var cards: {[key: string]: any} = {
 	},
 	"EC.Goal.FleetAdmiral": {
 		"name": "Fleet Admiral",
-		"goalLogic": "PlayShips(*, *, 7)",
+		"goalLogic": "PlayShipCards(*, 7)",
 		"points": "3"
 	},
 	"EC.Goal.CoupDetat": {
