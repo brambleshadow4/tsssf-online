@@ -268,7 +268,10 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 	return falseValue
 }
 
-export function getConnectedPonies(model: GameModel, ponyLoc: Location, onlyCountDirectlyShipped?: boolean)
+/**
+ * From a pony board location, gets all pony cards shipped to that pony.
+ */
+export function getConnectedPonies(model: GameModel, ponyLoc: Location, onlyCountDirectlyShipped?: boolean): Card[]
 {
 	model.turnstate = model.turnstate!;
 
@@ -815,15 +818,11 @@ export function typecheckGoal(card: any)
 {
 	if(card.goalFun == undefined)
 	{
-		//console.log("typechecking goal");
-		//console.log(card);
 		card.goalFun = false;
 
 		if(card.goalLogic)
 		{
 			var fun = goalLogicParser(card.goalLogic, []);
-
-			//console.log(fun);
 			card.goalFun = fun;
 		}
 	}

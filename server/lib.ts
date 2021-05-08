@@ -92,9 +92,9 @@ export interface GameModel
 export interface ChangelingContextList
 {
 	list: {[prop: string]: any},
-	currentlyShippedTo: Card[],
-	previousShips: Card[],
-	disguiseCausedByDirectPlay: boolean
+	method?: "play" | "replace" | "lovePoison" | "swap" | "ship",
+	shipRollbackPony: Card,
+	preSwapShippedTo: Card[]
 }
 
 export interface Turnstate
