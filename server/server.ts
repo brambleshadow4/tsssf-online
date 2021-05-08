@@ -259,5 +259,11 @@ if(process.argv[3])
 			tsssfServer.games.DEV.setLobbyOptions(baseRules);
 			tsssfServer.games.DEV.startGame(["Core.Pony.AloeAndLotus"]);
 			break;
-	}
+	
+		case "2":
+				tsssfServer.openLobby("DEV");
+				tsssfServer.games.DEV.setLobbyOptions(baseRules);
+				tsssfServer.games.DEV.startGame(["Core.Ship.ShmoopyBoo","Core.Ship.WantItNeedIt" ]);
+				break;
+		}
 }

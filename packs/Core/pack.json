@@ -710,7 +710,7 @@
 				"points": "3"
 			},
 			"Epidemic": {
-				"goalLogic": "PlayLovePoisons",
+				"goalLogic": "PlayShipCards(action=lovePoison, 2)",
 				"points": "3"
 			},
 			"Fabulosity": {

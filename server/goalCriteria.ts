@@ -235,6 +235,10 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 		var cardValue = getCardProp(model, card, prop);
 
 
+		if(prop == "action")
+		{
+			return cardValue == value ? trueValue : falseValue
+		}
 		
 		return cardValue.has(value) ? trueValue : falseValue;
 	}
@@ -585,6 +589,34 @@ function PlayShips(selector1: string, selector2: string, count?: number)
 	}
 }
 
+function PlayShipCards(selector: string, count?: number)
+{
+	if (typeof selector != "string") 
+		throw new Error("Arg 1 of PlayShipCards needs to be a string");
+	if (typeof count != "number" && typeof count != "undefined") 
+		throw new Error("Arg 2 of PlayShipCards needs to be a number");
+
+	let countNum = count || 1;
+
+	return function(model: GameModel): boolean
+	{
+		if(model.turnstate)
+		{
+			console.log(model.turnstate.playedShipCards);
+
+			var playedCount = model.turnstate.playedShipCards
+				.map( x => doesCardMatchSelector(model, x, selector))
+				.reduce((a:number, b:number) => a + b, 0)
+
+
+			return playedCount >= countNum;
+		}
+
+		return false;
+	}
+}
+
+
 function BreakShip(selector1: string, selector2: string, count?: number)
 {
 	if (typeof selector1 != "string") 
@@ -702,20 +734,6 @@ function ExistsShipGeneric(compareCardsFun: (m:GameModel, c1: Card, c2: Card) =>
 
 
 /************************** Custom Rules **************************/
-
-function PlayLovePoisons(model: GameModel)
-{
-	if(model.turnstate)
-	{
-		let cards = cm.inPlay();
-		var matchingPlays = model.turnstate.playedShipCards.filter( x => cards[x].action == "lovePoison")
-	
-
-		return (matchingPlays.length >= 2);
-	}
-
-	return false;
-}
 
 function SwapCount(count: number)
 {
@@ -865,9 +883,9 @@ function goalLogicParser(text: string, stack: string[]): any
 			case "ExistsPonyShippedTo": return ExistsPonyShippedTo;
 			case "ExistsShip": return ExistsShip;
 			case "ExistsShipGeneric": return ExistsShipGeneric;
-			case "PlayLovePoisons": return PlayLovePoisons;
 			case "PlayPonies": return PlayPonies;
 			case "PlayShips": return PlayShips;
+			case "PlayShipCards": return PlayShipCards;
 			case "Select": return Select;
 			case "ShippedWithOppositeGenderedSelf": return ShippedWithOppositeGenderedSelf;
 			case "ShippedWith2Versions": return ShippedWith2Versions;
