@@ -602,8 +602,6 @@ function PlayShipCards(selector: string, count?: number)
 	{
 		if(model.turnstate)
 		{
-			console.log(model.turnstate.playedShipCards);
-
 			var playedCount = model.turnstate.playedShipCards
 				.map( x => doesCardMatchSelector(model, x, selector))
 				.reduce((a:number, b:number) => a + b, 0)

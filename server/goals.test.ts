@@ -392,9 +392,10 @@ export default function(){
 	});
 
 
-	test("Changling moved onto board with replace ability only breaks ships once", ()=>{
+	test("Replace changling only breaks ships once", ()=>{
 
 		let [game, player] = setupGame();
+		let start = "Core.Start.FanficAuthorTwilight";
 		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
 		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
 		let pony1 = "Core.Pony.DramaticallyWoundedRarity";
@@ -412,11 +413,21 @@ export default function(){
 		player.move(changeling, "hand", "p,1,0");
 
 		expect(game.turnstate!.brokenShips.length).toBe(2);
+		hasShipPair(game.turnstate!.brokenShips, start, pony1)
+		hasShipPair(game.turnstate!.brokenShips, pony2, pony1)
 
 		player.setEffect(changeling, "disguise", "Core.Pony.VinylScratch");
 
 		expect(game.turnstate!.brokenShips.length).toBe(2);
+		hasShipPair(game.turnstate!.brokenShips, start, pony1)
+		hasShipPair(game.turnstate!.brokenShips, pony2, pony1)
+
+
 		expect(game.turnstate!.playedShips.length).toBe(4);
+		hasShipPair(game.turnstate!.playedShips, pony1, start)
+		hasShipPair(game.turnstate!.playedShips, pony1, pony2)
+		hasShipPair(game.turnstate!.playedShips, start, changeling+":1")
+		hasShipPair(game.turnstate!.playedShips, pony2, changeling+":1")
 	});
 
 	test("genderSwapped + CharityAuction", () => {
