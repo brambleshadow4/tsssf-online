@@ -700,11 +700,14 @@ export class GameModel implements GameModelShared
 							// X gets shipped back to A but redisguised as Y,
 							// it still counts as breaking up A/X which we normaly rollback.
 
-							if(cc.method != "swap" || !preSwapShippedTo.has(pony))
+							let oldShip = game.shipString(oldChangeling, pony);
+							let newShip = game.shipString(newChangeling, pony);
+
+							if((cc.method != "swap" || !preSwapShippedTo.has(pony)) && game.turnstate.shipSet.has(oldShip))
 							{
 								// replace the [pony, changeling:old] ship with [pony, changeling:new]
-								game.turnstate.shipSet.delete(game.shipString(oldChangeling, pony));
-								game.turnstate.shipSet.add(game.shipString(newChangeling, pony));
+								game.turnstate.shipSet.delete(oldShip);
+								game.turnstate.shipSet.add(newShip);
 								
 							}
 						}
