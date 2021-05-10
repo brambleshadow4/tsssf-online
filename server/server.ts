@@ -54,6 +54,7 @@ app.get("/game/cardComponent.js", file("./views/game/cardComponent.js"))
 app.get("/game/peripheralComponents.js", file("./views/game/peripheralComponents.js"))
 app.get("/game/boardComponent.js", file("./views/game/boardComponent.js"))
 app.get("/game/popupComponent.js", file("./views/game/popupComponent.js"))
+app.get("/game/cardSearchBarComponent.js", file("./views/game/cardSearchBarComponent.js"))
 
 
 app.get("/info/addYourOwnCards", file("./views/addYourOwnCards/addYourOwnCards.html"))

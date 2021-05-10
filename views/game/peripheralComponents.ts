@@ -44,6 +44,7 @@ import {
 
 import {
 	createPopup,
+	createSearchPopup,
 	createTabbedPopup,
 	htmlTab
 } from "./popupComponent.js"
@@ -353,8 +354,6 @@ export function updateWinnings()
 	}
 	
 
-	
-
 	element.ontouchstart = function(e)
 	{
 		if(!isItMyTurn())
@@ -592,7 +591,7 @@ function updateCardRowHeight()
 
 export function openCardSelect(title: string, heading: string, cards: Card[], miniMode?: boolean)
 {
-	return createPopup(title, !!miniMode, function(closePopupWithVal: any){
+	function renderFun(closePopupWithVal: any){
 
 		var div = document.createElement('div');
 		div.classList.add("popupPage")
@@ -621,7 +620,16 @@ export function openCardSelect(title: string, heading: string, cards: Card[], mi
 		}
 
 		return div;
-	})
+	}
+
+	if(miniMode)
+	{
+		return createPopup(title, miniMode, renderFun);
+	}
+	else
+	{
+		return createSearchPopup(title, renderFun)
+	}
 }
 
 

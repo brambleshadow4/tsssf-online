@@ -1,11 +1,18 @@
+import {cardSearchBar} from "./cardSearchBarComponent.js";
+
 var oldPopupAccept: undefined | ((value?: any) => any) ;
 
 export function createPopup(title: string, miniMode: boolean, renderFun: (acceptFun: (value?: any) => any) => HTMLElement)
 {
 	var className = miniMode ? "mini" : "normal";
 
-	return createPopupShared(className, title, renderFun);
+	return createPopupShared(className, title, renderFun, {});
 	
+}
+
+export function createSearchPopup(title: string, renderFun: (acceptFun: (value?: any) => any) => HTMLElement)
+{
+	return createPopupShared("normal", title, renderFun, {searchBar: true});	
 }
 
 
@@ -15,18 +22,23 @@ export function createTabbedPopup(tabs: {
 	}[]
 )
 {
-	return createPopupShared("normal", undefined, undefined, tabs);
+	return createPopupShared("normal", undefined, undefined, {tabs});
 }
 
 function createPopupShared(
 	className: string,
 	title?: string,
 	renderFun?: (acceptFun: (value?: any) => any) => HTMLElement,
-	tabs?: {
-		render: (acceptFun: (value?: any) => any) => HTMLElement,
-		name?: string,
-	}[])
-{
+	options?:{
+		tabs?: {
+			render: (acceptFun: (value?: any) => any) => HTMLElement,
+			name?: string,
+		}[],
+		searchBar?: boolean
+	}
+){
+	let opt = options || {};
+
 	if(oldPopupAccept)
 		oldPopupAccept();
 
@@ -46,6 +58,8 @@ function createPopupShared(
 
 		div.className += " " + className
 
+		var searchBarDispose: undefined | Function = undefined;
+
 
 		// When we call a tab's render function, we send it the newAccept function
 		// so that the render can close the popup with value val
@@ -53,6 +67,10 @@ function createPopupShared(
 		{
 			if(parent.parentNode)
 				parent.parentNode.removeChild(parent);
+
+			if(searchBarDispose)
+				searchBarDispose();
+
 			oldPopupAccept = undefined;
 			accept(val);
 		}
@@ -64,16 +82,17 @@ function createPopupShared(
 		
 		var initialContent;
 
-		if(tabs)
+		if(opt.tabs)
 		{
+			let tabs = opt.tabs;
 			var tabDiv = document.createElement('div');
 			tabDiv.className = 'popupTabs';
 
 
-			for(let i =0; i < tabs.length; i++)
+			for(let i =0; i < opt.tabs.length; i++)
 			{
 				let tab = document.createElement('div');
-				let tabName = tabs[i].name;
+				let tabName = opt.tabs[i].name;
 				if(tabName)
 					tab.innerHTML = tabName;
 				tabDiv.appendChild(tab);
@@ -108,9 +127,22 @@ function createPopupShared(
 		{
 			var titleBar = document.createElement('div');
 			titleBar.className = "popupTitleBar";
-			titleBar.innerHTML = "<span>" + title + "</span>";
+			
+			var leftItems = document.createElement('div');
+			leftItems.className = 'popupTitleBarLeft';
+			leftItems.innerHTML = "<span>" + title + "</span>";
+			titleBar.appendChild(leftItems);
+
 			titleBar.appendChild(closeButton);
 			div.appendChild(titleBar);
+
+			if(opt.searchBar)
+			{
+				var searchBar: HTMLElement;
+				[searchBar, searchBarDispose] = cardSearchBar();
+			
+				leftItems.appendChild(searchBar)
+			}
 		}
 
 		var container = document.createElement('div');
@@ -118,9 +150,9 @@ function createPopupShared(
 
 		div.appendChild(container)
 
-		if(tabs)
+		if(opt.tabs)
 		{
-			container.appendChild(tabs[0].render(newAccept));
+			container.appendChild(opt.tabs[0].render(newAccept));
 		}
 		else if (renderFun)
 		{
@@ -143,3 +175,5 @@ export function htmlTab(html: string)
 		return div;
 	}
 }
+
+

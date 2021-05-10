@@ -1,7 +1,7 @@
 /**
 	Z indexes
 	
-	6: giant card;
+	6: giant card, search results
 	5: card select popup
 	4: animated card moving
 	3: shuffle buttons, hand drop zone, offset pony cards, help buttons
@@ -501,23 +501,86 @@ input[type="number"]
 	display: inline-block;
 	vertical-align: middle;
 	height: 32px;
-	font-size: 0;
-	
+	font-size: 0pt;
+	overflow-x: hidden;
+	overflow-y: show;
 }
 
-.popupTitleBar > span
+.popupTitleBarLeft > span
 {
 	margin-left: 10px;
 	font-size: 12pt;
 	line-height: 32px;
 }
 
-.popupTitleBar #popupCloseButton
+.popupTitleBar .cardSearchBar
 {
-	float: right;
+	margin-left: 20px;
+}
+
+.popupTitleBarLeft
+{
+	width: calc(100% - 35px);
+	display: inline-flex;
+}
+
+.cardSearchBar
+{
+	display: inline-flex;
+	font-size: 12pt;
+}
+.cardSearchBar input
+{
+	display: inline-block;
+	vertical-align: middle;
+	margin: 5px 0px;
+	padding: 0px;
+	height: calc(100% - 10px);
+	width: 200px;
+	flex-grow: 0;
+	flex-shrink: 0;
+}
+.csbSearchSuggestions
+{
+	font-size: 12pt;
+	width: 200px;
+	position: absolute;
+	z-index: 6;
+	background-color: white;
+
+	border: solid 2px blue;
+	border-top: none;
+}
+
+.csbSearchSuggestions > div
+{
+	margin: 3px;
+	cursor: pointer;
 }
 
 
+
+
+/*
+
+	#ccddff - keyboard select
+	#99bbff - mouse hover
+*/
+
+.csbSearchSuggestions > div:hover
+{
+	background-color: #ccddff;
+}
+
+.csbActiveFilters
+{
+	white-space: nowrap;
+}
+
+.csbActiveFilters div
+{
+	display: inline-block;
+}
 .popupPage
 {
 	padding: 20px;
