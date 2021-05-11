@@ -160,8 +160,6 @@ body.cardsUnapproved .card.custom
 }
 
 
-
-
 #sidebar
 {
 	position: absolute;
@@ -171,8 +169,6 @@ body.cardsUnapproved .card.custom
 
 	width: 29vh;
 }
-
-
 
 
 body
@@ -548,13 +544,19 @@ input[type="number"]
 	z-index: 6;
 	background-color: white;
 
-	border: solid 2px blue;
-	border-top: none;
+	box-sizing: border-box;
 }
 
 .csbSearchSuggestions > div
 {
 	margin: 3px;
+	cursor: pointer;
+}
+
+.csbClearFilter
+{
+	height: 20px;
+	width: 20px;
 	cursor: pointer;
 }
 
@@ -580,22 +582,36 @@ input[type="number"]
 .csbActiveFilters div
 {
 	display: inline-block;
+	background-color: #d9ffb3;
+
+	height: 20px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border-radius: 10px;
+	margin: 6px 5px;
 }
+.csbActiveFilters div > *
+{
+	display: inline-block;
+	vertical-align: middle;
+}
+
+
 .popupPage
 {
 	padding: 20px;
 	box-sizing: border-box;
 }
 
-.popupPage > *:first-child
-{
-	margin-top: 0px;
-}
-
 #popupContent
 {
 	overflow-y: auto;
 	height: calc(100% - 32px);
+}
+
+.popupWithTabs #popupContent
+{
+	height: calc(100%);
 }
 
 .popupContainer

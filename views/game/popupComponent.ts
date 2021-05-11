@@ -10,19 +10,19 @@ export function createPopup(title: string, miniMode: boolean, renderFun: (accept
 	
 }
 
-export function createSearchPopup(title: string, renderFun: (acceptFun: (value?: any) => any) => HTMLElement)
+export function createSearchPopup(title: string, renderFun: (filters: any[], acceptFun: (value?: any) => any) => HTMLElement)
 {
-	return createPopupShared("normal", title, renderFun, {searchBar: true});	
+	return createPopupShared("normal", title, undefined, {searchBar: true, filterRenderFun: renderFun});	
 }
 
 
 export function createTabbedPopup(tabs: {
-		render: (acceptFun: (value?: any) => any) => HTMLElement,
+		render: (acceptFun: (value?: any) => any) => HTMLElement | [HTMLElement, Function],
 		name?: string,
 	}[]
 )
 {
-	return createPopupShared("normal", undefined, undefined, {tabs});
+	return createPopupShared("normal popupWithTabs", undefined, undefined, {tabs});
 }
 
 function createPopupShared(
@@ -31,10 +31,11 @@ function createPopupShared(
 	renderFun?: (acceptFun: (value?: any) => any) => HTMLElement,
 	options?:{
 		tabs?: {
-			render: (acceptFun: (value?: any) => any) => HTMLElement,
+			render: (acceptFun: (value?: any) => any) => HTMLElement | [HTMLElement, Function],
 			name?: string,
 		}[],
-		searchBar?: boolean
+		searchBar?: boolean,
+		filterRenderFun?: (filters: any[], acceptFun: (value?: any) => any) => HTMLElement 
 	}
 ){
 	let opt = options || {};
@@ -71,6 +72,9 @@ function createPopupShared(
 			if(searchBarDispose)
 				searchBarDispose();
 
+			if(tabDisposeFn)
+				tabDisposeFn();
+
 			oldPopupAccept = undefined;
 			accept(val);
 		}
@@ -79,7 +83,7 @@ function createPopupShared(
 
 		oldPopupAccept = newAccept;
 
-		
+		var tabDisposeFn: Function | undefined = undefined;
 		var initialContent;
 
 		if(opt.tabs)
@@ -99,6 +103,8 @@ function createPopupShared(
 
 				tab.onclick = function()
 				{
+					if(tabDisposeFn){tabDisposeFn();}
+
 					for(let j=0; j<tabDiv.children.length; j++)
 					{
 						tabDiv.children[j].classList.remove('selected')
@@ -108,7 +114,22 @@ function createPopupShared(
 
 					var container = document.getElementById('popupContent')!;
 					container.innerHTML = "";
-					container.appendChild(tabs[i].render(newAccept));
+
+					let output = tabs[i].render(newAccept);
+					let element: HTMLElement;
+					if((output as [HTMLElement, Function]).length)
+					{
+						[element, tabDisposeFn] = output as [HTMLElement, Function];
+					}
+					else
+					{
+						element = output as HTMLElement;
+						tabDisposeFn = undefined;
+					}
+
+
+
+					container.appendChild(element);
 				}
 			}
 
@@ -139,7 +160,14 @@ function createPopupShared(
 			if(opt.searchBar)
 			{
 				var searchBar: HTMLElement;
-				[searchBar, searchBarDispose] = cardSearchBar();
+				[searchBar, searchBarDispose] = cardSearchBar((newFilters) => 
+				{
+					if (opt.filterRenderFun)
+					{
+						container.innerHTML = "";
+						container.appendChild(opt.filterRenderFun(newFilters, newAccept));
+					}
+				});
 			
 				leftItems.appendChild(searchBar)
 			}
@@ -152,11 +180,28 @@ function createPopupShared(
 
 		if(opt.tabs)
 		{
-			container.appendChild(opt.tabs[0].render(newAccept));
+			let output = opt.tabs[0].render(newAccept);
+			let element: HTMLElement;
+			if((output as [HTMLElement, Function]).length)
+			{
+				[element, tabDisposeFn] = output as [HTMLElement, Function];
+			}
+			else
+			{
+				element = output as HTMLElement;
+				tabDisposeFn = undefined;
+			}
+
+
+			container.appendChild(element);
 		}
 		else if (renderFun)
 		{
 			container.appendChild(renderFun(newAccept));
+		}
+		else if (opt.filterRenderFun)
+		{
+			container.appendChild(opt.filterRenderFun([], newAccept));
 		}
 
 		parent.appendChild(div)
@@ -175,5 +220,3 @@ export function htmlTab(html: string)
 		return div;
 	}
 }
-
-

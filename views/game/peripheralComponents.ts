@@ -47,7 +47,9 @@ import {
 	createSearchPopup,
 	createTabbedPopup,
 	htmlTab
-} from "./popupComponent.js"
+} from "./popupComponent.js";
+
+import {doesCardMatchFilters, cardSearchBar} from "./cardSearchBarComponent.js";
 
 
 
@@ -215,7 +217,7 @@ export function updatePonyDiscard(cardOnTop?: Card)
 		
 		if(model.ponyDiscardPile.length)
 		{
-			var card = await openCardSelect("Discarded ponies", "", model.ponyDiscardPile);
+			var card = await openSearchCardSelect("Discarded ponies", "", model.ponyDiscardPile);
 
 			if(card && isItMyTurn())
 			{
@@ -254,7 +256,7 @@ export function updateShipDiscard(tempCard?: Card)
 		
 		if(model.shipDiscardPile.length)
 		{
-			var card = await openCardSelect("Discarded ships", "",  model.shipDiscardPile);
+			var card = await openSearchCardSelect("Discarded ships", "",  model.shipDiscardPile);
 
 			if(card && isItMyTurn())
 			{
@@ -295,7 +297,7 @@ export function updateGoalDiscard(tempCard?: Card)
 	{
 		if(model.goalDiscardPile.length)
 		{
-			var card = await openCardSelect("Discarded goals", "", model.goalDiscardPile);
+			var card = await openSearchCardSelect("Discarded goals", "", model.goalDiscardPile);
 			var openGoal = model.currentGoals.map(x => x.card).indexOf("blank:goal");
 
 
@@ -432,7 +434,7 @@ export function updatePlayerList()
 
 		div.onclick = function()
 		{
-			openCardSelect("Goals", player.name + "'s won goals", player.winnings.map((x: Winning) => x.card));
+			openSearchCardSelect("Goals", player.name + "'s won goals", player.winnings.map((x: Winning) => x.card));
 		}
 
 		playerList.appendChild(div);
@@ -622,15 +624,52 @@ export function openCardSelect(title: string, heading: string, cards: Card[], mi
 		return div;
 	}
 
-	if(miniMode)
-	{
-		return createPopup(title, miniMode, renderFun);
-	}
-	else
-	{
-		return createSearchPopup(title, renderFun)
-	}
+
+	return createPopup(title, !!miniMode, renderFun);
 }
+
+export function openSearchCardSelect(title: string, heading: string, cards: Card[])
+{
+	function renderFun(filters: [string, any][], closePopupWithVal: any){
+
+		var div = document.createElement('div');
+		div.classList.add("popupPage")
+
+		if(heading)
+		{
+			var h1 = document.createElement('h1');
+			h1.innerHTML = heading;
+			div.appendChild(h1);
+		}
+		
+		let cards2 = cards.slice();
+
+		cards2.sort();
+
+		let allCards = cm.inPlay();
+
+		for(let card of cards2)
+		{
+			if(!doesCardMatchFilters(card, filters)) { continue; }
+
+			var cardElement = makeCardElement(card);
+			div.appendChild(cardElement);
+
+			cardElement.onclick = function()
+			{
+				closePopupWithVal(card);
+			}
+		}
+
+		return div;
+	}
+
+	return createSearchPopup(title, renderFun);
+
+}
+
+
+
 
 
 win.openSettings = function()
@@ -693,55 +732,72 @@ win.openSettings = function()
 	});
 }
 
-function referencePageRender()
+function referencePageRender(_acceptFun: Function): [HTMLElement, Function]
 {
 
 	var popupPage = document.createElement('div')
 	popupPage.className = "popupPage";
 
-	var ponyReference = document.createElement('div');
-	var shipReference = document.createElement('div');
-	var goalReference = document.createElement('div');
+	var [div, cardSearchBarDispose] = cardSearchBar(renderCards);
 
-	var keys = Object.keys(cm.inPlay());
+	popupPage.appendChild(div);
 
-	keys.sort();
-	for(let key of keys)
+
+	var filteredCards = document.createElement("div");
+
+
+	function renderCards(filters: [string, any][])
 	{
+		filteredCards.innerHTML = "";
 
-		let cardDiv = makeCardElement(key)
-		
-		if(isPony(key))
+		var keys = Object.keys(cm.inPlay());
+		var ponyReference = document.createElement('div');
+		var shipReference = document.createElement('div');
+		var goalReference = document.createElement('div');
+		keys.sort();
+		for(let key of keys)
 		{
-			ponyReference.appendChild(cardDiv)
-		}
-		if(isShip(key))
-		{
-			shipReference.appendChild(cardDiv)
-		}
-		if(isGoal(key))
-		{
-			goalReference.appendChild(cardDiv)
+
+			if(!doesCardMatchFilters(key, filters)) continue;
+
+			let cardDiv = makeCardElement(key)
+			
+			if(isPony(key))
+			{
+				ponyReference.appendChild(cardDiv)
+			}
+			if(isShip(key))
+			{
+				shipReference.appendChild(cardDiv)
+			}
+			if(isGoal(key))
+			{
+				goalReference.appendChild(cardDiv)
+			}
+
 		}
 
+		var header = document.createElement('h1');
+		header.innerHTML = "Pony Cards";
+		filteredCards.appendChild(header);
+		filteredCards.appendChild(ponyReference);
+
+		header = document.createElement('h1');
+		header.innerHTML = "Ship Cards";
+		filteredCards.appendChild(header);
+		filteredCards.appendChild(shipReference);
+
+		header = document.createElement('h1');
+		header.innerHTML = "Goal Cards";
+		filteredCards.appendChild(header);
+		filteredCards.appendChild(goalReference);
 	}
 
-	var header = document.createElement('h1');
-	header.innerHTML = "Pony Cards";
-	popupPage.appendChild(header);
-	popupPage.appendChild(ponyReference);
+	renderCards([]);
 
-	header = document.createElement('h1');
-	header.innerHTML = "Ship Cards";
-	popupPage.appendChild(header);
-	popupPage.appendChild(shipReference);
+	popupPage.appendChild(filteredCards);
 
-	header = document.createElement('h1');
-	header.innerHTML = "Goal Cards";
-	popupPage.appendChild(header);
-	popupPage.appendChild(goalReference);
-
-	return popupPage;
+	return [popupPage, cardSearchBarDispose];
 }
 
 

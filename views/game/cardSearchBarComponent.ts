@@ -1,10 +1,7 @@
-
+import {isGoal, Card} from "../../server/lib.js";
 import * as cm from "../../server/cardManager.js";
 
-
-
-
-export function cardSearchBar(onFilterChange?: () => any): [HTMLElement, Function]
+export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => any): [HTMLElement, Function]
 {
 
 	let filters: [string, any][] = [];
@@ -22,8 +19,7 @@ export function cardSearchBar(onFilterChange?: () => any): [HTMLElement, Functio
 
 	input.placeholder = "Search name, race, gender, etc."
 
-
-	input.oninput = function(e)
+	function processInput()
 	{
 		searchSuggestions.innerHTML = "";
 
@@ -39,17 +35,27 @@ export function cardSearchBar(onFilterChange?: () => any): [HTMLElement, Functio
 				let propName = suggestion[0][0].toUpperCase() + suggestion[0].substring(1);
 				div.innerHTML = propName + ": " + suggestion[1];
 
+
+
 				div.onclick = function()
 				{
 					filters.push(suggestion);
+
+					if(onFilterChange)
+					{
+						onFilterChange(filters);
+					}
+
 					input.value = "";
 					renderFilters();
-				}
+					processInput();
+				}	
 
 				searchSuggestions.appendChild(div);
 			}
 		}
 	}
+	input.oninput = processInput;
 
 	let searchSuggestions = document.createElement('div');
 	searchSuggestions.className = "csbSearchSuggestions";
@@ -72,8 +78,6 @@ export function cardSearchBar(onFilterChange?: () => any): [HTMLElement, Functio
 	setTimeout(alignSearchSuggestions, 0);
 
 
-
-
 	function renderFilters()
 	{
 		activeFilters.innerHTML = "";
@@ -82,7 +86,28 @@ export function cardSearchBar(onFilterChange?: () => any): [HTMLElement, Functio
 		{
 			var div = document.createElement('div');
 			let propName = filter[0][0].toUpperCase() + filter[0].substring(1);
-			div.innerHTML = propName + ": " + filter[1];
+			div.innerHTML = "<span>" + propName + ": " + filter[1] + "</span>";
+
+			let clearFilterButton = document.createElement('img');
+			clearFilterButton.src = "/img/close.svg";
+			clearFilterButton.className = "csbClearFilter";
+			div.appendChild(clearFilterButton);
+
+			clearFilterButton.onclick = function()
+			{
+				let x = filters.indexOf(filter);
+				if(x > -1)
+				{
+					filters.splice(x, 1);
+
+					if(onFilterChange)
+					{
+						onFilterChange(filters);
+					}
+					
+					renderFilters();
+				}
+			}
 
 			activeFilters.appendChild(div);
 		}
@@ -149,8 +174,6 @@ function getSuggestions(text: string)
 	var tokens = text.toLowerCase().split(" ");
 	var matches = [];
 
-	console.log(tokens);
-
 	for(let key in potentialResults)
 	{
 		let isMatch = true;
@@ -174,4 +197,43 @@ function getSuggestions(text: string)
 	}
 
 	return matches.map(x => potentialResults[x]);
+}
+
+export function doesCardMatchFilters(card: Card, filters: [string, any][]): boolean
+{
+	let cardProps = cm.inPlay()[card];
+	for(let filter of filters)
+	{
+		if(isGoal(card))
+		{
+			if(filter[0] == "points")
+			{
+				if((cardProps as any)[filter[0]] != filter[1])
+				{
+					return false;
+				}
+			}
+			else if(filter[0] == "gender" && filter[1]=="male")
+			{
+				let text = cardProps.goalLogic || "";
+				text = text.replace(/female/g,"");
+				if(text.indexOf("male") == -1){ return false; }
+			}
+			else if((!cardProps.goalLogic || cardProps.goalLogic.indexOf(filter[1]) == -1))
+			{
+				return false;
+			}
+		}
+		else if(filter[0] == "keywords")
+		{
+			if(!cardProps.keywords || cardProps.keywords.indexOf(filter[1]) == -1){ return false; }
+		}
+
+		else if((cardProps as any)[filter[0]] != filter[1])
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
