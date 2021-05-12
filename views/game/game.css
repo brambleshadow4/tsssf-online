@@ -491,39 +491,41 @@ input[type="number"]
 {
 	text-align: left;
 	background-color: #d9d9d9;
+	display: flex;
 }
 .popupTitleBar > *
 {
 	display: inline-block;
+	flex-wrap: nowrap;
 	vertical-align: middle;
 	height: 32px;
 	font-size: 0pt;
-	overflow-x: hidden;
-	overflow-y: show;
 }
 
-.popupTitleBarLeft > span
+.popupTitleBarTitle
 {
 	margin-left: 10px;
+	margin-right: 20px;
 	font-size: 12pt;
 	line-height: 32px;
+	flex-grow: 0;
+	flex-shrink: 0;
 }
 
-.popupTitleBar .cardSearchBar
+.popupTitleBarCenter
 {
-	margin-left: 20px;
-}
-
-.popupTitleBarLeft
-{
-	width: calc(100% - 35px);
-	display: inline-flex;
+	flex-grow: 1;
+	flex-shrink: 1;
+	min-width: 0;
 }
 
 .cardSearchBar
 {
-	display: inline-flex;
+	display: flex;
 	font-size: 12pt;
+	width: 100%;
+
+	position: relative;
 }
 .cardSearchBar input
 {
@@ -545,13 +547,11 @@ input[type="number"]
 	background-color: white;
 
 	box-sizing: border-box;
+
+	top: 25px;
+	left: 0px;
 }
 
-.csbSearchSuggestions > div
-{
-	margin: 3px;
-	cursor: pointer;
-}
 
 .csbClearFilter
 {
@@ -562,21 +562,38 @@ input[type="number"]
 
 
 
+.csbSearchSuggestions > div
+{
+	margin: 3px;
+	cursor: pointer;
+}
+
+
+
 
 /*
-
 	#ccddff - keyboard select
 	#99bbff - mouse hover
 */
-
-.csbSearchSuggestions > div:hover
+.csbSearchSuggestions > div:hover, .csbSearchSuggestions >div.selected:hover
 {
+	background-color: #99bbff;	
+}
+
+.csbSearchSuggestions >div.selected
+{	
 	background-color: #ccddff;
 }
+
 
 .csbActiveFilters
 {
 	white-space: nowrap;
+	min-width: 0;
+	flex-shrink: 1;
+	overflow: hidden;
+	display: inline-block;
+	flex-grow: 1;
 }
 
 .csbActiveFilters div

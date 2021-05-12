@@ -732,15 +732,15 @@ win.openSettings = function()
 	});
 }
 
-function referencePageRender(_acceptFun: Function): [HTMLElement, Function]
+function referencePageRender(_acceptFun: Function): HTMLElement
 {
 
 	var popupPage = document.createElement('div')
 	popupPage.className = "popupPage";
 
-	var [div, cardSearchBarDispose] = cardSearchBar(renderCards);
 
-	popupPage.appendChild(div);
+
+	popupPage.appendChild(cardSearchBar(renderCards));
 
 
 	var filteredCards = document.createElement("div");
@@ -797,7 +797,7 @@ function referencePageRender(_acceptFun: Function): [HTMLElement, Function]
 
 	popupPage.appendChild(filteredCards);
 
-	return [popupPage, cardSearchBarDispose];
+	return popupPage;
 }
 
 

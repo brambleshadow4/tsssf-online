@@ -17,7 +17,7 @@ export function createSearchPopup(title: string, renderFun: (filters: any[], acc
 
 
 export function createTabbedPopup(tabs: {
-		render: (acceptFun: (value?: any) => any) => HTMLElement | [HTMLElement, Function],
+		render: (acceptFun: (value?: any) => any) => HTMLElement,
 		name?: string,
 	}[]
 )
@@ -31,7 +31,7 @@ function createPopupShared(
 	renderFun?: (acceptFun: (value?: any) => any) => HTMLElement,
 	options?:{
 		tabs?: {
-			render: (acceptFun: (value?: any) => any) => HTMLElement | [HTMLElement, Function],
+			render: (acceptFun: (value?: any) => any) => HTMLElement ,
 			name?: string,
 		}[],
 		searchBar?: boolean,
@@ -59,8 +59,6 @@ function createPopupShared(
 
 		div.className += " " + className
 
-		var searchBarDispose: undefined | Function = undefined;
-
 
 		// When we call a tab's render function, we send it the newAccept function
 		// so that the render can close the popup with value val
@@ -68,12 +66,6 @@ function createPopupShared(
 		{
 			if(parent.parentNode)
 				parent.parentNode.removeChild(parent);
-
-			if(searchBarDispose)
-				searchBarDispose();
-
-			if(tabDisposeFn)
-				tabDisposeFn();
 
 			oldPopupAccept = undefined;
 			accept(val);
@@ -83,7 +75,6 @@ function createPopupShared(
 
 		oldPopupAccept = newAccept;
 
-		var tabDisposeFn: Function | undefined = undefined;
 		var initialContent;
 
 		if(opt.tabs)
@@ -103,7 +94,6 @@ function createPopupShared(
 
 				tab.onclick = function()
 				{
-					if(tabDisposeFn){tabDisposeFn();}
 
 					for(let j=0; j<tabDiv.children.length; j++)
 					{
@@ -115,21 +105,8 @@ function createPopupShared(
 					var container = document.getElementById('popupContent')!;
 					container.innerHTML = "";
 
-					let output = tabs[i].render(newAccept);
-					let element: HTMLElement;
-					if((output as [HTMLElement, Function]).length)
-					{
-						[element, tabDisposeFn] = output as [HTMLElement, Function];
-					}
-					else
-					{
-						element = output as HTMLElement;
-						tabDisposeFn = undefined;
-					}
 
-
-
-					container.appendChild(element);
+					container.appendChild(tabs[i].render(newAccept));
 				}
 			}
 
@@ -149,18 +126,19 @@ function createPopupShared(
 			var titleBar = document.createElement('div');
 			titleBar.className = "popupTitleBar";
 			
-			var leftItems = document.createElement('div');
-			leftItems.className = 'popupTitleBarLeft';
-			leftItems.innerHTML = "<span>" + title + "</span>";
-			titleBar.appendChild(leftItems);
+			titleBar.innerHTML = "<span class='popupTitleBarTitle'>" + title + "</span>";
+			
+			var center = document.createElement('div');
+			center.className = 'popupTitleBarCenter';
+			titleBar.appendChild(center);
+
 
 			titleBar.appendChild(closeButton);
 			div.appendChild(titleBar);
 
 			if(opt.searchBar)
 			{
-				var searchBar: HTMLElement;
-				[searchBar, searchBarDispose] = cardSearchBar((newFilters) => 
+				var searchBar = cardSearchBar((newFilters) => 
 				{
 					if (opt.filterRenderFun)
 					{
@@ -168,8 +146,8 @@ function createPopupShared(
 						container.appendChild(opt.filterRenderFun(newFilters, newAccept));
 					}
 				});
-			
-				leftItems.appendChild(searchBar)
+							
+				center.appendChild(searchBar)
 			}
 		}
 
@@ -180,20 +158,7 @@ function createPopupShared(
 
 		if(opt.tabs)
 		{
-			let output = opt.tabs[0].render(newAccept);
-			let element: HTMLElement;
-			if((output as [HTMLElement, Function]).length)
-			{
-				[element, tabDisposeFn] = output as [HTMLElement, Function];
-			}
-			else
-			{
-				element = output as HTMLElement;
-				tabDisposeFn = undefined;
-			}
-
-
-			container.appendChild(element);
+			container.appendChild(opt.tabs[0].render(newAccept));
 		}
 		else if (renderFun)
 		{
