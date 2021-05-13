@@ -1,4 +1,5 @@
 import express from "express";
+import cookieParser from 'cookie-parser';
 import fs from 'fs';
 import ws from 'ws';
 import https from "https";
@@ -6,8 +7,27 @@ import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js"
 
+import en_us from "../i18n/en-us.js";
+import zz_zz from "../i18n/zz-zz.js";
+
+const defaultLocale = "en-us";
+const translations = {
+	"en-us": en_us,
+	"zz-zz": zz_zz,
+} as any;
+
+
+for(let lang in translations)
+{
+	for(let key in translations[defaultLocale])
+	{
+		translations[lang][key] = translations[lang][key] || translations[lang][defaultLocale]
+	}
+}
+
 
 const app = express()
+app.use(cookieParser());
 let PORT = 80;
 
 var argSet = new Set(process.argv);
@@ -36,7 +56,7 @@ catch(e){}
 
 
 
-app.get('/', file("./views/home.html"));
+app.get('/', tokenizeFile("./views/home.html"));
 app.get('/img/**', fmap("/img/**", "./img/**"));
 app.get('/packs/**', fmap("/packs/**", "./packs/**"));
 
@@ -74,6 +94,12 @@ app.get("/viewSelector.js", file("./views/viewSelector.js"))
 app.get("/lib.js", file("./server/lib.js"))
 app.get("/server/lib.js", file("./server/lib.js"))
 
+app.get("/i18n/en-us.js", function(req, res){
+
+	res.setHeader("Content-Type", "text/javascript");
+	res.send("export default " + JSON.stringify(translations["en-us"]));
+});
+
 
 app.get("/server/cards.js", file("./server/cards.js"))
 app.get("/server/cardManager.js", file("./server/cardManager.js"))
@@ -86,7 +112,10 @@ app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
 
 app.get("/lobby", function(req,res)
 {
-	var key = Object.keys(req.query)[0].toUpperCase();
+
+	let query = req.originalUrl.substring(req.originalUrl.indexOf("?")+1);
+
+	var key = query.toUpperCase();
 
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
@@ -100,7 +129,9 @@ app.get("/lobby", function(req,res)
 
 app.get("/game", function(req, res)
 {
-	var key = Object.keys(req.query)[0].toUpperCase();
+	let query = req.originalUrl.substring(req.originalUrl.indexOf("?")+1);
+
+	var key = query.toUpperCase();
 
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
@@ -137,12 +168,11 @@ app.get("/stats", async function(req, res){
 
 app.get("/lobby.css", file("./views/lobby/lobby.css"))
 app.get("/lobby/lobby.js", file("./views/lobby/lobby.js"))
-app.get("/lobby/lobbyView.js", file("./views/lobby/lobbyView.js"))
+app.get("/lobby/lobbyView.js", tokenizeFile("./views/lobby/lobbyView.js"))
 
 app.get("/host", function(req, res){
 
 	var key = tsssfServer.openLobby();
-
 	res.redirect("/lobby?" + key);
 })
 
@@ -182,6 +212,45 @@ else
 }
 
 
+function tokenizeFile(url: string)
+{
+	return function(req: Request, res: any)
+	{
+		if(fs.existsSync(url))
+		{
+			let fileText = fs.readFileSync(url, "utf8");
+
+			fileText = addTranslatedTokens(fileText, "en-us");
+
+			if(url.indexOf(".js") > -1)
+			{
+				res.setHeader("Content-Type", "text/javascript");
+			}
+
+			res.send(fileText);
+		}
+		else
+		{
+			res.send("404 error sad");
+		}
+	}	
+}
+
+function addTranslatedTokens(text: string, lang: string)
+{
+	let pattern = /{{([A-Za-z0-9\.]+)}}/g;
+
+	let match = pattern.exec(text)
+	while(match)
+	{
+		let key = match[1]; 
+		text = text.replace(match[0], translations[lang][key] || translations["en-us"][key] || "");
+		match = pattern.exec(text)
+	}
+
+	return text;
+}
+
 
 function file(url: string)
 {
@@ -205,10 +274,8 @@ function fmap(routeUri: string, fileUrl: string): any
 
 		//setTimeout(function(){
 		sendIfExists(url, res);
-		//},1000)
-		
+		//},1000)	
 	}
-	
 }
 
 function sendIfExists(url:string, res: any)

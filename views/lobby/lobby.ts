@@ -9,7 +9,9 @@ import {
 	PackListHeader,
 	PackListItem,
 	PackListPack
-} from "../../server/lib.js"
+} from "../../server/lib.js";
+
+import texts from "../../i18n/en-us.js";
 
 
 import * as cm from "../../server/cardManager.js";
@@ -183,7 +185,7 @@ function loadCardPages(options: GameOptions)
 
 	if(customStartCards.length && uploadHeader)
 	{
-		uploadHeader.innerHTML += "<br><span class='subheading'>Uploaded start cards are in the 'Start Card' section</span>";
+		uploadHeader.innerHTML += "<br><span class='subheading'>" + texts.LobbyUploadStartCardLocation + "</span>";
 	}
 
 	var allStartCards = startCardNames.concat(customStartCards)
@@ -217,7 +219,7 @@ function loadCardPages(options: GameOptions)
 			switch(cardEl.getAttribute('card'))
 			{	
 				case "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord":
-					infoText = "Goals will not automatically turn green if you use this start card";
+					infoText = texts.LobbyDiscordStartWarning;
 					break;
 			}
 
