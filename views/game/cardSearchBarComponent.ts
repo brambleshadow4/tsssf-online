@@ -1,6 +1,11 @@
 import {isGoal, Card} from "../../server/lib.js";
 import * as cm from "../../server/cardManager.js";
 
+
+/**
+ * Creates a cardSearchBar control
+ * onFilterChange gets called whenever the filters are updated.
+ */
 export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => any): HTMLElement
 {
 
@@ -10,8 +15,6 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 
 	var bar = document.createElement('div');
 	bar.className = "cardSearchBar"
-
-
 
 	var input = document.createElement("input");
 	let activeFilters = document.createElement('span');
@@ -71,6 +74,7 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 		}
 	}
 
+	/** oninput event handler */
 	function processInput()
 	{
 		searchSuggestions.innerHTML = "";
@@ -84,8 +88,6 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 				
 				let div = document.createElement('div');
 				div.innerHTML = toFilterName(suggestion);
-
-
 
 				div.onclick = function()
 				{
@@ -115,6 +117,7 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 	bar.appendChild(activeFilters);
 
 
+	/** draw the filters */
 	function renderFilters()
 	{
 		activeFilters.innerHTML = "";
@@ -150,20 +153,18 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 		}
 	}
 
-	function disposeHandler()
-	{
-		if(searchSuggestions?.parentNode)
-			searchSuggestions.parentNode.removeChild(searchSuggestions);
-	}
-
-
 	return bar;
 }
 
 
+/**
+ * Returns a list of [prop, value] filteres based on text
+ */
 function getSuggestions(text: string)
 {
 	var cards = cm.inPlay();
+
+	// TOOD cache this on a per game basis.
 	var potentialResults: {[key:string]: [string, any]} = {};
 
 	var noSearchProps = new Set(["url","thumb", "goalFun", "changeGoalPointValues", "noLogic", "altTimeline"]);
@@ -234,6 +235,10 @@ function getSuggestions(text: string)
 	return matches.map(x => potentialResults[x]);
 }
 
+/**
+ * Converts a [prop, value] filter into a human friendly string
+ * to use in place
+ */
 function toFilterName(filter: [string, string])
 {
 
@@ -264,8 +269,12 @@ function toFilterName(filter: [string, string])
 	return propName + ": " + filter[1];
 
 }
-
-function propValueOverrides(prop: string, value: string | undefined)
+ /**
+  * returns a prop + value pair for a given prop/value pair to use  in place of the original.
+  * This creates equivlance classes for various props that otherwise would have a unique value
+  * and not be super useful on their own.
+  */
+function propValueOverrides(prop: string, value: string | undefined): [string, string]
 {
 	if(!value)
 		return [prop, ""];
@@ -320,7 +329,10 @@ function propValueOverrides(prop: string, value: string | undefined)
 	return [prop, value || ""];
 }
 
-
+/**
+ * Given a Card and a list of [string, prop] filters,
+ * does this card match evey filter in filters?
+ */
 export function doesCardMatchFilters(card: Card, filters: [string, any][]): boolean
 {
 	let cardProps = cm.inPlay()[card];
