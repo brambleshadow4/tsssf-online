@@ -6,8 +6,7 @@ export default {
 	"HomepageSourceCode": "Source code",
 	"HomepageSubmitBug": "Submit a bug",
 	"HomepageFindPlayers": "Find Players",
-	"HomepageTranslatedBy": "", 
-
+	"HomepageTranslatedBy": "", // "English translation made by brambleshadow4" English version doesn't need this message, but other translations should have this
 
 
 	"LobbyJoinGame": "Join Game",
@@ -45,8 +44,8 @@ export default {
 	"GameDisconnectTimeout": "Their turn will end if they do not reconnect in < 15s",
 	"GameEndMyTurnButton": "End My Turn",
 	"GameEffectShippedWithEveryPony": "This pony is shipped with every other pony on the grid",
-	"GameEffectCopying": "Copying {0}", // {0} is the name of a card
-
+	"GameEffectCopying": "Copying {0}", // {0} is the name of a card,
+	"GamePointsWithUnit": "{0}pts", // {0} is the number of points the player has. "points" should be shortened to something really short, a.k.a. "pts"
 
 
 	"PopupTitleSelectDisguise": "Select Disguise",

@@ -353,7 +353,7 @@ export function updateWinnings()
 		var scoreElement = document.createElement('span');
 		scoreElement.className = 'score';
 
-		scoreElement.innerHTML = points + "pts";
+		scoreElement.innerHTML = s.GamePointsWithUnit.replace("{0}", points);
 		element.appendChild(scoreElement);
 	}
 	

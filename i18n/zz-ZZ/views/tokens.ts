@@ -45,6 +45,7 @@ export default {
 	"GameEndMyTurnButton": "End My Turn zzz",
 	"GameEffectShippedWithEveryPony": "This pony is shipped with every other pony on the grid zzz",
 	"GameEffectCopying": "Copying {0} zzz", // {0} is the name of a card
+	"GamePointsWithUnit": "{0}zs",
 
 
 
