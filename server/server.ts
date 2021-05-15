@@ -13,11 +13,12 @@ import zz_ZZ from "../i18n/zz-ZZ/views/tokens.js";
 
 
 
+
 const defaultLocale = "en-US";
 const translations = {
 	"en-US": en_US,
 	"es-ES": es_ES,
-	"zz-zz": zz_ZZ,
+	"zz-ZZ": zz_ZZ,
 } as any;
 
 
@@ -25,14 +26,9 @@ for(let lang in translations)
 {
 	for(let key in translations[defaultLocale])
 	{	
-		console.log(key);
-		console.log(translations[lang][key] || translations[defaultLocale][key]);
-
 		translations[lang][key] = translations[lang][key] || translations[defaultLocale][key]		
 	}
 }
-
-console.log(es_ES);
 
 
 const app = express()
