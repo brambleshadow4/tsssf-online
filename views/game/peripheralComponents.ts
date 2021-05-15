@@ -604,6 +604,7 @@ export function openCardSelect(title: string, heading: string, cards: Card[], mi
 		if(heading)
 		{
 			var h1 = document.createElement('h1');
+			h1.className = "no-top-margin";
 			h1.innerHTML = heading;
 			div.appendChild(h1);
 		}
@@ -641,6 +642,7 @@ export function openSearchCardSelect(title: string, heading: string, cards: Card
 		if(heading)
 		{
 			var h1 = document.createElement('h1');
+			h1.className = "no-top-margin";
 			h1.innerHTML = heading;
 			div.appendChild(h1);
 		}
@@ -835,7 +837,7 @@ export function customCardsPopup()
 		var div = document.createElement('div');
 
 		div.innerHTML = `
-		<h1>${s.CustomCardsHeading}</h1>
+		<h1 class='no-top-margin'>${s.CustomCardsHeading}</h1>
 
 		<div>
 			<div><img src="img/art-aryatheeditor.jpg" style="height: 200px"/></div>

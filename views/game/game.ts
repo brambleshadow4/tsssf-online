@@ -94,6 +94,7 @@ import {
 	updateHand,
 	initPeripherals,
 	openCardSelect,
+	openSearchCardSelect,
 	customCardsPopup
 } from "./peripheralComponents.js";
 
@@ -712,7 +713,6 @@ export async function moveCard(
 
 	if(startLocation != cardLocations[card])
 	{
-
 		// if another player moves card A to a goal/board location L at the same time as you move card B,
 		// you move B to L, then message arrives to move A to L,
 		// then message arives to move B back, but it's no longer at L.
@@ -1174,7 +1174,6 @@ function changelingAction(type: string)
 				case "earth":
 				case "pegasus":
 
-
 					disguises = disguises.filter(x => slashStringToSet(cards[x].race).has(type));
 					break;
 				case "nonAlicornFemale":
@@ -1213,7 +1212,7 @@ function changelingAction(type: string)
 			if(!disguises.length && !newDisguise)
 				return;
 
-			newDisguise = newDisguise || await openCardSelect(s.PopupTitleSelectDisguise, s.PopupChooseDisguise, disguises);
+			newDisguise = newDisguise || await openSearchCardSelect(s.PopupTitleSelectDisguise, s.PopupChooseDisguise, disguises);
 
 			if(!newDisguise)
 				return
@@ -1230,8 +1229,6 @@ async function fullCopyAction(card: Card)
 	let model = win.model;
 	if(model.turnstate)
 	{
-
-
 		var copyOptions = Object.keys(model.board).filter(x => x.startsWith("p,") && model.board[x].card && !isBlank(model.board[x].card)).map(x => model.board[x].card);
 
 		copyOptions = copyOptions.filter(x => x != card);
@@ -1415,6 +1412,7 @@ async function keywordChangeAction(shipCard: Card)
 
 		var selectedPony: Card;
 		var h1 = document.createElement('h1');
+		h1.className = "no-top-margin";
 		h1.innerHTML = s.PopupTextPickAKeyword;
 		element.appendChild(h1);
 
@@ -1555,6 +1553,7 @@ function raceChangePopup(ponies: Card[])
 		div.classList.add('popupPage');
 
 		var h1 = document.createElement('h1');
+		h1.className = "no-top-margin";
 		h1.innerHTML = s.PopupChoosePonyAndRace;
 		div.appendChild(h1)
 
@@ -1659,6 +1658,7 @@ function raceGenderChangePopup(ponies: Card[])
 		div.classList.add('popupPage');
 
 		var h1 = document.createElement('h1');
+		h1.className = "no-top-margin";
 		h1.innerHTML = s.PopupChoosePonyRaceAndGender;
 		div.appendChild(h1)
 
