@@ -16,7 +16,7 @@ var HEAD = `
 var HTML = `
 
 <div id='playerArea' class='playerArea'>
-	<h2 class="noTopMargin">Players</h2>
+	<h2 class="noTopMargin">{{LobbyPlayers}}</h2>
 	<div id='playerList'></div>
 </div>
 
@@ -24,77 +24,75 @@ var HTML = `
 
 	<div class='center'>
 		<div id='tabs' class="popupTabs off">
-			<div id='joinGameTab' onclick="changePage(this, 'pageJoin')" class="selected">Join Game</div>
-			<div id='gameOptionsTab' onclick="changePage(this, 'pageOptions')">Game Options</div>
-			<div id='chooseCardsTab' onclick="changePage(this, 'pageCards')">Choose cards</div>
-			<div onclick="changePage(this, 'pageStartCard')">Start card</div>
+			<div id='joinGameTab' onclick="changePage(this, 'pageJoin')" class="selected">{{LobbyJoinGame}}</div>
+			<div id='gameOptionsTab' onclick="changePage(this, 'pageOptions')">{{LobbyGameOptions}}</div>
+			<div id='chooseCardsTab' onclick="changePage(this, 'pageCards')">{{LobbyChooseCards}}</div>
+			<div onclick="changePage(this, 'pageStartCard')">{{LobbyStartCard}}</div>
 		</div>
 		<div id='main' class='main pageJoin unregistered'>
 			
 			<div id='mobilePlayerArea' class='mobileOnly'>
-				<h2>Players</h2>
+				<h2>{{LobbyPlayers}}</h2>
 				<div id='playerList2'></div>
 			</div>
 
 			<div id='joinGameInfo'>
-				<p style='margin-top: 0px;'>Invite other players to join with this link</p>
+				<p style='margin-top: 0px;'>{{LobbyInvitePlayers}}</p>
 				<input type="text" id='inviteURL' readonly />
 
 				<div id='chooseName'>
-					<h2 class='bothMargins'>Choose a name</h2>
+					<h2 class='bothMargins'>{{LobbyChooseName}}</h2>
 					<input type='text' id='playerName' maxlength="20" />
-					<button onclick='register();'>Join</button>
+					<button onclick='register();'>{{LobbyJoin}}</button>
 				</div>
 			</div>
 
 			<div class='startButtonArea mobileOnly'>
-				<button onclick="startGame();">Start Game</button>
+				<button onclick="startGame();">{{LobbyStartGame}}</button>
 			</div>
 
 			<div id='gameOptionsInfo'>
-				<h2>Rule Enforcement</h2>
+				<h2>{{LobbyRuleEnforcement}}</h2>
 				<!-- div><input type='radio' name='gamerules' disabled><label for=''>Full rules - Coming soon!</label></div -->
-				<div><input id='turnsOnly' type='radio' name='gamerules' checked><label for='turnsOnly'>Turns - Only one person can play at a time</label></div>
-				<div><input id='sandbox' type='radio' name='gamerules' ><label for='sandbox'>Sandbox - Everyone can play simultaneously</label></div>
+				<div><input id='turnsOnly' type='radio' name='gamerules' checked><label for='turnsOnly'>{{LobbyRulesTurns}}</label></div>
+				<div><input id='sandbox' type='radio' name='gamerules' ><label for='sandbox'>{{LobbyRulesSandbox}}</label></div>
 
-				<h2 class='bothMargins'>Other options</h2>
-				<div><input type='checkbox' id='keepLobbyOpen'><label for='keepLobbyOpen'>Keep lobby open during game<br>You can also toggle this in game</label></div>
+				<h2 class='bothMargins'>{{LobbyOtherOptions}}</h2>
+				<div><input type='checkbox' id='keepLobbyOpen'><label for='keepLobbyOpen'>{{LobbyKeepLobbyOpen}}</label></div>
 			</div>
 
 			<div id='startCardInfo'>
-				<h2>Pick a start card</h2>
+				<h2>{{LobbyPickStart}}</h2>
 				<div id='startCards'></div>
 				<p id='startCardDetails'></p>
 			</div>
 
 			<div id='chooseCardsInfo'>
-				<h2>Expansions</h2>
+				<h2>{{LobbyExpansions}}</h2>
 				<div id='expansions'></div>
-				<h2 class="bothMargins">Individual Cards</h2>
+				<h2 class="bothMargins">{{LobbyIndividualCards}}</h2>
 				<div id='cardSelectors'></div>
-				<h2 class="bothMargins"><a href="/info/addYourOwnCards" target="_blank"><span>Add Your Own Cards</span><img height="30px" src="/img/help-blue.svg"></a></h2>
+				<h2 class="bothMargins"><a href="/info/addYourOwnCards" target="_blank"><span>{{LobbyAddYourOwnCards}}</span><img height="30px" src="/img/help-blue.svg"></a></h2>
 				<p>
-					Please note that TSSSF.net will not publish cards uploaded in this manner; 
-					they will only be available during this game. TSSSF.net reserves the right to
-					examine any file uploaded to its servers.
+					{{LobbyUploadDisclaimer}}
 				</p>
-				<p>If you are an artist and would like to feature your shipfic cards on this website, reach out to us on our <a href="https://discord.gg/WQVBUgv">discord</a></p>
-				<div><label>Choose file:</label> <input id='packUpload' type="file" accept=".json" /></div>
+				<p>{{LobbyArtistInfo}}</p>
+				<div><label>{{LobbyChooseFile}}:</label> <input id='packUpload' type="file" accept=".json" /></div>
 
 				<pre><code id='uploadErrors'></code></pre>
 
 			</div>
 
 			<div class='startButtonArea'>
-				<button onclick="startGame();">Start Game</button>
+				<button onclick="startGame();">{{LobbyStartGame}}</button>
 			</div>
 
 			<div class='waitingOnHost'>
-				<p>Waiting for the host to start the game.</p>
+				<p>{{LobbyWaiting}}</p>
 			</div>
 
 			<div id='closedLobby'>
-				<p>Game in session. The lobby for this game is closed</p>
+				<p>{{LobbyGameInSession}}</p>
 				<!--<p>If this is a mistake, reach out to the game's host. They can choose to allow new players to join mid game.</p>-->
 
 			</div>

@@ -125,7 +125,14 @@ function hasShipPair(ships: [string, string][], pony1: string, pony2: string)
 		}
 	}
 
-	expect(val).toBe(true);
+	try
+	{
+		expect(val).toBe(true);
+	}	
+	catch(e)
+	{
+		throw new Error("Expected pair " + pony1 + "/" + pony2);
+	}
 }
 
 function evalGoalLogic(model: GameModel, goalLogic: string): boolean
@@ -359,6 +366,89 @@ export default function(){
 		});
 	})
 
+
+	group("changeling swap", () =>{
+
+		//   B-C-D       B-X-D
+		//   |      ->   | |
+		// S-X-A       S-C-A
+
+		let game: GameModel, player: MockPlayer;
+
+		let start = "Core.Start.FanficAuthorTwilight"
+		let changeling = "Core.Pony.UnicornChangeling";
+		let ponyA = "Core.Pony.DramaticallyWoundedRarity";
+		let ponyB = "Core.Pony.StarswirlTheBearded";
+		let ponyC = "Core.Pony.BrokenWingRainbowDash";
+		let ponyD = "Core.Pony.BerryPunch";
+
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom"
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon"
+		let ship3 = "Core.Ship.CheckingItOffMyList";
+		let ship4 = "Core.Ship.CabinInTheWoodsAwooo";
+		let ship5 = "Core.Ship.Amnesia";
+		let ship6 = "Core.Ship.BeachEpisode";
+
+		beforeEach(() => {
+
+			[game, player] = setupGame();
+			player.grab(ponyA, ponyB, ponyC, ponyD, changeling, ship1, ship2, ship3, ship4, ship5, ship6);
+
+			player.move(ship1, "hand", "sr,0,0");
+			player.move(changeling, "hand", "p,1,0");
+			player.move(ship2, "hand", "sr,1,0");
+			player.move(ponyA, "hand", "p,2,0");
+			player.move(ship3, "hand", "sd,1,-1");
+			player.move(ponyB, "hand", "p,1,-1");
+			player.move(ship4, "hand", "sr,1,-1");
+			player.move(ponyC, "hand", "p,2,-1");
+			player.move(ship5, "hand", "sr,2,-1");
+			player.move(ponyD, "hand", "p,3,-1");
+
+			player.endTurn();
+
+			player.move(ship6, "hand", "sd,2,-1"); // activate a swap ability
+
+			player.move(ponyC, "p,2,-1", "offset,2,-1");
+			player.move(changeling, "p,1,0", "p,2,-1");
+			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
+			player.move(ponyC, "offset,2,-1", "p,1,0");
+		});
+
+		test("changeling swap breaks changeling ships", () =>{
+
+			let brokenShips = game.turnstate!.brokenShips;
+
+			expect(brokenShips.length).toBe(4);
+			hasShipPair(brokenShips, changeling+":0", start);
+			hasShipPair(brokenShips, changeling+":0", ponyA);
+			hasShipPair(brokenShips, changeling+":0", ponyB);
+			hasShipPair(brokenShips, ponyC, ponyD);
+
+		});
+
+		test("changeling swap played ships", () =>{
+
+			let playedShips = game.turnstate!.playedShips;
+
+			expect(playedShips.length).toBe(5);
+			hasShipPair(playedShips, changeling+":1", ponyB);
+			hasShipPair(playedShips, changeling+":1", ponyA);
+			hasShipPair(playedShips, changeling+":1", ponyD);
+			hasShipPair(playedShips, ponyC, start);
+			hasShipPair(playedShips, ponyC, ponyA);
+	
+		});
+
+		test("changeling swap played ponies", () =>{
+			expect(game.turnstate!.playedPonies.length).toBe(0);		
+		});
+
+		test("changeling swap played ship cards", () =>{
+			expect(game.turnstate!.playedShipCards.length).toBe(1);		
+		});
+
+	});
 	
 
 	test("BreakShip: It's not evil w/ changeling", () =>{

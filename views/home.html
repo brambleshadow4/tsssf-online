@@ -67,6 +67,12 @@
 				background-color: white;
 			}
 
+			.languages img
+			{
+				height: 30px;
+				width: 30px;
+			}
+
 			.footerLinks img
 			{
 				height: 30px;
@@ -121,12 +127,20 @@
 		<div class='split'>
 			<div id="left">
 				<h1>Twilight Sparkle's<br>Secret Shipfic Folder<br>Online</h1>
-				<h2>Beta 0.10.3</h2>
-				<p><strong>The Custom Cards Update</strong><br><a href="/info/addYourOwnCards">Learn how to upload your own cards</a></p>	
+				<h2>Beta 0.10.4</h2>
+				<p><strong>{{HomepageCustomCards}}</strong><br><a href="/info/addYourOwnCards">{{HomepageCustomCardsLearn}}</a></p>	
 				<div>
 					<!--div><button onclick="join()">Join Game</button></div-->
-					<div><button onclick="host()">Host Game</button></div>
+					<div><button onclick="host()">{{HomepageHostGame}}</button></div>
 				</div>
+				<p>
+					<!--<span class='languages'>
+						<a href="/?lang=en-US"><img src="/img/lang/en-US.png" /></a>
+						<a href="/?lang=es-ES"><img src="/img/lang/es-ES.png" /></a>
+						<a href="/?lang=zz-ZZ">Test Lang</a>
+					</span><br>
+					<span>{{HomepageTranslatedBy}}</span>-->
+				</p>
 			</div>
 			<div id='right'>
 				<img src="/img/tsssf-box.png">
@@ -137,18 +151,18 @@
 			<div class='footerLinks'>
 				<a href="http://www.secretshipfic.com/">
 					<img id='shipficlogo' src='/img/shipficWebsiteLogo.png' />
-					<span>About the game</span>
+					<span>{{HomepageAboutTheGame}}</span>
 				</a>
 				<a href="https://github.com/brambleshadow4/tsssf-online">
 					<img src="/img/GitHub.png" />
-					<span>Source code</span></a>
+					<span>{{HomepageSourceCode}}</span></a>
 				<a href="https://discord.gg/WQVBUgv">
 					<img src='/img/discord.svg' />
-					<span>Submit a bug</span>
+					<span>{{HomepageSubmitBug}}</span>
 				</a>
 				<a href="https://discord.me/kefentse">
 					<img src='/img/discord.svg' />
-					<span>Find Players</span>
+					<span>{{HomepageFindPlayers}}</span>
 				</a>
 			</div>
 		</footer>

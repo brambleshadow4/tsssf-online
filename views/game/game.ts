@@ -60,6 +60,8 @@
 */
 
 import * as cm from "../../server/cardManager.js";
+import s from "../tokens.js";
+
 import {
 	isPony, 
 	isGoal, 
@@ -92,6 +94,7 @@ import {
 	updateHand,
 	initPeripherals,
 	openCardSelect,
+	openSearchCardSelect,
 	customCardsPopup
 } from "./peripheralComponents.js";
 
@@ -367,9 +370,9 @@ export function updateTurnstate()
 	{
 		document.body.classList.remove("nomove");
 
-		div.innerHTML = "<div>It is currently your turn</div>";
+		div.innerHTML = "<div>" + s.GameYourTurn + "</div>";
 		var button = document.createElement('button');
-		button.innerHTML = "End My Turn";
+		button.innerHTML = s.GameEndMyTurnButton;
 		div.appendChild(button);
 
 		button.onclick = function()
@@ -381,13 +384,13 @@ export function updateTurnstate()
 	{
 		document.body.classList.add("nomove");
 
-		div.innerHTML = `<div>It is currently ${turnstate.currentPlayer}'s turn </div>`;
+		div.innerHTML = `<div>`+ s.GamePlayerTurn.replace("{0}", model.turnstate.currentPlayer) + `</div>`;
 
 
 		var thisPlayer = model.players.filter(x => x.name == turnstate.currentPlayer)[0];
 
 		if(thisPlayer && thisPlayer.disconnected)
-			div.innerHTML += "<div>Their turn will end if they do not reconnect in < 15s</div>";
+			div.innerHTML += "<div>" + s.GameDisconnectTimeout + "</div>";
 	}
 
 	updateEffects();
@@ -529,12 +532,13 @@ function updateEffects()
 
 			if(decs.shipWithEverypony)
 			{
-				addTempSymbol(element, "star", "This pony is shipped with every other pony on the grid");
+				addTempSymbol(element, "star", s.GameEffectShippedWithEveryPony);
 			}
 
 			if(decs.fullCopy)
 			{
-				addTempSymbol(element, "star", "Copying " + decs.fullCopy.substring(decs.fullCopy.lastIndexOf(".")+1));
+				let caption = s.GameEffectCopying.replace("{0}", decs.fullCopy.substring(decs.fullCopy.lastIndexOf(".")+1));
+				addTempSymbol(element, "star", caption);
 			}
 		}	
 	}	
@@ -666,7 +670,7 @@ export function isValidMove(cardDragged: Card, targetCard: Card, endLocation: Lo
 		return false;
 	}
 
-	return (targetCard == "blank:ship"    && (isShip(cardDragged) || cm.inPlay()[cardDragged].action == "ship")
+	return (targetCard == "blank:ship" && (isShip(cardDragged) || cm.inPlay()[cardDragged].action == "ship")
 		|| (targetCard == "blank:pony" && isPonyOrStart(cardDragged))
 	);
 }
@@ -709,7 +713,6 @@ export async function moveCard(
 
 	if(startLocation != cardLocations[card])
 	{
-
 		// if another player moves card A to a goal/board location L at the same time as you move card B,
 		// you move B to L, then message arrives to move A to L,
 		// then message arives to move B back, but it's no longer at L.
@@ -1171,7 +1174,6 @@ function changelingAction(type: string)
 				case "earth":
 				case "pegasus":
 
-
 					disguises = disguises.filter(x => slashStringToSet(cards[x].race).has(type));
 					break;
 				case "nonAlicornFemale":
@@ -1210,7 +1212,7 @@ function changelingAction(type: string)
 			if(!disguises.length && !newDisguise)
 				return;
 
-			newDisguise = newDisguise || await openCardSelect("Select Disguise", "Choose a pony to disguise as", disguises);
+			newDisguise = newDisguise || await openSearchCardSelect(s.PopupTitleSelectDisguise, s.PopupChooseDisguise, disguises);
 
 			if(!newDisguise)
 				return
@@ -1227,8 +1229,6 @@ async function fullCopyAction(card: Card)
 	let model = win.model;
 	if(model.turnstate)
 	{
-
-
 		var copyOptions = Object.keys(model.board).filter(x => x.startsWith("p,") && model.board[x].card && !isBlank(model.board[x].card)).map(x => model.board[x].card);
 
 		copyOptions = copyOptions.filter(x => x != card);
@@ -1236,7 +1236,7 @@ async function fullCopyAction(card: Card)
 		if(!copyOptions.length) { return; }
 
 
-		var cardToCopy = await openCardSelect("Copy", "Choose a pony to copy", copyOptions);
+		var cardToCopy = await openCardSelect(s.PopupTitleCopy, s.PopupChoosePonyToCopy, copyOptions);
 
 		setCardProp(card, "fullCopy", cardToCopy);
 	}
@@ -1314,7 +1314,7 @@ async function makePrincessAction(shipCard: Card)
 	var ponies = getNeighborCards(shipCard);
 
 
-	var ponyCard = await openCardSelect("Special", "Choose a new princess", ponies.filter(x => cm.inPlay()[x].keywords.indexOf("Changeling") === -1), true);
+	var ponyCard = await openCardSelect(s.PopupTitleSpecial, s.PopupChoosePrincess, ponies.filter(x => cm.inPlay()[x].keywords.indexOf("Changeling") === -1), true);
 
 	if(ponyCard)
 	{
@@ -1329,7 +1329,7 @@ async function makePrincessAction(shipCard: Card)
 async function genderChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Gender Change", "Choose a pony to change gender", ponies, true);
+	var ponyCard = await openCardSelect(s.PopupTitleGenderChange, s.PopupChoosePonyToChangeGender, ponies, true);
 
 	if(!ponyCard) return;
 
@@ -1364,7 +1364,7 @@ async function shipWithEveryponyAction(ponyCard: Card)
 		}
 	}
 
-	var chosen = await openCardSelect("Special", "Choose a pony to ship with everypony", ponies, true);
+	var chosen = await openCardSelect(s.PopupTitleSpecial, s.PopupChoosePonyToShipWithEverypony, ponies, true);
 
 	if(chosen)
 	{
@@ -1375,7 +1375,7 @@ async function shipWithEveryponyAction(ponyCard: Card)
 async function cloneAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Clone", "Choose a pony to count as two ponies", ponies.filter(x => !cm.inPlay()[x].count), true);
+	var ponyCard = await openCardSelect(s.PopupTitleClone, s.PopupChooseClone, ponies.filter(x => !cm.inPlay()[x].count), true);
 
 	if(!ponyCard) return;
 
@@ -1389,7 +1389,7 @@ async function cloneAction(shipCard: Card)
 async function timelineChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
-	var ponyCard = await openCardSelect("Timeline Change","Choose a pony to gain the <br> time traveller symbol", ponies, true);
+	var ponyCard = await openCardSelect(s.PopupTitleTimelineChange, s.PopupChooseTimlinePony, ponies, true);
 
 	if(!ponyCard) return;
 
@@ -1405,14 +1405,15 @@ async function keywordChangeAction(shipCard: Card)
 {
 	var ponies = getNeighborCards(shipCard);
 
-	var output = await createPopup("Keyword Change", true, function(accept)
+	var output = await createPopup(s.PopupTitleKeywordChange, true, function(accept)
 	{
 		var element = document.createElement('div');
 		element.className = "popupPage"
 
 		var selectedPony: Card;
 		var h1 = document.createElement('h1');
-		h1.innerHTML = "Pick a keyword";
+		h1.className = "no-top-margin";
+		h1.innerHTML = s.PopupTextPickAKeyword;
 		element.appendChild(h1);
 
 		var card1 = makeCardElement(ponies[0]);
@@ -1483,7 +1484,7 @@ function addKeywordsAction(...keywords: string[])
 	return async function(shipCard: Card)
 	{
 		var ponies = getNeighborCards(shipCard);
-		var ponyCard = await openCardSelect("Keyword Change","Choose a pony to gain keywords", ponies, true);
+		var ponyCard = await openCardSelect(s.PopupTitleKeywordChange, s.PopupChoosePonyForKeywords, ponies, true);
 
 		if(!ponyCard) return;
 
@@ -1543,7 +1544,7 @@ async function raceGenderChangeAction(shipCard: Card)
 
 function raceChangePopup(ponies: Card[])
 {
-	return createPopup("Race Change", true, function(acceptFn)
+	return createPopup(s.PopupTitleRaceChange, true, function(acceptFn)
 	{
 		var selectedPony: Card;
 		var selectedRace: string;
@@ -1552,7 +1553,8 @@ function raceChangePopup(ponies: Card[])
 		div.classList.add('popupPage');
 
 		var h1 = document.createElement('h1');
-		h1.innerHTML = "Choose a pony and select their new race";
+		h1.className = "no-top-margin";
+		h1.innerHTML = s.PopupChoosePonyAndRace;
 		div.appendChild(h1)
 
 		var buttonDiv = document.createElement('div')
@@ -1646,7 +1648,7 @@ function raceChangePopup(ponies: Card[])
 
 function raceGenderChangePopup(ponies: Card[])
 {
-	return createPopup("Change Gender", true, function(acceptFn)
+	return createPopup(s.PopupTitleGenderChange, true, function(acceptFn)
 	{
 		var selectedPony = "";
 		var selectedRace = "";
@@ -1656,7 +1658,8 @@ function raceGenderChangePopup(ponies: Card[])
 		div.classList.add('popupPage');
 
 		var h1 = document.createElement('h1');
-		h1.innerHTML = "Choose a pony and select their new race/gender";
+		h1.className = "no-top-margin";
+		h1.innerHTML = s.PopupChoosePonyRaceAndGender;
 		div.appendChild(h1)
 
 		var buttonDiv = document.createElement('div')

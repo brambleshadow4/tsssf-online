@@ -9,7 +9,9 @@ import {
 	PackListHeader,
 	PackListItem,
 	PackListPack
-} from "../../server/lib.js"
+} from "../../server/lib.js";
+
+import texts from "../tokens.js";
 
 
 import * as cm from "../../server/cardManager.js";
@@ -109,7 +111,7 @@ function loadCardPages(options: GameOptions)
 
 	if(options.customCards.descriptions.length)
 	{
-		allPacks.push({"h": "Uploads", "id":"uploadBanner"});
+		allPacks.push({"h": texts.LobbyUploads, "id":"uploadBanner"});
 		allPacks = allPacks.concat(options.customCards.descriptions);
 	}
 
@@ -183,7 +185,7 @@ function loadCardPages(options: GameOptions)
 
 	if(customStartCards.length && uploadHeader)
 	{
-		uploadHeader.innerHTML += "<br><span class='subheading'>Uploaded start cards are in the 'Start Card' section</span>";
+		uploadHeader.innerHTML += "<br><span class='subheading'>" + texts.LobbyUploadStartCardLocation + "</span>";
 	}
 
 	var allStartCards = startCardNames.concat(customStartCards)
@@ -217,7 +219,7 @@ function loadCardPages(options: GameOptions)
 			switch(cardEl.getAttribute('card'))
 			{	
 				case "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord":
-					infoText = "Goals will not automatically turn green if you use this start card";
+					infoText = texts.LobbyDiscordStartWarning;
 					break;
 			}
 
@@ -430,27 +432,27 @@ var animCounter = 0;
 function loadingPlayerAnimation()
 {
 	requestAnimationFrame(loadingPlayerAnimation);
-	var txt = "<em>player joining</em>";
+	var txt = `<em>${texts.LobbyPlayerJoining}</em>`;
 	var doUpdate = false;
 
 	if(animCounter == 20)
 	{
-		txt = "<em>player joining.</em>";
+		txt = `<em>${texts.LobbyPlayerJoining}.</em>`;
 		doUpdate = true;
 	}
 	if(animCounter == 40)
 	{
-		txt = "<em>player joining..</em>";
+		txt = `<em>${texts.LobbyPlayerJoining}..</em>`;
 		doUpdate = true;
 	}
 	if(animCounter == 60)
 	{
-		txt = "<em>player joining...</em>";
+		txt = `<em>${texts.LobbyPlayerJoining}...</em>`;
 		doUpdate = true;
 	}
 	if(animCounter >=80)
 	{
-		txt = "<em>player joining</em>";
+		txt = `<em>${texts.LobbyPlayerJoining}</em>`;
 		doUpdate = true;
 		animCounter = -1;
 	}

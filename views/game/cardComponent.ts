@@ -28,7 +28,7 @@ import {
 	isValidMove
 } from "./game.js";
 import {broadcastMove} from "./network.js";
-
+import s from "../tokens.js";
 import {createPopup} from "./popupComponent.js";
 
 var isDkeyPressed = false;
@@ -727,7 +727,7 @@ function removeShiftHover(element: CardElement)
 
 function pointsPopup(points: number[])
 {
-	return createPopup("Choose Point Amount", true, function(accept: ((value?: any) => any)) 
+	return createPopup(s.PopupTitleChoosePoints, true, function(accept: ((value?: any) => any)) 
 	{
 		var div = document.createElement('div');
 		div.className = "pointAmountPopup";
@@ -754,7 +754,7 @@ function pointsPopup(points: number[])
 				
 
 				let button = document.createElement('button');
-				button.innerHTML = "Other";
+				button.innerHTML = s.PopupOtherButton;
 				button.onclick = function()
 				{
 					if(!isNaN(Number(input.value)))
@@ -867,6 +867,8 @@ export function addTempSymbol(element: CardElement, symbol: string, tooltip?: st
 function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 {
 	let cards = cm.inPlay();
+
+	console.log(card);
 
 	if(isAnon(card))
 	{
