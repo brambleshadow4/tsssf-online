@@ -1,6 +1,6 @@
 import {isGoal, Card} from "../../server/lib.js";
 import * as cm from "../../server/cardManager.js";
-
+import s from "../tokens.js";
 
 /**
  * Creates a cardSearchBar control
@@ -20,7 +20,7 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 	let activeFilters = document.createElement('span');
 	activeFilters.className = "csbActiveFilters";
 
-	input.placeholder = "Search name, race, gender, etc.";
+	input.placeholder = s.SearchBarPlaceholder;
 
 	input.onkeydown = function(e)
 	{

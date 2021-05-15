@@ -1,4 +1,5 @@
 import * as cm from "../../server/cardManager.js";
+import s from "../tokens.js";
 
 import {isStart} from "../../server/lib.js" 
 import {makeCardElement} from "../game/cardComponent.js";
@@ -21,16 +22,16 @@ export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: st
 	bar.className = 'bar';
 
 	var noneButton = document.createElement('button');
-	noneButton.innerHTML = "None";
+	noneButton.innerHTML = s.CardSelectNone;
 	noneButton.className = 'selected';
 	noneButton.onclick = buttonToggle("None");
 
 	var someButton = document.createElement('button');
-	someButton.innerHTML = "Some";
+	someButton.innerHTML = s.CardSelectSome;
 	someButton.onclick = buttonToggle("Some");
 
 	var allButton = document.createElement('button');
-	allButton.innerHTML = "All";
+	allButton.innerHTML = s.CardSelectAll;
 	allButton.className = 'allButton';
 	allButton.setAttribute('deck', deckPrefix);
 	allButton.onclick = buttonToggle("All");

@@ -7,8 +7,8 @@ import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js"
 
-import en_us from "../i18n/en-us.js";
-import zz_zz from "../i18n/zz-zz.js";
+import en_us from "../views/tokens.js";
+import zz_zz from "../i18n/zz-zz/views/tokens.js";
 
 const defaultLocale = "en-us";
 const translations = {
@@ -21,7 +21,7 @@ for(let lang in translations)
 {
 	for(let key in translations[defaultLocale])
 	{
-		translations[lang][key] = translations[lang][key] || translations[lang][defaultLocale]
+		translations[lang][key] = translations[lang][key] || translations[defaultLocale][key]		
 	}
 }
 
@@ -56,7 +56,20 @@ catch(e){}
 
 
 
-app.get('/', tokenizeFile("./views/home.html"));
+app.get('/', function(req:any,res:any, next:any){
+
+	console.log(req.cookies);
+
+	switch(req.query.lang){
+		case "en-us":
+		case "zz-zz":
+			res.cookie('lang', req.query.lang)
+	}
+
+
+	next();
+}, tokenizeFile("./views/home.html"));
+
 app.get('/img/**', fmap("/img/**", "./img/**"));
 app.get('/packs/**', fmap("/packs/**", "./packs/**"));
 
@@ -94,10 +107,11 @@ app.get("/viewSelector.js", file("./views/viewSelector.js"))
 app.get("/lib.js", file("./server/lib.js"))
 app.get("/server/lib.js", file("./server/lib.js"))
 
-app.get("/i18n/en-us.js", function(req, res){
+app.get("/tokens.js", function(req, res){
 
 	res.setHeader("Content-Type", "text/javascript");
-	res.send("export default " + JSON.stringify(translations["en-us"]));
+	let lang = req.cookies.lang || defaultLocale;
+	res.send("export default " + JSON.stringify(translations[lang]));
 });
 
 
@@ -107,19 +121,19 @@ app.get("/server/packLib.js", file("./server/packLib.js"))
 app.get("/server/goalCriteria.js", file("./server/goalCriteria.js"))
 
 app.get("/rulebook.html", file("./views/rulebook.html"))
+app.get("/quickRules.html", file("./views/quickRules.html"))
 app.get("/faq.html", file("./views/faq.html"))
 app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
 
 app.get("/lobby", function(req,res)
 {
-
 	let query = req.originalUrl.substring(req.originalUrl.indexOf("?")+1);
 
 	var key = query.toUpperCase();
 
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
-		sendIfExists("./views/app.html", res);
+		sendIfExists("./views/app.html", req.cookies.lang, res);
 	}
 	else
 	{
@@ -135,7 +149,7 @@ app.get("/game", function(req, res)
 
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
-		sendIfExists("./views/app.html", res);
+		sendIfExists("./views/app.html", req.cookies.lang, res);
 	}
 	else
 	{
@@ -178,8 +192,6 @@ app.get("/host", function(req, res){
 
 app.get("/**", function(req,res){ 
 
-	console.log("redirect");
-	console.log(req.url);
 	res.redirect("/"); 
 
 });
@@ -214,13 +226,13 @@ else
 
 function tokenizeFile(url: string)
 {
-	return function(req: Request, res: any)
+	return function(req: any, res: any)
 	{
 		if(fs.existsSync(url))
 		{
 			let fileText = fs.readFileSync(url, "utf8");
 
-			fileText = addTranslatedTokens(fileText, "en-us");
+			fileText = addTranslatedTokens(fileText, req.cookies.lang || defaultLocale);
 
 			if(url.indexOf(".js") > -1)
 			{
@@ -254,15 +266,15 @@ function addTranslatedTokens(text: string, lang: string)
 
 function file(url: string)
 {
-	return function(req: Request, res: Response){
+	return function(req: any, res: Response){
 
-		sendIfExists(url, res);
+		sendIfExists(url, req.cookies.lang, res);
 	} as any
 }
 
 function fmap(routeUri: string, fileUrl: string): any
 {
-	return function(req: {originalUrl: string}, res: Response){
+	return function(req: any, res: Response){
 
 
 		let routePrefix = routeUri.substring(0,routeUri.indexOf("**"));
@@ -273,14 +285,22 @@ function fmap(routeUri: string, fileUrl: string): any
 		url = url.replace(/%20/g," ");
 
 		//setTimeout(function(){
-		sendIfExists(url, res);
+		sendIfExists(url, req.cookies.lang, res);
 		//},1000)	
 	}
 }
 
-function sendIfExists(url:string, res: any)
+function sendIfExists(url:string, lang: string, res: any)
 {
-	if(fs.existsSync(url))
+
+	let lang2 = lang || "";
+	let translatedUrl = "./i18n/" + lang2 + url.replace("./", "/");
+
+	if(fs.existsSync(translatedUrl))
+	{
+		res.sendFile(translatedUrl, {root:"./"})
+	}
+	else if(fs.existsSync(url))
 	{
 		res.sendFile(url, {root:"./"})
 	}

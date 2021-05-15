@@ -16,7 +16,7 @@ var HEAD = `
 var HTML = `
 
 <div id='playerArea' class='playerArea'>
-	<h2 class="noTopMargin">Players</h2>
+	<h2 class="noTopMargin">{{LobbyPlayers}}</h2>
 	<div id='playerList'></div>
 </div>
 

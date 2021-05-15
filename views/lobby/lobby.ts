@@ -11,7 +11,7 @@ import {
 	PackListPack
 } from "../../server/lib.js";
 
-import texts from "../../i18n/en-us.js";
+import texts from "../tokens.js";
 
 
 import * as cm from "../../server/cardManager.js";
@@ -432,27 +432,27 @@ var animCounter = 0;
 function loadingPlayerAnimation()
 {
 	requestAnimationFrame(loadingPlayerAnimation);
-	var txt = "<em>player joining</em>";
+	var txt = `<em>${texts.LobbyPlayerJoining}</em>`;
 	var doUpdate = false;
 
 	if(animCounter == 20)
 	{
-		txt = "<em>player joining.</em>";
+		txt = `<em>${texts.LobbyPlayerJoining}.</em>`;
 		doUpdate = true;
 	}
 	if(animCounter == 40)
 	{
-		txt = "<em>player joining..</em>";
+		txt = `<em>${texts.LobbyPlayerJoining}..</em>`;
 		doUpdate = true;
 	}
 	if(animCounter == 60)
 	{
-		txt = "<em>player joining...</em>";
+		txt = `<em>${texts.LobbyPlayerJoining}...</em>`;
 		doUpdate = true;
 	}
 	if(animCounter >=80)
 	{
-		txt = "<em>player joining</em>";
+		txt = `<em>${texts.LobbyPlayerJoining}</em>`;
 		doUpdate = true;
 		animCounter = -1;
 	}
