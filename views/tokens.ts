@@ -1,11 +1,12 @@
 export default {
 	"HomepageAboutTheGame": "About the game",
-	"HomepageCustomCards" : "The Custom Cards Update",
+	"HomepageCustomCards": "The Custom Cards Update",
 	"HomepageCustomCardsLearn" : "Learn how to upload your own cards",
-	"HomepageHostGame" : "Host Game",
-	"HomepageSourceCode" : "Source code",
-	"HomepageSubmitBug" : "Submit a bug",
-	"HomepageFindPlayers" : "Find Players",
+	"HomepageHostGame": "Host Game",
+	"HomepageSourceCode": "Source code",
+	"HomepageSubmitBug": "Submit a bug",
+	"HomepageFindPlayers": "Find Players",
+	"HomepageTranslationBy": "",
 
 
 	"LobbyJoinGame": "Join Game",
@@ -34,6 +35,8 @@ export default {
 	"LobbyDiscordStartWarning": "Goals will not automatically turn green if you use this start card",
 	"LobbyUploadStartCardLocation": "Uploaded start cards are in the 'Start Card' section",
 	"LobbyPlayerJoining": "player joining",
+	"LobbyMiniExpansions": "Mini Expansions",
+	"LobbyUploads": "Uploads",
 
 
 	"GameYourTurn": "It is currently your turn",
@@ -57,7 +60,7 @@ export default {
 	"PopupTitleDiscardedShips": "Discarded ships",
 	"PopupTitleDiscardedGoals": "Discarded goals",
 	"PopupTitleHostSettings": "Host Settings",
-
+	"PopupTitleChoosePoints": "Choose Point Amount",
 
 	"PopupChooseDisguise": "Choose a pony to disguise as",
 	"PopupChoosePonyToCopy": "Choose a pony to copy",
@@ -71,6 +74,7 @@ export default {
 	"PopupChoosePonyRaceAndGender": "Choose a pony and select their new race/gender",
 	"PopupTextPickAKeyword": "Pick a keyword",
 	"PopupTextWonGoals": "{0}'s won goals", // {0} is the player name
+	"PopupOtherButton": "Other",
 
 	"HostSettingKeepLobbyOpen": "Let players join mid-game",
 	"HostSettingNewGameButton": "New Game",
@@ -82,8 +86,8 @@ export default {
 
 	"HelpTabQuickStart": "Quick Start",
 	"HelpTabQuickRules": "Quick Rules",
-	"HelpTabFullRules": 'Full Rules',
-	"HelpTabFAQ": 'FAQ',
+	"HelpTabFullRules": "Full Rules",
+	"HelpTabFAQ": "FAQ",
 	"HelpTabCardReference": "Card Reference",
 
 	"PopupTextPonyCards": "Pony Cards",

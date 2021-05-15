@@ -58,16 +58,16 @@ catch(e){}
 
 app.get('/', function(req:any,res:any, next:any){
 
-	console.log(req.cookies);
-
 	switch(req.query.lang){
 		case "en-us":
 		case "zz-zz":
 			res.cookie('lang', req.query.lang)
+			res.redirect("/?t=" + new Date().getTime());
+			return;
 	}
 
-
 	next();
+	
 }, tokenizeFile("./views/home.html"));
 
 app.get('/img/**', fmap("/img/**", "./img/**"));
@@ -98,7 +98,7 @@ app.get("/info/upload1.png", file("./views/addYourOwnCards/upload1.png"))
 app.get("/info/upload2.png", file("./views/addYourOwnCards/upload2.png"))
 
 app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
-app.get("/lobby/packOrder.js", file("./views/lobby/packOrder.js"))
+app.get("/lobby/packOrder.js", tokenizeFile("./views/lobby/packOrder.js"))
 
 
 
@@ -336,7 +336,28 @@ server.on('upgrade', (request, socket, head) => {
 if(process.argv[3])
 {
 	let baseRules = {
-		cards:["Core.*"],
+		cardDecks:["Core.*"],
+		ruleset: "turnsOnly",
+		keepLobbyOpen: true
+	};
+	let allCards = {
+		cardDecks:[
+			"Core.*",
+			"EC.*",
+			"PU.*",
+			"NoHoldsBarred.*",
+			"HorriblePeople.2014ConExclusives.*",
+			"HorriblePeople.2015ConExclusives.*",
+			"HorriblePeople.2015Workshop.*",
+			"HorriblePeople.AdventurePack.*",
+			"HorriblePeople.DungeonDelvers.*",
+			"HorriblePeople.FlufflePuff.*",
+			"HorriblePeople.GraciousGivers.*",
+			"HorriblePeople.Hearthswarming.*",
+			"HorriblePeople.Mean6.*",
+			"HorriblePeople.Misc.*",
+			"HorriblePeople.WeeabooParadaisu.*",
+		],
 		ruleset: "turnsOnly",
 		keepLobbyOpen: true
 	};
@@ -344,14 +365,33 @@ if(process.argv[3])
 	{
 		case "1":
 			tsssfServer.openLobby("DEV");
-			tsssfServer.games.DEV.setLobbyOptions(baseRules);
-			tsssfServer.games.DEV.startGame(["Core.Pony.AloeAndLotus"]);
+			tsssfServer.games.DEV.setLobbyOptions(allCards);
+			tsssfServer.games.DEV.startGame([
+				"Core.Ship.CanITellYouASecret",
+				"Core.Ship.DoYouThinkLoveCanBloomEvenOnABattlefield",
+				"Core.Ship.CultMeeting",
+				"Core.Ship.YerAPrincessHarry",
+				"EC.Ship.BlindDate",
+				"EC.Ship.ScienceExperiments",
+				"HorriblePeople.2015ConExclusives.Ship.ObjectofAdoration",
+				"HorriblePeople.Mean6.Ship.TheNightmareBecomesYou",
+				"HorriblePeople.GraciousGivers.Ship.DunkedInTheDatingPool"
+			]);
 			break;
 	
 		case "2":
 				tsssfServer.openLobby("DEV");
-				tsssfServer.games.DEV.setLobbyOptions(baseRules);
-				tsssfServer.games.DEV.startGame(["Core.Ship.ShmoopyBoo","Core.Ship.WantItNeedIt" ]);
+				tsssfServer.games.DEV.setLobbyOptions(allCards);
+				tsssfServer.games.DEV.startGame([
+					"NoHoldsBarred.Pony.Sleight",
+					"NoHoldsBarred.Pony.Plushling",
+					"NoHoldsBarred.Pony.KingVespid",
+					"Core.Pony.EarthChangeling",
+					"Core.Pony.UnicornChangeling",
+					"Core.Pony.PegasusChangeling",
+					"Core.Pony.QueenChrysalis",
+					"NoHoldsBarred.Pony.PixelPrism"
+				]);
 				break;
 		}
 }

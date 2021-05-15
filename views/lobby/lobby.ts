@@ -111,7 +111,7 @@ function loadCardPages(options: GameOptions)
 
 	if(options.customCards.descriptions.length)
 	{
-		allPacks.push({"h": "Uploads", "id":"uploadBanner"});
+		allPacks.push({"h": texts.LobbyUploads, "id":"uploadBanner"});
 		allPacks = allPacks.concat(options.customCards.descriptions);
 	}
 

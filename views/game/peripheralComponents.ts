@@ -353,7 +353,7 @@ export function updateWinnings()
 		var scoreElement = document.createElement('span');
 		scoreElement.className = 'score';
 
-		scoreElement.innerHTML =  points + "pts";
+		scoreElement.innerHTML = points + "pts";
 		element.appendChild(scoreElement);
 	}
 	
@@ -436,8 +436,8 @@ export function updatePlayerList()
 
 		div.onclick = function()
 		{
-			openSearchCardSelect("Goals", 
-				s.PopupTextWonGoals.replace("{0}", player.name),
+			openSearchCardSelect(s.PopupTextWonGoals.replace("{0}", player.name), 
+				"",
 				player.winnings.map((x: Winning) => x.card));
 		}
 

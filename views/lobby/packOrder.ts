@@ -28,7 +28,7 @@ var order: PackListItem[] =[
 		"startCards": []
 	},
 	{
-		"h": "Mini Expansions"
+		"h": "{{LobbyMiniExpansions}}"
 	},
 	{
 		"pack": "HorriblePeople.2014ConExclusives",
