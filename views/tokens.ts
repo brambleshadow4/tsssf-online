@@ -6,7 +6,8 @@ export default {
 	"HomepageSourceCode": "Source code",
 	"HomepageSubmitBug": "Submit a bug",
 	"HomepageFindPlayers": "Find Players",
-	"HomepageTranslationBy": "",
+	"HomepageTranslatedBy": "", 
+
 
 
 	"LobbyJoinGame": "Join Game",

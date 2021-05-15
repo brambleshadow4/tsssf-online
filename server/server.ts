@@ -7,23 +7,32 @@ import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js"
 
-import en_us from "../views/tokens.js";
-import zz_zz from "../i18n/zz-zz/views/tokens.js";
+import en_US from "../views/tokens.js";
+import es_ES from "../i18n/es-ES/views/tokens.js";
+import zz_ZZ from "../i18n/zz-ZZ/views/tokens.js";
 
-const defaultLocale = "en-us";
+
+
+const defaultLocale = "en-US";
 const translations = {
-	"en-us": en_us,
-	"zz-zz": zz_zz,
+	"en-US": en_US,
+	"es-ES": es_ES,
+	"zz-zz": zz_ZZ,
 } as any;
 
 
 for(let lang in translations)
 {
 	for(let key in translations[defaultLocale])
-	{
+	{	
+		console.log(key);
+		console.log(translations[lang][key] || translations[defaultLocale][key]);
+
 		translations[lang][key] = translations[lang][key] || translations[defaultLocale][key]		
 	}
 }
+
+console.log(es_ES);
 
 
 const app = express()
@@ -59,8 +68,10 @@ catch(e){}
 app.get('/', function(req:any,res:any, next:any){
 
 	switch(req.query.lang){
-		case "en-us":
-		case "zz-zz":
+		case "en-US":
+		case "es-ES":
+		case "zz-ZZ":
+
 			res.cookie('lang', req.query.lang)
 			res.redirect("/?t=" + new Date().getTime());
 			return;
@@ -256,7 +267,7 @@ function addTranslatedTokens(text: string, lang: string)
 	while(match)
 	{
 		let key = match[1]; 
-		text = text.replace(match[0], translations[lang][key] || translations["en-us"][key] || "");
+		text = text.replace(match[0], translations[lang][key] || translations[defaultLocale][key] || "");
 		match = pattern.exec(text)
 	}
 
