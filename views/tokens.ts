@@ -6,7 +6,7 @@ export default {
 	"HomepageSourceCode": "Source code",
 	"HomepageSubmitBug": "Submit a bug",
 	"HomepageFindPlayers": "Find Players",
-	"HomepageTranslatedBy": "", // "English translation made by brambleshadow4" English version doesn't need this message, but other translations should have this
+	"HomepageTranslatedBy": "", // "Translated by brambleshadow4" English version doesn't need this message, but other translations should have this
 
 
 	"LobbyJoinGame": "Join Game",
