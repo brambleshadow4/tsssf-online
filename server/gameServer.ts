@@ -669,20 +669,18 @@ export class GameModel implements GameModelShared
 							shippedWith = getConnectedPonies(game, loc).map(x => game.appendChangelingContext(x));
 						}
 
-
-						// Played ships have already been commited, so roll back them.
-						// broken ships haven't beent commited becasue the disguise hasn't applied yet. 
-						if(cc.method == "play"  || cc.method == "replace" || cc.method == "ship" )
+						// update played ships so they have the correct context.
+						if(cc.method == "play" || cc.method == "replace" || cc.method == "ship" || cc.method == "lovePoison")
 						{
 							for(let pony of shippedWith)
 							{
-								for(var i = 0; i < game.turnstate.playedShipsCommitted.length; i++)
+								for(var i = 0; i < game.turnstate.playedShips.length; i++)
 								{
-									var [p1, p2] = game.turnstate.playedShipsCommitted[i];
+									var [p1, p2] = game.turnstate.playedShips[i];
 
 									if(p1 == pony && p2 == oldChangeling || p2 == pony && p1 == oldChangeling )
 									{
-										game.turnstate.playedShipsCommitted[i] = [pony, newChangeling];
+										game.turnstate.playedShips[i] = [pony, newChangeling];
 										break;
 									}
 								}
@@ -703,15 +701,22 @@ export class GameModel implements GameModelShared
 							let oldShip = game.shipString(oldChangeling, pony);
 							let newShip = game.shipString(newChangeling, pony);
 
-							if((cc.method != "swap" || !preSwapShippedTo.has(pony)) && game.turnstate.shipSet.has(oldShip))
+							let preSwapCondition = false;
+
+							if(cc.method != "swap")
+							{
+								preSwapCondition = !preSwapShippedTo.has(pony)
+							}
+
+							if(preSwapCondition && game.turnstate.shipSet.has(oldShip))
 							{
 								// replace the [pony, changeling:old] ship with [pony, changeling:new]
 								game.turnstate.shipSet.delete(oldShip);
 								game.turnstate.shipSet.add(newShip);
 								
 							}
-						}
 
+						}
 					}
 					else if(prop == "keywords")
 					{
@@ -1236,9 +1241,7 @@ export class GameModel implements GameModelShared
 		var decks = ["Core.*"];
 		if(options.cardDecks)
 		{
-			//var allowedDecks = ["PU.*","EC.*"]
-			decks = options.cardDecks; //.filter( x => allowedDecks.indexOf(x) > -1);
-			//decks.push("Core.*");
+			decks = options.cardDecks;
 		}
 
 		cm.init(decks.concat([this.startCard]), this.customCards.cards);
@@ -1525,22 +1528,6 @@ export class GameModel implements GameModelShared
 		return broken;
 	}
 
-	private getPlayedShips(startSet: Set<string>, endSet: Set<string>)
-	{
-		var played:[Card,Card][] = [];
-
-		for(var ship of endSet)
-		{
-			if(!startSet.has(ship))
-			{
-				played.push(ship.split("/") as [Card, Card]);
-			}
-		}
-
-		return played;
-	}
-
-
 	private getSwappedCount(startPositions: {[loc: string]: Card}, endPositions: {[loc: string]: Card})
 	{
 		var count = 0;
@@ -1628,7 +1615,7 @@ export class GameModel implements GameModelShared
 		this.cardLocations[card] = serverEndLoc;
 
 
-		this.updateTurnstatePreMove(card, startLocation);
+		this.updateTurnstatePreMove(card, startLocation, endLocation);
 
 
 		// remove from old location
@@ -1726,9 +1713,6 @@ export class GameModel implements GameModelShared
 		}
 
 
-		
-
-
 		//postmove
 
 		this.updateTurnstatePostMove(card, startLocation, endLocation);
@@ -1767,25 +1751,30 @@ export class GameModel implements GameModelShared
 		this.checkIfGoalsWereAchieved();
 	}
 
-	private updateTurnstatePreMove(card: Card, startLocation: string): void
+	private updateTurnstatePreMove(card: Card, startLocation: string, endLocation: string): void
 	{
 		if(!this.turnstate) { return; }
 
 
-		if(this.isChangeling(card) && (isBoardLoc(startLocation) || isOffsetLoc(startLocation)))
-		{
-			if(this.board[startLocation] && this.board[startLocation].card == card)
-			{
-				let cc = this.turnstate.getChangeContext(card);
-				cc.method = "swap";
-				cc.preSwapShippedTo = getConnectedPonies(this, startLocation).map( x => this.appendChangelingContext(x));
-			}
-		}
 
-		if(this.isChangeling(card) && (startLocation == "hand" || startLocation == "ponyDiscardPile,top"))
+		if(this.isChangeling(card))
 		{
 			let cc = this.turnstate.getChangeContext(card);
-			cc.method = "play";
+
+			if(this.board[startLocation] && this.board[startLocation].card == card)
+			{
+				cc.method = "swap";
+				cc.preSwapShippedTo = getConnectedPonies(this, startLocation).map( x => this.appendChangelingContext(x));
+
+				if(this.turnstate.openPonyLocations.has(endLocation))
+				{
+					cc.method = "lovePoison";
+				}
+			}
+			else
+			{
+				cc.method = "play"; // could be play or replace, doesn't actually matter
+			}
 		}
 	}
 
@@ -1794,46 +1783,51 @@ export class GameModel implements GameModelShared
 		if(!this.turnstate) {return;}
 
 		var newSet = this.getCurrentShipSet();
+
 		var brokenShipsTentative = this.getBrokenShips(this.turnstate.shipSet, newSet);
-		var playedShipsTentative = this.getPlayedShips(this.turnstate.shipSet, newSet);
-
-
 		this.turnstate.brokenShips = this.turnstate.brokenShipsCommitted.concat(brokenShipsTentative);
-		this.turnstate.playedShips = this.turnstate.playedShipsCommitted.concat(playedShipsTentative);
-
 
 		var curPositionMap = this.getCurrentPositionMap();
 		var newlySwapped = this.getSwappedCount(this.turnstate.positionMap, curPositionMap)
 
 		this.turnstate.swaps = this.turnstate.swapsCommitted + newlySwapped;
 
-
 		if(commit)
 		{
 			this.turnstate.brokenShipsCommitted = this.turnstate.brokenShips;
-			this.turnstate.playedShipsCommitted = this.turnstate.playedShips;
+			//this.turnstate.playedShipsCommitted = this.turnstate.playedShips;
 			this.turnstate.swapsCommitted = this.turnstate.swaps;
 			this.turnstate.shipSet = newSet;
 			this.turnstate.positionMap = curPositionMap;
 		}
 	}
 
-	private commitCounts()
-	{
-
-	}
 
 	private updateTurnstatePostMove(card: Card, startLocation: Location, endLocation: Location)
 	{
 		if(!this.turnstate) { return }
 
 		if(isPony(card) 
-			&& (startLocation == "hand" || startLocation == "ponyDiscardPile,top")
+			&& (this.turnstate.openPonyLocations.has(endLocation) || startLocation == "hand" || startLocation == "ponyDiscardPile,top") // need both because replace powers aren't open.
 			&& isBoardLoc(endLocation))
 		{
 	
-			var cardContext = this.appendChangelingContext(card);
-			this.turnstate.playedPonies.push(cardContext);
+			let cardContext = this.appendChangelingContext(card);
+
+			if(startLocation == "hand" || startLocation == "ponyDiscardPile,top") // this will be false for love poisons
+			{
+				this.turnstate.playedPonies.push(cardContext);
+			}
+
+			let connectedPonies = getConnectedPonies(this, endLocation);
+
+			let newShips: [string,string][] = connectedPonies.map( x => [x, cardContext]);
+			this.turnstate.playedShips = this.turnstate.playedShips.concat(newShips);
+		}
+
+		if(isPony(card) && isBoardLoc(endLocation))
+		{
+			this.turnstate.openPonyLocations.delete(endLocation);
 		}
 
 		if(isShip(card) 
@@ -1841,7 +1835,22 @@ export class GameModel implements GameModelShared
 			&& isBoardLoc(endLocation))
 		{
 			this.turnstate.playedShipCards.push(card);
+
+			let connectedPonies = this.getShippedPonies(endLocation);
+
+			if(connectedPonies.length == 2)
+			{
+				this.turnstate.playedShips.push(connectedPonies as [string, string]);
+			}
+			else
+			{
+				var slots = getNeighborKeys(endLocation);
+				slots = slots.filter(x => !this.board[x]?.card);
+				slots.forEach(x => this.turnstate!.openPonyLocations.add(x));
+			}
 		}
+
+		
 
 
 		if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
@@ -1892,11 +1901,11 @@ export class Turnstate
 {	
 	public currentPlayer = "";
 	public overrides: {[key:string]: any} = {};
-	/*public tentativeShips: {[key: string]: any} = {};*/
+
+	public openPonyLocations: Set<string> = new Set();
 	
 	public playedPonies: Card[] = [];
 	public playedShips: [Card, Card][] = [];
-	public playedShipsCommitted: [Card, Card][] = [];
 	public playedShipCards: Card[] = [];
 
 	public playedThisTurn = new Set();

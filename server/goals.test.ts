@@ -229,6 +229,10 @@ export default function(){
 		let p2 = "Core.Pony.BonBon";
 		let changeling = "Core.Pony.UnicornChangeling";
 
+		// start -  p2 
+		//   |      |
+		//   p1  - change
+
 		beforeEach(() => {
 			[game, player] = setupGame();
 			
@@ -242,9 +246,6 @@ export default function(){
 
 			player.endTurn();
 		});
-
-
-
 
 		test("changeling redisguising breaks up existing ships", () =>{
 
@@ -294,9 +295,8 @@ export default function(){
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
 			playedShips = game.turnstate!.playedShips;
-			expect(playedShips.length).toBe(3);
+			expect(playedShips.length).toBe(2);
 			hasShipPair(playedShips, changeling+":1", startCard)
-			hasShipPair(playedShips, changeling+":2", startCard)
 			hasShipPair(playedShips, changeling+":2", p2)
 		});
 
@@ -316,7 +316,7 @@ export default function(){
 
 		// start - pony - change:1
 		//           |   
-		//       chnage:2
+		//        change:2
 
 		beforeEach(() =>{
 
@@ -341,6 +341,7 @@ export default function(){
 
 			player.move(lovePoison, "hand", "sd,1,0");
 			player.move(changeling, "p,2,0", "p,1,1");
+
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
 			brokenShips = game.turnstate!.brokenShips;
@@ -359,6 +360,7 @@ export default function(){
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
 			playedShips = game.turnstate!.playedShips;
+
 			expect(playedShips.length).toBe(2);
 			hasShipPair(playedShips, changeling+":1", pony)
 			hasShipPair(playedShips, changeling+":2", pony)
@@ -369,18 +371,18 @@ export default function(){
 
 	group("changeling swap", () =>{
 
-		//   B-C-D       B-X-D
-		//   |      ->   | |
-		// S-X-A       S-C-A
+		//   B-C-D       B-C-D        B-Y-D
+		//   |      ->   | |    ->    | |
+		// S-X-A       S-X-A        S-C-A
 
 		let game: GameModel, player: MockPlayer;
 
 		let start = "Core.Start.FanficAuthorTwilight"
 		let changeling = "Core.Pony.UnicornChangeling";
-		let ponyA = "Core.Pony.DramaticallyWoundedRarity";
-		let ponyB = "Core.Pony.StarswirlTheBearded";
-		let ponyC = "Core.Pony.BrokenWingRainbowDash";
-		let ponyD = "Core.Pony.BerryPunch";
+		let ponyA = "Core.Pony.ApplejackBackgroundPony";
+		let ponyB = "Core.Pony.BerryPunch";
+		let ponyC = "Core.Pony.Caramel";
+		let ponyD = "Core.Pony.DramaticallyWoundedRarity";
 
 		let ship1 = "Core.Ship.BadPonyGoToMyRoom"
 		let ship2 = "Core.Ship.BoredOnASundayAfternoon"
@@ -431,11 +433,7 @@ export default function(){
 
 			let playedShips = game.turnstate!.playedShips;
 
-			expect(playedShips.length).toBe(5);
-			hasShipPair(playedShips, changeling+":1", ponyB);
-			hasShipPair(playedShips, changeling+":1", ponyA);
-			hasShipPair(playedShips, changeling+":1", ponyD);
-			hasShipPair(playedShips, ponyC, start);
+			expect(playedShips.length).toBe(1);
 			hasShipPair(playedShips, ponyC, ponyA);
 	
 		});
