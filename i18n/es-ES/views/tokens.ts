@@ -1,6 +1,8 @@
 // Thanks to Wild Thunder06 + Mysterous science for helping translate this
 
 export default {
+	"Lang": "es-ES",
+
 	"HomepageAboutTheGame": "Sobre el juego",
 	"HomepageCustomCards": "Actualización de las cartas personalizadas",
 	"HomepageCustomCardsLearn" : "Aprende a subir tus propias cartas",

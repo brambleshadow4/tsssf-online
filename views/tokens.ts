@@ -1,4 +1,6 @@
 export default {
+	"Lang": "en-US",
+
 	"HomepageAboutTheGame": "About the game",
 	"HomepageCustomCards": "The Custom Cards Update",
 	"HomepageCustomCardsLearn" : "Learn how to upload your own cards",
