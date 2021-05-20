@@ -1,4 +1,6 @@
 export default {
+	"Lang": "en-US",
+
 	"HomepageAboutTheGame": "About the game",
 	"HomepageCustomCards": "The Custom Cards Update",
 	"HomepageCustomCardsLearn" : "Learn how to upload your own cards",
@@ -6,7 +8,7 @@ export default {
 	"HomepageSourceCode": "Source code",
 	"HomepageSubmitBug": "Submit a bug",
 	"HomepageFindPlayers": "Find Players",
-	"HomepageTranslatedBy": "", // "English translation made by brambleshadow4" English version doesn't need this message, but other translations should have this
+	"HomepageTranslatedBy": "", // "Translated by brambleshadow4" English version doesn't need this message, but other translations should have this
 
 
 	"LobbyJoinGame": "Join Game",

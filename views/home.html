@@ -71,7 +71,11 @@
 			{
 				height: 30px;
 				width: 30px;
+				border: solid 2px white;
+				border-radius: 10px;
 			}
+
+			.selected  img { border-color: #0074E8; }
 
 			.footerLinks img
 			{
@@ -91,6 +95,8 @@
 				color: black;
 				margin: 0px 20px;
 			}
+
+			
 
 			@media screen and (max-width: 600px)
 			{
@@ -127,19 +133,23 @@
 		<div class='split'>
 			<div id="left">
 				<h1>Twilight Sparkle's<br>Secret Shipfic Folder<br>Online</h1>
-				<h2>Beta 0.10.4</h2>
-				<p><strong>{{HomepageCustomCards}}</strong><br><a href="/info/addYourOwnCards">{{HomepageCustomCardsLearn}}</a></p>	
+				<h2>Beta 0.11.0</h2>
 				<div>
 					<!--div><button onclick="join()">Join Game</button></div-->
 					<div><button onclick="host()">{{HomepageHostGame}}</button></div>
 				</div>
 				<p>
-					<!--<span class='languages'>
-						<a href="/?lang=en-US"><img src="/img/lang/en-US.png" /></a>
-						<a href="/?lang=es-ES"><img src="/img/lang/es-ES.png" /></a>
-						<a href="/?lang=zz-ZZ">Test Lang</a>
+					<span class='languages'>
+						<a id='select:en-US' href="/?lang=en-US"><img src="/img/lang/en-US.png" /></a>
+						<a id='select:es-ES' href="/?lang=es-ES"><img src="/img/lang/es-ES.png" /></a>
+						<!--<a href="/?lang=zz-ZZ">Test Lang</a>-->
+						<input id="lang" type="hidden" value="{{Lang}}"/>
+						<script>
+							let lang = document.getElementById('lang').value;
+							document.getElementById("select:" + lang).classList.add('selected');
+						</script>
 					</span><br>
-					<span>{{HomepageTranslatedBy}}</span>-->
+					<span>{{HomepageTranslatedBy}}</span>
 				</p>
 			</div>
 			<div id='right'>
