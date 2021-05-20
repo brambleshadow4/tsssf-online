@@ -209,86 +209,86 @@
 		},
 		"ship": {
 			"MoreThanRoommates": {
-				"name": "More Than Roommates"
+				"title": "More Than Roommates"
 			},
 			"SpringBreak": {
-				"name": "Spring Break!"
+				"title": "Spring Break!"
 			},
 			"IsThisSeatTaken": {
-				"name": "Is This Seat Taken?"
+				"title": "Is This Seat Taken?"
 			},
 			"CramSession": {
-				"name": "Cram Session"
+				"title": "Cram Session"
 			},
 			"BrandNewRoommate": {
-				"name": "Brand New Roommate"
+				"title": "Brand New Roommate"
 			},
 			"AdvancedMagicSeminar": {
-				"name": "Advanced Magic Seminar"
+				"title": "Advanced Magic Seminar"
 			},
 			"MysteriousExchangeStudent": {
-				"name": "Mysterious Exchange Student"
+				"title": "Mysterious Exchange Student"
 			},
 			"ServingCommunityService": {
-				"name": "Serving Community Service"
+				"title": "Serving Community Service"
 			},
 			"ChemistryLabExplosion": {
-				"name": "Chemistry Lab Explosion!",
+				"title": "Chemistry Lab Explosion!",
 				"action": "lovePoison"
 			},
 			"RightsRallyBakeSale": {
-				"name": "Rights Rally Bake Sale"
+				"title": "Rights Rally Bake Sale"
 			},
 			"HidingFromTheDeansSecretPolice": {
-				"name": "Hiding from the Dean's Secret Police"
+				"title": "Hiding from the Dean's Secret Police"
 			},
 			"PreAssignedLabPartners": {
-				"name": "Pre-Assigned Lab Partners"
+				"title": "Pre-Assigned Lab Partners"
 			},
 			"BattleOfTheBands": {
-				"name": "Battle of the Bands"
+				"title": "Battle of the Bands"
 			},
 			"InThisDimensionImAPromQueen": {
-				"name": "In This Dimension, I'm a Prom Queen",
+				"title": "In This Dimension, I'm a Prom Queen",
 				"action": "keywordChange"
 			},
 			"RomanticCultHazing": {
-				"name": "Romantic Cult Hazing"
+				"title": "Romantic Cult Hazing"
 			},
 			"WorstFieldTripEver": {
-				"name": "Worst Field Trip Ever",
+				"title": "Worst Field Trip Ever",
 				"action": "keywordChange"
 			},
 			"WalkOfShame": {
-				"name": "Walk of Shame"
+				"title": "Walk of Shame"
 			},
 			"MostAdorableStalkingEver": {
-				"name": "Most Adorable Stalking Ever"
+				"title": "Most Adorable Stalking Ever"
 			},
 			"RadicalSelfExplorationExperiment": {
-				"name": "Radical Self-Exploration Experiment",
+				"title": "Radical Self-Exploration Experiment",
 				"action": "keywordChange"
 			},
 			"MetYouOnTheNightlyPatrol": {
-				"name": "Met You on the Nightly Patrol"
+				"title": "Met You on the Nightly Patrol"
 			},
 			"ATripToTheDarkRoom": {
-				"name": "A Trip to the Dark Room"
+				"title": "A Trip to the Dark Room"
 			},
 			"RushWeek": {
-				"name": "Rush Week"
+				"title": "Rush Week"
 			},
 			"AfternoonVisitToTheLocalMilkshakeJoint": {
-				"name": "Afternoon Visit to the Local Milkshake Joint"
+				"title": "Afternoon Visit to the Local Milkshake Joint"
 			},
 			"SordidLoveTriangle": {
-				"name": "Sordid Love Triangle"
+				"title": "Sordid Love Triangle"
 			},
 			"LoveAtFirstSight": {
-				"name": "Love at First Sight"
+				"title": "Love at First Sight"
 			},
 			"SplittingAMealPlan": {
-				"name": "Splitting a Meal Plan"
+				"title": "Splitting a Meal Plan"
 			}
 		},
 		"goal": {

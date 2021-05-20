@@ -853,221 +853,221 @@ var cards: {[key: string]: any} = {
 		"points": "2"
 	},
 	"EC.Ship.OverACozyCampfire": {
-		"name": "Over a Cozy Campfire"
+		"title": "Over a Cozy Campfire"
 	},
 	"EC.Ship.TheNoodleIncident": {
-		"name": "The Noodle Incident"
+		"title": "The Noodle Incident"
 	},
 	"EC.Ship.BlindDate": {
-		"name": "Blind Date",
+		"title": "Blind Date",
 		"action": "keywordChange"
 	},
 	"EC.Ship.ScienceExperiments": {
-		"name": "Science Experiments!",
+		"title": "Science Experiments!",
 		"action": "clone"
 	},
 	"EC.Ship.HighSchoolSweethearts": {
-		"name": "High School Sweethearts"
+		"title": "High School Sweethearts"
 	},
 	"EC.Ship.PrettiestPonyOfTheYear": {
-		"name": "Prettiest Pony of the Year"
+		"title": "Prettiest Pony of the Year"
 	},
 	"EC.Ship.FillyImFabulous": {
-		"name": "Filly, I'm Fabulous"
+		"title": "Filly, I'm Fabulous"
 	},
 	"EC.Ship.BodyDouble": {
-		"name": "Body Double",
+		"title": "Body Double",
 		"action": "clone"
 	},
 	"EC.Ship.FavorForAFriend": {
-		"name": "Favor for a Friend"
+		"title": "Favor for a Friend"
 	},
 	"EC.Ship.AwkwardDanceParty": {
-		"name": "Awkward Dance Party"
+		"title": "Awkward Dance Party"
 	},
 	"EC.Ship.AMurderMostFoul": {
-		"name": "A Murder Most Foul!"
+		"title": "A Murder Most Foul!"
 	},
 	"EC.Ship.SlumberParty": {
-		"name": "Slumber Party"
+		"title": "Slumber Party"
 	},
 	"EC.Ship.LongForgottenMemories": {
-		"name": "Long-Forgotten Memories",
+		"title": "Long-Forgotten Memories",
 		"action": "keywordChange"
 	},
 	"EC.Ship.TheChosenOnes": {
-		"name": "The Chosen Ones"
+		"title": "The Chosen Ones"
 	},
 	"EC.Ship.Makeover": {
-		"name": "Makeover!",
+		"title": "Makeover!",
 		"action": "genderChange"
 	},
 	"EC.Ship.WackyTragicCircumstances": {
-		"name": "Wacky Tragic Circumstances"
+		"title": "Wacky Tragic Circumstances"
 	},
 	"EC.Ship.ForbiddenMagicMacguffin": {
-		"name": "Forbidden Magic Macguffin",
+		"title": "Forbidden Magic Macguffin",
 		"action": "keywordChange"
 	},
 	"EC.Ship.ClashingOfWills": {
-		"name": "Clashing of Wills"
+		"title": "Clashing of Wills"
 	},
 	"EC.Ship.SuddenUnexplainedOffspring": {
-		"name": "Sudden Unexplained Offspring"
+		"title": "Sudden Unexplained Offspring"
 	},
 	"EC.Ship.WebOfDeceit": {
-		"name": "Web of Deceit",
+		"title": "Web of Deceit",
 		"action": "keywordChange"
 	},
 	"EC.Ship.WhatHappensInLasPegasus": {
-		"name": "What Happens In Las Pegasus..."
+		"title": "What Happens In Las Pegasus..."
 	},
 	"EC.Ship.ADarkAndTerribleSecret": {
-		"name": "A Dark and Terrible Secret"
+		"title": "A Dark and Terrible Secret"
 	},
 	"EC.Ship.VisitToTheMirrorPool": {
-		"name": "Visit to the Mirror Pool",
+		"title": "Visit to the Mirror Pool",
 		"action": "clone"
 	},
 	"EC.Ship.MayIHaveThisDance": {
-		"name": "May I Have This Dance"
+		"title": "May I Have This Dance"
 	},
 	"EC.Ship.SnowfallStroll": {
-		"name": "Snowfall Stroll"
+		"title": "Snowfall Stroll"
 	},
 	"EC.Ship.SpontaneousMusicalNumber": {
-		"name": "Spontaneous Musical Number"
+		"title": "Spontaneous Musical Number"
 	},
 	"EC.Ship.ImpendingDoom": {
-		"name": "Impending Doom"
+		"title": "Impending Doom"
 	},
 	"EC.Goal.FamilyAppreciationDay": {
-		"name": "Family Appreciation Day",
+		"title": "Family Appreciation Day",
 		"goalLogic": "ExistsChain(Apple in keywords,4)",
 		"points": "2"
 	},
 	"EC.Goal.BigMacIsBigMackin": {
-		"name": "Big Mac is Big Mackin'",
+		"title": "Big Mac is Big Mackin'",
 		"goalLogic": "ExistsPonyShippedTo(name=Big Macintosh, Select(gender=female,3))",
 		"points": "2"
 	},
 	"EC.Goal.MyWaifu": {
-		"name": "My Waifu",
+		"title": "My Waifu",
 		"goalLogic": "ExistsShip(OC in keywords,Mane 6 in keywords)",
 		"points": "2"
 	},
 	"EC.Goal.BookClub": {
-		"name": "Book Club",
+		"title": "Book Club",
 		"goalLogic": "ExistsPonyShippedTo(name=Twilight Sparkle, Select(*,5))",
 		"points": "3"
 	},
 	"EC.Goal.EnjoyingTheScenery": {
-		"name": "Enjoying the Scenery",
+		"title": "Enjoying the Scenery",
 		"goalLogic": "ExistsPonyShippedTo(name=Rarity, Select(*,4))",
 		"points": "1"
 	},
 	"EC.Goal.IronPonyCompetition": {
-		"name": "Iron Pony Competition",
+		"title": "Iron Pony Competition",
 		"goalLogic": "ExistsPonyShippedTo(name=Rainbow Dash, Select(*,4))",
 		"points": "1"
 	},
 	"EC.Goal.CiderSqueezin": {
-		"name": "Cider Squeezin'",
+		"title": "Cider Squeezin'",
 		"goalLogic": "ExistsPonyShippedTo(name=Applejack, Select(*,4))",
 		"points": "1"
 	},
 	"EC.Goal.AintNoPartyLikeAPinkiePieParty": {
-		"name": "Ain't No Party Like a Pinkie Pie Party",
+		"title": "Ain't No Party Like a Pinkie Pie Party",
 		"goalLogic": "ExistsPonyShippedTo(name=Pinkie Pie, Select(*,4))",
 		"points": "1"
 	},
 	"EC.Goal.Recruitment": {
-		"name": "Recruitment",
+		"title": "Recruitment",
 		"goalLogic": "ExistsPonyShippedTo(name=Fluttershy, Select(*,4))",
 		"points": "1"
 	},
 	"EC.Goal.PlayingTheGame": {
-		"name": "Playing the Game",
+		"title": "Playing the Game",
 		"goalLogic": "ExistsPonyShippedTo(gender=male, Select(gender=female, 4))",
 		"points": "1"
 	},
 	"EC.Goal.IReallyLikeHerMane": {
-		"name": "I Really Like Her Mane!",
+		"title": "I Really Like Her Mane!",
 		"goalLogic": "BreakShip(name=Smarty Pants,*)",
 		"points": "2"
 	},
 	"EC.Goal.PickyPicky": {
-		"name": "Picky Picky!",
+		"title": "Picky Picky!",
 		"points": "1",
 		"goalFun": false
 	},
 	"EC.Goal.BewareTheGroove": {
-		"name": "Beware the Groove",
+		"title": "Beware the Groove",
 		"goalLogic": "BreakShip(Elder in keywords, race=alicorn)",
 		"points": "2"
 	},
 	"EC.Goal.ABlessingOfAlicorns": {
-		"name": "A Blessing of Alicorns",
+		"title": "A Blessing of Alicorns",
 		"goalLogic": "ExistsPony(race=alicorn, 5)",
 		"points": "2"
 	},
 	"EC.Goal.TheresNoThrillLikeIronWill": {
-		"name": "There's No ThrillLike Iron Will",
+		"title": "There's No ThrillLike Iron Will",
 		"goalLogic": "ExistsShip(name=Iron Will,Villain in keywords)",
 		"points": "2"
 	},
 	"EC.Goal.OfPoniesAndPerilTheMagnumOpus": {
-		"name": "Of Ponies and Peril: The Magnum Opus",
+		"title": "Of Ponies and Peril: The Magnum Opus",
 		"goalLogic": "ExistsChain(altTimeline=true,3)",
 		"points": "2"
 	},
 	"EC.Goal.Swinging": {
-		"name": "Swinging",
+		"title": "Swinging",
 		"goalLogic": "ExistsPonyShippedTo(*, AllOf(name=Mr. Cake, name=Mrs. Cake))",
 		"points": "3"
 	},
 	"EC.Goal.SpaDay": {
-		"name": "Spa Day",
+		"title": "Spa Day",
 		"goalLogic": "ExistsShip(Mane 6 in keywords, name=Aloe && name=Lotus)",
 		"points": "2"
 	},
 	"EC.Goal.NoPoniesCanPonyTwoPoniesToPony": {
-		"name": "No Ponies Can Pony Two Ponies to Pony",
+		"title": "No Ponies Can Pony Two Ponies to Pony",
 		"goalLogic": "ExistsPonyShippedTo(*, Select(*, 6))",
 		"points": "4"
 	},
 	"EC.Goal.EvilSocietyOfEvil": {
-		"name": "Evil Society of Evil",
+		"title": "Evil Society of Evil",
 		"goalLogic": "ExistsChain(Villain in keywords, 6)",
 		"points": "3"
 	},
 	"EC.Goal.FluttershysHomeForRedeemedEvilDoers": {
-		"name": "Fluttershy's Home for Redeemed Evil-Doers",
+		"title": "Fluttershy's Home for Redeemed Evil-Doers",
 		"goalLogic": "ExistsPonyShippedTo(name=Fluttershy, Select(Villain in keywords, 3))",
 		"points": "2"
 	},
 	"EC.Goal.Landslide": {
-		"name": "Landslide",
+		"title": "Landslide",
 		"points": "0",
 		"goalFun": false
 	},
 	"EC.Goal.FleetAdmiral": {
-		"name": "Fleet Admiral",
+		"title": "Fleet Admiral",
 		"goalLogic": "PlayShipCards(*, 7)",
 		"points": "3"
 	},
 	"EC.Goal.CoupDetat": {
-		"name": "Coup d'etat",
+		"title": "Coup d'etat",
 		"points": "3",
 		"goalFun": false
 	},
 	"EC.Goal.FriendsInHighPlaces": {
-		"name": "Friends in High Places",
+		"title": "Friends in High Places",
 		"goalLogic": "ExistsPonyShippedTo(OC in keywords, Select(Princess in keywords, 2))",
 		"points": "3"
 	},
 	"EC.Goal.Recolor": {
-		"name": "Recolor",
+		"title": "Recolor",
 		"goalLogic": "ExistsPony(OC in keywords && OC !in keywords_b, 1)",
 		"points": "2"
 	},
@@ -1228,10 +1228,9 @@ var cards: {[key: string]: any} = {
 		"keywords": []
 	},
 	"HorriblePeople.AdventurePack.Goal.DaringDont": {
-		"name": "Daring Don't",
+		"title": "Daring Don't",
 		"goalLogic": "ExistsPonyShippedTo(name=Daring Do, AllOf(name=Rainbow Dash, name=Twilight Sparkle))",
-		"points": "2",
-		"noLogic": true
+		"points": "2"
 	},
 	"HorriblePeople.DungeonDelvers.Pony.ArchmageTwilightSparkle": {
 		"name": "Twilight Sparkle",
@@ -1294,13 +1293,13 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"HorriblePeople.DungeonDelvers.Ship.PitTrap": {
-		"name": "Pit Trap!"
+		"title": "Pit Trap!"
 	},
 	"HorriblePeople.DungeonDelvers.Ship.TakingIttotheNextLevel": {
-		"name": "Taking It to the Next Level"
+		"title": "Taking It to the Next Level"
 	},
 	"HorriblePeople.DungeonDelvers.Goal.YouMeetInATavern": {
-		"name": "You Meet in a Tavern",
+		"title": "You Meet in a Tavern",
 		"goalLogic": "ExistsShip(RPG in keywords || card=Core.Pony.DruidFluttershy, RPG in keywords || card=Core.Pony.DruidFluttershy)",
 		"points": "1"
 	},
@@ -1324,13 +1323,13 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"HorriblePeople.FlufflePuff.Ship.AShockingRelationship": {
-		"name": "A Shocking Relationship"
+		"title": "A Shocking Relationship"
 	},
 	"HorriblePeople.FlufflePuff.Ship.GettingDownToBusiness": {
-		"name": "Getting Down to Business"
+		"title": "Getting Down to Business"
 	},
 	"HorriblePeople.FlufflePuff.Goal.TheFunCave": {
-		"name": "The Fun Cave",
+		"title": "The Fun Cave",
 		"goalLogic": "ExistsShip(name=Fluffle Puff, name=Chrysalis)",
 		"points": "3"
 	},
@@ -1627,10 +1626,10 @@ var cards: {[key: string]: any} = {
 		"keywords": []
 	},
 	"HorriblePeople.Misc.Ship.AllGoodThingsMustEnd": {
-		"name": "All Good Things Must End"
+		"title": "All Good Things Must End"
 	},
 	"HorriblePeople.Misc.Ship.GiftOnTheDoorstep": {
-		"name": "Gift on the Doorstep"
+		"title": "Gift on the Doorstep"
 	},
 	"HorriblePeople.WeeabooParadaisu.Pony.NihonponniNaritaiTwilightSparkle": {
 		"name": "Twilight Sparkle",
@@ -1647,13 +1646,13 @@ var cards: {[key: string]: any} = {
 		"keywords": []
 	},
 	"HorriblePeople.WeeabooParadaisu.Ship.HanabiMatsuri": {
-		"name": "Hanabi Matsuri"
+		"title": "Hanabi Matsuri"
 	},
 	"HorriblePeople.WeeabooParadaisu.Ship.OnsenFieldTrip": {
-		"name": "Onsen Field Trip"
+		"title": "Onsen Field Trip"
 	},
 	"HorriblePeople.WeeabooParadaisu.Ship.BeautifulHenshin": {
-		"name": "Beautiful Henshin",
+		"title": "Beautiful Henshin",
 		"action": "makePrincess"
 	},
 	"NoHoldsBarred.Pony.CobaltdeCoeur": {
@@ -2034,19 +2033,19 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"NoHoldsBarred.Ship.ASnugglebytheFire": {
-		"name": "A Snuggle by the Fire"
+		"title": "A Snuggle by the Fire"
 	},
 	"NoHoldsBarred.Ship.LoveontheFriendshipExpress": {
-		"name": "Love on the Friendship Express"
+		"title": "Love on the Friendship Express"
 	},
 	"NoHoldsBarred.Ship.MurderTurnsMeOn": {
-		"name": "Murder Turns Me On"
+		"title": "Murder Turns Me On"
 	},
 	"NoHoldsBarred.Ship.CoffeeIntensifies": {
-		"name": "[Coffee Intensifies]"
+		"title": "[Coffee Intensifies]"
 	},
 	"NoHoldsBarred.Ship.Infestivities": {
-		"name": "Infestivities"
+		"title": "Infestivities"
 	},
 	"NoHoldsBarred.Goal.ThisShipIsDelicious": {
 		"goalLogic": "ExistsPonyShippedTo(name=Pinkie Pie, AllOf(name=Luna,name=Twilight Sparkle,name=Applejack))",
@@ -2276,86 +2275,86 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"PU.Ship.MoreThanRoommates": {
-		"name": "More Than Roommates"
+		"title": "More Than Roommates"
 	},
 	"PU.Ship.SpringBreak": {
-		"name": "Spring Break!"
+		"title": "Spring Break!"
 	},
 	"PU.Ship.IsThisSeatTaken": {
-		"name": "Is This Seat Taken?"
+		"title": "Is This Seat Taken?"
 	},
 	"PU.Ship.CramSession": {
-		"name": "Cram Session"
+		"title": "Cram Session"
 	},
 	"PU.Ship.BrandNewRoommate": {
-		"name": "Brand New Roommate"
+		"title": "Brand New Roommate"
 	},
 	"PU.Ship.AdvancedMagicSeminar": {
-		"name": "Advanced Magic Seminar"
+		"title": "Advanced Magic Seminar"
 	},
 	"PU.Ship.MysteriousExchangeStudent": {
-		"name": "Mysterious Exchange Student"
+		"title": "Mysterious Exchange Student"
 	},
 	"PU.Ship.ServingCommunityService": {
-		"name": "Serving Community Service"
+		"title": "Serving Community Service"
 	},
 	"PU.Ship.ChemistryLabExplosion": {
-		"name": "Chemistry Lab Explosion!",
+		"title": "Chemistry Lab Explosion!",
 		"action": "lovePoison"
 	},
 	"PU.Ship.RightsRallyBakeSale": {
-		"name": "Rights Rally Bake Sale"
+		"title": "Rights Rally Bake Sale"
 	},
 	"PU.Ship.HidingFromTheDeansSecretPolice": {
-		"name": "Hiding from the Dean's Secret Police"
+		"title": "Hiding from the Dean's Secret Police"
 	},
 	"PU.Ship.PreAssignedLabPartners": {
-		"name": "Pre-Assigned Lab Partners"
+		"title": "Pre-Assigned Lab Partners"
 	},
 	"PU.Ship.BattleOfTheBands": {
-		"name": "Battle of the Bands"
+		"title": "Battle of the Bands"
 	},
 	"PU.Ship.InThisDimensionImAPromQueen": {
-		"name": "In This Dimension, I'm a Prom Queen",
+		"title": "In This Dimension, I'm a Prom Queen",
 		"action": "keywordChange"
 	},
 	"PU.Ship.RomanticCultHazing": {
-		"name": "Romantic Cult Hazing"
+		"title": "Romantic Cult Hazing"
 	},
 	"PU.Ship.WorstFieldTripEver": {
-		"name": "Worst Field Trip Ever",
+		"title": "Worst Field Trip Ever",
 		"action": "keywordChange"
 	},
 	"PU.Ship.WalkOfShame": {
-		"name": "Walk of Shame"
+		"title": "Walk of Shame"
 	},
 	"PU.Ship.MostAdorableStalkingEver": {
-		"name": "Most Adorable Stalking Ever"
+		"title": "Most Adorable Stalking Ever"
 	},
 	"PU.Ship.RadicalSelfExplorationExperiment": {
-		"name": "Radical Self-Exploration Experiment",
+		"title": "Radical Self-Exploration Experiment",
 		"action": "keywordChange"
 	},
 	"PU.Ship.MetYouOnTheNightlyPatrol": {
-		"name": "Met You on the Nightly Patrol"
+		"title": "Met You on the Nightly Patrol"
 	},
 	"PU.Ship.ATripToTheDarkRoom": {
-		"name": "A Trip to the Dark Room"
+		"title": "A Trip to the Dark Room"
 	},
 	"PU.Ship.RushWeek": {
-		"name": "Rush Week"
+		"title": "Rush Week"
 	},
 	"PU.Ship.AfternoonVisitToTheLocalMilkshakeJoint": {
-		"name": "Afternoon Visit to the Local Milkshake Joint"
+		"title": "Afternoon Visit to the Local Milkshake Joint"
 	},
 	"PU.Ship.SordidLoveTriangle": {
-		"name": "Sordid Love Triangle"
+		"title": "Sordid Love Triangle"
 	},
 	"PU.Ship.LoveAtFirstSight": {
-		"name": "Love at First Sight"
+		"title": "Love at First Sight"
 	},
 	"PU.Ship.SplittingAMealPlan": {
-		"name": "Splitting a Meal Plan"
+		"title": "Splitting a Meal Plan"
 	},
 	"PU.Goal.Besties": {
 		"goalLogic": "ExistsShip(Uni in keywords, Uni in keywords)",

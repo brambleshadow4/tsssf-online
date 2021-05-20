@@ -24,13 +24,13 @@
 		},
 		"ship": {
 			"HanabiMatsuri": {
-				"name": "Hanabi Matsuri"
+				"title": "Hanabi Matsuri"
 			},
 			"OnsenFieldTrip": {
-				"name": "Onsen Field Trip"
+				"title": "Onsen Field Trip"
 			},
 			"BeautifulHenshin": {
-				"name": "Beautiful Henshin",
+				"title": "Beautiful Henshin",
 				"action": "makePrincess"
 			}
 		},

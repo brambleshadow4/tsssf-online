@@ -386,19 +386,19 @@
 		},
 		"ship": {
 			"ASnugglebytheFire": {
-				"name": "A Snuggle by the Fire"
+				"title": "A Snuggle by the Fire"
 			},
 			"LoveontheFriendshipExpress": {
-				"name": "Love on the Friendship Express"
+				"title": "Love on the Friendship Express"
 			},
 			"MurderTurnsMeOn": {
-				"name": "Murder Turns Me On"
+				"title": "Murder Turns Me On"
 			},
 			"CoffeeIntensifies": {
-				"name": "[Coffee Intensifies]"
+				"title": "[Coffee Intensifies]"
 			},
 			"Infestivities": {
-				"name": "Infestivities"
+				"title": "Infestivities"
 			}
 		},
 		"goal": {

@@ -43,10 +43,10 @@
 		},
 		"ship": {
 			"AllGoodThingsMustEnd": {
-				"name": "All Good Things Must End"
+				"title": "All Good Things Must End"
 			},
 			"GiftOnTheDoorstep": {
-				"name": "Gift on the Doorstep"
+				"title": "Gift on the Doorstep"
 			}
 		},
 		"goal": {}

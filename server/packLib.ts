@@ -84,7 +84,9 @@ export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | 
 	var genders = new Set(["male","female"]);
 	var races = new Set(["earth","pegasus","unicorn","alicorn"]);
 
-	var ponyProps = new Set(["gender","race","name", "keywords", "action", "altTimeline", "count", "changeGoalPointValues", "url", "thumb"]);
+	var ponyProps = new Set(["gender","race","name", "keywords", "action", "altTimeline", "count", "changeGoalPointValues", "url", "thumb", "title"]);
+	var shipProps = new Set(["title", "action", "thumb", "url"]);
+	var goalProps = new Set(["points", "goalLogic", "goalFun", "title", "thumb", "url"]);
 
 	if(packFormat.startsWith("link"))
 	{
@@ -110,7 +112,17 @@ export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | 
 				errors.push("pony " + name + " has an extra prop: " + key);
 			}
 		}
-		
+	}
+
+	if(cardType == "Ship") 
+	{
+		for(var key of Object.keys(card))
+		{
+			if(!shipProps.has(key))
+			{
+				errors.push("ship " + name + " has an extra prop: " + key);
+			}
+		}
 	}
 
 	if(cardType == "Goal")
@@ -119,20 +131,10 @@ export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | 
 			errors.push("goal " + name + " is missing the points property");
 		else
 		{
-			if(typeof card.points !== "number" && typeof card.points !== "string") 
+			if(typeof card.points !== "string" || !/^-?\d+(--?\d+)?$/.exec(card.points))
 			{
 				errors.push("goal " + name + " has an invalid points property: " + card.points);
 				return errors;
-			}
-
-			if(isNaN(Number(card.points)))
-			{
-				let [a,b] = card.points.split("-");
-
-				if(isNaN(Number(a)) || isNaN(Number(b)))
-				{
-					errors.push("goal " + name + " has an invalid points value: " + card.points);
-				}
 			}
 		}
 
@@ -142,6 +144,14 @@ export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | 
 		catch(e)
 		{
 			errors.push("goal " + name + "\n" + e.toString());
+		}
+
+		for(var key of Object.keys(card))
+		{
+			if(!goalProps.has(key))
+			{
+				errors.push("goal " + name + " has an extra prop: " + key);
+			}
 		}
 		
 	}

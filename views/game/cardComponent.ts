@@ -81,13 +81,16 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 	if(!isGoal(card))
 		return [];
 
-	var points = [];
+	var points: (number | "*")[] = [];
 	var pointString = (cards[card] as GoalProps).points;
-	if(pointString.indexOf("-") > -1)
+
+	let parse = /^(-?\d+)(-(-?\d+))?$/.exec(pointString);
+
+	if(parse && parse[3] !== undefined)
 	{
 		var i = pointString.indexOf("-")
-		var minPts = Number(pointString.substring(0, i))
-		var maxPts = Number(pointString.substring(i+1));
+		var minPts = Number(parse[1])
+		var maxPts = Number(parse[3]);
 
 		for(i=minPts; i<=maxPts; i++)
 		{
@@ -96,7 +99,7 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 	}
 	else
 	{
-		points = [Number(pointString)];
+		points = [Number(parse![1])];
 	}
 
 	var changeGoalPointValues = false;
@@ -115,7 +118,7 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 
 	if(!achieved || changeGoalPointValues)
 	{
-		points.push(-1);
+		points.push("*");
 	}
 
 	return points;
@@ -725,7 +728,7 @@ function removeShiftHover(element: CardElement)
 }
 
 
-function pointsPopup(points: number[])
+function pointsPopup(points: (number | "*")[])
 {
 	return createPopup(s.PopupTitleChoosePoints, true, function(accept: ((value?: any) => any)) 
 	{
@@ -741,7 +744,7 @@ function pointsPopup(points: number[])
 
 		for(let val of points)
 		{
-			if(val == -1)
+			if(val == "*")
 			{
 				let customDiv = document.createElement('div');
 
@@ -749,8 +752,9 @@ function pointsPopup(points: number[])
 				let input = document.createElement('input');
 				input.type = "number";
 
+				let numberPoints = points.filter(x => x != "*") as number[];
 
-				input.value = "" + (points.reduce((a,b) => Math.max(a,b), 0) + 1);
+				input.value = "" + (numberPoints.reduce((a,b) => Math.max(a,b), 0) + 1);
 				
 
 				let button = document.createElement('button');

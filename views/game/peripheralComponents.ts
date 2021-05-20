@@ -348,7 +348,7 @@ export function updateWinnings()
 
 	var points = model.winnings.reduce((a,b) => a + b.value, 0);
 
-	if(points > 0)
+	if(model.winnings.length)
 	{
 		var scoreElement = document.createElement('span');
 		scoreElement.className = 'score';
@@ -468,7 +468,6 @@ export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 
 		if(isSoftUpdate && oldElement.classList.contains("blank"))
 		{
-
 			continue;
 		}
 

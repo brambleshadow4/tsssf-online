@@ -29,15 +29,15 @@
 		},
 		"ship": {
 			"AShockingRelationship": {
-				"name": "A Shocking Relationship"
+				"title": "A Shocking Relationship"
 			},
 			"GettingDownToBusiness": {
-				"name": "Getting Down to Business"
+				"title": "Getting Down to Business"
 			}
 		},
 		"goal": {
 			"TheFunCave": {
-				"name": "The Fun Cave",
+				"title": "The Fun Cave",
 				"goalLogic": "ExistsShip(name=Fluffle Puff, name=Chrysalis)",
 				"points": "3"
 			}
