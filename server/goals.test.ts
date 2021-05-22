@@ -754,6 +754,32 @@ export default function(){
 		expect(evalGoalLogic(game, "ExistsShip(name=Twilight Sparkle, name=Pixel Prism)")).toBe(true);
 	});
 
+	test("aloe/lotus ships count as two ships", () => {
+
+		let [game, player] = setupGame();;
+
+		let aloelotus = "Core.Pony.AloeAndLotus";
+		let malePony = "Core.Pony.BigMacintosh";
+		let femalePony = "Core.Pony.StarStudentTwilight";
+
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+		let ship3 = "Core.Ship.CheckingItOffMyList";
+
+		player.grab(aloelotus, malePony, femalePony, ship1, ship2);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(malePony, "hand", "p,1,0");
+
+		player.endTurn();
+		expect(evalGoalLogic(game, "PlayShips(gender=male, gender=female, 2)")).toBe(false);
+
+		player.move(ship2, "hand", "sr,1,0");
+		player.move(aloelotus, "hand", "p,2,0");
+
+		expect(evalGoalLogic(game, "PlayShips(gender=male, gender=female, 2)")).toBe(true);
+	})
+
 	//test("ExistsChain", () =>{
 		//expect(0).toBe("unimplemented");
 	//});
