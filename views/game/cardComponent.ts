@@ -125,7 +125,6 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 }
 
 
-
 export function makeCardElement(card: Card, location?: Location, isDraggable?: boolean, isDropTarget?: boolean): CardElement
 {
 	let cards = cm.inPlay();
@@ -315,7 +314,6 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				document.getElementById('playingArea')!.classList.add('draggingPony');
 			}
 
-			//console.log(cards[card].action)
 			if(isShip(card) || (cards[card] as ShipProps).action == "ship")
 			{
 				document.getElementById('playingArea')!.classList.add('draggingShip');
@@ -706,7 +704,6 @@ function addShiftHover(card: Card, element: CardElement)
 		setTimeout(function(){
 			if(thisNo == touchStartNum && hoverCard)
 			{
-				//console.log("isHoverTouch = true")
 				isHoverTouch = true;
 				enlargeCard();
 			}
@@ -821,7 +818,6 @@ export function setActionButton(element: CardElement, handler: Function)
 	{
 		clearActionButtons();
 		await handler(e);
-		console.log("updateTurnstate")
 		updateTurnstate();
 	};
 	element.appendChild(button);
@@ -871,8 +867,6 @@ export function addTempSymbol(element: CardElement, symbol: string, tooltip?: st
 function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 {
 	let cards = cm.inPlay();
-
-	console.log(card);
 
 	if(isAnon(card))
 	{

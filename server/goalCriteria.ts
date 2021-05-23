@@ -545,7 +545,6 @@ function PlayPonies(selector: string, count?: number)
 	}
 }
 
-
 function getShipCount(model: GameModel, pony1: Card, pony2: Card)
 {
 	return Math.max(getCardProp(model, pony1, "count") || 1, getCardProp(model, pony2, "count") || 1)

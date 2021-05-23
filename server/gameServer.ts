@@ -305,8 +305,46 @@ export class GameModel implements GameModelShared
 			if(!game) // not quite sure how this happens, but this crashed one time.
 				return;
 
-			game.messageHistory.push(message);
+			let logPlayerName = game.getPlayer(socket)?.name || ":unknown:"; 
+
+			game.messageHistory.push(logPlayerName + ";" + message);
 			game.lastMessageTimestamp = new Date().getTime();
+
+			if(message == "debug")
+			{
+				var gameCopy = {} as any;
+
+				gameCopy.messageHistory = game.messageHistory;
+				gameCopy.board = game.board;
+
+				if(game.turnstate)
+				{
+					let ts = game.turnstate;
+					let cts = gameCopy.turnstate = {} as any;
+
+					cts.currentPlayer = ts.currentPlayer;
+					cts.overrides = ts.overrides;
+
+						
+					cts.playedPonies = ts.playedPonies;
+					cts.playedShips = ts.playedShips;
+					cts.playedShipCards = ts.playedShipCards
+
+					cts.playedThisTurn = ts.playedThisTurn;
+
+					cts.brokenShipsCommitted = ts.brokenShipsCommitted;
+					cts.brokenShips = ts.brokenShips
+					cts.swapsCommitted = ts.swapsCommitted;
+					cts.swaps = ts.swaps;
+
+					cts.shipSet = [...ts.shipSet];
+					cts.positionMap = ts.positionMap;
+						
+					cts.changelingContexts = ts.changelingContexts;
+				}
+
+				socket.send("debug;" + JSON.stringify(gameCopy));
+			}
 
 			if(message.startsWith("handshake;"))
 			{
@@ -858,7 +896,6 @@ export class GameModel implements GameModelShared
 
 				if(player.name == game.turnstate.currentPlayer)
 				{
-				
 					game.changeTurnToNextPlayer();	
 				}
 			}
@@ -1895,6 +1932,7 @@ export class GameModel implements GameModelShared
 		}
 	}
 }
+
 
 
 export class Turnstate
