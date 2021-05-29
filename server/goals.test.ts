@@ -5,7 +5,7 @@ import {
 	isPony,
 	isShip,
 	isGoal,
-	Card, Location
+	Card, Location, GameOptions
 } from "./lib.js";
 
 import {typecheckGoal} from "./goalCriteria.js";
@@ -105,8 +105,9 @@ function setupGame(setupOptions?:{
 	game.setLobbyOptions({
 		cardDecks: setupOptions?.cardDecks || ["Core.*"],
 		ruleset: "turnsOnly",
-		startCard: setupOptions?.startCard
-	});
+		startCard: setupOptions?.startCard || "Core.Start.FanficAuthorTwilight",
+		teams: {}
+	} as GameOptions);
 	game.startGame();
 
 	return [game, fakePlayer];

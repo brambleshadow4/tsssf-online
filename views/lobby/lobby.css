@@ -78,6 +78,13 @@
 	font-size: .8em;
 }
 
+
+.teamInput 
+{
+	width:  1cm;
+	margin-right: 30px;
+}
+
 input[type='text']
 {
 	width: 300px;

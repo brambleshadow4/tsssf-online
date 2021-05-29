@@ -8,7 +8,8 @@ import {validatePack} from "../../server/packLib.js";
 import {
 	PackListHeader,
 	PackListItem,
-	PackListPack
+	PackListPack,
+	GameOptions
 } from "../../server/lib.js";
 
 import texts from "../tokens.js";
@@ -28,6 +29,10 @@ var sentName = false;
 
 var cardBoxElements: {[key: string]: Element} = {};
 var cardSelectorElements: {[key: string]: Element} = {}
+
+
+var currentOptions: GameOptions;
+var currentPlayers: string[];
 
 
 var globals = window as unknown as {
@@ -50,15 +55,6 @@ globals.decks =  {
 	"EC.*": new Set(),
 }
 
-
-type GameOptions = {
-
-	cardDecks: string[],
-	startCard: string,
-	keepLobbyOpen: boolean,
-	ruleset: "turnsOnly" | "sandbox",
-	customCards: {cards: {[key: string]: CardProps}, descriptions: PackListItem[]}	
-}
 
 export function loadView(isOpen: boolean)
 {
@@ -94,6 +90,9 @@ export function loadView(isOpen: boolean)
 
 function loadCardPages(options: GameOptions)
 {
+	console.log(options);
+	console.log(typeof options);
+
 	document.getElementById('uploadErrors')!.innerHTML = "";
 	(document.getElementById('packUpload') as HTMLInputElement).value = "";
 
@@ -237,6 +236,39 @@ function getPackString(card: Card)
 }
 
 
+function loadGameOptions(options: GameOptions)
+{
+	console.log(options)
+
+	if(options.ruleset == "turnsOnly")
+		input("turnsOnly").checked = true;
+	else if (options.ruleset == "sandbox")
+		input("sandbox").checked = true;
+
+	if(options.keepLobbyOpen)
+		input("keepLobbyOpen").checked = true;
+
+
+	var teams = document.getElementById('teams') as HTMLElement;
+	teams.innerHTML = "";
+	for(let player of currentPlayers)
+	{	
+		if(player)
+		{
+			let value = options.teams[player] || "";
+			teams.innerHTML += `<div><input class='teamInput' playerName="${player}" value="${value}"/><span>${player}</span></div>`;
+		}
+	}
+
+	var inputEls = teams.getElementsByTagName('input')
+	
+	for(let i = 0; i < inputEls.length; i++)
+	{
+		inputEls[i].oninput = setLobbyOptions;
+	}
+}
+
+
 function onMessage(event: MessageEvent)
 {
 	if(event.data.startsWith("registered;"))
@@ -256,6 +288,8 @@ function onMessage(event: MessageEvent)
 
 		if(options)
 		{
+			currentOptions = options;
+
 			ishost = true;
 			document.getElementById('rightSide')!.classList.add('host');
 
@@ -313,14 +347,7 @@ function onMessage(event: MessageEvent)
 				}
 			}
 				
-
-			if(options.ruleset == "turnsOnly")
-				input("turnsOnly").checked = true;
-			else if (options.ruleset == "sandbox")
-				input("sandbox").checked = true;
-
-			if(options.keepLobbyOpen)
-				input("keepLobbyOpen").checked = true;
+			loadGameOptions(options)
 		}
 	}
 
@@ -331,6 +358,13 @@ function onMessage(event: MessageEvent)
 
 		var names = names.split(",");
 		var list = document.getElementById('playerList')!;
+
+		currentPlayers = names;
+		
+		if(currentOptions)
+		{
+			loadGameOptions(currentOptions);
+		}
 		
 
 		list.innerHTML = "";
@@ -380,7 +414,14 @@ function register()
 function setLobbyOptions()
 {
 	var cardDecks = document.getElementsByClassName('cardbox');
-	var options: any = {cardDecks:[]};
+	var options: GameOptions = {
+		cardDecks:[],
+		startCard: "Core.Start.FanficAuthorTwilight",
+		ruleset: "turnsOnly",
+		customCards: {cards: {}, descriptions: []},
+		keepLobbyOpen: false,
+		teams: {},
+	};
 
 
 	// skip 0 because it's core
@@ -388,14 +429,32 @@ function setLobbyOptions()
 	options.cardDecks = Object.keys(globals.decks).map(x => [...globals.decks[x]]).reduce((a,b) => a.concat(b), []);
 
 	var startCard = document.getElementById('startCards')!.getElementsByClassName('selected')[0];
-	options.startCard = startCard ? startCard.getAttribute('card') : "Core.Start.FanficAuthorTwilight";
+	options.startCard = startCard.getAttribute('card') || "Core.Start.FanficAuthorTwilight";
 
 	if(input('sandbox').checked)
 		options.ruleset = "sandbox";
 	if(input('turnsOnly').checked)
 		options.ruleset = "turnsOnly";
 
+	var teams = document.getElementById('teams')!;
+
+	var teamInputs = teams.getElementsByTagName('input')
+	for(let i=0; i < teamInputs.length; i++)
+	{
+		let playerName = teamInputs[i].getAttribute("playerName");
+		let teamName = teamInputs[i].value;
+
+		if(playerName && teamName != "")
+		{
+			options.teams[playerName] = teamName;
+		}
+	}
+
+	console.log(options);
+
 	options.keepLobbyOpen = !!input('keepLobbyOpen').checked;
+
+	currentOptions = options;
 
 	globals.socket.send("setLobbyOptions;" +  JSON.stringify(options));
 }

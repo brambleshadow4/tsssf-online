@@ -785,7 +785,15 @@ export async function moveCard(
 	}
 	else if(isPlayerLoc(startLocation))
 	{
-		startPos = {top: "-18vh", left: "50vh"}
+		startPos = {top: "-18vh", left: "50vh"};
+
+		var playerName = startLocation.split(",")[1];
+		var player = model.players.filter(x => x.name == playerName)[0];
+		if(player.hand)
+		{
+			let i = player.hand.indexOf(card);
+			player.hand.splice(i);
+		}
 	}
 	/*else if(isOffsetLoc(startLocation))
 	{
@@ -896,6 +904,14 @@ export async function moveCard(
 	else if(isPlayerLoc(endLocation))
 	{
 		endPos = {top: "-18vh", left: "50vh"};
+
+		var playerName = endLocation.split(",")[1];
+		var player = model.players.filter(x => x.name == playerName)[0];
+		if(player.hand)
+		{
+			player.hand.push(card);
+		}
+
 	}
 	else if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
 	{

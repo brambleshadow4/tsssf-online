@@ -20,7 +20,8 @@ import {
 	GameModel as GameModelShared,
 	CardProps,
 	ChangelingContextList,
-	PackListPack
+	PackListPack,
+	GameOptions
 } from "./lib.js";
 
 
@@ -63,6 +64,7 @@ var PROP_VALUES = {
 export interface Player 
 {
 	socket: any,
+	team?: string,
 	name: string,
 	hand: string[],
 	winnings: {card: Card, value: number}[],
@@ -268,7 +270,7 @@ export class GameModel implements GameModelShared
 
 	public startCard: Card = "Core.Start.FanficAuthorTwilight";
 
-	public ruleset: string = "";
+	public ruleset: "sandbox" | "turnsOnly" = "turnsOnly";
 
 	private host?: ws;
 
@@ -328,15 +330,24 @@ export class GameModel implements GameModelShared
 				{
 					if(game.host == socket)
 					{
-						var options = {
+						var options: GameOptions = {
 							cardDecks:["Core.*"],
 							ruleset: "turnsOnly",
+							startCard: "Core.Start.FanficAuthorTwilight",
+							keepLobbyOpen: false,
+							teams: {},
+							customCards: {
+								cards: {},
+								descriptions: []
+							},
 						};
+
 						try 
 						{
 							options = JSON.parse(message.substring("setLobbyOptions;".length))
 						}
 						catch(e){ }
+
 
 						game.setLobbyOptions(options);
 
@@ -707,9 +718,11 @@ export class GameModel implements GameModelShared
 						game.cardLocations[card] = "player," + player.name;
 
 						var msg = "draw;" + typ + ";" + (len - 1);
-						game.toEveryone( msg);
+						game.toEveryone(msg);
 						socket.send("move;" + card + ";" + typ + "DrawPile;hand");
-						game.toEveryoneElse(socket, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
+
+						game.toTeamMembers(socket, "move;" + card + ";" + typ + "DrawPile;player," + player.name)
+						game.toNonTeamMembers(socket, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
 					
 						game.sendPlayerCounts(player);
 					}
@@ -1164,6 +1177,32 @@ export class GameModel implements GameModelShared
 		throw new Error("no player index");
 	}
 
+	public toTeamMembers(thissocket: ws, message: string)
+	{
+		let player = this.getPlayer(thissocket)!;;
+		for(var i=0; i < this.players.length; i++)
+		{
+			var socket = this.players[i].socket;
+			if(socket != thissocket && socket.isAlive && player.team == this.players[i].team && player.team !== undefined)
+			{
+				socket.send(message);
+			}
+		}
+	}
+
+	public toNonTeamMembers(thissocket: ws, message: string)
+	{
+		let player = this.getPlayer(thissocket)!;;
+		for(var i=0; i < this.players.length; i++)
+		{
+			var socket = this.players[i].socket;
+			if(socket != thissocket && socket.isAlive && (player.team != this.players[i].team || player.team == undefined))
+			{
+				socket.send(message);
+			}
+		}
+	}
+
 	public toEveryoneElse(thissocket: ws, message: string)
 	{
 		for(var i=0; i < this.players.length; i++)
@@ -1235,20 +1274,29 @@ export class GameModel implements GameModelShared
 		if(playerCount > 1)
 		{
 			var playerIndex = this.getPlayerIndex(socket);
+			var player = this.getPlayer(socket)!;
 
 			for(var i=(playerIndex+1) % playerCount; i != playerIndex; i = ((i + 1) % playerCount))
 			{
 				let other = this.players[i];
 				
+				let otherPlayerStats = {
+					name: other.name,
+					team: other.team,
+					disconnected: !other.socket.isAlive,
+					ponies: other.hand.filter(x => isPony(x)).length,
+					ships: other.hand.filter(x => isShip(x)).length,
+					winnings: other.winnings
+				} as any;
+
+				if(other.team === player.team && player.team != undefined)
+				{
+					otherPlayerStats.hand = other.hand.slice();
+				}
+
 				if(other.name != "") // Players who are still registering have a name of ""
 				{
-					players.push({
-						name: other.name,
-						disconnected: !other.socket.isAlive,
-						ponies: other.hand.filter(x => isPony(x)).length,
-						ships: other.hand.filter(x => isShip(x)).length,
-						winnings: other.winnings
-					});
+					players.push(otherPlayerStats);
 				}
 			}
 		}
@@ -1270,16 +1318,38 @@ export class GameModel implements GameModelShared
 
 	private sendHostMessage(socket:ws, isHost: boolean)
 	{
-		if(!isHost)
-			var payload = "0"
-		else
-			var payload = JSON.stringify({
+		var payload = "0";
+
+		if(isHost)
+		{
+			let teams: {[key: string]: string} = {};
+			for(let player of this.players)
+			{
+				if(player.team !== undefined)
+				{
+					teams[player.name] = player.team;
+				}
+			}
+
+			console.log("players")
+			console.log(this.players);
+
+			console.log("teams");
+
+			console.log(teams);
+
+			let lobbyOptions: GameOptions = {
 				cardDecks: this.cardDecks,
 				startCard: this.startCard,
+				teams,
 				ruleset: this.ruleset,
 				keepLobbyOpen: this.keepLobbyOpen,
 				customCards: this.customCards
-			});
+			}
+
+			var payload = JSON.stringify(lobbyOptions);
+		}
+			
 
 		socket.send("ishost;" + payload)
 	}
@@ -1328,13 +1398,22 @@ export class GameModel implements GameModelShared
 
 	
 
-	public setLobbyOptions(options: any)
+	public setLobbyOptions(options: GameOptions)
 	{
 		this.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
 		this.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
 		this.keepLobbyOpen = !!options.keepLobbyOpen;
-		this.ruleset = options.ruleset.substring(0,200);
+		this.ruleset = options.ruleset.substring(0,200) as "turnsOnly" | "sandbox";
 
+		for(let playerName in options.teams)
+		{
+			let player = this.getPlayerByName(playerName);
+			if(player)
+			{
+				player.team = options.teams[playerName];
+				console.log("set player's team to " + player.team);
+			}
+		}
 
 		var decks = ["Core.*"];
 		if(options.cardDecks)

@@ -436,9 +436,14 @@ export function updatePlayerList()
 
 		div.onclick = function()
 		{
-			openSearchCardSelect(s.PopupTextWonGoals.replace("{0}", player.name), 
-				"",
-				player.winnings.map((x: Winning) => x.card));
+			let playersCards = player.winnings.map((x: Winning) => x.card);
+
+			if(player.hand)
+			{
+				playersCards = player.hand.concat(playersCards);
+			}
+
+			openSearchCardSelect(s.PopupTextWonGoals.replace("{0}", player.name), "", playersCards);
 		}
 
 		playerList.appendChild(div);
