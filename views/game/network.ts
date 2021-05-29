@@ -48,6 +48,8 @@ let win = window as unknown as {
 })
 */
 
+var heldDebugResolve: undefined | ((obj: any) => void) ;
+
 
 
 export function attachToSocket(socket: WebSocketPlus)
@@ -84,6 +86,16 @@ export function attachToSocket(socket: WebSocketPlus)
 
 			//console.log(model.turnstate);
 			updateTurnstate();
+		}
+
+		if(event.data.startsWith("debug;"))
+		{
+			if(heldDebugResolve)
+			{
+				heldDebugResolve(JSON.parse(event.data.substring("debug;".length)));
+				heldDebugResolve = undefined;
+			}
+			
 		}
 
 		if(event.data.startsWith('keepLobbyOpen;'))
@@ -271,4 +283,14 @@ export function requestSwapShuffle(typ: "pony" | "ship" | "goal")
 {
 	if(isItMyTurn())
 		broadcast("swapshuffle;" + typ);
+}
+
+
+(win as any).dump = function dump()
+{
+	return new Promise((resolve, reject) =>
+	{
+		heldDebugResolve = resolve;
+		win.socket.send("debug");
+	});
 }

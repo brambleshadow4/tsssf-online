@@ -348,7 +348,7 @@ export function updateWinnings()
 
 	var points = model.winnings.reduce((a,b) => a + b.value, 0);
 
-	if(points > 0)
+	if(model.winnings.length)
 	{
 		var scoreElement = document.createElement('span');
 		scoreElement.className = 'score';
@@ -468,7 +468,6 @@ export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 
 		if(isSoftUpdate && oldElement.classList.contains("blank"))
 		{
-
 			continue;
 		}
 
@@ -490,15 +489,17 @@ export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 	}
 }
 
-export function updateHand(cardIndex?: number)
+
+export function updateHand(updateInfo?: string)
 {
 	var handDiv = document.getElementById('hand')!;	
+	
 
 	var ponyHand = document.getElementById('hand-pony')!;
 	var shipHand = document.getElementById('hand-ship')!;
 	let model = win.model as GameModel & {hand: Card[]};
 
-	if(cardIndex == undefined)
+	if(updateInfo == undefined)
 	{
 		var oldCards = handDiv.getElementsByClassName('card');
 
@@ -510,7 +511,6 @@ export function updateHand(cardIndex?: number)
 		for(var i=0; i<model.hand.length; i++)
 		{
 			var cardEl = makeCardElement(model.hand[i], "hand", true);
-			cardEl.id = "hand" + i;
 
 			win.cardLocations[model.hand[i]] = "hand";
 
@@ -526,12 +526,32 @@ export function updateHand(cardIndex?: number)
 			//addTrashHandlers(model.hand[i], cardEl, "hand");
 		}
 	}
-	else
+	else if(updateInfo.startsWith("-"))
 	{
-		var cardEl = makeCardElement(model.hand[cardIndex], "hand", true);
-		cardEl.id = "hand" + cardIndex;
+		let cardDivs = handDiv.getElementsByClassName('card');
+		let card = updateInfo.substring(1);
 
-		if(isPony(model.hand[cardIndex]))
+		for(let i =0; i < cardDivs.length; i++)
+		{
+			let cardDiv = cardDivs[i] as HTMLElement;
+
+			console.log(cardDiv.style.backgroundImage);
+			console.log("url(" + cm.inPlay()[card].thumb + ")")
+
+			if(cardDiv && cardDiv.style.backgroundImage == "url(\"" + cm.inPlay()[card].thumb + "\")")
+			{
+				cardDiv.parentNode!.removeChild(cardDiv);
+				break;
+			}
+		}
+		
+	}
+	else if(updateInfo.startsWith("+"))
+	{
+		let card = updateInfo.substring(1);
+		var cardEl = makeCardElement(card, "hand", true);
+
+		if(isPony(card))
 		{
 			ponyHand.appendChild(cardEl);
 		}
@@ -540,6 +560,15 @@ export function updateHand(cardIndex?: number)
 			shipHand.appendChild(cardEl)
 		}
 	}
+
+	let cardDivs = handDiv.getElementsByClassName('card');
+
+	// used by animation to calculate bounding boxes;
+	for(var i = 0; i < cardDivs.length; i++)
+	{
+		cardDivs[i].id = "hand" + i;
+	}
+
 
 	updateCardRowHeight();
 }
@@ -568,7 +597,7 @@ function getScrollBarWidth () {
 	var w2 = inner.offsetWidth;
 	if (w1 == w2) w2 = outer.clientWidth;
 
-	document.body.removeChild (outer);
+	document.body.removeChild(outer);
 
 	return (w1 - w2);
 };

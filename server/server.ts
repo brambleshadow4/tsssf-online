@@ -87,6 +87,7 @@ app.get("/favicon.ico", file("./img/favicon.ico"))
 app.get('/.well-known/**', fmap("/.well-known/**", "./.well-known/**"));
 
 app.get("/game/game.js", file("./views/game/game.js"))
+app.get("/sectionLinks.js", file("./views/sectionLinks.js"))
 app.get("/game/gameView.js", file("./views/game/gameView.js"))
 app.get("/game/network.js", file("./views/game/network.js"))
 app.get("/game/game.css", file("./views/game/game.css"))

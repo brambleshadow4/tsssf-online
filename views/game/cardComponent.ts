@@ -27,7 +27,6 @@ import {
 	updateTurnstate,
 	isValidMove
 } from "./game.js";
-import {broadcastMove} from "./network.js";
 import s from "../tokens.js";
 import {createPopup} from "./popupComponent.js";
 
@@ -81,13 +80,16 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 	if(!isGoal(card))
 		return [];
 
-	var points = [];
+	var points: (number | "*")[] = [];
 	var pointString = (cards[card] as GoalProps).points;
-	if(pointString.indexOf("-") > -1)
+
+	let parse = /^(-?\d+)(-(-?\d+))?$/.exec(pointString);
+
+	if(parse && parse[3] !== undefined)
 	{
 		var i = pointString.indexOf("-")
-		var minPts = Number(pointString.substring(0, i))
-		var maxPts = Number(pointString.substring(i+1));
+		var minPts = Number(parse[1])
+		var maxPts = Number(parse[3]);
 
 		for(i=minPts; i<=maxPts; i++)
 		{
@@ -96,7 +98,7 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 	}
 	else
 	{
-		points = [Number(pointString)];
+		points = [Number(parse![1])];
 	}
 
 	var changeGoalPointValues = false;
@@ -115,12 +117,11 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 
 	if(!achieved || changeGoalPointValues)
 	{
-		points.push(-1);
+		points.push("*");
 	}
 
 	return points;
 }
-
 
 
 export function makeCardElement(card: Card, location?: Location, isDraggable?: boolean, isDropTarget?: boolean): CardElement
@@ -181,7 +182,6 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 					return;
 
 				moveCard(card, "goal," + goalNo, "winnings", {extraArg: value})
-				broadcastMove(card, "goal," + goalNo, "winnings", "" + value)
 			}
 		}
 
@@ -217,17 +217,14 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			if(isPony(card))
 			{	
 				moveCard(card, location, "ponyDiscardPile,top");
-				broadcastMove(card, location, "ponyDiscardPile,top");
 			}
 			else if(isShip(card))
 			{	
 				moveCard(card, location, "shipDiscardPile,top");
-				broadcastMove(card, location, "shipDiscardPile,top");
 			}
 			else if (isGoal(card))
 			{
 				moveCard(card, location, "goalDiscardPile,top");
-				broadcastMove(card, location, "goalDiscardPile,top");
 			}
 			else
 			{
@@ -312,7 +309,6 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				document.getElementById('playingArea')!.classList.add('draggingPony');
 			}
 
-			//console.log(cards[card].action)
 			if(isShip(card) || (cards[card] as ShipProps).action == "ship")
 			{
 				document.getElementById('playingArea')!.classList.add('draggingShip');
@@ -346,19 +342,16 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				if(startLoc == "hand")
 				{
 					moveCard(offsetCard, location, "ponyDiscardPile,top");
-					broadcastMove(offsetCard, location, "ponyDiscardPile,top");	
 				}
 				else if(startLoc ==  "ponyDiscardPile,top")
 				{
 					moveCard(offsetCard, location, offsetLoc);
-					broadcastMove(offsetCard, location, offsetLoc);	
 
 					doReactiveMoveBack = true;
 				}
 				else
 				{
 					moveCard(offsetCard, location, offsetLoc);
-					broadcastMove(offsetCard, location, offsetLoc);	
 				}
 				
 					
@@ -371,12 +364,10 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 		}
 
 		moveCard(card, startLoc, location!);
-		broadcastMove(card, startLoc, location!);
 
 		if(doReactiveMoveBack)
 		{
 			moveCard(offsetCard, offsetLoc, "ponyDiscardPile,top");
-			broadcastMove(offsetCard, offsetLoc, "ponyDiscardPile,top");	
 		}
 	}
 
@@ -638,7 +629,6 @@ function showTrashButton(card: Card, location:Location)
 
 			endMoveShared();
 			moveCard(card, location!, trashTarget + ",top");
-			broadcastMove(card, location!, trashTarget + ",top");
 		}
 
 	
@@ -656,7 +646,6 @@ function showTrashButton(card: Card, location:Location)
 
 			endMoveShared();
 			moveCard(card, location!, trashTarget + ",top", {noAnimiation: true});
-			broadcastMove(card, location!, trashTarget + ",top");
 		}
 	}
 }
@@ -703,7 +692,6 @@ function addShiftHover(card: Card, element: CardElement)
 		setTimeout(function(){
 			if(thisNo == touchStartNum && hoverCard)
 			{
-				//console.log("isHoverTouch = true")
 				isHoverTouch = true;
 				enlargeCard();
 			}
@@ -725,7 +713,7 @@ function removeShiftHover(element: CardElement)
 }
 
 
-function pointsPopup(points: number[])
+function pointsPopup(points: (number | "*")[])
 {
 	return createPopup(s.PopupTitleChoosePoints, true, function(accept: ((value?: any) => any)) 
 	{
@@ -741,7 +729,7 @@ function pointsPopup(points: number[])
 
 		for(let val of points)
 		{
-			if(val == -1)
+			if(val == "*")
 			{
 				let customDiv = document.createElement('div');
 
@@ -749,8 +737,9 @@ function pointsPopup(points: number[])
 				let input = document.createElement('input');
 				input.type = "number";
 
+				let numberPoints = points.filter(x => x != "*") as number[];
 
-				input.value = "" + (points.reduce((a,b) => Math.max(a,b), 0) + 1);
+				input.value = "" + (numberPoints.reduce((a,b) => Math.max(a,b), 0) + 1);
 				
 
 				let button = document.createElement('button');
@@ -817,7 +806,6 @@ export function setActionButton(element: CardElement, handler: Function)
 	{
 		clearActionButtons();
 		await handler(e);
-		console.log("updateTurnstate")
 		updateTurnstate();
 	};
 	element.appendChild(button);
@@ -867,8 +855,6 @@ export function addTempSymbol(element: CardElement, symbol: string, tooltip?: st
 function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 {
 	let cards = cm.inPlay();
-
-	console.log(card);
 
 	if(isAnon(card))
 	{

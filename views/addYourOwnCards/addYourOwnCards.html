@@ -3,6 +3,7 @@
 	<head>
 		<link href="/info/highlight.min.css" type="text/css" rel="stylesheet" />
 		<script src="/info/highlight.min.js"></script>
+		<script src="../sectionLinks.js"></script>
 		<style>
 
 			body
@@ -106,11 +107,11 @@
 	
 			<div id='main' class='main'>
 				
-				<h1>So, you want add your own cards + play shipfic with them online?</h1>
+				<h1 id='top'>So, you want add your own cards + play shipfic with them online?</h1>
 
 				<p>Excellent, let's get down into how to do it.</p>
 
-				<h2>Step 0: Have art for your shipfic cards</h2>
+				<h2 id='step-0'>Step 0: Have art for your shipfic cards</h2>
 
 				<p>It goes without saying that if you want to add your own cards, you first need to have cards!</p>
 
@@ -118,7 +119,7 @@
 
 				<p>Once you have your .png files ready, you'll need to upload them online. If you're only making a small number of shipfic cards, uploading them to a 3rd party website like the <a href="https://secretshipfic.booru.org">secret shipfic booru</a> or <a href="https://derpibooru.org/">derpibooru</a> is perfect. If you plan on making dozens of cards and releasing multiple expansion packs, you chould check out <a href="#appendix-a">Appendix A: Pack Format</a> for a better way to organizing your packs</p>
 
-				<h2>Step 1: Create a pack.json file</h2>
+				<h2 id='step-1'>Step 1: Create a pack.json file</h2>
 
 				<p>All the metadata for each shipfic card is stored in a JSON file. JSON is a very common file format which you can edit easily in a free text editor like notepad++.</p>
 
@@ -190,7 +191,7 @@
 }
 </code></pre>
 
-				<h2>Step 2: Add Additional Attributes to Each Card</h2>
+				<h2 id='step-2'>Step 2: Add Additional Attributes to Each Card</h2>
 
 				<p>Now that every card has an image associated with it, it's time to add additional attributes specific to whether it's a pony card, a ship card, or a goal card.</p>
 
@@ -254,7 +255,7 @@
 }
 </code></pre>
 
-				<h2>Step 3: Upload to TSSSF.net</h2>
+				<h2 id='step-3'>Step 3: Upload to TSSSF.net</h2>
 
 				<p>Now that you have your json file ready to go, it's time to upload it! Host a new game, open the 'Choose Cards' tab, and upload your JSON file.</p>
 
@@ -267,7 +268,7 @@
 
 				<p>The link:1 format, described above, is a good way to quickly put together a pack of cards to play online. However, for larger collections of cards it is convenient to store all the cards in the same folder structure, rather than linking individual cards together. Hence, the pack:1 format.</p>
 
-				<h3>The Pack:1 File Structure</h3>
+				<h3 id='pack-file-structure'>The Pack:1 File Structure</h3>
 
 				<p>The difference between the pack:1 format and the link:1 format is that the pack:1 format omits the url attributes and instead, stores the images files in a consistent location based on the card's key name, card type, namespace, and a root attribute, e.g.</p>
 
@@ -333,7 +334,7 @@
 
 
 
-				<h3>Thumbnail Images</h3>
+				<h3 id='thumbnail-images'>Thumbnail Images</h3>
 
 				<p>In addition to the above file structure, every .png image has a corresponding thumbnail image, suffixed with .thumb.jpg.</p>
 
@@ -355,7 +356,7 @@
 					<div><a href="/packs/NoHoldsBarred/pack.json">NoHoldsBarred/pack.json</a></div>
 				</div>
 
-				<h3>Pony Attributes</h3>
+				<h3 id='pony-attributes'>Pony Attributes</h3>
 
 				<div class='figure'><table>
 					<tr>
@@ -383,7 +384,7 @@
 
 					<tr><td>count</td><td>any number</td><td>Changes how many ponies this card counts as, e.g. 2 for Aloe & Lotus</td></tr>
 
-					<tr class='alt'><td rowspan="14">action</td><td>"swap"</td><td></td></tr>
+					<tr class='alt'><td rowspan="15">action</td><td>"swap"</td><td></td></tr>
 					<tr class='alt'><td>"3swap"</td><td></td></tr>
 					<tr class='alt'><td>"replace"</td><td></td></tr>
 					<tr class='alt'><td>"search"</td><td></td></tr>
@@ -406,11 +407,16 @@
 						replace
 					</div>
 					</td></tr>
-					<tr class='alt'><td>"ChangelingNoRedisguise(&lt;type&gt;)"</td><td>Same as Changeling(&lt;type&gt;), but the card cannot redisguise when moved
-					</td></tr>
+					<tr class='alt'>
+						<td>"ChangelingNoRedisguise(&lt;type&gt;)"</td>
+						<td>Same as Changeling(&lt;type&gt;), but the card cannot redisguise when moved</td>
+					</tr>
+					<tr class='alt'>
+						<td>"exchangeCardsBetweenHands"</td><td>Causes players to randomly trade one card with the player next to them</td>
+					</tr>
 				</table></div>
 
-				<h3>Ship Attributes</h3>
+				<h3 id='ship-attributes'>Ship Attributes</h3>
 
 				<div class='figure'><table>
 					<tr>
@@ -430,7 +436,7 @@
 				</table></div>
 
 
-				<h3>Goal Attributes</h3>
+				<h3 id='goal-attributes'>Goal Attributes</h3>
 
 				<table>
 					<tr>
@@ -457,7 +463,7 @@
 
 				</table> 
 
-				<h3>Goal functions</h3>
+				<h3 id='goal-functions'>Goal functions</h3>
 
 				<p>Valid goal logic consists of a single goal function with all its criteria/count parameters passed in to it. Each goal function checks something different, so make sure you use the right one for your goal</p>
 
@@ -674,7 +680,7 @@
 				-->
 
 
-				<h3>Criteria</h3>
+				<h3 id='goal-criteria'>Criteria</h3>
 
 				<p>Criteria are what actually determine if a particular pony card matches or not based on the <a href="#appendix-b">pony card's attributes</a>. They are passed in as parameters to goal functions</p>
 

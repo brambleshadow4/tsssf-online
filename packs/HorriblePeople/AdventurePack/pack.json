@@ -23,10 +23,9 @@
 		"ship": {},
 		"goal": {
 			"DaringDont": {
-				"name": "Daring Don't",
+				"title": "Daring Don't",
 				"goalLogic": "ExistsPonyShippedTo(name=Daring Do, AllOf(name=Rainbow Dash, name=Twilight Sparkle))",
-				"points": "2",
-				"noLogic": true
+				"points": "2"
 			}
 		}
 	}

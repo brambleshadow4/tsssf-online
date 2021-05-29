@@ -70,15 +70,15 @@
 		},
 		"ship": {
 			"PitTrap": {
-				"name": "Pit Trap!"
+				"title": "Pit Trap!"
 			},
 			"TakingIttotheNextLevel": {
-				"name": "Taking It to the Next Level"
+				"title": "Taking It to the Next Level"
 			}
 		},
 		"goal": {
 			"YouMeetInATavern": {
-				"name": "You Meet in a Tavern",
+				"title": "You Meet in a Tavern",
 				"goalLogic": "ExistsShip(RPG in keywords || card=Core.Pony.DruidFluttershy, RPG in keywords || card=Core.Pony.DruidFluttershy)",
 				"points": "1"
 			}
