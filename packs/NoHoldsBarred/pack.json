@@ -248,6 +248,7 @@
 				"name": "Abarenbou",
 				"race": "unicorn",
 				"gender": "male",
+				"action": "exchangeCardsBetweenHands",
 				"keywords": [
 					"OC"
 				]

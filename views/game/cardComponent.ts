@@ -27,7 +27,6 @@ import {
 	updateTurnstate,
 	isValidMove
 } from "./game.js";
-import {broadcastMove} from "./network.js";
 import s from "../tokens.js";
 import {createPopup} from "./popupComponent.js";
 
@@ -183,7 +182,6 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 					return;
 
 				moveCard(card, "goal," + goalNo, "winnings", {extraArg: value})
-				broadcastMove(card, "goal," + goalNo, "winnings", "" + value)
 			}
 		}
 
@@ -219,17 +217,14 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			if(isPony(card))
 			{	
 				moveCard(card, location, "ponyDiscardPile,top");
-				broadcastMove(card, location, "ponyDiscardPile,top");
 			}
 			else if(isShip(card))
 			{	
 				moveCard(card, location, "shipDiscardPile,top");
-				broadcastMove(card, location, "shipDiscardPile,top");
 			}
 			else if (isGoal(card))
 			{
 				moveCard(card, location, "goalDiscardPile,top");
-				broadcastMove(card, location, "goalDiscardPile,top");
 			}
 			else
 			{
@@ -347,19 +342,16 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				if(startLoc == "hand")
 				{
 					moveCard(offsetCard, location, "ponyDiscardPile,top");
-					broadcastMove(offsetCard, location, "ponyDiscardPile,top");	
 				}
 				else if(startLoc ==  "ponyDiscardPile,top")
 				{
 					moveCard(offsetCard, location, offsetLoc);
-					broadcastMove(offsetCard, location, offsetLoc);	
 
 					doReactiveMoveBack = true;
 				}
 				else
 				{
 					moveCard(offsetCard, location, offsetLoc);
-					broadcastMove(offsetCard, location, offsetLoc);	
 				}
 				
 					
@@ -372,12 +364,10 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 		}
 
 		moveCard(card, startLoc, location!);
-		broadcastMove(card, startLoc, location!);
 
 		if(doReactiveMoveBack)
 		{
 			moveCard(offsetCard, offsetLoc, "ponyDiscardPile,top");
-			broadcastMove(offsetCard, offsetLoc, "ponyDiscardPile,top");	
 		}
 	}
 
@@ -639,7 +629,6 @@ function showTrashButton(card: Card, location:Location)
 
 			endMoveShared();
 			moveCard(card, location!, trashTarget + ",top");
-			broadcastMove(card, location!, trashTarget + ",top");
 		}
 
 	
@@ -657,7 +646,6 @@ function showTrashButton(card: Card, location:Location)
 
 			endMoveShared();
 			moveCard(card, location!, trashTarget + ",top", {noAnimiation: true});
-			broadcastMove(card, location!, trashTarget + ",top");
 		}
 	}
 }

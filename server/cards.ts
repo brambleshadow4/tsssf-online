@@ -1897,6 +1897,7 @@ var cards: {[key: string]: any} = {
 		"name": "Abarenbou",
 		"race": "unicorn",
 		"gender": "male",
+		"action": "exchangeCardsBetweenHands",
 		"keywords": [
 			"OC"
 		]

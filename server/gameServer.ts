@@ -310,95 +310,17 @@ export class GameModel implements GameModelShared
 			game.messageHistory.push(logPlayerName + ";" + message);
 			game.lastMessageTimestamp = new Date().getTime();
 
-			if(message == "debug")
-			{
-				var gameCopy = {} as any;
+			if(message == "debug") game.onDebugMessage(socket);
+			
 
-				gameCopy.messageHistory = game.messageHistory;
-				gameCopy.board = game.board;
-
-				if(game.turnstate)
-				{
-					let ts = game.turnstate;
-					let cts = gameCopy.turnstate = {} as any;
-
-					cts.currentPlayer = ts.currentPlayer;
-					cts.overrides = ts.overrides;
-
-						
-					cts.playedPonies = ts.playedPonies;
-					cts.playedShips = ts.playedShips;
-					cts.playedShipCards = ts.playedShipCards
-
-					cts.playedThisTurn = ts.playedThisTurn;
-
-					cts.brokenShipsCommitted = ts.brokenShipsCommitted;
-					cts.brokenShips = ts.brokenShips
-					cts.swapsCommitted = ts.swapsCommitted;
-					cts.swaps = ts.swaps;
-
-					cts.shipSet = [...ts.shipSet];
-					cts.positionMap = ts.positionMap;
-						
-					cts.changelingContexts = ts.changelingContexts;
-				}
-
-				socket.send("debug;" + JSON.stringify(gameCopy));
-			}
-
-			if(message.startsWith("handshake;"))
-			{
-				let id = Number(message.split(";")[1]);
-
-				var player = game.getPlayer(socket, id);
-
-				if(!player)
-				{
-					player = game.addPlayerConnection(socket);
-				}
-
-				if(game.isRegistered(player) && game.isInGame)
-				{
-					socket.send("handshake;game");
-					game.sendPlayerlistsToEachPlayer();
-
-					if(game.players.filter(x => !x.socket.isDead).length == 1)
-						game.changeTurnToNextPlayer(); // only one alive player. Make sure it's their turn.
-				}
-				else if(game.isLobbyOpen)
-				{
-					socket.send("handshake;lobby");
-					game.sendLobbyList();
-				}
-				else
-				{
-					socket.send("handshake;closed");
-				}
-
-				if(!game.host)
-				{
-					var players = game.players
-					game.host = players[0].socket;
-					game.sendHostMessage( players[0].socket, true);
-				}
-
-				return;
-			}
+			if(message.startsWith("handshake;")) { game.onHandshakeMessage(message, socket); return; }
+			
 
 
 			if(game.isLobbyOpen)
 			{
 				if(message.startsWith("ishost;"))
 				{
-					/*if(!game.host || game.host == socket)
-					{
-						game.host = socket;
-						sendHostMessage(key, socket, true)
-					}
-					else
-					{
-						sendHostMessage(key, socket, false)
-					}	*/
 					game.sendHostMessage( socket, game.host == socket);		
 				}
 
@@ -544,66 +466,9 @@ export class GameModel implements GameModelShared
 			}
 
 
-			if(message.startsWith("kick;") && socket == game.host)
+			if(message.startsWith("kick;"))
 			{
-				var [_, playerName] = message.split(";");
-
-				var playerIndex = -1;
-				for(var i=0; i< game.players.length; i++)
-				{
-					if(game.players[i].name == playerName)
-					{
-						playerIndex = i; 
-						break;
-					}
-				}
-
-				if(playerIndex != -1)
-				{
-					var hand = game.players[i].hand;
-					var winnings = game.players[i].winnings;
-
-					if(game.turnstate && game.turnstate.currentPlayer == playerName)
-						game.changeTurnToNextPlayer();
-
-					game.players[i].socket.send("kick");
-					game.players[i].socket.close()
-					game.players.splice(i,1);
-
-					var ponies = hand.filter(x => isPony(x));
-					var ships = hand.filter(x => isShip(x));
-
-					game.shipDiscardPile = game.shipDiscardPile.concat(ships);
-					game.ponyDiscardPile = game.ponyDiscardPile.concat(ponies);
-					game.goalDiscardPile = game.goalDiscardPile.concat(winnings.map(x => x.card));
-
-					for(var card of ponies)
-					{
-						game.cardLocations[card] = "ponyDiscardPile,stack"
-					}
-
-					for(var card of ships)
-					{
-						game.cardLocations[card] = "shipDiscardPile,stack"
-					}
-
-					for(let card of winnings)
-					{
-						game.cardLocations[card.card] = "goalDiscardPile,stack"
-					}
-
-					game.cardLocations[game.shipDiscardPile[game.shipDiscardPile.length-1]] = "shipDiscardPile,top";
-					game.cardLocations[game.goalDiscardPile[game.goalDiscardPile.length-1]] = "goalDiscardPile,top";
-					game.cardLocations[game.ponyDiscardPile[game.ponyDiscardPile.length-1]] = "ponyDiscardPile,top";
-
-					// request game
-
-					for(let player of game.players)
-					{
-						game.sendCurrentState(player.socket);
-					}
-
-				}
+				game.onKickMessage(message, socket);
 			}
 
 			if(message.startsWith("requestmodel;"))
@@ -794,6 +659,12 @@ export class GameModel implements GameModelShared
 				}				
 			}
 
+			if(message.startsWith("special;"))
+			{
+				game.onSpecialMessage(message, socket);
+				return;
+			}
+
 			if(message.startsWith("draw;"))
 			{
 				var [_, typ] = message.split(";");
@@ -900,6 +771,196 @@ export class GameModel implements GameModelShared
 				}
 			}
 		}
+	}
+
+
+	public onHandshakeMessage(message:string, socket:ws)
+	{
+		let id = Number(message.split(";")[1]);
+
+		var player = this.getPlayer(socket, id);
+
+		if(!player)
+		{
+			player = this.addPlayerConnection(socket);
+		}
+
+		if(this.isRegistered(player) && this.isInGame)
+		{
+			socket.send("handshake;game");
+			this.sendPlayerlistsToEachPlayer();
+
+			if(this.players.filter(x => !x.socket.isDead).length == 1)
+				this.changeTurnToNextPlayer(); // only one alive player. Make sure it's their turn.
+		}
+		else if(this.isLobbyOpen)
+		{
+			socket.send("handshake;lobby");
+			this.sendLobbyList();
+		}
+		else
+		{
+			socket.send("handshake;closed");
+		}
+
+		if(!this.host)
+		{
+			var players = this.players
+			this.host = players[0].socket;
+			this.sendHostMessage( players[0].socket, true);
+		}
+	}
+
+	public onKickMessage(message:string, socket:ws)
+	{
+		if (socket != this.host) return;
+
+
+		var [_, playerName] = message.split(";");
+
+		var playerIndex = -1;
+		for(var i=0; i< this.players.length; i++)
+		{
+			if(this.players[i].name == playerName)
+			{
+				playerIndex = i; 
+				break;
+			}
+		}
+
+		if(playerIndex == -1) { return; }
+
+
+		var hand = this.players[i].hand;
+		var winnings = this.players[i].winnings;
+
+		if(this.turnstate && this.turnstate.currentPlayer == playerName)
+			this.changeTurnToNextPlayer();
+
+		this.players[i].socket.send("kick");
+		this.players[i].socket.close()
+		this.players.splice(i,1);
+
+		var ponies = hand.filter(x => isPony(x));
+		var ships = hand.filter(x => isShip(x));
+
+		this.shipDiscardPile = this.shipDiscardPile.concat(ships);
+		this.ponyDiscardPile = this.ponyDiscardPile.concat(ponies);
+		this.goalDiscardPile = this.goalDiscardPile.concat(winnings.map(x => x.card));
+
+		for(var card of ponies)
+		{
+			this.cardLocations[card] = "ponyDiscardPile,stack"
+		}
+
+		for(var card of ships)
+		{
+			this.cardLocations[card] = "shipDiscardPile,stack"
+		}
+
+		for(let card of winnings)
+		{
+			this.cardLocations[card.card] = "goalDiscardPile,stack"
+		}
+
+		this.cardLocations[this.shipDiscardPile[this.shipDiscardPile.length-1]] = "shipDiscardPile,top";
+		this.cardLocations[this.goalDiscardPile[this.goalDiscardPile.length-1]] = "goalDiscardPile,top";
+		this.cardLocations[this.ponyDiscardPile[this.ponyDiscardPile.length-1]] = "ponyDiscardPile,top";
+
+		// request game
+
+		for(let player of this.players)
+		{
+			this.sendCurrentState(player.socket);
+		}
+
+	}
+
+	public onDebugMessage(socket:ws)
+	{
+		var gameCopy = {} as any;
+
+		gameCopy.messageHistory = this.messageHistory;
+		gameCopy.board = this.board;
+
+		if(this.turnstate)
+		{
+			let ts = this.turnstate;
+			let cts = gameCopy.turnstate = {} as any;
+
+			cts.currentPlayer = ts.currentPlayer;
+			cts.overrides = ts.overrides;
+
+				
+			cts.playedPonies = ts.playedPonies;
+			cts.playedShips = ts.playedShips;
+			cts.playedShipCards = ts.playedShipCards
+
+			cts.playedThisTurn = ts.playedThisTurn;
+
+			cts.brokenShipsCommitted = ts.brokenShipsCommitted;
+			cts.brokenShips = ts.brokenShips
+			cts.swapsCommitted = ts.swapsCommitted;
+			cts.swaps = ts.swaps;
+
+			cts.shipSet = [...ts.shipSet];
+			cts.positionMap = ts.positionMap;
+				
+			cts.changelingContexts = ts.changelingContexts;
+		}
+
+		socket.send("debug;" + JSON.stringify(gameCopy));
+	}
+	public onSpecialMessage(message:string, socket: ws)
+	{	
+		var [_, type] = message.split(";");
+
+		if(type == "exchangeCardsBetweenHands")
+		{
+			let playersInGame = this.players.filter(x => this.isRegistered(x));
+			let playerCount = playersInGame.length;
+
+			let playersShifted = [...playersInGame.slice(1), playersInGame[0]];
+
+			let fromPlayer = playersInGame.map(x => x.name);
+
+			let cards = [];
+			for(let player of playersInGame)
+			{
+				if(player.hand.length)
+				{
+					let i = Math.floor(Math.random() * player.hand.length);
+					let card = player.hand[i];
+					cards.push(card);
+					player.hand.splice(i, 1);
+				}
+				else
+				{
+					cards.push("");
+				}
+			}
+
+			for(let i = 0; i < playersInGame.length; i++)
+			{
+				let card = cards[i];
+				if(card)
+				{
+					playersShifted[i].hand.push(card);
+					this.cardLocations[card] = "player," + playersShifted[i].name;
+					playersInGame[i].socket.send("move;" + card + ";hand;player," + playersShifted[i].name); // take all the cards first
+				}
+			}
+
+			for(let i = 0; i < playersInGame.length; i++)
+			{
+				let card = cards[i];
+				if(card)
+				{
+					playersShifted[i].socket.send("move;" + card + ";player," + playersShifted[i].name + ";hand"); // then move all the cards
+				}
+			}
+		}
+
 	}
 
 	private onClose(game: GameModel, socket: ws & {isAlive: boolean, isDead: boolean})

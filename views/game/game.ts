@@ -493,7 +493,6 @@ function updateEffects()
 					decs.keywords.push("Princess");
 
 				let action = cm.inPlay()[card].action || "";
-				console.log(action);
 
 				if(action.startsWith("Changeling"))
 					decs.disguise = larsonEffect;
@@ -760,7 +759,7 @@ export async function moveCard(
 		if(i == -1) { return };
 		model.hand.splice(i,1);
 
-		updateHand();
+		updateHand("-" + card);
 	}
 	else if(isDiscardLoc(startLocation))
 	{
@@ -846,7 +845,7 @@ export async function moveCard(
 
 		let x = model.hand.length - 1;
 
-		updateFun = () => updateHand(x);
+		updateFun = () => updateHand("+" + card);
 	}
 	else if(isDiscardLoc(endLocation))
 	{
@@ -942,16 +941,26 @@ export async function moveCard(
 	if(isPlayerLoc(endLocation))
 		delete cardLocations[card];
 
+
+
+	if(!options.forceCardToMove)
+	{
+		broadcastMove(card, startLocation, endLocation, options.extraArg ? "" + options.extraArg : "");
+	}
+
 	// run animation (if applicable)
 	
 
 	if(startLocation != "limbo" && !options.noAnimiation
 		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation)) // not going from discard to discard
-		&& (isDiscardLoc(endLocation)
+		&& (
+			isDiscardLoc(endLocation)
 			|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
 			|| endLocation == "winnings"
 			|| isGoalLoc(endLocation)
-			|| isPlayerLoc(endLocation))
+			|| isPlayerLoc(endLocation)
+			|| (isPlayerLoc(startLocation) && endLocation == "hand")
+		)
 	)
 	{
 		animateCardMove(card, startPos || {}, endPos || {}, updateFun);
@@ -1137,6 +1146,7 @@ function getCardAction(card: Card)
 		case "shipWithEverypony": return shipWithEveryponyAction;
 		case "timelineChange": return timelineChangeAction;
 		case "fullCopy": return fullCopyAction;
+		case "exchangeCardsBetweenHands": return exchangeCardsBetweenHandsAction;
 		
 	}		
 }
@@ -1182,7 +1192,6 @@ function changelingAction(type: string)
 						&& slashStringToSet(cards[x].gender).has("female")
 					));
 
-					console.log(disguises);
 					break;
 				case "replace":
 					
@@ -1788,3 +1797,8 @@ function raceGenderChangePopup(ponies: Card[])
 	});
 }
 
+
+function exchangeCardsBetweenHandsAction(ponyCard: Card)
+{
+	win.socket.send("special;exchangeCardsBetweenHands");
+}
