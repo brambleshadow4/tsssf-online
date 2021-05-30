@@ -1,5 +1,6 @@
 export default {
 	"Lang": "en-US",
+	"NavTemplate": "", // This is filled in from NavTemplate.html
 
 	"HomepageAboutTheGame": "About the game",
 	"HomepageCustomCards": "The Custom Cards Update",

@@ -7,8 +7,9 @@ var parentParent;
 window.addEventListener('mouseover', function(e){
 
 	let parent = e.originalTarget;
+	let parentID = parent.id || parent.getAttribute('idf');
 
-	if(headings.has(e.originalTarget.tagName) && parent.id)
+	if(headings.has(e.originalTarget.tagName) && parentID)
 	{
 		
 		if(linkElement)
@@ -19,7 +20,8 @@ window.addEventListener('mouseover', function(e){
 
 		x = parent;
 
-		linkElement = document.createElement('div');
+		linkElement = document.createElement('a');
+		linkElement.href = "#" + parentID;
 
 		linkElement.style.backgroundImage = "url(/img/link.svg)";
 		linkElement.style.backgroundSize = "20px 20px";
@@ -28,15 +30,11 @@ window.addEventListener('mouseover', function(e){
 		linkElement.style.width = "20px";
 
 		parent.style.position = "relative";
+		parent.style.zIndex = "1";
 		linkElement.style.position = "absolute";
 		linkElement.style.top = "2px";
 		linkElement.style.left = "-25px";
 		linkElement.style.cursor = "pointer";
-
-		if(parent.id)
-		{
-			linkElement.onclick = () => {window.location.href = "#" + parent.id};
-		}
 
 		parentParent = parent.parentNode;
 		if(parent.childNodes.length > 0)

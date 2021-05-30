@@ -16,12 +16,7 @@ import zz_ZZ from "../i18n/zz-ZZ/views/tokens.js";
 
 
 
-// compile markdown
 
-
-buildTemplate("./views/info/resources.md");
-buildTemplate("./views/info/addYourOwnCards/addYourOwnCards.md")
-buildTemplate("./views/info/quickRules.md")
 
 
 
@@ -34,13 +29,54 @@ const translations = {
 } as any;
 
 
+translations[defaultLocale].NavTemplate = fs.readFileSync("./views/NavTemplate.html", {encoding: "utf8"});
+
 for(let lang in translations)
 {
 	for(let key in translations[defaultLocale])
 	{	
 		translations[lang][key] = translations[lang][key] || translations[defaultLocale][key]		
 	}
+
+	let prefix = "./i18n/" + lang;
+
+	if(lang == defaultLocale)
+		prefix = ".";
+
+	var navTemplate = translations[defaultLocale].NavTemplate
+
+	if(fs.existsSync(prefix + "/views/NavTemplate.html"))
+	{
+		navTemplate = fs.readFileSync(prefix + "/views/NavTemplate.html", {encoding: "utf8"});
+		translations[lang].NavTemplate = navTemplate
+	}
+
+	for(let file of [
+		"/views/info/resources.md",
+		"/views/info/addYourOwnCards/addYourOwnCards.md",
+		"/views/info/quickRules.md"])
+	{
+		let fullFile = prefix + file;
+		if(fs.existsSync(fullFile))
+		{
+			buildTemplate(fullFile, navTemplate);
+		}
+		else if(navTemplate != translations[defaultLocale].NavTemplate)
+		{
+			buildTemplate("." + file, navTemplate);
+		}
+	}
 }
+
+
+// compile markdown
+
+for(let lang in translations)
+{
+	
+}
+
+
 
 
 const app = express()

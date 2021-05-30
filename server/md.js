@@ -1,7 +1,7 @@
 import fs from "fs";
 
 
-export function buildTemplate(filename)
+export function buildTemplate(filename, navTemplate)
 {
 	var rawTxt = fs.readFileSync(filename, {encoding: "utf8"});
 	var outFileName = filename.replace(".md", ".html");
@@ -20,7 +20,9 @@ export function buildTemplate(filename)
 		{
 			border: solid 2px black;
 			background-color: white;
+			margin-top: 40px;
 		}
+		nav {display: block}
 		</style>
 	`
 
@@ -49,6 +51,10 @@ export function buildTemplate(filename)
 
 		</head>
 		<body>
+			<nav>
+				<a href="/">TSSSF.net</a>
+				${navTemplate}
+			</nav>
 			<div id='main' class='main'>
 				${html}
 			</div>
@@ -512,8 +518,8 @@ export function toHTML(markdown)
 		if(element.type == "")
 			return text;
 
-		var idAttr = (element.id ? ` id="${element.id}"` : "")
-
-		return `<${element.type}${idAttr}>${text}</${element.type}>`;
+		var anchor = (element.id ? `<span id="${element.id}" style="position: relative; top: -20px"></span>` : "")
+		var idfAttr = element.id || "";
+		return `${anchor}<${element.type} idf="${idfAttr}">${text}</${element.type}>`;
 	}
 }

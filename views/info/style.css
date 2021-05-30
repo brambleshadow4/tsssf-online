@@ -6,6 +6,60 @@
 	padding: 0 .5in .5in .5in;
 }
 
+/* Menu styles */
+nav
+{
+	display: none;
+	position: fixed;
+	left:  0;
+	right:  0;
+	top: 0;
+	height: 30px;
+	background-color: #F06BA8;
+	color: white;
+
+	z-index: 2;
+}
+
+nav a 
+{
+	padding: 5px;
+	text-decoration: none;
+}
+
+nav a:hover
+{
+	background-color: #ed4593;
+}
+
+nav a, nav .hoverMenu
+{
+	display: inline-block;
+	vertical-align: top;
+	background-color: #F06BA8;
+	color: white;
+	
+}
+
+.hoverMenuExpand a
+{
+	display: block;
+}
+
+.hoverMenuExpand
+{
+	display: none;
+	background-color: #F06BA8;
+	color: white;
+	z-index: 2;
+}
+
+.hoverMenu:hover .hoverMenuExpand
+{
+	display: block;
+}
+
+
 h1, h2
 {
 	border-bottom: solid 1px black;

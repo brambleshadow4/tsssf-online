@@ -12,7 +12,69 @@
 		<meta property="og:image" content="http://tsssf.net/img/tsssf-box.png">
 		<meta property="og:url" content="http://www.tsssf.net">
 		<meta property="og:type" content="website">
+		<style>
+			/* Menu styles */
+			nav
+			{
+				max-width: 800px;
+				height: 30px;
+				background-color: #F06BA8;
+				color: white;
 
+				z-index: 2;
+				margin: auto;
+				margin-top: 5vh;
+				position: relative;
+
+				text-align: left;
+			}
+
+			nav a 
+			{
+				padding: 5px;
+				text-decoration: none;
+			}
+
+			nav a:hover
+			{
+				background-color: #ed4593;
+			}
+
+			nav a, nav .hoverMenu
+			{
+				display: inline-block;
+				vertical-align: top;
+				background-color: #F06BA8;
+				color: white;
+				
+			}
+
+			.hoverMenu 
+			{
+				position: relative;
+			}
+
+			.hoverMenuExpand a
+			{
+				display: block;
+			}
+
+			.hoverMenuExpand
+			{
+				display: none;
+				background-color: #F06BA8;
+				color: white;
+				z-index: 2;
+				position: absolute;
+			}
+
+			.hoverMenu:hover .hoverMenuExpand
+			{
+				display: block;
+				position: relative;
+			}
+
+		</style>
 		<style>
 
 			html
@@ -29,7 +91,7 @@
 
 			.split
 			{
-				margin-top: 5vh;
+				
 				display: flex;
 				flex-direction: row;
 
@@ -130,7 +192,12 @@
 	</head>
 
 	<body>
+
+		<nav>
+			{{NavTemplate}}
+		</nav>
 		<div class='split'>
+			
 			<div id="left">
 				<h1>Twilight Sparkle's<br>Secret Shipfic Folder<br>Online</h1>
 				<h2>Beta 0.11.1</h2>

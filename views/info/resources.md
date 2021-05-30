@@ -1,7 +1,9 @@
 Resources
 ============
 
-The secret shipfic community is made up of many different individuals. 
+The secret shipfic community is made up of many different individuals. As such, there's 
+a ton of stuff all scattered across the web. This page tries to list it all in one place
+so you don't miss any of it.
 
 
 Websites + Blogs
@@ -21,35 +23,21 @@ FAQ: <https://docs.google.com/document/d/1lA0GZiFDUfcaLKOJ7M4ob15_Utkrl8iWF_UXNz
 
 
 
-Implementations
-------------------
-Web app: <http://www.tsssf.net>
-
-Vassel: <http://www.vassalengine.org/wiki/Module:Twilight_Sparkle%27s_Secret_Shipfic_Folder>
-
-### Table Top Simulator: ### 
-
-English edition: <https://steamcommunity.com/sharedfiles/filedetails/?id=628630032]>  
-Russian edition: <https://steamcommunity.com/sharedfiles/filedetails/?id=395834480>  
-
-### Standalone app ###
-Repository: <https://github.com/raubana/TSSSFgame>  
-Wiki: <https://tsssfgame.fandom.com/wiki/Tsssfgame_Wiki>  
- 
-
-
-Tools for making your own cards
+Make Your Own Cards
 --------------------------
 
-Online card creator <http://latent-logic.github.io/TSSSF-Frontend/>  
-Official Guide <https://github.com/HorriblePeople/TSSSFTemplates>  
-Official Templates <https://github.com/HorriblePeople/TSSSFTemplates>    
+Online card creator: <http://latent-logic.github.io/TSSSF-Frontend/>  
+Official Templates: <https://github.com/HorriblePeople/TSSSFTemplates> 
+Official Guide to printing: <https://github.com/HorriblePeople/TSSSFTemplates>  
 
 
-Expansion + Booster Pack Assets
+Card Assets
 ---------------------------
+
+### Official Assets from Horrible People ###
+
 Core Deck: <https://github.com/HorriblePeople/Core-Deck>    
-Extra Credit: <https://github.com/HorriblePeople/Expansions>    
+Extra Credit : <https://github.com/HorriblePeople/Expansions>    
 Ponyville University: <https://github.com/HorriblePeople/Expansions>    
 No Holds Barred: <https://github.com/HorriblePeople/Expansions>    
 
@@ -69,22 +57,56 @@ Official expansions, including
 
 <https://github.com/HorriblePeople/Mini-Expansions>
 
-### Fan made cards ###
+### Assets from Children of Kefentse ###
 
-A Panel of Ponies by Novel Idea <https://www.deviantart.com/mlp-novelidea/gallery/58059629/tsssf>
+Since Horrible People closed up shop, Children of Kefentse has released newer
+versions of the official cards with more consistet text and other errors corrected.
 
-Ask Chrome Pony []
+Core Deck 1.1.6: <https://github.com/secretshipfic/Core-Deck>   
+Extra Credit 1.0.2:  <https://github.com/secretshipfic/ExtraCredit>  
+Ponyville University 1.0.6: <https://github.com/secretshipfic/PonyvilleUniversity>
+
+### Cards made by fans ###
+
+These are cards made publically available by the artists that created them. 
+
+A Panel of Ponies by Novel Idea <https://www.deviantart.com/mlp-novelidea/gallery/58059629/tsssf>  
+Ask Chrome Pony  
+Pirate Dash  
 
 
 
 Card Lists + Databases
 ----------------------
 
-Shipficbooru <https://secretshipfic.booru.org/index.php>  
-asdk
+Shipficbooru: <https://secretshipfic.booru.org/index.php>  
+Children of Kefentse card list: <https://docs.google.com/spreadsheets/d/1MToVUj0jUo1U76tcyj3gwqn2AK1XmEJ8u1HbwOJSyE8/edit#gid=0>
 
 
 Card Vendors
 ------------------
-Shipfic Co <https://shipfic.co/>  
+
+These people either sell the core deck or cards they themselves made!
+
+ShipficCo <https://shipfic.co/>  
 Boiler3 <https://boiler3.square.site/#KsqtaR>
+
+
+
+Other Implementations
+------------------
+
+Believe it or not, TSSSF.net is a newcomer to the shipfic scene. There's lots of other ways
+to play shipfic online if you're not a fan of TSSSF.net
+
+Vassel: <http://www.vassalengine.org/wiki/Module:Twilight_Sparkle%27s_Secret_Shipfic_Folder>
+
+### Table Top Simulator: ### 
+
+English edition: <https://steamcommunity.com/sharedfiles/filedetails/?id=628630032]>  
+Russian edition: <https://steamcommunity.com/sharedfiles/filedetails/?id=395834480>  
+
+### Standalone app ###
+Repository: <https://github.com/raubana/TSSSFgame>  
+Wiki: <https://tsssfgame.fandom.com/wiki/Tsssfgame_Wiki>  
+ 

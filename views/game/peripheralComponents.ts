@@ -79,11 +79,10 @@ export function initPeripherals()
 
 		document.getElementById(id)!.onclick = () => requestSwapShuffle(key)
 
-		id = key + "DrawPile"
+		id = key + "DrawPile";
+		
 		document.getElementById(id)!.ontouchstart = function(e)
 		{
-
-
 			var stillHeldDown = true;
 
 			this.ontouchend = function(e)
