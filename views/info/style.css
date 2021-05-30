@@ -1,0 +1,85 @@
+.main
+{
+	max-width: 800px;
+	margin: auto;
+	background-color: white;
+	padding: 0 .5in .5in .5in;
+}
+
+h1, h2
+{
+	border-bottom: solid 1px black;
+}
+
+
+pre, code
+{
+	-moz-tab-size: 4;
+	tab-size: 4;
+}
+
+th
+{
+	border-bottom: solid 1px black;
+}
+
+img
+{
+	width: 100%;
+}
+
+.inset
+{
+	padding-left: 30px;
+}
+
+.hidden{visibility: hidden;}
+
+.text-root { color: green; }
+.text-namespace { color: blue; }
+.text-cardtype { color: purple; }
+.text-cardkey {color: orange; }
+
+table,tr,td
+{
+	border-collapse: collapse;
+	vertical-align: top;
+}
+
+table
+{
+	margin: 0px 40px;
+	background-color: #F0F0F0;
+}
+
+td
+{
+	padding: 2px;
+	padding-left: 7px;
+}
+
+tr.alt, div.alt
+{
+	background-color: #E0E0E0;
+}
+
+.hangingIndent
+{
+	display: flex;
+}
+
+.function-doc
+{
+	padding: 10px;
+	background-color: #F0F0F0;
+}
+
+.figure > div
+{
+	margin: auto;
+}
+
+.figure table
+{
+	margin: auto;
+}

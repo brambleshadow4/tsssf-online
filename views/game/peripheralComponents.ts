@@ -471,7 +471,6 @@ export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 			continue;
 		}
 
-
 		let element = updateCardElement(
 			goalDiv.getElementsByClassName('card')[i] as HTMLElement,
 			model.currentGoals[i].card, "goal," + i, false, false);
@@ -534,9 +533,6 @@ export function updateHand(updateInfo?: string)
 		for(let i =0; i < cardDivs.length; i++)
 		{
 			let cardDiv = cardDivs[i] as HTMLElement;
-
-			console.log(cardDiv.style.backgroundImage);
-			console.log("url(" + cm.inPlay()[card].thumb + ")")
 
 			if(cardDiv && cardDiv.style.backgroundImage == "url(\"" + cm.inPlay()[card].thumb + "\")")
 			{
@@ -842,15 +838,15 @@ function createHelpPopup()
 		},
 		{
 			name: s.HelpTabQuickRules,
-			render: htmlTab(`<iframe src="/quickRules.html"></iframe>`)},
+			render: htmlTab(`<iframe src="/info/quickRules?embed"></iframe>`)},
 
 		{
 			name: s.HelpTabFullRules,
-			render: htmlTab(`<iframe src="/rulebook.html"></iframe>`)
+			render: htmlTab(`<iframe src="/info/rulebook?embed"></iframe>`)
 		},
 		{
 			name: s.HelpTabFAQ,
-			render: htmlTab(`<iframe src="/faq.html"></iframe>`)
+			render: htmlTab(`<iframe src="/info/faq?embed"></iframe>`)
 		},
 		{
 			name: s.HelpTabCardReference,

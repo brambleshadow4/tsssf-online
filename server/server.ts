@@ -5,7 +5,10 @@ import ws from 'ws';
 import https from "https";
 import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
-import {getStats} from "./stats.js"
+import {getStats} from "./stats.js";
+
+// @ts-ignore
+import {buildTemplate} from "./md.js";
 
 import en_US from "../views/tokens.js";
 import es_ES from "../i18n/es-ES/views/tokens.js";
@@ -13,7 +16,16 @@ import zz_ZZ from "../i18n/zz-ZZ/views/tokens.js";
 
 
 
+// compile markdown
 
+
+buildTemplate("./views/info/resources.md");
+buildTemplate("./views/info/addYourOwnCards/addYourOwnCards.md")
+buildTemplate("./views/info/quickRules.md")
+
+
+
+// compile translations
 const defaultLocale = "en-US";
 const translations = {
 	"en-US": en_US,
@@ -98,12 +110,15 @@ app.get("/game/popupComponent.js", file("./views/game/popupComponent.js"))
 app.get("/game/cardSearchBarComponent.js", file("./views/game/cardSearchBarComponent.js"))
 
 
-app.get("/info/addYourOwnCards", file("./views/addYourOwnCards/addYourOwnCards.html"))
-app.get("/info/highlight.min.css", file("./views/addYourOwnCards/highlight.min.css"))
-app.get("/info/highlight.min.js", file("./views/addYourOwnCards/highlight.min.js"))
+app.get("/info/addYourOwnCards", file("./views/info/addYourOwnCards/addYourOwnCards.html"))
 
-app.get("/info/upload1.png", file("./views/addYourOwnCards/upload1.png"))
-app.get("/info/upload2.png", file("./views/addYourOwnCards/upload2.png"))
+app.get("/info/style.css", file("./views/info/style.css"))
+app.get("/info/highlight.min.css", file("./views/info/addYourOwnCards/highlight.min.css"))
+app.get("/info/highlight.min.js", file("./views/info/addYourOwnCards/highlight.min.js"))
+
+app.get("/info/resources", file("./views/info/resources.html"))
+
+app.get("/info/addYourOwnCards/upload2.png", file("./views/info/addYourOwnCards/upload2.png"))
 
 app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
 app.get("/lobby/packOrder.js", tokenizeFile("./views/lobby/packOrder.js"))
@@ -128,9 +143,9 @@ app.get("/server/cardManager.js", file("./server/cardManager.js"))
 app.get("/server/packLib.js", file("./server/packLib.js"))
 app.get("/server/goalCriteria.js", file("./server/goalCriteria.js"))
 
-app.get("/rulebook.html", file("./views/rulebook.html"))
-app.get("/quickRules.html", file("./views/quickRules.html"))
-app.get("/faq.html", file("./views/faq.html"))
+app.get("/info/rulebook", file("./views/info/rulebook.html"))
+app.get("/info/quickRules", file("./views/info/quickRules.html"))
+app.get("/info/faq", file("./views/info/faq.html"))
 app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
 
 app.get("/lobby", function(req,res)
