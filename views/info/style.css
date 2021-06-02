@@ -137,3 +137,15 @@ tr.alt, div.alt
 {
 	margin: auto;
 }
+
+@media print
+{
+	nav{
+		position: absolute;
+		display: none !important
+	}
+	
+	.main {
+		border: none !important;
+	}
+}

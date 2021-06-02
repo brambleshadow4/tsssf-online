@@ -1,10 +1,10 @@
 import fs from "fs";
 
 
-export function buildTemplate(filename, navTemplate)
+export function buildTemplate(filename, navTemplate, outFileName)
 {
 	var rawTxt = fs.readFileSync(filename, {encoding: "utf8"});
-	var outFileName = filename.replace(".md", ".html");
+	var outFileName = (outFileName || filename).replace(".md", ".html");
 	var html = toHTML(rawTxt);
 
 

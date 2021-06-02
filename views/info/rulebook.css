@@ -1,0 +1,68 @@
+.main
+{
+	font-family: Arial;
+}
+
+h1 {
+	font-family: "Artifika", serif;
+	color: #674EA7;
+	font-size: 20pt;
+	border: none;
+	clear: both;
+}
+
+img 
+{
+	width: 80%;
+	margin: auto;
+	display: block;
+}
+
+.title {
+	font-family: "Artifika", serif;
+	color: #741B47;
+	font-size: 28px;
+
+	font-style: normal;
+}
+
+.subtitle {
+	color: #666;
+	margin-bottom: 10pt;
+}
+
+.subtitle3, .subtitle4
+{
+	font-size: 9pt;
+}
+
+.subtitle3
+{
+	margin-top: 10pt;
+}
+
+h2 
+{
+	border: none;
+	font-size:  14pt;
+}
+
+.titleimg
+{
+	width: 50%;
+	margin: auto;
+	display: block;
+}
+
+.titles
+{
+	text-align: center;
+	font-style: italic;
+}
+
+.float-right-col
+{
+	width:  30%;
+	float: right;
+	margin-bottom: 10pt;
+}

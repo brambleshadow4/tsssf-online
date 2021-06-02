@@ -43,7 +43,7 @@ for(let lang in translations)
 	if(lang == defaultLocale)
 		prefix = ".";
 
-	var navTemplate = translations[defaultLocale].NavTemplate
+	let navTemplate = translations[defaultLocale].NavTemplate
 
 	if(fs.existsSync(prefix + "/views/NavTemplate.html"))
 	{
@@ -51,11 +51,16 @@ for(let lang in translations)
 		translations[lang].NavTemplate = navTemplate
 	}
 
+	console.log(lang);
+
 	for(let file of [
 		"/views/info/resources.md",
 		"/views/info/addYourOwnCards/addYourOwnCards.md",
-		"/views/info/quickRules.md"])
-	{
+		"/views/info/quickRules.md",
+		"/views/info/rulebook.md"
+	]){
+		console.log(file)
+
 		let fullFile = prefix + file;
 		if(fs.existsSync(fullFile))
 		{
@@ -63,8 +68,10 @@ for(let lang in translations)
 		}
 		else if(navTemplate != translations[defaultLocale].NavTemplate)
 		{
-			buildTemplate("." + file, navTemplate);
+			buildTemplate("." + file, navTemplate, fullFile);
 		}
+
+		console.log(navTemplate.substring(0,100))
 	}
 }
 
@@ -180,6 +187,7 @@ app.get("/server/packLib.js", file("./server/packLib.js"))
 app.get("/server/goalCriteria.js", file("./server/goalCriteria.js"))
 
 app.get("/info/rulebook", file("./views/info/rulebook.html"))
+app.get("/info/rulebook.css", file("./views/info/rulebook.css"))
 app.get("/info/quickRules", file("./views/info/quickRules.html"))
 app.get("/info/faq", file("./views/info/faq.html"))
 app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
