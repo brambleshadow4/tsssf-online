@@ -66,6 +66,8 @@ table, tr, td
 	border: solid 1.5pt #4c1130;
 	background-color: #f5f0ff;
 	padding: 5px;
+
+	text-align: center;
 }
 
 .cell-variant {

@@ -1,0 +1,49 @@
+
+
+h2 { 
+	font-size: 12pt; text-decoration: underline; 
+
+}
+
+h2, h1 {border:  none}
+
+img {width: initial;}
+
+
+table, tr, td
+{ 
+	margin: auto; 
+	border-collapse: collapse;
+	border: solid 1.5pt #4c1130;
+	background-color: #f5f0ff;
+	padding: 5px;
+}
+
+.cell-variant {
+	color: white;
+	background-color: #a64d79;
+}
+
+table
+{
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+
+.redtext {color: red;}
+.indent {padding-left: 30px;}
+
+.variant {
+	color: #6aa84f;
+	font-weight: bold;
+}
+
+.center{text-align: center;}
+
+
+
+.nospacepar p
+{
+	margin: 0;
+}

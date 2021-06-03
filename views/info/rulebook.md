@@ -95,6 +95,7 @@ The number of points needed to win changes based on the number of people playing
 
 
 <table>
+	<colgroup><col width="141"><col width="141"></colgroup>
 	<tr>
 		<td class='cell-variant'>2-3 Players</td>
 		<td>11 points</td>
