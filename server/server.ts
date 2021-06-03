@@ -16,10 +16,6 @@ import zz_ZZ from "../i18n/zz-ZZ/views/tokens.js";
 
 
 
-
-
-
-
 // compile translations
 const defaultLocale = "en-US";
 const translations = {
@@ -51,15 +47,12 @@ for(let lang in translations)
 		translations[lang].NavTemplate = navTemplate
 	}
 
-	console.log(lang);
-
 	for(let file of [
 		"/views/info/resources.md",
 		"/views/info/addYourOwnCards/addYourOwnCards.md",
 		"/views/info/quickRules.md",
 		"/views/info/rulebook.md"
 	]){
-		console.log(file)
 
 		let fullFile = prefix + file;
 		if(fs.existsSync(fullFile))
@@ -70,8 +63,6 @@ for(let lang in translations)
 		{
 			buildTemplate("." + file, navTemplate, fullFile);
 		}
-
-		console.log(navTemplate.substring(0,100))
 	}
 }
 
@@ -132,7 +123,12 @@ app.get('/', function(req:any,res:any, next:any){
 	
 }, tokenizeFile("./views/home.html"));
 
+app.get("/home.css", file("./views/home.css"))
+
+
+
 app.get('/img/**', fmap("/img/**", "./img/**"));
+app.get('/fonts/**', fmap("/fonts/**", "./fonts/**"));
 app.get('/packs/**', fmap("/packs/**", "./packs/**"));
 
 

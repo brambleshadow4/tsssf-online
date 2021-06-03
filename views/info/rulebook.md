@@ -14,66 +14,68 @@
 		<span style="float: right;"><strong>Last Updated:</strong> 2015-05-22</span>
 	</div>
 </div>
-
+<div class='page-break'></div>
 
 
 Table of Contents
 ====================
 
-<a>Table of Contents</a>  
-<a>Objective</a>  
-<a>Winning Points</a>  
-<a>A Brief Explanation for Those Unfamiliar With "Shipping"</a>  
-<a>Terminology</a>  
-<a>I Don't Get The Idea Behind This Game</a>  
-<a>The Nitty Gritty: Setup and Turns</a>  
-<a>Setting Up the Game</a>  
-<a>The Anatomy of a Card</a>  
-<a>On Your Turn</a>  
-<a>Mechanics: Shipping for Fun and Profit</a>  
-<a>How Do I Ship Ponies with Other Ponies?</a>  
-<a>Let's Make This Interesting: Powers</a>  
-<a>Ship Powers</a>  
-<a>Completing a Goal</a>  
-<a>How Do I Tell if my Pony Card Counts for This Goal?</a>  
-<a>The Deck Ran Out</a>  
-<a>Confusing Concepts</a>  
-<a>Love Poisons</a>  
-<a>Changelings</a>  
-<a>Start Card</a>  
-<a>Chains</a>  
-<a>I Have the Power!: Advanced Rules</a>  
-<a>Adjacent Ships</a>  
-<a>What Exactly Does it Mean When...: A Glossary of Terms</a>  
-<a>Pony</a>  
-<a>Gender</a>  
-<a>Race</a>  
-<a>Ship</a>  
-<a>Shipping Grid</a>  
-<a>Chain</a>  
-<a>Breaking Up A Ship</a>  
-<a>Play</a>  
-<a>Swap</a>  
-<a>Replace</a>  
-<a>Discard</a>  
-<a>Some Helpful Tips for Beginners</a>  
-<a>Rule #0</a>  
-<a>Can't Achieve a Goal This Turn</a>  
-<a>Really Hard Goals</a>  
-<a>Planning Ahead</a>  
-<a>Searching the Discard</a>  
-<a>Contradicting Previously Stated Rules</a>  
-<a>Variants</a>  
-<a>Private Goals</a>  
-<a>Shipfic Bridge</a>  
-<a>Greased Lightning</a>  
-<a>Early Game Boost</a>  
-<a>The Long Haul</a>  
-<a>The Ridiculously Long Haul</a>  
-<a>Shipping Solitaire</a>  
-<a>Yeah, But...: Frequently Asked Questions & Rulings</a>  
-<a>Printed Deck Errata</a>  
-<a>Still Confused?</a>  
+<div class='level1'><a href="#table-of-contents">Table of Contents</a></div>
+<div class='level1'><a href="#i-objective">Objective</a></div>
+<div class='level2'><a href="#winning-points">Winning Points</a></div>
+<div class='level1'><a href="#ii-a-brief-explanation-for-those-unfamiliar-with-shipping">A Brief Explanation for Those Unfamiliar With "Shipping"</a></div>
+<div class='level2'><a href="#terminology">Terminology</a></div>
+<div class='level2'><a href="#i-dont-get-the-idea-behind-this-game">I Don't Get The Idea Behind This Game</a></div>
+<div class='level1'><a href="#iii-the-nitty-gritty-setup-and-turns">The Nitty Gritty: Setup and Turns</a></div>
+<div class='level2'><a href="#setting-up-the-game">Setting Up the Game</a></div>
+<div class='level2'><a href="#the-anatomy-of-a-card">The Anatomy of a Card</a></div>
+<div class='level2'><a href="#on-your-turn">On Your Turn</a></div>
+<div class='level1'><a href="#iv-mechanics-shipping-for-fun-and-profit">Mechanics: Shipping for Fun and Profit</a></div>
+<div class='level2'><a href="#how-do-i-ship-ponies-with-other-ponies">How Do I Ship Ponies with Other Ponies?</a></div>
+<div class='level2'><a href="#lets-make-this-interesting-powers">Let's Make This Interesting: Powers</a></div>
+<div class='level3'><a href="#ship-powers">Ship Powers </a></div>
+<div class='level2'><a href="#completing-a-goal">Completing a Goal</a></div>
+<div class='level3'><a href="#how-do-i-tell-if-my-pony-card-counts-for-this-goal">How Do I Tell if my Pony Card Counts for This Goal? </a></div>
+<div class='level2'><a href="#the-deck-ran-out">The Deck Ran Out</a></div>
+<div class='level1'><a href="#v-confusing-concepts">Confusing Concepts</a></div>
+<div class='level2'><a href="#love-poisons">Love Poisons</a></div>
+<div class='level2'><a href="#changelings">Changelings</a></div>
+<div class='level2'><a href="#start-card">Start Card</a></div>
+<div class='level2'><a href="#chains">Chains</a></div>
+<div class='level1'><a href="#vi-i-have-the-power-advanced-rules">I Have the Power!: Advanced Rules</a></div>
+<div class='level2'><a href="#adjacent-ships">Adjacent Ships</a></div>
+<div class='level1'><a href="#vii-what-exactly-does-it-mean-when-a-glossary-of-terms">What Exactly Does it Mean When...: A Glossary of Terms</a></div>
+<div class='level2'><a href="#pony">Pony</a></div>
+<div class='level2'><a href="#gender">Gender</a></div>
+<div class='level2'><a href="#race">Race</a></div>
+<div class='level2'><a href="#ship">Ship</a></div>
+<div class='level2'><a href="#shipping-grid">Shipping Grid</a></div>
+<div class='level2'><a href="#chain">Chain</a></div>
+<div class='level2'><a href="#breaking-up-a-ship">Breaking Up A Ship</a></div>
+<div class='level2'><a href="#play">Play</a></div>
+<div class='level2'><a href="#swap">Swap</a></div>
+<div class='level2'><a href="#replace">Replace</a></div>
+<div class='level2'><a href="#discard">Discard</a></div>
+<div class='level1'><a href="#viii-some-helpful-tips-for-beginners">Some Helpful Tips for Beginners</a></div>
+<div class='level2'><a href="#rule-0">Rule #0</a></div>
+<div class='level2'><a href="#cant-achieve-a-goal-this-turn">Can't Achieve a Goal This Turn</a></div>
+<div class='level2'><a href="#really-hard-goals">Really Hard Goals</a></div>
+<div class='level2'><a href="#planning-ahead">Planning Ahead</a></div>
+<div class='level2'><a href="#searching-the-discard">Searching the Discard</a></div>
+<div class='level2'><a href="#contradicting-previously-stated-rules">Contradicting Previously Stated Rules</a></div>
+<div class='level1'><a href="#ix-variants">Variants</a></div>
+<div class='level2'><a href="#private-goals">Private Goals</a></div>
+<div class='level2'><a href="#shipfic-bridge">Shipfic Bridge</a></div>
+<div class='level2'><a href="#greased-lightning">Greased Lightning</a></div>
+<div class='level2'><a href="#early-game-boost">Early Game Boost</a></div>
+<div class='level2'><a href="#the-long-haul">The Long Haul</a></div>
+<div class='level2'><a href="#the-ridiculously-long-haul">The Ridiculously Long Haul</a></div>
+<div class='level2'><a href="#shipping-solitaire">Shipping Solitaire</a></div>
+<div class='level1'><a href="#x-yeah-but-frequently-asked-questions-rulings">Yeah, But...: Frequently Asked Questions &amp; Rulings</a></div>
+<div class='level1'><a href="#xi-printed-deck-errata">Printed Deck Errata</a></div>
+<div class='level1'><a href="#xii-still-confused">Still Confused?</a></div>
+
+<div class='page-break'></div>
 
 
 I. Objective
@@ -94,15 +96,15 @@ The number of points needed to win changes based on the number of people playing
 
 <table>
 	<tr>
-		<td>2-3 Players</td>
+		<td class='cell-variant'>2-3 Players</td>
 		<td>11 points</td>
 	</tr>
 	<tr>
-		<td>4 Players</td>
+		<td class='cell-variant'>4 Players</td>
 		<td>9 points</td>
 	</tr>
 	<tr>
-		<td>5+ Players</td>
+		<td class='cell-variant'>5+ Players</td>
 		<td>7 points</td>
 	</tr>
 </table>
@@ -297,6 +299,8 @@ V. Confusing Concepts
 As with most games, there are a few mechanics that crop up that are a little more complicated. We've explained them here
 a little more thoroughly.
 
+<img class="float-left-card" src="/packs/Core/Ship/ShmoopyBoo.png" />
+
 Love Poisons
 ------------
 
@@ -311,17 +315,17 @@ Keep this in mind for strategy!
 
 For a better look at what Love Poisons do when they're played, see the following illustration:
 
-<img style="width: 100%" alt="Chart - Love Poison.png" src="/img/rulebook/image2.png" title="">
-
+<img style="width: 100%;" alt="Chart - Love Poison.png" src="/img/rulebook/image2.png" title="">
 
 
 Changelings
 ------------------------
 
+<img class="float-right-card" src="/packs/Core/Pony/UnicornChangeling.png" />
+
 There's a type of wildcard in TSSSF called Changelings! Any card that has the "Changeling" keyword counts as a
 changeling.
 
-<img alt="Pony_Changeling-001.png" src="/img/rulebook/image1.png" title="">
 
 Changelings each have a race associated with them. For example, the card you see to the right here is the Unicorn
 changeling. It can become any Pony in the game as long as their card has the Unicorn symbol. 
@@ -559,7 +563,7 @@ Sometimes the discard piles get very full, and when you search through them, try
 to carefully inspect every card can really hold up the game and is impolite to other players. Try to have an idea of
 what you're looking for ahead of time and scan for the requisite name, symbol, keyword, or something else. If you don't
 know what's in the deck yet, you can use the handy
-<a href="http://tsssf.wdfiles.com/local--files/core%253A1-0-3/Core-Pony-Card-List.pdf">Pony Card List</a> as a
+[Pony Card List](http://tsssf.wikidot.com/local--files/core:1-0-3/Core-Pony-Card-List.pdf) as a
 reference.
 
 Contradicting Previously Stated Rules

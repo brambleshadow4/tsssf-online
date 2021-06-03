@@ -27,8 +27,9 @@ Make Your Own Cards
 --------------------------
 
 Online card creator: <http://latent-logic.github.io/TSSSF-Frontend/>  
-Official Templates: <https://github.com/HorriblePeople/TSSSFTemplates> 
-Official Guide to printing: <https://github.com/HorriblePeople/TSSSFTemplates>  
+Official Templates: <https://github.com/HorriblePeople/TSSSFTemplates>  
+Official Guide to making cards: <http://www.secretshipfic.com/make-your-own-cards>  
+Official Guide to printing: <http://www.secretshipfic.com/printing-your-own-cards>  
 
 
 Card Assets
@@ -44,14 +45,14 @@ No Holds Barred: <https://github.com/HorriblePeople/Expansions>
 Official expansions, including  
 - 2014 Con Exclusives  
 - 2015 con exclusives  
-- 2015 worskshop cards  
+- 2015 workshop cards  
 - adventure pack  
 - dungeon delvers  
 - fluffle puff pack  
 - gracious givers 1+2  
 - Hearthswarming  
 - New New Core  
-- The Meane six  
+- The Mean six  
 - Weeaboo Paradaisu
 - So long and thanks, box expansion, new new core
 
@@ -60,7 +61,7 @@ Official expansions, including
 ### Assets from Children of Kefentse ###
 
 Since Horrible People closed up shop, Children of Kefentse has released newer
-versions of the official cards with more consistet text and other errors corrected.
+versions of the official cards with more consistent text and other errors corrected.
 
 Core Deck 1.1.6: <https://github.com/secretshipfic/Core-Deck>   
 Extra Credit 1.0.2:  <https://github.com/secretshipfic/ExtraCredit>  
@@ -68,7 +69,7 @@ Ponyville University 1.0.6: <https://github.com/secretshipfic/PonyvilleUniversit
 
 ### Cards made by fans ###
 
-These are cards made publically available by the artists that created them. 
+These are cards made publicly available by the artists that created them. 
 
 A Panel of Ponies by Novel Idea <https://www.deviantart.com/mlp-novelidea/gallery/58059629/tsssf>  
 Ask Chrome Pony  

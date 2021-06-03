@@ -4,6 +4,7 @@
 	margin: auto;
 	background-color: white;
 	padding: 0 .5in .5in .5in;
+	font-family: Arial;
 }
 
 /* Menu styles */
@@ -15,7 +16,7 @@ nav
 	right:  0;
 	top: 0;
 	height: 30px;
-	background-color: #F06BA8;
+	background-color: #E880B4; 
 	color: white;
 
 	z-index: 2;
@@ -29,14 +30,14 @@ nav a
 
 nav a:hover
 {
-	background-color: #ed4593;
+	background-color: #DF5399;
 }
 
 nav a, nav .hoverMenu
 {
 	display: inline-block;
 	vertical-align: top;
-	background-color: #F06BA8;
+	background-color: #E880B4; 
 	color: white;
 	
 }

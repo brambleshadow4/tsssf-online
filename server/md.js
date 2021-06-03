@@ -1,5 +1,36 @@
 import fs from "fs";
 
+/* This snippit is usefule for building out the table of contents
+
+var doc = document.getElementById('main')
+var toc = [];
+
+for(var i=0; i<doc.children.length; i++)
+{
+	let child = doc.children[i];
+	console.log(child)
+
+	if(child.tagName == "H1")
+	{
+		let entry = `<div class='level1'><a href="#${child.id || child.getAttribute('idf')}">${child.innerHTML}</a></div>`;
+		toc.push(entry)
+	}
+	if(child.tagName == "H2")
+	{
+		let entry = `<div class='level2'><a href="#${child.id || child.getAttribute('idf')}">${child.innerHTML}</a></div>`;
+		toc.push(entry)
+	}
+	if(child.tagName == "H3")
+	{
+		let entry = `<div class='level3'><a href="#${child.id || child.getAttribute('idf')}">${child.innerHTML}</a></div>`;
+		toc.push(entry)
+	}
+}
+
+console.log(toc.join("\n"))
+
+*/
+
 
 export function buildTemplate(filename, navTemplate, outFileName)
 {
