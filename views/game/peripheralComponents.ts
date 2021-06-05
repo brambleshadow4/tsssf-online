@@ -218,7 +218,7 @@ export function updatePonyDiscard(cardOnTop?: Card)
 		
 		if(model.ponyDiscardPile.length)
 		{
-			var card = await openSearchCardSelect(s.PopupTitleDiscardedPonies, "", model.ponyDiscardPile);
+			var card = await openSearchCardSelect(s.PopupTitleDiscardedPonies, "", model.ponyDiscardPile, true);
 
 			if(card && isItMyTurn())
 			{
@@ -257,7 +257,7 @@ export function updateShipDiscard(tempCard?: Card)
 		
 		if(model.shipDiscardPile.length)
 		{
-			var card = await openSearchCardSelect(s.PopupTitleDiscardedShips, "",  model.shipDiscardPile);
+			var card = await openSearchCardSelect(s.PopupTitleDiscardedShips, "",  model.shipDiscardPile, true);
 
 			if(card && isItMyTurn())
 			{
@@ -298,7 +298,7 @@ export function updateGoalDiscard(tempCard?: Card)
 	{
 		if(model.goalDiscardPile.length)
 		{
-			var card = await openSearchCardSelect(s.PopupTitleDiscardedGoals, "", model.goalDiscardPile);
+			var card = await openSearchCardSelect(s.PopupTitleDiscardedGoals, "", model.goalDiscardPile, true);
 			var openGoal = model.currentGoals.map(x => x.card).indexOf("blank:goal");
 
 
@@ -435,9 +435,17 @@ export function updatePlayerList()
 
 		div.onclick = function()
 		{
-			openSearchCardSelect(s.PopupTextWonGoals.replace("{0}", player.name), 
-				"",
-				player.winnings.map((x: Winning) => x.card));
+			let winnings = player.winnings.map((x: Winning) => x.card);
+			let playersCards = [];
+			let title = s.PopupTextWonGoals;
+
+			if(player.hand)
+			{
+				playersCards = player.hand;
+				title = s.PopupTextPlayersCards;
+			}
+
+			openSearchCardSelect(title.replace("{0}", player.name), "", playersCards.concat(winnings), false);
 		}
 
 		playerList.appendChild(div);
@@ -656,7 +664,7 @@ export function openCardSelect(title: string, heading: string, cards: Card[], mi
 	return createPopup(title, !!miniMode, renderFun);
 }
 
-export function openSearchCardSelect(title: string, heading: string, cards: Card[])
+export function openSearchCardSelect(title: string, heading: string, cards: Card[], sort: boolean)
 {
 	function renderFun(filters: [string, any][], closePopupWithVal: any){
 
@@ -673,7 +681,10 @@ export function openSearchCardSelect(title: string, heading: string, cards: Card
 		
 		let cards2 = cards.slice();
 
-		cards2.sort();
+		if(sort)
+		{
+			cards2.sort();
+		}
 
 		let allCards = cm.inPlay();
 

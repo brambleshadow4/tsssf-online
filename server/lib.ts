@@ -89,6 +89,16 @@ export interface GameModel
 	messageHistory: string[],
 }
 
+export interface GameOptions 
+{
+	cardDecks: string[],
+	startCard: string,
+	keepLobbyOpen: boolean,
+	teams: {[key: string]: string},
+	ruleset: "turnsOnly" | "sandbox",
+	customCards: {cards: {[key: string]: CardProps}, descriptions: PackListItem[]}	
+}
+
 export interface ChangelingContextList
 {
 	list: {[prop: string]: any},

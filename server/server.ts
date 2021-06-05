@@ -6,7 +6,7 @@ import https from "https";
 import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js";
-
+import {GameOptions} from "./lib.js";
 // @ts-ignore
 import {buildTemplate} from "./md.js";
 
@@ -428,7 +428,7 @@ if(process.argv[3])
 	{
 		case "1":
 			tsssfServer.openLobby("DEV");
-			tsssfServer.games.DEV.setLobbyOptions(allCards);
+			tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
 			tsssfServer.games.DEV.startGame([
 				"Core.Ship.CanITellYouASecret",
 				"Core.Ship.DoYouThinkLoveCanBloomEvenOnABattlefield",
@@ -444,7 +444,7 @@ if(process.argv[3])
 	
 		case "2":
 				tsssfServer.openLobby("DEV");
-				tsssfServer.games.DEV.setLobbyOptions(allCards);
+				tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
 				tsssfServer.games.DEV.startGame([
 					"NoHoldsBarred.Pony.Sleight",
 					"NoHoldsBarred.Pony.Plushling",

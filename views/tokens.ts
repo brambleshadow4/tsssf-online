@@ -40,6 +40,8 @@ export default {
 	"LobbyPlayerJoining": "player joining",
 	"LobbyMiniExpansions": "Mini Expansions",
 	"LobbyUploads": "Uploads",
+	"LobbyTeamsOptions": "Team Options",
+	"LobbyTeamsOptionsText": "Assign two players to the same team by giving them the same number next to their name. Players on the same team can see each other's cards.",
 
 
 	"GameYourTurn": "It is currently your turn",
@@ -76,7 +78,8 @@ export default {
 	"PopupChoosePonyAndRace": "Choose a pony and select their new race",
 	"PopupChoosePonyRaceAndGender": "Choose a pony and select their new race/gender",
 	"PopupTextPickAKeyword": "Pick a keyword",
-	"PopupTextWonGoals": "{0}'s won goals", // {0} is the player name
+	"PopupTextWonGoals": "{0}'s won goals", // {0} is the player's name
+	"PopupTextPlayersCards": "{0}'s cards", // {0} is the player's name
 	"PopupOtherButton": "Other",
 
 	"HostSettingKeepLobbyOpen": "Let players join mid-game",

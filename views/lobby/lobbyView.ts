@@ -59,6 +59,10 @@ var HTML = `
 
 				<h2 class='bothMargins'>{{LobbyOtherOptions}}</h2>
 				<div><input type='checkbox' id='keepLobbyOpen'><label for='keepLobbyOpen'>{{LobbyKeepLobbyOpen}}</label></div>
+
+				<h2 class="bothMargins">{{LobbyTeamsOptions}}</h2>
+				<p>{{LobbyTeamsOptionsText}}</p>
+				<div id='teams'></div>
 			</div>
 
 			<div id='startCardInfo'>
