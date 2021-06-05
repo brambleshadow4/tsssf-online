@@ -25,7 +25,7 @@ const translations = {
 } as any;
 
 
-translations[defaultLocale].NavTemplate = fs.readFileSync("./views/NavTemplate.html", {encoding: "utf8"});
+translations[defaultLocale].NavTemplate = fs.readFileSync("./views/navTemplate.html", {encoding: "utf8"});
 
 for(let lang in translations)
 {
@@ -41,9 +41,9 @@ for(let lang in translations)
 
 	let navTemplate = translations[defaultLocale].NavTemplate
 
-	if(fs.existsSync(prefix + "/views/NavTemplate.html"))
+	if(fs.existsSync(prefix + "/views/navTemplate.html"))
 	{
-		navTemplate = fs.readFileSync(prefix + "/views/NavTemplate.html", {encoding: "utf8"});
+		navTemplate = fs.readFileSync(prefix + "/views/navTemplate.html", {encoding: "utf8"});
 		translations[lang].NavTemplate = navTemplate
 	}
 
