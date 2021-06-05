@@ -5,7 +5,10 @@ import ws from 'ws';
 import https from "https";
 import cards from "./cards.js"
 import {TsssfGameServer} from "./gameServer.js";
-import {getStats} from "./stats.js"
+import {getStats} from "./stats.js";
+import {GameOptions} from "./lib.js";
+// @ts-ignore
+import {buildTemplate} from "./md.js";
 
 import en_US from "../views/tokens.js";
 import es_ES from "../i18n/es-ES/views/tokens.js";
@@ -13,7 +16,7 @@ import zz_ZZ from "../i18n/zz-ZZ/views/tokens.js";
 
 
 
-
+// compile translations
 const defaultLocale = "en-US";
 const translations = {
 	"en-US": en_US,
@@ -22,13 +25,56 @@ const translations = {
 } as any;
 
 
+translations[defaultLocale].NavTemplate = fs.readFileSync("./views/NavTemplate.html", {encoding: "utf8"});
+
 for(let lang in translations)
 {
 	for(let key in translations[defaultLocale])
 	{	
 		translations[lang][key] = translations[lang][key] || translations[defaultLocale][key]		
 	}
+
+	let prefix = "./i18n/" + lang;
+
+	if(lang == defaultLocale)
+		prefix = ".";
+
+	let navTemplate = translations[defaultLocale].NavTemplate
+
+	if(fs.existsSync(prefix + "/views/NavTemplate.html"))
+	{
+		navTemplate = fs.readFileSync(prefix + "/views/NavTemplate.html", {encoding: "utf8"});
+		translations[lang].NavTemplate = navTemplate
+	}
+
+	for(let file of [
+		"/views/info/resources.md",
+		"/views/info/addYourOwnCards/addYourOwnCards.md",
+		"/views/info/quickRules.md",
+		"/views/info/rulebook.md"
+	]){
+
+		let fullFile = prefix + file;
+		if(fs.existsSync(fullFile))
+		{
+			buildTemplate(fullFile, navTemplate);
+		}
+		else if(navTemplate != translations[defaultLocale].NavTemplate)
+		{
+			buildTemplate("." + file, navTemplate, fullFile);
+		}
+	}
 }
+
+
+// compile markdown
+
+for(let lang in translations)
+{
+	
+}
+
+
 
 
 const app = express()
@@ -77,7 +123,12 @@ app.get('/', function(req:any,res:any, next:any){
 	
 }, tokenizeFile("./views/home.html"));
 
+app.get("/home.css", file("./views/home.css"))
+
+
+
 app.get('/img/**', fmap("/img/**", "./img/**"));
+app.get('/fonts/**', fmap("/fonts/**", "./fonts/**"));
 app.get('/packs/**', fmap("/packs/**", "./packs/**"));
 
 
@@ -88,7 +139,7 @@ app.get('/.well-known/**', fmap("/.well-known/**", "./.well-known/**"));
 
 app.get("/game/game.js", file("./views/game/game.js"))
 app.get("/sectionLinks.js", file("./views/sectionLinks.js"))
-app.get("/game/gameView.js", file("./views/game/gameView.js"))
+app.get("/game/gameView.js", tokenizeFile("./views/game/gameView.js"))
 app.get("/game/network.js", file("./views/game/network.js"))
 app.get("/game/game.css", file("./views/game/game.css"))
 app.get("/game/cardComponent.js", file("./views/game/cardComponent.js"))
@@ -98,12 +149,15 @@ app.get("/game/popupComponent.js", file("./views/game/popupComponent.js"))
 app.get("/game/cardSearchBarComponent.js", file("./views/game/cardSearchBarComponent.js"))
 
 
-app.get("/info/addYourOwnCards", file("./views/addYourOwnCards/addYourOwnCards.html"))
-app.get("/info/highlight.min.css", file("./views/addYourOwnCards/highlight.min.css"))
-app.get("/info/highlight.min.js", file("./views/addYourOwnCards/highlight.min.js"))
+app.get("/info/addYourOwnCards", file("./views/info/addYourOwnCards/addYourOwnCards.html"))
 
-app.get("/info/upload1.png", file("./views/addYourOwnCards/upload1.png"))
-app.get("/info/upload2.png", file("./views/addYourOwnCards/upload2.png"))
+app.get("/info/style.css", file("./views/info/style.css"))
+app.get("/info/highlight.min.css", file("./views/info/addYourOwnCards/highlight.min.css"))
+app.get("/info/highlight.min.js", file("./views/info/addYourOwnCards/highlight.min.js"))
+
+app.get("/info/resources", file("./views/info/resources.html"))
+
+app.get("/info/addYourOwnCards/upload2.png", file("./views/info/addYourOwnCards/upload2.png"))
 
 app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
 app.get("/lobby/packOrder.js", tokenizeFile("./views/lobby/packOrder.js"))
@@ -128,9 +182,10 @@ app.get("/server/cardManager.js", file("./server/cardManager.js"))
 app.get("/server/packLib.js", file("./server/packLib.js"))
 app.get("/server/goalCriteria.js", file("./server/goalCriteria.js"))
 
-app.get("/rulebook.html", file("./views/rulebook.html"))
-app.get("/quickRules.html", file("./views/quickRules.html"))
-app.get("/faq.html", file("./views/faq.html"))
+app.get("/info/rulebook", file("./views/info/rulebook.html"))
+app.get("/info/rulebook.css", file("./views/info/rulebook.css"))
+app.get("/info/quickRules", file("./views/info/quickRules.html"))
+app.get("/info/faq", file("./views/info/faq.html"))
 app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
 
 app.get("/lobby", function(req,res)
@@ -373,7 +428,7 @@ if(process.argv[3])
 	{
 		case "1":
 			tsssfServer.openLobby("DEV");
-			tsssfServer.games.DEV.setLobbyOptions(allCards);
+			tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
 			tsssfServer.games.DEV.startGame([
 				"Core.Ship.CanITellYouASecret",
 				"Core.Ship.DoYouThinkLoveCanBloomEvenOnABattlefield",
@@ -389,7 +444,7 @@ if(process.argv[3])
 	
 		case "2":
 				tsssfServer.openLobby("DEV");
-				tsssfServer.games.DEV.setLobbyOptions(allCards);
+				tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
 				tsssfServer.games.DEV.startGame([
 					"NoHoldsBarred.Pony.Sleight",
 					"NoHoldsBarred.Pony.Plushling",

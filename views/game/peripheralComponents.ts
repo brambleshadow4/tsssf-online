@@ -79,11 +79,10 @@ export function initPeripherals()
 
 		document.getElementById(id)!.onclick = () => requestSwapShuffle(key)
 
-		id = key + "DrawPile"
+		id = key + "DrawPile";
+		
 		document.getElementById(id)!.ontouchstart = function(e)
 		{
-
-
 			var stillHeldDown = true;
 
 			this.ontouchend = function(e)
@@ -219,7 +218,7 @@ export function updatePonyDiscard(cardOnTop?: Card)
 		
 		if(model.ponyDiscardPile.length)
 		{
-			var card = await openSearchCardSelect(s.PopupTitleDiscardedPonies, "", model.ponyDiscardPile);
+			var card = await openSearchCardSelect(s.PopupTitleDiscardedPonies, "", model.ponyDiscardPile, true);
 
 			if(card && isItMyTurn())
 			{
@@ -258,7 +257,7 @@ export function updateShipDiscard(tempCard?: Card)
 		
 		if(model.shipDiscardPile.length)
 		{
-			var card = await openSearchCardSelect(s.PopupTitleDiscardedShips, "",  model.shipDiscardPile);
+			var card = await openSearchCardSelect(s.PopupTitleDiscardedShips, "",  model.shipDiscardPile, true);
 
 			if(card && isItMyTurn())
 			{
@@ -299,7 +298,7 @@ export function updateGoalDiscard(tempCard?: Card)
 	{
 		if(model.goalDiscardPile.length)
 		{
-			var card = await openSearchCardSelect(s.PopupTitleDiscardedGoals, "", model.goalDiscardPile);
+			var card = await openSearchCardSelect(s.PopupTitleDiscardedGoals, "", model.goalDiscardPile, true);
 			var openGoal = model.currentGoals.map(x => x.card).indexOf("blank:goal");
 
 
@@ -436,9 +435,17 @@ export function updatePlayerList()
 
 		div.onclick = function()
 		{
-			openSearchCardSelect(s.PopupTextWonGoals.replace("{0}", player.name), 
-				"",
-				player.winnings.map((x: Winning) => x.card));
+			let winnings = player.winnings.map((x: Winning) => x.card);
+			let playersCards = [];
+			let title = s.PopupTextWonGoals;
+
+			if(player.hand)
+			{
+				playersCards = player.hand;
+				title = s.PopupTextPlayersCards;
+			}
+
+			openSearchCardSelect(title.replace("{0}", player.name), "", playersCards.concat(winnings), false);
 		}
 
 		playerList.appendChild(div);
@@ -470,7 +477,6 @@ export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 		{
 			continue;
 		}
-
 
 		let element = updateCardElement(
 			goalDiv.getElementsByClassName('card')[i] as HTMLElement,
@@ -534,9 +540,6 @@ export function updateHand(updateInfo?: string)
 		for(let i =0; i < cardDivs.length; i++)
 		{
 			let cardDiv = cardDivs[i] as HTMLElement;
-
-			console.log(cardDiv.style.backgroundImage);
-			console.log("url(" + cm.inPlay()[card].thumb + ")")
 
 			if(cardDiv && cardDiv.style.backgroundImage == "url(\"" + cm.inPlay()[card].thumb + "\")")
 			{
@@ -661,7 +664,7 @@ export function openCardSelect(title: string, heading: string, cards: Card[], mi
 	return createPopup(title, !!miniMode, renderFun);
 }
 
-export function openSearchCardSelect(title: string, heading: string, cards: Card[])
+export function openSearchCardSelect(title: string, heading: string, cards: Card[], sort: boolean)
 {
 	function renderFun(filters: [string, any][], closePopupWithVal: any){
 
@@ -678,7 +681,10 @@ export function openSearchCardSelect(title: string, heading: string, cards: Card
 		
 		let cards2 = cards.slice();
 
-		cards2.sort();
+		if(sort)
+		{
+			cards2.sort();
+		}
 
 		let allCards = cm.inPlay();
 
@@ -842,15 +848,15 @@ function createHelpPopup()
 		},
 		{
 			name: s.HelpTabQuickRules,
-			render: htmlTab(`<iframe src="/quickRules.html"></iframe>`)},
+			render: htmlTab(`<iframe src="/info/quickRules"></iframe>`)},
 
 		{
 			name: s.HelpTabFullRules,
-			render: htmlTab(`<iframe src="/rulebook.html"></iframe>`)
+			render: htmlTab(`<iframe src="/info/rulebook"></iframe>`)
 		},
 		{
 			name: s.HelpTabFAQ,
-			render: htmlTab(`<iframe src="/faq.html"></iframe>`)
+			render: htmlTab(`<iframe src="/info/faq"></iframe>`)
 		},
 		{
 			name: s.HelpTabCardReference,

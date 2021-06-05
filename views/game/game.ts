@@ -785,7 +785,15 @@ export async function moveCard(
 	}
 	else if(isPlayerLoc(startLocation))
 	{
-		startPos = {top: "-18vh", left: "50vh"}
+		startPos = {top: "-18vh", left: "50vh"};
+
+		var playerName = startLocation.split(",")[1];
+		var player = model.players.filter(x => x.name == playerName)[0];
+		if(player.hand) 
+		{
+			let i = player.hand.indexOf(card);
+			player.hand.splice(i, 1);
+		}
 	}
 	/*else if(isOffsetLoc(startLocation))
 	{
@@ -896,6 +904,14 @@ export async function moveCard(
 	else if(isPlayerLoc(endLocation))
 	{
 		endPos = {top: "-18vh", left: "50vh"};
+
+		var playerName = endLocation.split(",")[1];
+		var player = model.players.filter(x => x.name == playerName)[0];
+		if(!isGoal(card) && player.hand)
+		{
+			player.hand.push(card);
+		}
+
 	}
 	else if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
 	{
@@ -939,7 +955,9 @@ export async function moveCard(
 	cardLocations[card] = endLocation;
 	
 	if(isPlayerLoc(endLocation))
+	{
 		delete cardLocations[card];
+	}
 
 
 
@@ -978,6 +996,90 @@ export async function moveCard(
 	}
 
 	updateTurnstate();
+	updateRemoveUnconnectedCardsButton();
+
+}
+
+
+function updateRemoveUnconnectedCardsButton()
+{
+	let model = win.model;
+
+	let unconnected = new Set(Object.keys(model.board).filter(x => !x.startsWith("offset") && model.board[x].card && !isBlank(model.board[x].card)));
+
+	let startLocation = win.cardLocations[model.startCard];
+
+	let button = document.getElementById('removeUnconnectedCards') as HTMLElement;
+
+	if(model.turnstate && model.turnstate.currentPlayer != model.playerName)
+	{
+		button.style.display = "none";
+		return;
+	}
+
+	if(isBoardLoc(startLocation))
+	{
+		unconnected.delete(startLocation);
+		let frontier = [startLocation];
+		let connected = new Set([startLocation]);
+		let incompleteShips = [];
+
+		while(frontier.length)
+		{
+			let loc = frontier.shift() as string;
+
+			let neighbors = getNeighborKeys(loc);
+
+			let missingNeighbor = false;
+
+			for(let n of neighbors)
+			{
+				if(unconnected.has(n) && !connected.has(n))
+				{
+					frontier.push(n);
+					connected.add(n);
+					unconnected.delete(n);
+				}
+
+				if(!unconnected.has(n) && !connected.has(n))
+					missingNeighbor = true;
+			}
+
+			// if a ship isn't connected to two ponies, discard it
+			if(loc.startsWith("s") && missingNeighbor)
+			{
+				incompleteShips.push(loc);
+			}
+		}
+
+		if(unconnected.size)
+		{
+			button.style.display = "block";
+			let unconnectedLocs = [...unconnected, ...incompleteShips];
+			let f = function()
+			{
+				if(unconnectedLocs.length)
+				{
+					let loc = unconnectedLocs.pop() as string;
+					let card = win.model.board[loc].card;
+					let discard = isShip(card) ? "shipDiscardPile,top" : "ponyDiscardPile,top";
+
+					moveCard(card, loc, discard);
+
+					setTimeout(f, 50);
+				}
+			}
+			button.onclick = f;
+		}
+		else
+		{
+			button.style.display = "none";
+		}
+	}
+	else
+	{
+		button.style.display = "none";
+	}
 
 }
 
@@ -1221,7 +1323,7 @@ function changelingAction(type: string)
 			if(!disguises.length && !newDisguise)
 				return;
 
-			newDisguise = newDisguise || await openSearchCardSelect(s.PopupTitleSelectDisguise, s.PopupChooseDisguise, disguises);
+			newDisguise = newDisguise || await openSearchCardSelect(s.PopupTitleSelectDisguise, s.PopupChooseDisguise, disguises, true);
 
 			if(!newDisguise)
 				return

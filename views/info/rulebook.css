@@ -1,0 +1,128 @@
+@font-face {
+  font-family: Artifika;
+  src: url(/fonts/Artifika-Regular.ttf);
+}
+
+.main
+{
+	font-family: Arial;
+}
+
+h1 {
+	font-family: "Artifika", serif;
+	color: #674EA7;
+	font-size: 20pt;
+	border: none;
+	clear: both;
+}
+
+h2 
+{
+	border: none;
+	font-size:  14pt;
+}
+
+h3 {
+	color: #666;
+	font-size: 12pt;
+}
+
+a {color: #D91180;}
+
+img 
+{
+	width: 80%;
+	margin: auto;
+	display: block;
+}
+
+.title {
+	font-family: "Artifika", serif;
+	color: #741B47;
+	font-size: 28px;
+
+	font-style: normal;
+}
+
+.subtitle {
+	color: #666;
+	margin-bottom: 10pt;
+}
+
+.subtitle3, .subtitle4
+{
+	font-size: 9pt;
+}
+
+.subtitle3
+{
+	margin-top: 10pt;
+}
+
+table, tr, td
+{ 
+	margin: auto; 
+	border-collapse: collapse;
+	border: solid 1.5pt #4c1130;
+	background-color: #f5f0ff;
+	padding: 5px;
+
+	text-align: center;
+}
+
+.cell-variant {
+	color: white;
+	background-color: #a64d79;
+}
+
+table
+{
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+
+.titleimg
+{
+	width: 50%;
+	margin: auto;
+	display: block;
+}
+
+.titles
+{
+	text-align: center;
+	font-style: italic;
+}
+
+.float-right-col
+{
+	width: 30%;
+	float: right;
+	margin-bottom: 10pt;
+	margin-left: 20pt;
+}
+
+.float-right-card
+{
+	width: 20%;
+	float: right;
+	margin-bottom: 10pt;
+	margin-left: 20pt;
+}
+
+
+.float-left-card
+{
+	width: 20%;
+	float: left;
+	margin-bottom: 10pt;
+	margin-right: 20pt;
+}
+
+.level2 { padding-left: 20pt }
+.level3 { padding-left: 40pt }
+
+.page-break {
+	page-break-after: always;
+}

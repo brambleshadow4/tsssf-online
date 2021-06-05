@@ -40,6 +40,7 @@ var HTML = `
 			</div>
 		</div>
 		<div id='winnings'></div>
+		<button style="display: none" id="removeUnconnectedCards">{{GameRemoveUnconnectedCardsButton}}</button>
 	</div>
 </div>
 <div id='cardRow'>

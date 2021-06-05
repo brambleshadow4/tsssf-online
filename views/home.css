@@ -1,0 +1,179 @@
+@font-face {
+  font-family: "Press Start 2P";
+  src: url(/fonts/PressStart2P-Regular.ttf);
+}
+
+nav
+{
+	max-width: 800px;
+	height: 30px;
+	background-color: #E880B4;
+	color: white;
+
+	z-index: 2;
+	margin: auto;
+	margin-top: 5vh;
+	position: relative;
+
+	text-align: left;
+}
+
+nav a 
+{
+	padding: 5px;
+	text-decoration: none;
+}
+
+nav a:hover
+{
+	background-color: #df5399;  
+}
+
+nav a, nav .hoverMenu
+{
+	display: inline-block;
+	vertical-align: top;
+	background-color: #E880B4;  
+	color: white;
+	
+}
+
+.hoverMenu 
+{
+	position: relative;
+}
+
+.hoverMenuExpand a
+{
+	display: block;
+}
+
+.hoverMenuExpand
+{
+	display: none;
+	background-color: #F06BA8;
+	color: white;
+	z-index: 2;
+	position: absolute;
+}
+
+.hoverMenu:hover .hoverMenuExpand
+{
+	display: block;
+	position: relative;
+}
+
+
+html
+{
+	background-image: url(/img/tileBackground2.jpg);
+	background-size: 40%;
+	margin: 0px;
+}
+
+body
+{
+	text-align: center;
+}
+
+.split
+{
+	
+	display: flex;
+	flex-direction: row;
+
+	justify-content: center;
+	vertical-align: middle;
+}
+
+#left{
+	width: 500px;
+	background-color: white;
+}
+#right
+{
+	/*width: 500px;*/
+	background-color: white;
+}
+
+.gameFont {font-family: "Press Start 2P";}
+
+
+img
+{
+	width: 300px;
+}
+
+button
+{
+	font-size: 15pt;
+	margin: 10px;
+	padding: 10px 20px
+}
+
+footer
+{
+	margin: auto;
+	padding: 20px 0px;
+	max-width: 800px;
+	background-color: white;
+}
+
+.languages img
+{
+	height: 30px;
+	width: 30px;
+	border: solid 2px white;
+	border-radius: 10px;
+}
+
+.selected  img { border-color: #0074E8; }
+
+.footerLinks img
+{
+	height: 30px;
+	width: 30px;
+}
+
+
+.footerLinks a > *
+{
+	vertical-align: middle;
+}
+
+.footerLinks a
+{
+	text-decoration: none;
+	color: black;
+	margin: 0px 20px;
+}
+
+
+
+@media screen and (max-width: 600px)
+{
+	.split
+	{
+		display: block;
+	}
+
+	#left,#right,footer
+	{
+		background-color: rgba(255,255,255,.5);
+	}
+
+	#left
+	{
+		width: 100%;
+	}
+
+	#right img
+	{
+		width: 50%;
+	}
+
+	.footerLinks a
+	{
+		display: block;
+	}
+}

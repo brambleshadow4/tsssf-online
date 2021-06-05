@@ -138,7 +138,6 @@ export function attachToSocket(socket: WebSocketPlus)
 
 		if(event.data.startsWith("move;"))
 		{
-			//console.log(event.data);
 			var [_, card, startLocation, endLocation] = event.data.split(";");
 			moveCard(card, startLocation, endLocation, {forceCardToMove: true});
 		}
