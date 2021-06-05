@@ -19,7 +19,17 @@
 			<script src="/sectionLinks.js"></script>
 			<script src="/info/highlight.min.js"></script>
 
-			<script>if(location.search.indexOf("embed")==-1) document.head.innerHTML += `
+			<script>
+				function inIframe () {
+					try {
+						return window.self !== window.top;
+					} catch (e) {
+						return true;
+					}
+				}
+				if(!inIframe())
+				{
+					document.head.innerHTML += `
 		<style>
 		body
 		{
@@ -35,7 +45,9 @@
 		}
 		nav {display: block}
 		</style>
-	`</script>
+	`
+				}
+			</script>
 
 		</head>
 		<body>
@@ -73,16 +85,16 @@
 				<link href="/info/rulebook.css" type="text/css" rel="stylesheet" />
 <div><img class='titleimg' alt="Box Front.png" src="/img/rulebook/image4.png" /></div>
 <div class='titles'>
-    <div class='title'>Twilight Sparkle's Secret Shipfic Folder</div>
-    <div class='subtitle'>The Silly Card Game About Badly Written Pony Romance</div>
-    <div class='subtitle2'>"Shipping is what happens when I decide two ponies love each other very much."</div>
-    <div class='subtitle2'>For news and updates, check us out at <a href="http://www.secretshipfic.com">http://www.secretshipfic.com</a>!</div>
-    <div class='subtitle3'>This document is always available at <a href="http://tinyurl.com/tsssf-rules">http://tinyurl.com/tsssf-rules</a></div>
-    <div class='subtitle4'>
-        <span style="float: left;"><strong>For use with game version:</strong> 1.0.2 and greater</span>
-        <span><strong>Rules Revision:</strong> 10</span>
-        <span style="float: right;"><strong>Last Updated:</strong> 2015-05-22</span>
-    </div>
+	<div class='title'>Twilight Sparkle's Secret Shipfic Folder</div>
+	<div class='subtitle'>The Silly Card Game About Badly Written Pony Romance</div>
+	<div class='subtitle2'>"Shipping is what happens when I decide two ponies love each other very much."</div>
+	<div class='subtitle2'>For news and updates, check us out at <a href="http://www.secretshipfic.com">http://www.secretshipfic.com</a>!</div>
+	<div class='subtitle3'>This document is always available at <a href="http://tinyurl.com/tsssf-rules">http://tinyurl.com/tsssf-rules</a></div>
+	<div class='subtitle4'>
+		<span style="float: left;"><strong>For use with game version:</strong> 1.0.2 and greater</span>
+		<span><strong>Rules Revision:</strong> 10</span>
+		<span style="float: right;"><strong>Last Updated:</strong> 2015-05-22</span>
+	</div>
 </div>
 <div class='page-break'></div>
 <span id="table-of-contents" style="position: relative; top: -20px"></span><h1 idf="table-of-contents">Table of Contents</h1><div class='level1'><a href="#table-of-contents">Table of Contents</a></div>
@@ -143,19 +155,19 @@
 <span id="i-objective" style="position: relative; top: -20px"></span><h1 idf="i-objective">I. Objective</h1><p idf="">In order to help fulfill Twilight Sparkle's dream of writing the perfect fanfic, you take turns expanding the shipping
 grid, joining new Ponies to the ever-more-complex network of relationships with Ship cards. If you are first to make one
 of Twilight's narrative Goals a reality, you earn the points for that Goal. </p><p idf="">You also earn shame for enabling Twilight's horrible penchant for shipping her friends, but nopony's perfect.</p><span id="winning-points" style="position: relative; top: -20px"></span><h2 idf="winning-points">Winning Points</h2><p idf="">The number of points needed to win changes based on the number of people playing.</p><table>
-    <colgroup><col width="141"><col width="141"></colgroup>
-    <tr>
-        <td class='cell-variant'>2-3 Players</td>
-        <td>11 points</td>
-    </tr>
-    <tr>
-        <td class='cell-variant'>4 Players</td>
-        <td>9 points</td>
-    </tr>
-    <tr>
-        <td class='cell-variant'>5+ Players</td>
-        <td>7 points</td>
-    </tr>
+	<colgroup><col width="141"><col width="141"></colgroup>
+	<tr>
+		<td class='cell-variant'>2-3 Players</td>
+		<td>11 points</td>
+	</tr>
+	<tr>
+		<td class='cell-variant'>4 Players</td>
+		<td>9 points</td>
+	</tr>
+	<tr>
+		<td class='cell-variant'>5+ Players</td>
+		<td>7 points</td>
+	</tr>
 </table>
 <span id="ii-a-brief-explanation-for-those-unfamiliar-with-shipping" style="position: relative; top: -20px"></span><h1 idf="ii-a-brief-explanation-for-those-unfamiliar-with-shipping">II. A Brief Explanation for Those Unfamiliar With "Shipping"</h1><span id="terminology" style="position: relative; top: -20px"></span><h2 idf="terminology">Terminology</h2><p idf="">Fan fiction is when fans of a show, book, movie, or any other work of creative fiction (or even sometimes non-fiction)
 write stories that take place in that same universe. Often times, it's for wish fulfullment, such as fleshing out events
@@ -278,5 +290,19 @@ the most Goal points wins. This can take a very long time, especially with a gro
 game at the most up-to-date version!</p><span id="xii-still-confused" style="position: relative; top: -20px"></span><h1 idf="xii-still-confused">XII. Still Confused?</h1><p idf="">Please contact us at secretshipfic@gmail.com with any questions, comments, concerns, or anything else! We're always
 happy to answer questions!</p>
 			</div>
+			<script>
+				if(inIframe())
+				{
+					let thispage = window.location + "".split("#")[0];
+					let links = document.getElementsByTagName('a');
+					for(let i=0; i < links.length; i++)
+					{
+						if(!links[i].href.startsWith(thispage))
+						{
+							links[i].setAttribute("target", "_blank");
+						}
+					}
+				}
+			</script>
 		</body>
 	</html>

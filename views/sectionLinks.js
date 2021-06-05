@@ -6,10 +6,10 @@ var parentParent;
 
 window.addEventListener('mouseover', function(e){
 
-	let parent = e.originalTarget;
+	let parent = e.target;
 	let parentID = parent.id || parent.getAttribute('idf');
 
-	if(headings.has(e.originalTarget.tagName) && parentID)
+	if(headings.has(parent.tagName) && parentID)
 	{
 		
 		if(linkElement)

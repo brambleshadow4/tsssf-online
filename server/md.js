@@ -78,7 +78,19 @@ export function buildTemplate(filename, navTemplate, outFileName)
 			<script src="/sectionLinks.js"></script>
 			<script src="/info/highlight.min.js"></script>
 
-			<script>if(location.search.indexOf("embed")==-1) document.head.innerHTML += \`${bonusStyle}\`</script>
+			<script>
+				function inIframe () {
+					try {
+						return window.self !== window.top;
+					} catch (e) {
+						return true;
+					}
+				}
+				if(!inIframe())
+				{
+					document.head.innerHTML += \`${bonusStyle}\`
+				}
+			</script>
 
 		</head>
 		<body>
@@ -89,6 +101,20 @@ export function buildTemplate(filename, navTemplate, outFileName)
 			<div id='main' class='main'>
 				${html}
 			</div>
+			<script>
+				if(inIframe())
+				{
+					let thispage = window.location + "".split("#")[0];
+					let links = document.getElementsByTagName('a');
+					for(let i=0; i < links.length; i++)
+					{
+						if(!links[i].href.startsWith(thispage))
+						{
+							links[i].setAttribute("target", "_blank");
+						}
+					}
+				}
+			</script>
 		</body>
 	</html>`;
 
@@ -135,7 +161,7 @@ export function toHTML(markdown)
 	Fmt.HashHeading = /^#{1,6} /;
 	Fmt.Bullets = /^ ? ? ?[*+-] /;
 	Fmt.Ordered = /^ *\d+\. +/;
-	Fmt.Code = /^    /;
+	Fmt.Code = /^	/;
 	Fmt.Hr = /^\s*\*\s*\*(\s*\*)+|^\s*-\s*-(\s*-)+/;
 	Fmt.UnderlineHeading = /^---+|^===+/;
 	Fmt.HTML = /^<([a-zA-Z0-9]+)(\s*\w+\s*=\s*('([^'\\]|\\.)*'|"([^"\\]|\\.)*"))*\s*\/?>/
@@ -152,7 +178,7 @@ export function toHTML(markdown)
 	// parse link definitions
 	// parse block elements
 	// parse inline elements
-	var lines = markdown.replace(/\t/g,"    ").split(/\r\n|\n|\r/);
+	var lines = markdown.replace(/\t/g,"	").split(/\r\n|\n|\r/);
 
 	return processBlocks({type:"", lines: lines});
 

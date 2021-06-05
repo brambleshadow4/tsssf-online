@@ -848,15 +848,15 @@ function createHelpPopup()
 		},
 		{
 			name: s.HelpTabQuickRules,
-			render: htmlTab(`<iframe src="/info/quickRules?embed"></iframe>`)},
+			render: htmlTab(`<iframe src="/info/quickRules"></iframe>`)},
 
 		{
 			name: s.HelpTabFullRules,
-			render: htmlTab(`<iframe src="/info/rulebook?embed"></iframe>`)
+			render: htmlTab(`<iframe src="/info/rulebook"></iframe>`)
 		},
 		{
 			name: s.HelpTabFAQ,
-			render: htmlTab(`<iframe src="/info/faq?embed"></iframe>`)
+			render: htmlTab(`<iframe src="/info/faq"></iframe>`)
 		},
 		{
 			name: s.HelpTabCardReference,
