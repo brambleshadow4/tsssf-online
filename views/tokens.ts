@@ -51,6 +51,7 @@ export default {
 	"GameEffectShippedWithEveryPony": "This pony is shipped with every other pony on the grid",
 	"GameEffectCopying": "Copying {0}", // {0} is the name of a card,
 	"GamePointsWithUnit": "{0}pts", // {0} is the number of points the player has. "points" should be shortened to something really short, a.k.a. "pts"
+	"GameRemoveUnconnectedCardsButton": "Remove Unconnected Cards",
 
 
 	"PopupTitleSelectDisguise": "Select Disguise",

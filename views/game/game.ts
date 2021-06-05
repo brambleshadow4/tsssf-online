@@ -996,6 +996,90 @@ export async function moveCard(
 	}
 
 	updateTurnstate();
+	updateRemoveUnconnectedCardsButton();
+
+}
+
+
+function updateRemoveUnconnectedCardsButton()
+{
+	let model = win.model;
+
+	let unconnected = new Set(Object.keys(model.board).filter(x => !x.startsWith("offset") && model.board[x].card && !isBlank(model.board[x].card)));
+
+	let startLocation = win.cardLocations[model.startCard];
+
+	let button = document.getElementById('removeUnconnectedCards') as HTMLElement;
+
+	if(model.turnstate && model.turnstate.currentPlayer != model.playerName)
+	{
+		button.style.display = "none";
+		return;
+	}
+
+	if(isBoardLoc(startLocation))
+	{
+		unconnected.delete(startLocation);
+		let frontier = [startLocation];
+		let connected = new Set([startLocation]);
+		let incompleteShips = [];
+
+		while(frontier.length)
+		{
+			let loc = frontier.shift() as string;
+
+			let neighbors = getNeighborKeys(loc);
+
+			let missingNeighbor = false;
+
+			for(let n of neighbors)
+			{
+				if(unconnected.has(n) && !connected.has(n))
+				{
+					frontier.push(n);
+					connected.add(n);
+					unconnected.delete(n);
+				}
+
+				if(!unconnected.has(n) && !connected.has(n))
+					missingNeighbor = true;
+			}
+
+			// if a ship isn't connected to two ponies, discard it
+			if(loc.startsWith("s") && missingNeighbor)
+			{
+				incompleteShips.push(loc);
+			}
+		}
+
+		if(unconnected.size)
+		{
+			button.style.display = "block";
+			let unconnectedLocs = [...unconnected, ...incompleteShips];
+			let f = function()
+			{
+				if(unconnectedLocs.length)
+				{
+					let loc = unconnectedLocs.pop() as string;
+					let card = win.model.board[loc].card;
+					let discard = isShip(card) ? "shipDiscardPile,top" : "ponyDiscardPile,top";
+
+					moveCard(card, loc, discard);
+
+					setTimeout(f, 50);
+				}
+			}
+			button.onclick = f;
+		}
+		else
+		{
+			button.style.display = "none";
+		}
+	}
+	else
+	{
+		button.style.display = "none";
+	}
 
 }
 
