@@ -321,8 +321,13 @@ export function toHTML(markdown)
 				contextLine.type = "Par";
 			}
 
-			while(contextLine.line[contextLine.indent] == " ")
-				contextLine.indent++;
+			while(contextLine.line[contextLine.indent] == " " || contextLine.line[contextLine.indent] == "\t")
+			{
+				if(contextLine.line[contextLine.indent] == "\t")
+					contextLine.indent += 4;
+				else
+					contextLine.indent++;
+			}
 
 			contextLines.push(contextLine);
 		}
@@ -349,11 +354,11 @@ export function toHTML(markdown)
 			{
 				var preCode = "<pre><code>";
 
-				preCode += contextLines.shift().line.substring(4);
+				preCode += removeTab(contextLines.shift().line)
 
 				while(contextLines.length && (contextLines[0].type == "Break" || contextLines[0].indent >= 4))
 				{
-					preCode += "\r\n" + contextLines.shift().line.substring(4);
+					preCode += "\r\n" + removeTab(contextLines.shift().line)
 				}
 
 				preCode += "</code></pre>";
@@ -495,6 +500,16 @@ export function toHTML(markdown)
 		var id = (element.id ? ` id="${element.id}"` : "")
 
 		return `<${element.type}${id}>${blocks.join("")}</${element.type}>`;
+
+	}
+
+	function removeTab(line)
+	{
+		if(!line) return line;
+
+		if(line.startsWith("\t")) return line.substring(1);
+
+		return line.substring(4);
 
 	}
 
