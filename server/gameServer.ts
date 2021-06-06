@@ -968,7 +968,7 @@ export class GameModel implements GameModelShared
 				let card = cards[i];
 				if(card)
 				{
-					playersShifted[i].socket.send("move;" + card + ";player," + playersShifted[i].name + ";hand"); // then move all the cards
+					playersShifted[i].socket.send("move;" + card + ";player," + playersInGame[i].name + ";hand"); // then move all the cards
 				}
 			}
 		}

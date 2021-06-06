@@ -34,6 +34,11 @@ export function init(filter: string[], customCards: {[key:string]: CardProps})
 	for(var key in customCards)
 	{
 		newAllCards[key] = JSON.parse(JSON.stringify(customCards[key]));
+
+		if(newAllCards[key].thumb == undefined)
+		{
+			newAllCards[key].thumb = newAllCards[key].url;
+		}
 	}
 
 	allCards = newAllCards;
