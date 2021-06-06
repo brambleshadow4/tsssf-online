@@ -1,6 +1,7 @@
 export default {
 	"Lang": "en-US",
 	"NavTemplate": "", // This is filled in from NavTemplate.html
+	"Version": "", // This is filled in from package.json
 
 	"HomepageAboutTheGame": "About the game",
 	"HomepageCustomCards": "The Custom Cards Update",

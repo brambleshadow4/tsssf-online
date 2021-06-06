@@ -25,6 +25,7 @@ const translations = {
 } as any;
 
 
+translations[defaultLocale].Version = JSON.parse(fs.readFileSync("./package.json", {encoding: "utf8"})).version;
 translations[defaultLocale].NavTemplate = fs.readFileSync("./views/navTemplate.html", {encoding: "utf8"});
 
 for(let lang in translations)
