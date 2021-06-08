@@ -41,6 +41,8 @@ export default {
 	"LobbyPlayerJoining": "Jugador uniéndose",
 	"LobbyMiniExpansions": "Mini expansiones",
 	"LobbyUploads": "Subidas",
+    "LobbyTeamsOptions": "Opciones de equipo",
+	"LobbyTeamsOptionsText": "Asigna dos jugadores al mismo equipo dándoles el mismo número junto a su nombre. Los jugadores del mismo equipo pueden ver las cartas del otro.",
 
 
 	"GameYourTurn": "Es tu turno",
@@ -50,6 +52,8 @@ export default {
 	"GameEffectShippedWithEveryPony": "Este pony se shipea con todos los demás pony en el tablero.",
 	"GameEffectCopying": "Copiando a {0}", // {0} is the name of a card,
 	"GamePointsWithUnit": "{0}pts", // {0} is the number of points the player has. "points" should be shortened to something really short, a.k.a. "pts"
+    "GameRemoveUnconnectedCardsButton": "Descartar Cartas Desconectadas",
+
 
 
 	"PopupTitleSelectDisguise": "Seleccionar disfraz",
@@ -67,7 +71,7 @@ export default {
 	"PopupTitleChoosePoints": "Elija la cantidad de puntos",
 
 	"PopupChooseDisguise": "Elige disfraz para el pony",
-	"PopupChoosePonyToCopy": "Choose a pony to copy", // REvisaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaar
+	"PopupChoosePonyToCopy": "Elige el poni al que copiar",
 
 	"PopupChoosePrincess":  "Elige una nueva princesa",
 	"PopupChoosePonyToChangeGender": "Elige un pony para cambiar de género",
