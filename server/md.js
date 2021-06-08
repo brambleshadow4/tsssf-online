@@ -118,10 +118,30 @@ export function buildTemplate(filename, navTemplate, outFileName)
 		</body>
 	</html>`;
 
-
+	forceFoldersToExist(outFileName);
 	fs.writeFileSync(outFileName, fullPage);
 }
 
+function forceFoldersToExist(file)
+{
+	let pieces = file.split("/");
+	pieces.pop();
+	let folder = pieces.shift();
+
+	while(pieces.length >= 0)
+	{
+		if(!fs.existsSync(folder))
+		{
+			fs.mkdirSync(folder);
+		}
+
+		if(pieces.length)
+			folder = folder + "/" + pieces.shift();
+		else
+			break
+
+	}
+}
 
 
 /*
