@@ -526,6 +526,8 @@ input[type="number"]
 	min-width: 0;
 }
 
+/* Card Search Component */
+
 .cardSearchBar
 {
 	display: flex;
@@ -620,6 +622,7 @@ input[type="number"]
 	vertical-align: middle;
 }
 
+/* end card search component */
 
 .popupPage
 {

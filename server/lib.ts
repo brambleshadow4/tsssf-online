@@ -4,7 +4,8 @@ export type Card = string;
 
 interface CardPropsBase {
 	url: string,
-	thumb: string
+	thumb: string,
+	title?: string
 }
 
 export interface ShipProps extends CardPropsBase {
@@ -42,7 +43,7 @@ export type CardSetProps = {
 	altTimeline: Set<true>,
 	count?: number,
 	changeGoalPointValues?: true,
-	card: string
+	card: string,
 }
 
 

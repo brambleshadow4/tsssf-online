@@ -1,4 +1,4 @@
-import {isGoal, Card} from "../../server/lib.js";
+import {isPony, isShip, isGoal, isStart, Card, CardProps} from "../../server/lib.js";
 import * as cm from "../../server/cardManager.js";
 import s from "../tokens.js";
 
@@ -6,7 +6,10 @@ import s from "../tokens.js";
  * Creates a cardSearchBar control
  * onFilterChange gets called whenever the filters are updated.
  */
-export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => any): HTMLElement
+export function cardSearchBar(
+	cards: {[key:string]: CardProps},
+	onFilterChange?: (newfilters: [string, any][]) => any
+): [HTMLElement, (newfilters: [string, any][]) => void]
 {
 
 	let filters: [string, any][] = [];
@@ -74,6 +77,19 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 		}
 	}
 
+	function setFilters(newFilters: [string, any][])
+	{
+		filters = newFilters;
+		if(onFilterChange)
+		{
+			onFilterChange(filters);
+		}
+
+		input.value = "";
+		renderFilters();
+		processInput();
+	}
+
 	/** oninput event handler */
 	function processInput()
 	{
@@ -91,16 +107,7 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 
 				div.onclick = function()
 				{
-					filters.push(suggestion);
-
-					if(onFilterChange)
-					{
-						onFilterChange(filters);
-					}
-
-					input.value = "";
-					renderFilters();
-					processInput();
+					setFilters(filters.concat([suggestion]))
 				}	
 
 				searchSuggestions.appendChild(div);
@@ -122,6 +129,8 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 	{
 		activeFilters.innerHTML = "";
 
+		console.log(filters)
+
 		for(let filter of filters)
 		{
 			var div = document.createElement('div');
@@ -138,14 +147,11 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 				let x = filters.indexOf(filter);
 				if(x > -1)
 				{
-					filters.splice(x, 1);
 
-					if(onFilterChange)
-					{
-						onFilterChange(filters);
-					}
-					
-					renderFilters();
+					let newfilters = filters.slice();
+					newfilters.splice(x, 1);
+
+					setFilters(newfilters);
 				}
 			}
 
@@ -153,18 +159,48 @@ export function cardSearchBar(onFilterChange?: (newfilters: [string, any][]) => 
 		}
 	}
 
-	return bar;
+	var potentialResults = buildSuggestions(cards);
+
+	console.log(potentialResults);
+
+	function getSuggestions(text: string)
+	{
+
+
+		var tokens = text.toLowerCase().split(" ");
+		var matches = [];
+
+		for(let key in potentialResults)
+		{
+			let isMatch = true;
+			for(let token of tokens)
+			{
+				if(key.indexOf(token) < 0)
+				{
+					isMatch = false;
+					break;
+				}
+			}
+
+			if(isMatch)
+			{	
+				matches.push(key)
+				if(matches.length >= 10)
+				{
+					break;
+				}
+			}
+		}
+
+		return matches.map(x => potentialResults[x]);
+	}
+
+	return [bar, setFilters];
 }
 
 
-/**
- * Returns a list of [prop, value] filteres based on text
- */
-function getSuggestions(text: string)
+function buildSuggestions(cards: {[key:string]: CardProps})
 {
-	var cards = cm.inPlay();
-
-	// TOOD cache this on a per game basis.
 	var potentialResults: {[key:string]: [string, any]} = {};
 
 	var noSearchProps = new Set(["url","thumb", "goalFun", "changeGoalPointValues", "noLogic", "altTimeline"]);
@@ -176,6 +212,28 @@ function getSuggestions(text: string)
 		for(let prop in cardProps)
 		{
 			if(noSearchProps.has(prop)) { continue; }
+
+			if(isPony(card))
+			{
+				potentialResults["type pony"] = ["type", "pony"]
+			}
+			if(isShip(card))
+			{
+				potentialResults["type start"] = ["type", "start"]
+			}
+			if(isStart(card))
+			{
+				potentialResults["type ship"] = ["type", "ship"]
+			}
+			if(isGoal(card))
+			{
+				potentialResults["type goal"] = ["type", "goal"]
+			}
+
+			let x = card.substring(0, card.lastIndexOf('.'));
+			let namespace = x.substring(0, x.lastIndexOf("."));
+			potentialResults["pack " + namespace.toLowerCase().replace(/\./g, " ")] = [ "pack", namespace];
+
 
 			if(prop == "keywords")
 			{
@@ -207,33 +265,13 @@ function getSuggestions(text: string)
 
 	potentialResults["alttimeline apocalypse hourglass"] = ["altTimeline", true];
 
-	var tokens = text.toLowerCase().split(" ");
-	var matches = [];
-
-	for(let key in potentialResults)
-	{
-		let isMatch = true;
-		for(let token of tokens)
-		{
-			if(key.indexOf(token) < 0)
-			{
-				isMatch = false;
-				break;
-			}
-		}
-
-		if(isMatch)
-		{	
-			matches.push(key)
-			if(matches.length >= 10)
-			{
-				break;
-			}
-		}
-	}
-
-	return matches.map(x => potentialResults[x]);
+	return potentialResults;
 }
+
+/**
+ * Returns a list of [prop, value] filteres based on text
+ */
+
 
 /**
  * Converts a [prop, value] filter into a human friendly string
@@ -258,6 +296,16 @@ function toFilterName(filter: [string, string])
 			case "raceGenderChange": return "Action: Race + Gender Change"
 			case "shipWithEverypony": return "Action: Ship With Everypony"
 		}
+	}
+
+	if(filter[0] == "pack")
+	{
+		if(filter[1] == "EC")
+			return "Pack: Extra Credit";
+		if(filter[1] == "PU")
+			return "Pack: Ponyville University";
+
+		return "Pack: " + filter[1].replace(/([A-Z])/g, " $1").replace(/\./g, "");
 	}
 
 	if(filter[0] == "altTimeline")
@@ -341,6 +389,33 @@ export function doesCardMatchFilters(card: Card, filters: [string, any][]): bool
 		let propName = filter[0];
 		let propValue = filter[1];
 		let [_, cardPropValue] = propValueOverrides(propName, (cardProps as any)[propName]);
+
+		if(propName == "pack")
+		{
+			let x = card.substring(0, card.lastIndexOf("."));
+			x = x.substring(0, x.lastIndexOf("."));
+
+			if(x != propValue)
+			{
+				return false;
+			}
+			continue;
+
+		}
+
+		if(propName == "type")
+		{
+			// type prop isn't on card, so use propValue
+			switch(propValue)
+			{
+				case "pony": if(!isPony(card)) return false; break;
+				case "start": if(!isStart(card)) return false; break;
+				case "ship": if(!isShip(card)) return false; break;
+				case "goal": if(!isGoal(card)) return false; break;
+			}
+
+			continue;
+		}
 
 		if(isGoal(card))
 		{

@@ -14,7 +14,7 @@ import {
 	isAnon,
 	isPonyOrStart,
 	GameModel,
-	Card, Location
+	Card, Location, CardProps
 } from "../../server/lib.js";
 
 import * as cm from "../../server/cardManager.js";
@@ -52,6 +52,8 @@ import {
 import s from "../tokens.js";
 
 import {doesCardMatchFilters, cardSearchBar} from "./cardSearchBarComponent.js";
+
+import {cardReference} from "../info/knowledgeBase.js";
 
 
 
@@ -708,7 +710,14 @@ export function openSearchCardSelect(title: string, heading: string, cards: Card
 		return div;
 	}
 
-	return createSearchPopup(title, renderFun);
+	var cardProps: {[key:string]: CardProps} = {};
+	var inPlay = cm.inPlay();
+	for(let card of cards)
+	{
+		cardProps[card] = inPlay[card];
+	}
+
+	return createSearchPopup(title, cardProps, renderFun);
 
 }
 
@@ -774,73 +783,7 @@ win.openSettings = function()
 	});
 }
 
-function referencePageRender(_acceptFun: Function): HTMLElement
-{
 
-	var popupPage = document.createElement('div')
-	popupPage.className = "popupPage";
-
-
-
-	popupPage.appendChild(cardSearchBar(renderCards));
-
-
-	var filteredCards = document.createElement("div");
-
-
-	function renderCards(filters: [string, any][])
-	{
-		filteredCards.innerHTML = "";
-
-		var keys = Object.keys(cm.inPlay());
-		var ponyReference = document.createElement('div');
-		var shipReference = document.createElement('div');
-		var goalReference = document.createElement('div');
-		keys.sort();
-		for(let key of keys)
-		{
-
-			if(!doesCardMatchFilters(key, filters)) continue;
-
-			let cardDiv = makeCardElement(key)
-			
-			if(isPony(key))
-			{
-				ponyReference.appendChild(cardDiv)
-			}
-			if(isShip(key))
-			{
-				shipReference.appendChild(cardDiv)
-			}
-			if(isGoal(key))
-			{
-				goalReference.appendChild(cardDiv)
-			}
-
-		}
-
-		var header = document.createElement('h1');
-		header.innerHTML = s.PopupTextPonyCards;
-		filteredCards.appendChild(header);
-		filteredCards.appendChild(ponyReference);
-
-		header = document.createElement('h1');
-		header.innerHTML = s.PopupTextShipCards;
-		filteredCards.appendChild(header);
-		filteredCards.appendChild(shipReference);
-
-		header = document.createElement('h1');
-		header.innerHTML = s.PopupTextGoalCards;
-		filteredCards.appendChild(header);
-		filteredCards.appendChild(goalReference);
-	}
-
-	renderCards([]);
-
-	popupPage.appendChild(filteredCards);
-
-	return popupPage;
-}
 
 
 function createHelpPopup()
@@ -864,7 +807,7 @@ function createHelpPopup()
 		},
 		{
 			name: s.HelpTabCardReference,
-			render: referencePageRender
+			render: (_a) => cardReference(cm.inPlay(), true)
 		}
 	]);
 }
