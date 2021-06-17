@@ -1,3 +1,5 @@
+ins { color: green; }
+del {color: red; }
 .card-aside
 {
 	float: left;
@@ -55,7 +57,23 @@ body.cardlist
 	position: relative;
 }
 
+.question:before {
+	content:  "Q: ";
+}
 
+.question
+{
+	font-weight: bold;
+}
+
+.answer:before {
+	content: "A: ";
+	font-weight: bold;
+}
+
+.answer {
+	margin-bottom: 20px;
+}
 
 
 /* Card Search Component */

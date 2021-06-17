@@ -3,6 +3,7 @@ import {makeCardElement} from "../game/cardComponent.js";
 import s from "../tokens.js";
 import * as lib from "../../server/lib.js";
 import * as cm from "../../server/cardManager.js";
+import faq from "./faq.js";
 
 function buildPage()
 {
@@ -53,7 +54,27 @@ function buildPage()
 
 
 
-			let FAQ = "<h2>FAQ</h2>";
+			let faqHTML = "<h2>FAQ</h2>";
+
+			let tags = getFaqTags(card, cardProps);
+
+			let previouslyAsked = new Set();
+
+
+			for(let tag of tags)
+			{
+				if(!faq[tag]) continue;
+				for(let q of faq[tag])
+				{
+					if(!previouslyAsked.has(q))
+					{
+						previouslyAsked.add(q);
+						faqHTML += q + "\n";s
+					}
+				}
+			}
+
+
 
 			if(cardProps)
 			{
@@ -72,12 +93,65 @@ function buildPage()
 
 				<div style="clear: both; padding-top: 10px"/>
 
-				${FAQ}
+				${faqHTML}
 
 				`
 			}
 	}
 }
+
+function getFaqTags(card: lib.Card, props: lib.CardProps)
+{
+	let tags: string[] = [];
+
+	if(props.gender as string == "male/female") tags.push("male-female");
+
+	
+	if(props.goalLogic && props.goalLogic.startsWith("BreakShip")) tags.push("breaking-ships");
+	if(props.goalLogic && props.goalLogic.startsWith("ExistsChain")) tags.push("chain");
+	if(props.action && props.action.startsWith("Changeling")) tags.push("changeling");
+	if(props.count == 2) tags.push("two-pony-card");
+	if(props.action == "clone") tags.push("clone");
+	if(props.action == "copy") tags.push("copy");
+	if(props.action == "genderChange") tags.push("gender-change");
+	if(props.action == "keywordChange") tags.push("keyword-change");
+	if(props.action == "lovePoison") tags.push("love-poison");
+	if(props.action == "newGoal") tags.push("new-goal");
+	if(props.action == "playFromDiscard") tags.push("play-from-discard");
+	if(props.goalLogic && props.goalLogic.startsWith("PlayPonies")) tags.push("play-pony");
+	if(props.goalLogic && props.goalLogic.startsWith("PlayShips(")) tags.push("play-ship");
+	if(props.action == "raceChange") tags.push("race-change");
+	if(props.action == "replace") tags.push("replace");
+	if(props.action == "search") tags.push("search");
+	if(props.action == "swap") tags.push("swap");
+	if(props.keywords && props.keywords.indexOf("princess") > -1) tags.push("princess");
+	
+
+
+
+	if(props.race == "alicorn") tags.push("alicorn");
+	if(props.altTimeline) tags.push("alt-timeline")
+	if(lib.isPony(card) && props.action) tags.push("pony-action")
+	if(props.keywords && props.keywords.indexOf("princess") > -1) tags.push("princess");
+
+	if(lib.isGoal(card)) tags.push("goals");
+
+	tags.push(card);
+
+	return tags;
+
+
+
+
+/*
+ 
+ * turn-order
+	disconnected-cards
+
+ */
+
+}
+
 
 function makeJsonHTML(card: lib.Card, props: lib.CardProps)
 {
@@ -161,9 +235,9 @@ export function cardReference(cards: {[key:string]: lib.CardProps}, openInNewTab
 
 			let cardDiv = makeCardElement(key)
 
-			cardDiv.onclick = function()
+			cardDiv.onclick = function(e)
 			{
-				if(openInNewTab)
+				if(openInNewTab || e.ctrlKey)
 				{
 					window.open("/info/card?" + key);
 				}

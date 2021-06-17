@@ -9,7 +9,6 @@ import {getStats} from "./stats.js";
 import {GameOptions} from "./lib.js";
 // @ts-ignore
 import {buildTemplate, buildTemplateHTML} from "./md.js";
-import {buildFAQ} from "./faqProcessor.js";
 
 import en_US from "../views/tokens.js";
 import es_ES from "../i18n/es-ES/views/tokens.js";
@@ -67,8 +66,6 @@ for(let lang in translations)
 		}
 	}
 }
-
-buildFAQ("./views/info/faq.txt", "./views/info/faq2.html");
 
 
 fs.writeFileSync("./views/info/index.html", buildTemplateHTML("<script type='module' src='/info/knowledgeBase.js'></script>", translations[defaultLocale].NavTemplate))
@@ -167,6 +164,7 @@ app.get("/info/highlight.min.css", file("./views/info/addYourOwnCards/highlight.
 app.get("/info/highlight.min.js", file("./views/info/addYourOwnCards/highlight.min.js"))
 app.get("/info/knowledgeBase.js", file("./views/info/knowledgeBase.js"))
 app.get("/info/knowledgeBase.css", file("./views/info/knowledgeBase.css"))
+app.get("/info/faq.js", file("./views/info/faq.js"))
 
 app.get("/info/resources", file("./views/info/resources.html"))
 
