@@ -129,8 +129,6 @@ export function cardSearchBar(
 	{
 		activeFilters.innerHTML = "";
 
-		console.log(filters)
-
 		for(let filter of filters)
 		{
 			var div = document.createElement('div');
@@ -139,7 +137,8 @@ export function cardSearchBar(
 
 			let clearFilterButton = document.createElement('img');
 			clearFilterButton.src = "/img/close.svg";
-			clearFilterButton.className = "csbClearFilter";
+			clearFilterButton.className = "csbClearFilter ";
+			div.className = filter[0] + "Filter defFilter";
 			div.appendChild(clearFilterButton);
 
 			clearFilterButton.onclick = function()
@@ -161,12 +160,9 @@ export function cardSearchBar(
 
 	var potentialResults = buildSuggestions(cards);
 
-	console.log(potentialResults);
 
 	function getSuggestions(text: string)
 	{
-
-
 		var tokens = text.toLowerCase().split(" ");
 		var matches = [];
 
@@ -197,6 +193,8 @@ export function cardSearchBar(
 
 	return [bar, setFilters];
 }
+
+let cahcedFiltersClasses = {};
 
 
 function buildSuggestions(cards: {[key:string]: CardProps})
