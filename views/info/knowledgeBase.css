@@ -28,6 +28,8 @@ body.cardlist
 {
 	font-family: monospace;
 	white-space: pre;	
+	tab-size: 4;
+	-moz-tab-size: 4;
 }
 
 

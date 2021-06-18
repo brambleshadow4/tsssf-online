@@ -54,7 +54,7 @@ function buildPage()
 
 
 
-			let faqHTML = "<h2>FAQ</h2>";
+			let faqHTML = ""; 
 
 			let tags = getFaqTags(card, cardProps);
 
@@ -72,6 +72,12 @@ function buildPage()
 						faqHTML += q + "\n";s
 					}
 				}
+			}
+
+
+			if(faqHTML.length)
+			{
+				faqHTML = "<h2>FAQ</h2>" + faqHTML;
 			}
 
 
@@ -196,6 +202,8 @@ function makeJsonHTML(card: lib.Card, props: lib.CardProps)
 	return "<div class='props'>\"" + card + "\": {\n" + lines.join(",\n") + "\n}\n</div>"
 }
 
+let currentState = location.search;
+
 function inIframe () 
 {
 	try {
@@ -230,7 +238,6 @@ export function cardReference(cards: {[key:string]: lib.CardProps}, openInNewTab
 		keys.sort(namespaceSort);
 		for(let key of keys)
 		{
-
 			if(!doesCardMatchFilters(key, filters)) continue;
 
 			let cardDiv = makeCardElement(key)
@@ -245,34 +252,83 @@ export function cardReference(cards: {[key:string]: lib.CardProps}, openInNewTab
 				{
 					location.href = "/info/card?" + key;
 				}
-				
 			};
 			
 
 			ponyReference.appendChild(cardDiv)
 			
+			if(window.location.pathname == "/info/cardlist")
+			{
+
+				let query = filtersToQueryString(filters);
+
+				if(currentState != query)
+				{
+					history.replaceState({}, "", query);
+					currentState = query;
+				}
+
+			}
 
 		}
 
 		cardDiv.appendChild(ponyReference);
 	}
 
-	setFilters([]);
+	
 
 	if(location.pathname == "/info/cardlist" && location.search.length)
 	{
-		let query = decodeURI(location.search.substring(1));
-		query = query.replace(/%23/g, "#");
-
-		let [prop, value] = query.split("=");
-
-		setFilters([[prop,value]]);
+		setFilters(queryStringToFilters(location.search.substring(1)));
+	}
+	else
+	{
+		setFilters([]);
 	}
 
 
 	popupPage.appendChild(cardDiv);
 
 	return popupPage;
+}
+
+function filtersToQueryString(filters: [string, any][]): string
+{
+	return "?" + filters.map(p => {
+
+		let [prop, value] = p;
+
+		return prop + "=" + ("" + value).replace(/#/g,"%23");
+	}).join("&");
+}	
+
+function queryStringToFilters(s: string): [string, any][]
+{
+	let query = decodeURI(s);
+	query = query.replace(/%23/g, "#");
+
+	let pieces = query.split("&");
+	let filters: [string,any][] = [];
+
+	for(let piece of pieces)
+	{
+		let [prop, value] = piece.split("=");
+		let valueAny = value as any;
+
+		if(value == "true")
+		{
+			valueAny = true;
+		}
+
+		if(!isNaN(Number(value)))
+		{
+			valueAny = Number(value);
+		}
+
+		filters.push([prop, valueAny]);
+	}
+
+	return filters
 }
 
 function namespaceOrder(namespace: string[])
