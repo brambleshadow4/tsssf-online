@@ -1,0 +1,182 @@
+ins { color: green; }
+del {color: red; }
+.card-aside
+{
+	float: left;
+	width: 40%;
+}
+
+
+.cardlist .main 
+{
+	max-width:  100%;
+	border: none;
+}
+
+body.cardlist
+{
+	background-image: none;
+}
+
+.props-container
+{
+	width: 55%;
+	overflow-x: auto;
+	float: right;
+}
+.props 
+{
+	font-family: monospace;
+	white-space: pre;	
+	tab-size: 4;
+	-moz-tab-size: 4;
+}
+
+
+.card
+{
+	height: 18vh;
+	width: 13vh;
+
+	background-image: url(/img/blank.svg);
+	background-position: center; 
+	background-size: cover;
+
+	margin-top: 1vh;
+	margin-left: 1vh;
+
+	z-index: 0;
+	cursor: pointer;
+
+	display: inline-block;
+
+	border-radius: 5px;
+
+	box-sizing: border-box;
+	user-select: none;
+	vertical-align: middle;
+
+	position: relative;
+}
+
+.question:before {
+	content:  "Q: ";
+}
+
+.question
+{
+	font-weight: bold;
+}
+
+.answer:before {
+	content: "A: ";
+	font-weight: bold;
+}
+
+.answer {
+	margin-bottom: 20px;
+}
+
+
+/* Card Search Component */
+
+.cardSearchBar
+{
+	display: flex;
+	font-size: 12pt;
+	width: 100%;
+
+	position: relative;
+}
+.cardSearchBar input
+{
+	display: inline-block;
+	vertical-align: middle;
+	margin: 5px 0px;
+	padding: 0px;
+	height: calc(100% - 10px);
+	width: 200px;
+	flex-grow: 0;
+	flex-shrink: 0;
+}
+.csbSearchSuggestions
+{
+	font-size: 12pt;
+	width: 200px;
+	position: absolute;
+	z-index: 6;
+	background-color: white;
+
+	box-sizing: border-box;
+
+	top: 25px;
+	left: 0px;
+}
+
+
+.csbClearFilter
+{
+	height: 20px;
+	width: 20px;
+	cursor: pointer;
+}
+
+.defFilter {background-color: #d9ffb3;}
+.packFilter, .typeFilter {background-color: #ffcc99; }
+.nameFilter, .countFilter {background-color: #BD97C5; }
+.actionFilter {background-color: #ffff99; }
+.goalLogicFilter, .pointsFilter {background-color: #00AEEF; }
+.altTimelineFilter {background-color: #B61F24; color:  white}
+.genderFilter { background-image:  linear-gradient(to right, #E00E77, #00AEEF); color: white}
+.titleFilter { background-color: #CCC; }
+
+
+.csbSearchSuggestions > div
+{
+	margin: 3px;
+	cursor: pointer;
+}
+
+
+/*
+	#ccddff - keyboard select
+	#99bbff - mouse hover
+*/
+.csbSearchSuggestions > div:hover, .csbSearchSuggestions >div.selected:hover
+{
+	background-color: #99bbff;	
+}
+
+.csbSearchSuggestions >div.selected
+{	
+	background-color: #ccddff;
+}
+
+
+.csbActiveFilters
+{
+	white-space: nowrap;
+	min-width: 0;
+	flex-shrink: 1;
+	overflow: hidden;
+	display: inline-block;
+	flex-grow: 1;
+}
+
+.csbActiveFilters div
+{
+	display: inline-block;
+
+	height: 20px;
+	padding-left: 10px;
+	padding-right: 10px;
+	border-radius: 10px;
+	margin: 6px 5px;
+}
+.csbActiveFilters div > *
+{
+	display: inline-block;
+	vertical-align: middle;
+}
+
+/* end Card Search Component */

@@ -1,4 +1,5 @@
 import {cardSearchBar} from "./cardSearchBarComponent.js";
+import {CardProps} from "../../server/lib.js";
 
 var oldPopupAccept: undefined | ((value?: any) => any) ;
 
@@ -10,9 +11,9 @@ export function createPopup(title: string, miniMode: boolean, renderFun: (accept
 	
 }
 
-export function createSearchPopup(title: string, renderFun: (filters: any[], acceptFun: (value?: any) => any) => HTMLElement)
+export function createSearchPopup(title: string, cards: {[key:string]: CardProps}, renderFun: (filters: any[], acceptFun: (value?: any) => any) => HTMLElement)
 {
-	return createPopupShared("normal", title, undefined, {searchBar: true, filterRenderFun: renderFun});	
+	return createPopupShared("normal", title, undefined, {searchBar: cards, filterRenderFun: renderFun});	
 }
 
 
@@ -34,8 +35,8 @@ function createPopupShared(
 			render: (acceptFun: (value?: any) => any) => HTMLElement ,
 			name?: string,
 		}[],
-		searchBar?: boolean,
-		filterRenderFun?: (filters: any[], acceptFun: (value?: any) => any) => HTMLElement 
+		searchBar?: {[key:string]: CardProps},
+		filterRenderFun?: (filters: any[], acceptFun: (value?: any) => any) => HTMLElement,
 	}
 ){
 	let opt = options || {};
@@ -138,7 +139,7 @@ function createPopupShared(
 
 			if(opt.searchBar)
 			{
-				var searchBar = cardSearchBar((newFilters) => 
+				var [searchBar, _] = cardSearchBar(opt.searchBar, (newFilters) => 
 				{
 					if (opt.filterRenderFun)
 					{

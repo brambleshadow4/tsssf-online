@@ -526,6 +526,8 @@ input[type="number"]
 	min-width: 0;
 }
 
+/* Card Search Component */
+
 .cardSearchBar
 {
 	display: flex;
@@ -559,6 +561,14 @@ input[type="number"]
 	left: 0px;
 }
 
+.defFilter {background-color: #d9ffb3;}
+.packFilter, .typeFilter {background-color: #ffcc99; }
+.nameFilter, .countFilter {background-color: #BD97C5; }
+.actionFilter {background-color: #ffff99; }
+.goalLogicFilter, .pointsFilter {background-color: #00AEEF; }
+.altTimelineFilter {background-color: #B61F24; color:  white}
+.genderFilter { background-image:  linear-gradient(to right, #E00E77, #00AEEF); color: white}
+.titleFilter { background-color: #CCC; }
 
 .csbClearFilter
 {
@@ -606,7 +616,6 @@ input[type="number"]
 .csbActiveFilters div
 {
 	display: inline-block;
-	background-color: #d9ffb3;
 
 	height: 20px;
 	padding-left: 10px;
@@ -620,6 +629,7 @@ input[type="number"]
 	vertical-align: middle;
 }
 
+/* end card search component */
 
 .popupPage
 {

@@ -939,7 +939,7 @@ function enlargeCard()
 	}
 
 	
-	giantCard.style.position = "absolute";
+	giantCard.style.position = "fixed";
 
 	var cardRect = hoverCardDiv.getBoundingClientRect();
 

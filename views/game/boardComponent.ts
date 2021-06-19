@@ -168,8 +168,6 @@ export async function initBoard()
 		var playingArea = document.getElementById('playingArea')!;
 
 
-		console.log(playingArea.clientWidth + "," + playingArea.clientHeight);
-
 		y += playingArea.clientHeight/2 - 18/2*vh;
 		x += playingArea.clientWidth/2 - 13/2*vh;
 

@@ -31,13 +31,9 @@ console.log(toc.join("\n"))
 
 */
 
-
-export function buildTemplate(filename, navTemplate, outFileName)
+export function buildTemplateHTML(rawTxt, navTemplate)
 {
-	var rawTxt = fs.readFileSync(filename, {encoding: "utf8"});
-	var outFileName = (outFileName || filename).replace(".md", ".html");
 	var html = toHTML(rawTxt);
-
 
 	var bonusStyle = `
 		<style>
@@ -90,12 +86,20 @@ export function buildTemplate(filename, navTemplate, outFileName)
 				{
 					document.head.innerHTML += \`${bonusStyle}\`
 				}
+
+				function toggleOpen(element)
+				{	
+					if(element.classList.contains('open'))
+						element.classList.remove('open');
+					else
+						element.classList.add('open');
+				}
+
 			</script>
 
 		</head>
 		<body>
 			<nav>
-				<a href="/">TSSSF.net</a>
 				${navTemplate}
 			</nav>
 			<div id='main' class='main'>
@@ -118,11 +122,22 @@ export function buildTemplate(filename, navTemplate, outFileName)
 		</body>
 	</html>`;
 
+	return fullPage;
+}
+
+
+export function buildTemplate(filename, navTemplate, outFileName)
+{
+	var rawTxt = fs.readFileSync(filename, {encoding: "utf8"});
+	
+	var fullPage = buildTemplateHTML(rawTxt, navTemplate)
+
+	var outFileName = (outFileName || filename).replace(".md", ".html");
 	forceFoldersToExist(outFileName);
 	fs.writeFileSync(outFileName, fullPage);
 }
 
-function forceFoldersToExist(file)
+export function forceFoldersToExist(file)
 {
 	let pieces = file.split("/");
 	pieces.pop();

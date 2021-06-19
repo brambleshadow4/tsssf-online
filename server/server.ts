@@ -8,7 +8,7 @@ import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js";
 import {GameOptions} from "./lib.js";
 // @ts-ignore
-import {buildTemplate} from "./md.js";
+import {buildTemplate, buildTemplateHTML} from "./md.js";
 
 import en_US from "../views/tokens.js";
 import es_ES from "../i18n/es-ES/views/tokens.js";
@@ -65,7 +65,11 @@ for(let lang in translations)
 			buildTemplate("." + file, navTemplate, fullFile);
 		}
 	}
+
+	fs.writeFileSync(prefix + "/views/info/index.html", buildTemplateHTML("<script type='module' src='/info/knowledgeBase.js'></script>", translations[lang].NavTemplate))
 }
+
+
 
 
 // compile markdown
@@ -152,17 +156,26 @@ app.get("/game/cardSearchBarComponent.js", file("./views/game/cardSearchBarCompo
 
 app.get("/info/addYourOwnCards", file("./views/info/addYourOwnCards/addYourOwnCards.html"))
 
+app.get("/info", file("./views/info/index.html"))
+app.get("/info/cardlist", file("./views/info/index.html"))
+app.get("/info/concept", file("./views/info/index.html"))
+app.get("/info/card", file("./views/info/index.html"))
+
 app.get("/info/style.css", file("./views/info/style.css"))
 app.get("/info/highlight.min.css", file("./views/info/addYourOwnCards/highlight.min.css"))
 app.get("/info/highlight.min.js", file("./views/info/addYourOwnCards/highlight.min.js"))
+app.get("/info/knowledgeBase.js", file("./views/info/knowledgeBase.js"))
+app.get("/info/knowledgeBase.css", file("./views/info/knowledgeBase.css"))
+app.get("/info/faq.js", file("./views/info/faq.js"))
 
 app.get("/info/resources", file("./views/info/resources.html"))
 
 app.get("/info/addYourOwnCards/upload2.png", file("./views/info/addYourOwnCards/upload2.png"))
 
+
+
 app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
 app.get("/lobby/packOrder.js", tokenizeFile("./views/lobby/packOrder.js"))
-
 
 
 app.get("/viewSelector.js", file("./views/viewSelector.js"))
