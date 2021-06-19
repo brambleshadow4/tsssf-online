@@ -7,8 +7,6 @@ import faq from "./faq.js";
 
 function buildPage()
 {
-	console.log(location.pathname)
-
 	switch(location.pathname)
 	{
 		case "/info":

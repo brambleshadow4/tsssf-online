@@ -124,7 +124,7 @@ body.cardlist
 .defFilter {background-color: #d9ffb3;}
 .packFilter, .typeFilter {background-color: #ffcc99; }
 .nameFilter, .countFilter {background-color: #BD97C5; }
-.actionFilter {background-color: #ffff66; }
+.actionFilter {background-color: #ffff99; }
 .goalLogicFilter, .pointsFilter {background-color: #00AEEF; }
 .altTimelineFilter {background-color: #B61F24; color:  white}
 .genderFilter { background-image:  linear-gradient(to right, #E00E77, #00AEEF); color: white}

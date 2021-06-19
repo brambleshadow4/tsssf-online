@@ -207,26 +207,66 @@ function buildSuggestions(cards: {[key:string]: CardProps})
 	{
 		let cardProps = cards[card];
 
+
+		if(isPony(card))
+		{
+			potentialResults["type pony"] = ["type", "pony"]
+		}
+		if(isShip(card))
+		{
+			potentialResults["type start"] = ["type", "start"]
+		}
+		if(isStart(card))
+		{
+			potentialResults["type ship"] = ["type", "ship"]
+		}
+		if(isGoal(card))
+		{
+			potentialResults["type goal"] = ["type", "goal"];
+
+			if(cardProps.goalLogic)
+			{
+				let pieces = cardProps.goalLogic.split(/,|\|\||\(|\)|&&/);
+
+				for(let piece of pieces)
+				{
+					let [part1,part2, ...others] = piece.split(/=|!=| in | !in /g);
+
+					if(others.length != 0 || !part1 || !part2)
+						continue;
+
+					part1 = part1.trim();
+					part2 = part2.trim();
+
+					if(part2 == "keywords")
+					{
+						let swap = part1;
+						part1 = part2;
+						part2 = swap;	
+					}
+
+					if(part1 == "altTimeline")
+					{
+						//potentialResults["alttimeline apocalpyse hourglass"] = ["altTimeline", true];
+						continue;
+					}
+
+					let [propOut, valOut] = propValueOverrides(part1, part2);
+					let searchText = (propOut + " " + valOut).toLowerCase();
+
+					if(!potentialResults[searchText])
+					{
+						potentialResults[searchText] = [propOut, valOut];
+					}
+				}
+			}
+		}
+
 		for(let prop in cardProps)
 		{
 			if(noSearchProps.has(prop)) { continue; }
 
-			if(isPony(card))
-			{
-				potentialResults["type pony"] = ["type", "pony"]
-			}
-			if(isShip(card))
-			{
-				potentialResults["type start"] = ["type", "start"]
-			}
-			if(isStart(card))
-			{
-				potentialResults["type ship"] = ["type", "ship"]
-			}
-			if(isGoal(card))
-			{
-				potentialResults["type goal"] = ["type", "goal"]
-			}
+
 
 			let x = card.substring(0, card.lastIndexOf('.'));
 			let namespace = x.substring(0, x.lastIndexOf("."));

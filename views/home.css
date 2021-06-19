@@ -75,10 +75,10 @@ nav a, nav .hoverMenu
 	nav
 	{
 		position: fixed;
-		height:  30px;
 		top: 0;
-		left:  0;
-		right:  0;
+		left: 0;
+		right: 0;
+		height: 30px;
 		margin-top: 0;
 	}
 
@@ -107,8 +107,9 @@ nav a, nav .hoverMenu
 	}
 
 	nav.open {
-		height:  initial;
-		position:  absolute;
+		height: initial;
+		bottom: 0;
+		overflow-y: auto;
 	}
 }
 
