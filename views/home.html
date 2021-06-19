@@ -15,7 +15,15 @@
 		<link href="/home.css" type="text/css" rel="stylesheet" />
 	</head>
 	<body>
-
+		<script>
+			function toggleOpen(element)
+			{	
+				if(element.classList.contains('open'))
+					element.classList.remove('open');
+				else
+					element.classList.add('open');
+			}
+		</script>
 		<nav>
 			{{NavTemplate}}
 		</nav>

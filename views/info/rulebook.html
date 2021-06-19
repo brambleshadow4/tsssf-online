@@ -47,13 +47,23 @@
 		</style>
 	`
 				}
+
+				function toggleOpen(element)
+				{	
+					if(element.classList.contains('open'))
+						element.classList.remove('open');
+					else
+						element.classList.add('open');
+				}
+
 			</script>
 
 		</head>
 		<body>
 			<nav>
-				<a href="/">TSSSF.net</a>
-				<div class='hoverMenu' style='width: 140px'>
+				<div class='mobileMenu' onclick="toggleOpen(this.parentNode)"><a>Menu</a></div>
+<a href="/">TSSSF.net</a>
+<div class='hoverMenu' style='width: 140px'>
 	<a href="#">Playing the Game</a>
 	<div class='hoverMenuExpand'>
 		<a href="/info/rulebook">Rulebook</a>

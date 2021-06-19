@@ -22,6 +22,12 @@ nav
 	z-index: 2;
 }
 
+.mobileMenu {
+	display: none;
+	padding-left: 25px;
+	vertical-align: top;
+}
+
 nav a 
 {
 	padding: 5px;
@@ -50,15 +56,59 @@ nav a, nav .hoverMenu
 .hoverMenuExpand
 {
 	display: none;
-	background-color: #F06BA8;
 	color: white;
 	z-index: 2;
+	background-color: #F06BA8;
 }
+
+
 
 .hoverMenu:hover .hoverMenuExpand
 {
 	display: block;
 }
+
+@media screen and (max-width: 600px)
+{
+	nav a, nav .hoverMenu
+	{
+		display: none;
+	}
+
+	.mobileMenu {
+		display: block;
+		background-image: url(/img/menu.svg);
+		background-repeat: no-repeat;
+		background-size:  20px 20px;
+		background-position: 5px 5px;
+		height:  30px;
+	}
+
+	.mobileMenu a {display: inline-block; cursor: pointer}
+	.mobileMenu a:hover {background-color: initial;}
+
+	nav.open a, nav.open .hoverMenu, nav.open .hoverMenuExpand
+	{
+		display: block;
+		width:  100% !important;
+	}
+
+	nav.open .hoverMenuExpand
+	{
+		padding-left:  20px;
+		background-color: initial;
+	}
+
+	nav.open {
+		height:  initial;
+		top: 0;
+		bottom: 0;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+}
+
+/* end menu styles */
 
 
 h1, h2
@@ -150,3 +200,4 @@ tr.alt, div.alt
 		border: none !important;
 	}
 }
+

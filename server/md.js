@@ -86,12 +86,20 @@ export function buildTemplateHTML(rawTxt, navTemplate)
 				{
 					document.head.innerHTML += \`${bonusStyle}\`
 				}
+
+				function toggleOpen(element)
+				{	
+					if(element.classList.contains('open'))
+						element.classList.remove('open');
+					else
+						element.classList.add('open');
+				}
+
 			</script>
 
 		</head>
 		<body>
 			<nav>
-				<a href="/">TSSSF.net</a>
 				${navTemplate}
 			</nav>
 			<div id='main' class='main'>
