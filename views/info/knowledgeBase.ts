@@ -49,10 +49,15 @@ function buildPage()
 		case "/info/card":
 			cm.init(["*"], {});
 
-			let card = location.search.substring(1);
-			let cardProps = cm.all()[card];
 
 
+			let [card, data] = location.search.substring(1).split(":base64,")
+			var cardProps: lib.CardProps;
+			if(data)
+				cardProps = JSON.parse(atob(data));
+			else
+				cardProps = cm.all()[card];
+			
 
 			let faqHTML = ""; 
 
@@ -132,9 +137,6 @@ function getFaqTags(card: lib.Card, props: lib.CardProps)
 	if(props.action == "swap") tags.push("swap");
 	if(props.keywords && props.keywords.indexOf("princess") > -1) tags.push("princess");
 	
-
-
-
 	if(props.race == "alicorn") tags.push("alicorn");
 	if(props.altTimeline) tags.push("alt-timeline")
 	if(lib.isPony(card) && props.action) tags.push("pony-action")
@@ -145,8 +147,6 @@ function getFaqTags(card: lib.Card, props: lib.CardProps)
 	tags.push(card);
 
 	return tags;
-
-
 
 
 /*
@@ -242,15 +242,22 @@ export function cardReference(cards: {[key:string]: lib.CardProps}, openInNewTab
 
 			let cardDiv = makeCardElement(key)
 
+			let refURL = key;
+
+			if(key.startsWith('X.'))
+			{
+				refURL = key + ":base64," + btoa(JSON.stringify(cards[key]));
+			}
+
 			cardDiv.onclick = function(e)
 			{
 				if(openInNewTab || e.ctrlKey)
 				{
-					window.open("/info/card?" + key);
+					window.open("/info/card?" + refURL);
 				}
 				else
 				{
-					location.href = "/info/card?" + key;
+					location.href = "/info/card?" + refURL;
 				}
 			};
 			

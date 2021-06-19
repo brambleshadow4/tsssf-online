@@ -230,7 +230,11 @@ function buildSuggestions(cards: {[key:string]: CardProps})
 
 			let x = card.substring(0, card.lastIndexOf('.'));
 			let namespace = x.substring(0, x.lastIndexOf("."));
-			potentialResults["pack " + namespace.toLowerCase().replace(/\./g, " ")] = [ "pack", namespace];
+
+			if(namespace.startsWith("X."))
+				potentialResults["custom pack " + namespace.toLowerCase().substring(2).replace(/\./g, " ")] = [ "pack", namespace];
+			else
+				potentialResults["pack " + namespace.toLowerCase().replace(/\./g, " ")] = [ "pack", namespace];
 
 
 			if(prop == "keywords")
@@ -303,7 +307,17 @@ function toFilterName(filter: [string, string])
 		if(filter[1] == "PU")
 			return "Pack: Ponyville University";
 
-		return "Pack: " + filter[1].replace(/([A-Z])/g, " $1").replace(/\./g, "");
+		let prefix = "Pack: ";
+
+		let packName = filter[1];
+
+		if(filter[1].startsWith("X."))
+		{
+			prefix = "Custom Pack: ";
+			packName = packName.substring(2);
+		}
+
+		return prefix + packName.replace(/([A-Z])/g, " $1").replace(/\./g, " ");
 	}
 
 	if(filter[0] == "altTimeline")
