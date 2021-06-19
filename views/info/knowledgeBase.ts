@@ -38,7 +38,7 @@ function buildPage()
 			if(!inIframe())
 			{	
 				var main = document.getElementById('main')!;
-				main.innerHTML += "<h1>Card Reference</h1>";
+				main.innerHTML += "<h1>"+ s.HelpTabCardReference +"</h1>";
 			}
 
 			cm.init(["*"], {});

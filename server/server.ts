@@ -65,10 +65,12 @@ for(let lang in translations)
 			buildTemplate("." + file, navTemplate, fullFile);
 		}
 	}
+
+	fs.writeFileSync(prefix + "/views/info/index.html", buildTemplateHTML("<script type='module' src='/info/knowledgeBase.js'></script>", translations[lang].NavTemplate))
 }
 
 
-fs.writeFileSync("./views/info/index.html", buildTemplateHTML("<script type='module' src='/info/knowledgeBase.js'></script>", translations[defaultLocale].NavTemplate))
+
 
 // compile markdown
 
