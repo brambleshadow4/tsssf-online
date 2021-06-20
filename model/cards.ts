@@ -1,4 +1,4 @@
-//auto-generated file using npm run buildPacks
+//auto-generated file using npm run build
 var cards: {[key: string]: any} = {
 	"ChildrenOfKefentse.Promo.Start.FanficEditorStarlight": {
 		"name": "Starlight Glimmer",
@@ -8,7 +8,7 @@ var cards: {[key: string]: any} = {
 		"keywords": []
 	},
 	"ChildrenOfKefentse.Promo.Start.DizzyFrizzyPatronSaintOfShippers": {
-		"name": "Dizzy Frizzy",
+		"name": "Dizzy Frizzy/Twilight Sparkle",
 		"race": "earth",
 		"gender": "female",
 		"keywords": [
@@ -231,7 +231,7 @@ var cards: {[key: string]: any} = {
 			"Mane 6"
 		]
 	},
-	"Core.Pony.Flim&Flam": {
+	"Core.Pony.FlimAndFlam": {
 		"name": "Flim/Flam",
 		"race": "unicorn",
 		"gender": "male",

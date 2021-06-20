@@ -2,24 +2,24 @@ import * as LobbyView from "./lobbyView.js";
 
 import {cardSelectComponent, cardBoxSelectComponent} from "./cardSelectComponent.js";
 import {makeCardElement} from "../game/cardComponent.js";
-import {isStart, Card, CardProps} from "../../server/lib.js";
-import {validatePack} from "../../server/packLib.js";
+import {isStart, Card, CardProps} from "../../model/lib.js";
+import {validatePack} from "../../model/packLib.js";
 
 import {
 	PackListHeader,
 	PackListItem,
 	PackListPack,
 	GameOptions
-} from "../../server/lib.js";
+} from "../../model/lib.js";
 
 import texts from "../tokens.js";
 
 
-import * as cm from "../../server/cardManager.js";
+import * as cm from "../../model/cardManager.js";
 
 
 import {WebSocketPlus} from "../viewSelector.js";
-import packOrder from "./packOrder.js";
+import packs from "../../model/packs.js";
 
 var gameOptionsDiv: HTMLElement;
 var chooseCardsDiv: HTMLElement;
@@ -106,7 +106,7 @@ function loadCardPages(options: GameOptions)
 	var deckElementList: HTMLElement[] = [];
 
 
-	var allPacks = packOrder.slice();
+	var allPacks = packs.slice();
 
 	if(options.customCards.descriptions.length)
 	{
@@ -178,7 +178,7 @@ function loadCardPages(options: GameOptions)
 	var startCards = document.getElementById('startCards')!;
 	startCards.innerHTML = "";
 
-	var startCardNames = packOrder.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
+	var startCardNames = packs.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
 	var customStartCards = options.customCards.descriptions.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
 
 

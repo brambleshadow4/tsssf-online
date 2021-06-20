@@ -15,9 +15,9 @@ import {
 	isPonyOrStart,
 	GameModel,
 	Card, Location, CardProps
-} from "../../server/lib.js";
+} from "../../model/lib.js";
 
-import * as cm from "../../server/cardManager.js";
+import * as cm from "../../model/cardManager.js";
 
 import {broadcastMove,
 	broadcast,
