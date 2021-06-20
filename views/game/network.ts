@@ -7,7 +7,7 @@ import {
 	GameModel,
 	Location,
 	Card
-} from "../../server/lib.js";
+} from "../../model/lib.js";
 
 import {
 	updatePonyDiscard,

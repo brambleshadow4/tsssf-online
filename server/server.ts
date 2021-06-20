@@ -3,12 +3,12 @@ import cookieParser from 'cookie-parser';
 import fs from 'fs';
 import ws from 'ws';
 import https from "https";
-import cards from "./cards.js"
+import cards from "../model/cards.js"
 import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js";
-import {GameOptions} from "./lib.js";
+import {GameOptions} from "../model/lib.js";
 // @ts-ignore
-import {buildTemplate, buildTemplateHTML} from "./md.js";
+import {buildTemplate, buildTemplateHTML} from "../build/md.js";
 
 import en_US from "../views/tokens.js";
 import es_ES from "../i18n/es-ES/views/tokens.js";
@@ -126,7 +126,7 @@ app.get('/', function(req:any,res:any, next:any){
 
 	next();
 	
-}, tokenizeFile("./views/home.html"));
+}, file("./views/home.html"));
 
 app.get("/home.css", file("./views/home.css"))
 
@@ -135,6 +135,7 @@ app.get("/home.css", file("./views/home.css"))
 app.get('/img/**', fmap("/img/**", "./img/**"));
 app.get('/fonts/**', fmap("/fonts/**", "./fonts/**"));
 app.get('/packs/**', fmap("/packs/**", "./packs/**"));
+app.get('/model/**', fmap("/model/**", "./model/**"));
 
 
 app.get("/favicon.ico", file("./img/favicon.ico"))
@@ -142,46 +143,31 @@ app.get("/favicon.ico", file("./img/favicon.ico"))
 
 app.get('/.well-known/**', fmap("/.well-known/**", "./.well-known/**"));
 
-app.get("/game/game.js", file("./views/game/game.js"))
-app.get("/sectionLinks.js", file("./views/sectionLinks.js"))
-app.get("/game/gameView.js", tokenizeFile("./views/game/gameView.js"))
-app.get("/game/network.js", file("./views/game/network.js"))
-app.get("/game/game.css", file("./views/game/game.css"))
-app.get("/game/cardComponent.js", file("./views/game/cardComponent.js"))
-app.get("/game/peripheralComponents.js", file("./views/game/peripheralComponents.js"))
-app.get("/game/boardComponent.js", file("./views/game/boardComponent.js"))
-app.get("/game/popupComponent.js", file("./views/game/popupComponent.js"))
-app.get("/game/cardSearchBarComponent.js", file("./views/game/cardSearchBarComponent.js"))
 
-
-app.get("/info/addYourOwnCards", file("./views/info/addYourOwnCards/addYourOwnCards.html"))
 
 app.get("/info", file("./views/info/index.html"))
 app.get("/info/cardlist", file("./views/info/index.html"))
 app.get("/info/concept", file("./views/info/index.html"))
 app.get("/info/card", file("./views/info/index.html"))
-
-app.get("/info/style.css", file("./views/info/style.css"))
-app.get("/info/highlight.min.css", file("./views/info/addYourOwnCards/highlight.min.css"))
-app.get("/info/highlight.min.js", file("./views/info/addYourOwnCards/highlight.min.js"))
-app.get("/info/knowledgeBase.js", file("./views/info/knowledgeBase.js"))
-app.get("/info/knowledgeBase.css", file("./views/info/knowledgeBase.css"))
-app.get("/info/faq.js", file("./views/info/faq.js"))
-
 app.get("/info/resources", file("./views/info/resources.html"))
 
+app.get("/info/addYourOwnCards", file("./views/info/addYourOwnCards/addYourOwnCards.html"))
 app.get("/info/addYourOwnCards/upload2.png", file("./views/info/addYourOwnCards/upload2.png"))
+app.get("/info/highlight.min.css", file("./views/info/addYourOwnCards/highlight.min.css"))
+app.get("/info/highlight.min.js", file("./views/info/addYourOwnCards/highlight.min.js"))
+
+
+
+
+
+
 
 
 
 app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
-app.get("/lobby/packOrder.js", tokenizeFile("./views/lobby/packOrder.js"))
+app.get("/lobby/packOrder.js", file("./views/lobby/packOrder.js"))
 
 
-app.get("/viewSelector.js", file("./views/viewSelector.js"))
-
-app.get("/lib.js", file("./server/lib.js"))
-app.get("/server/lib.js", file("./server/lib.js"))
 
 app.get("/tokens.js", function(req, res){
 
@@ -191,17 +177,15 @@ app.get("/tokens.js", function(req, res){
 });
 
 
-app.get("/server/cards.js", file("./server/cards.js"))
-app.get("/server/cardManager.js", file("./server/cardManager.js"))
-app.get("/server/packLib.js", file("./server/packLib.js"))
-app.get("/server/goalCriteria.js", file("./server/goalCriteria.js"))
 
 app.get("/info/rulebook", file("./views/info/rulebook.html"))
 app.get("/info/rulebook.css", file("./views/info/rulebook.css"))
 app.get("/info/quickRules", file("./views/info/quickRules.html"))
 app.get("/info/faq", file("./views/info/faq.html"))
-app.get("/game/gamePublic.js", file("./views/game/gamePublic.js"))
 
+
+
+app.get("/lobby.css", file("./views/lobby/lobby.css"));
 app.get("/lobby", function(req,res)
 {
 	let query = req.originalUrl.substring(req.originalUrl.indexOf("?")+1);
@@ -257,9 +241,6 @@ app.get("/stats", async function(req, res){
 })
 
 
-app.get("/lobby.css", file("./views/lobby/lobby.css"))
-app.get("/lobby/lobby.js", file("./views/lobby/lobby.js"))
-app.get("/lobby/lobbyView.js", tokenizeFile("./views/lobby/lobbyView.js"))
 
 app.get("/host", function(req, res){
 
@@ -267,12 +248,9 @@ app.get("/host", function(req, res){
 	res.redirect("/lobby?" + key);
 })
 
-app.get("/**", function(req,res){ 
 
-	res.redirect("/"); 
+app.get('/**', fmap("/**", "./views/**"));
 
-});
-	
 
 var server;
 if(settings.KEY && !argSet.has("nossl"))
@@ -301,7 +279,7 @@ else
 }
 
 
-function tokenizeFile(url: string)
+/*function tokenizeFile(url: string)
 {
 	return function(req: any, res: any)
 	{
@@ -323,7 +301,7 @@ function tokenizeFile(url: string)
 			res.send("404 error sad");
 		}
 	}	
-}
+}*/
 
 function addTranslatedTokens(text: string, lang: string)
 {
@@ -361,6 +339,9 @@ function fmap(routeUri: string, fileUrl: string): any
 
 		url = url.replace(/%20/g," ");
 
+		if(!req.originalUrl.startsWith("/pack"))
+			console.log(req.originalUrl + " -> " + url);
+
 		//setTimeout(function(){
 		sendIfExists(url, req.cookies.lang, res);
 		//},1000)	
@@ -373,13 +354,45 @@ function sendIfExists(url:string, lang: string, res: any)
 	let lang2 = lang || "";
 	let translatedUrl = "./i18n/" + lang2 + url.replace("./", "/");
 
+
+
 	if(fs.existsSync(translatedUrl))
 	{
 		res.sendFile(translatedUrl, {root:"./"})
 	}
 	else if(fs.existsSync(url))
 	{
-		res.sendFile(url, {root:"./"})
+		if(url.endsWith(".html") || url == "/model/packOrder.js")
+		{
+			let fileText = fs.readFileSync(url, "utf8");
+
+			fileText = addTranslatedTokens(fileText, lang || defaultLocale);
+
+			if(url.indexOf(".js") > -1)
+			{
+				res.setHeader("Content-Type", "text/javascript");
+			}
+
+			res.send(fileText);
+
+		}
+		else
+		{
+			res.sendFile(url, {root:"./"})
+			return;
+			/*console.log(url);
+			console.log("text/css");
+			res.setHeader("Content-Type", "text/css");*/
+
+			
+	
+			
+		}
+
+
+		
+
+		//
 	}
 	else
 	{

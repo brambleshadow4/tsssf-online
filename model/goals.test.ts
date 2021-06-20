@@ -1,4 +1,4 @@
-import {GameModel, Player} from "./gameServer.js";
+import {Player, GameModel} from "../server/gameServer.js";
 import * as cm from "./cardManager.js";
 import {test, expect, beforeEach, group} from "./testFramework.js";
 import {
@@ -576,7 +576,7 @@ export default function(){
 
 		let ship1 = "Core.Ship.CanITellYouASecret";
 		let ship2 = "Core.Ship.DudeLooksLikeALady";
-		let flimFlam = "Core.Pony.Flim&Flam";
+		let flimFlam = "Core.Pony.FlimAndFlam";
 		let unicorn = "Core.Pony.HeartlessDictatorRarity";
 		player.grab(ship1, ship2, flimFlam, unicorn);
 

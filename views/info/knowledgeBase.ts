@@ -1,8 +1,8 @@
 import {doesCardMatchFilters, cardSearchBar} from "../game/cardSearchBarComponent.js";
 import {makeCardElement} from "../game/cardComponent.js";
 import s from "../tokens.js";
-import * as lib from "../../server/lib.js";
-import * as cm from "../../server/cardManager.js";
+import * as lib from "../../model/lib.js";
+import * as cm from "../../model/cardManager.js";
 import faq from "./faq.js";
 
 function buildPage()
