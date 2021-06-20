@@ -1,5 +1,5 @@
-import {isPony, isShip, isGoal, isStart, Card, CardProps} from "../../model/lib.js";
-import * as cm from "../../model/cardManager.js";
+import {isPony, isShip, isGoal, isStart, Card, CardProps} from "../../server/lib.js";
+import * as cm from "../../server/cardManager.js";
 import s from "../tokens.js";
 
 /**

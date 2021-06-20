@@ -9,8 +9,7 @@ server/server.csr
 server/server.key
 server/settings.txt
 server/**.js
-build/**.js
-model/**.js
+
 i18n/**/*.js
 
 views/info/**/*.html

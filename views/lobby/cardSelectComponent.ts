@@ -1,7 +1,7 @@
-import * as cm from "../../model/cardManager.js";
+import * as cm from "../../server/cardManager.js";
 import s from "../tokens.js";
 
-import {isStart} from "../../model/lib.js" 
+import {isStart} from "../../server/lib.js" 
 import {makeCardElement} from "../game/cardComponent.js";
 
 export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: string, deckPrefix: string, cardBox?: Element)

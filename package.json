@@ -6,8 +6,9 @@
 	"type": "module",
 	"scripts": {
 		"tsc": "tsc",
-		"test": "node ./model/testFramework.js",
-		"build": "node ./build/build.js"
+		"test": "node ./server/testFramework.js",
+		"buildPacks": "node ./server/pack.js",
+		"build": "node ./server/buildFaq.js"
 	},
 	"author": "brambleshadow4",
 	"license": "",
@@ -23,9 +24,8 @@
 		"express": "^4.17.1",
 		"https": "^1.0.0",
 		"sharp": "^0.27.2",
-		"shell": "^0.8.4",
 		"sqlite3": "^5.0.0",
 		"typescript": "^4.2.2",
-		"ws": "^7.5.0"
+		"ws": "^7.3.1"
 	}
 }

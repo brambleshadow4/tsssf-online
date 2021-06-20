@@ -1,4 +1,4 @@
-//auto-generated file using npm run build
+//auto-generated file using npm run buildPacks
 var cards: {[key: string]: any} = {
 	"ChildrenOfKefentse.Promo.Start.FanficEditorStarlight": {
 		"name": "Starlight Glimmer",

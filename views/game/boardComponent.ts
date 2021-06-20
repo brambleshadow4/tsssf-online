@@ -15,7 +15,7 @@ import {
 	Location,
 	Card,
 	CardElement
-} from "../../model/lib.js";
+} from "../../server/lib.js";
 
 import
 {

@@ -1,16 +1,16 @@
 
 import * as cm from "./cardManager.js";
 
-import {slashStringToSet, isBlank, Card, CardProps, CardSetProps, OverrideProps, Location} from "./lib.js";
-import {GameModelServer as GameModel} from "./lib.js";
+import {slashStringToSet, isBlank, Card, CardProps, CardSetProps, Location} from "./lib.js";
+import {GameModel} from "./gameServer.js";
 
 
 
 
-function toSetProps(props: CardProps ): CardSetProps
+function toSetProps(props: CardProps): CardSetProps
 {
 	return {
-		action: props?.action,
+		action: props.action,
 		name: slashStringToSet(props.name),
 		gender: slashStringToSet(props.gender) as any,
 		race: slashStringToSet(props.race) as any,
@@ -116,7 +116,7 @@ function getCardProp<T extends keyof CardSetProps>(model: GameModel, cardFull: C
 	var allProps = [
 		toSetProps(cards[predisguise]),
 		toSetProps(cards[baseCard]),
-		toSetProps(cardOverrides as any)
+		toSetProps(cardOverrides)
 	];
 
 	var props = allProps.map( x => x[prop]);

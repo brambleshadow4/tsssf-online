@@ -22,14 +22,13 @@ import {
 	ChangelingContextList,
 	PackListPack,
 	GameOptions
-} from "../model/lib.js";
+} from "./lib.js";
 
-import Turnstate from "./turnstate.js";
 
-import * as cm from "../model/cardManager.js";
-import {validatePack, flattenPack, mergePacks} from "../model/packLib.js";
+import * as cm from "./cardManager.js";
+import {validatePack, flattenPack, mergePacks} from "./packLib.js";
 
-import {evalGoalCard, getConnectedPonies} from "../model/goalCriteria.js"
+import {evalGoalCard, getConnectedPonies} from "./goalCriteria.js"
 import {logGameHosted, logPlayerJoined} from "./stats.js";
 
 
@@ -1627,7 +1626,7 @@ export class GameModel implements GameModelShared
 		return s;
 	}
 
-	public getCurrentPositionMap(): {[key:string]: Location}
+	public getCurrentPositionMap()
 	{
 		var map:{[key:string]: Location} = {};
 
@@ -2066,6 +2065,81 @@ export class GameModel implements GameModelShared
 }
 
 
+
+export class Turnstate
+{	
+	public currentPlayer = "";
+	public overrides: {[key:string]: any} = {};
+
+	public openPonyLocations: Set<string> = new Set();
+	
+	public playedPonies: Card[] = [];
+	public playedShips: [Card, Card][] = [];
+	public playedShipCards: Card[] = [];
+
+	public playedThisTurn = new Set();
+
+	public brokenShipsCommitted: [Card,Card][] = [];
+	public brokenShips: [Card,Card][] = [];
+
+	public swapsCommitted = 0;
+	public swaps = 0;
+
+	public shipSet: Set<string> = new Set();
+	public positionMap: {[key: string]: string} = {};
+	
+	public changelingContexts: {[key:string] : ChangelingContextList} = {};
+
+	public specialEffects: {
+		shipWithEverypony: Set<string>,
+		larsonEffect?: boolean
+	} = {
+		shipWithEverypony: new Set()
+	};
+
+	public constructor(){}
+
+	public init(model: GameModel, currentPlayerName: string)
+	{
+		this.currentPlayer = currentPlayerName;
+		this.shipSet = model.getCurrentShipSet();
+		this.positionMap = model.getCurrentPositionMap();
+
+		this.updateSpecialEffects(model.board);	
+	}
+
+	public updateSpecialEffects(board: {[key: string]: {card: Card}})
+	{
+
+		delete this.specialEffects["larsonEffect"];
+		for(var key in board)
+		{
+			if(board[key].card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
+			{
+				this.specialEffects["larsonEffect"] = true;
+			}
+		}
+	}
+
+	public getChangeContext(card: Card): ChangelingContextList
+	{
+		if(!this.changelingContexts[card])
+		{
+			this.changelingContexts[card] = {list:[], shipRollbackPony: "", preSwapShippedTo: []};
+		}
+
+		return this.changelingContexts[card];
+	}
+	
+	public clientProps()
+	{
+		return {
+			playedThisTurn: [...this.playedThisTurn],
+			overrides: this.overrides,
+			currentPlayer: this.currentPlayer
+		}
+	}
+}
 
 function getFileName()
 {

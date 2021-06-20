@@ -59,7 +59,7 @@
 
 */
 
-import * as cm from "../../model/cardManager.js";
+import * as cm from "../../server/cardManager.js";
 import s from "../tokens.js";
 
 import {
@@ -79,10 +79,10 @@ import {
 	slashStringToSet,
 	GameModel as GameModelShared,
 	Card, Location,
-	CardProps, GoalProps, ShipProps, PonyProps, OverrideProps,
+	CardProps, GoalProps, ShipProps, PonyProps,
 	Turnstate,
-	CardElement,
-} from "../../model/lib.js";
+	CardElement
+} from "../../server/lib.js";
 
 import {
 	updatePonyDiscard,
@@ -1355,7 +1355,7 @@ async function fullCopyAction(card: Card)
 }
 
 
-function getCardProp(card: Card, prop: keyof OverrideProps | "*")
+function getCardProp(card: Card, prop: string)
 {
 	let model = win.model;
 	var cardObj = model.turnstate.overrides[card] || {};
@@ -1367,21 +1367,19 @@ function getCardProp(card: Card, prop: keyof OverrideProps | "*")
 	if(prop == "*")
 	{
 		var copy = {} as any;
-		for(var k in cardObj)
-		{
-			copy[k] = cardObj[k as keyof OverrideProps];
-		}
+		for(var prop in cardObj)
+			copy[prop] = cardObj[prop]
 
 		return copy;
 	}
 
 	if(cardObj && cardObj[prop])
-		return cardObj[prop ]
+		return cardObj[prop]
 
 	return (cm.inPlay()[baseCard] as any)[prop];
 }
 
-function setCardProp(card: Card, prop: keyof OverrideProps, value: any)
+function setCardProp(card: Card, prop: string, value: any)
 {
 	let model = win.model;
 	let cardProps = cm.inPlay()[card];

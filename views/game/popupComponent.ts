@@ -1,5 +1,5 @@
 import {cardSearchBar} from "./cardSearchBarComponent.js";
-import {CardProps} from "../../model/lib.js";
+import {CardProps} from "../../server/lib.js";
 
 var oldPopupAccept: undefined | ((value?: any) => any) ;
 

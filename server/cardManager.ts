@@ -1,5 +1,6 @@
 import cards from "./cards.js";
 import {CardProps} from "./lib.js";
+import {GameModel} from "./gameServer.js";
 
 var allCards: {[key:string]: CardProps} = {};
 var gameCards: {[key:string]: CardProps} = {};
