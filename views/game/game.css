@@ -427,6 +427,8 @@ input[type="number"]
 	overflow-y: auto;
 
 	overflow: visible;
+
+	max-height: 80%;
 }
 .popup.normal
 {
@@ -443,6 +445,7 @@ input[type="number"]
 	margin-top: 10vh;
 	position: relative;
 	display: inline-block;
+	overflow-y: auto;
 }
 
 #popupCloseButton
@@ -524,6 +527,13 @@ input[type="number"]
 	flex-grow: 1;
 	flex-shrink: 1;
 	min-width: 0;
+}
+
+
+.keywordButtons
+{
+	max-width: 40vw;
+	margin-top: 20px;
 }
 
 /* Card Search Component */

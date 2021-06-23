@@ -1553,7 +1553,8 @@ async function keywordChangeAction(shipCard: Card)
 		card2.onclick = ponySelect;
 		element.appendChild(card2);
 		
-		var row = document.createElement('div')
+		var buttonDiv = document.createElement('div');
+		buttonDiv.className = "keywordButtons";
 		for(let i=0; i< allKeywords.length; i++)
 		{
 
@@ -1568,17 +1569,11 @@ async function keywordChangeAction(shipCard: Card)
 				
 			}
 
-			row.appendChild(button);
+			buttonDiv.appendChild(button);
 
-
-			if(i%5 == 4)
-			{
-				element.appendChild(row);
-				row = document.createElement('div');
-			}
 		}
 
-		element.appendChild(row);
+		element.appendChild(buttonDiv);
 
 		return element;
 
