@@ -131,9 +131,15 @@ export function attachToSocket(socket: WebSocketPlus)
 
 		if(event.data.startsWith("model;"))
 		{
-			//console.log(event.data);
+			let modelPreviouslyLoaded = model;
+		
 			updateGame(JSON.parse(event.data.substring(6)));
-			win.moveToStartCard();
+
+			if(!modelPreviouslyLoaded)
+			{
+				win.moveToStartCard();
+			}
+			
 		}
 
 		if(event.data.startsWith("move;"))

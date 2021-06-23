@@ -157,13 +157,6 @@ app.get("/info/highlight.min.css", file("./views/info/addYourOwnCards/highlight.
 app.get("/info/highlight.min.js", file("./views/info/addYourOwnCards/highlight.min.js"))
 
 
-
-
-
-
-
-
-
 app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
 app.get("/lobby/packOrder.js", file("./views/lobby/packOrder.js"))
 
@@ -279,30 +272,6 @@ else
 }
 
 
-/*function tokenizeFile(url: string)
-{
-	return function(req: any, res: any)
-	{
-		if(fs.existsSync(url))
-		{
-			let fileText = fs.readFileSync(url, "utf8");
-
-			fileText = addTranslatedTokens(fileText, req.cookies.lang || defaultLocale);
-
-			if(url.indexOf(".js") > -1)
-			{
-				res.setHeader("Content-Type", "text/javascript");
-			}
-
-			res.send(fileText);
-		}
-		else
-		{
-			res.send("404 error sad");
-		}
-	}	
-}*/
-
 function addTranslatedTokens(text: string, lang: string)
 {
 	let pattern = /{{([A-Za-z0-9\.]+)}}/g;
@@ -339,9 +308,6 @@ function fmap(routeUri: string, fileUrl: string): any
 
 		url = url.replace(/%20/g," ");
 
-		if(!req.originalUrl.startsWith("/pack"))
-			console.log(req.originalUrl + " -> " + url);
-
 		//setTimeout(function(){
 		sendIfExists(url, req.cookies.lang, res);
 		//},1000)	
@@ -355,14 +321,13 @@ function sendIfExists(url:string, lang: string, res: any)
 	let translatedUrl = "./i18n/" + lang2 + url.replace("./", "/");
 
 
-
 	if(fs.existsSync(translatedUrl))
 	{
 		res.sendFile(translatedUrl, {root:"./"})
 	}
 	else if(fs.existsSync(url))
 	{
-		if(url.endsWith(".html") || url == "/model/packOrder.js")
+		if(url.endsWith(".html") || url == "/model/packs.js" || url.endsWith("View.js"))
 		{
 			let fileText = fs.readFileSync(url, "utf8");
 
@@ -380,19 +345,7 @@ function sendIfExists(url:string, lang: string, res: any)
 		{
 			res.sendFile(url, {root:"./"})
 			return;
-			/*console.log(url);
-			console.log("text/css");
-			res.setHeader("Content-Type", "text/css");*/
-
-			
-	
-			
 		}
-
-
-		
-
-		//
 	}
 	else
 	{
