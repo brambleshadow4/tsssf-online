@@ -92,27 +92,16 @@ function buildPage()
 
 				faqHTML = "<h2>FAQ</h2>";
 
-				if(faqSections.length > 1)
-				{
-					
-					faqHTML += faqSections.map(
-						x => {
+			
+				faqHTML += faqSections.map(
+					x => {
 
-							let sectionName = faq[x[0]].heading || cm.all()[x[0]].title || x[0];
+						let sectionName = faq[x[0]].heading || cm.all()[x[0]].title || x[0];
 
-							return `<h3 class='question-section'>${sectionName}</h3>\n` + x[1];
-						}
-					).join("\n");
-				}
-				else
-				{
-					let [_, section] = faqSections[0];
-
-					faqHTML += section;
-				}	
+						return `<h3 class='question-section'>${sectionName}</h3>\n` + x[1];
+					}
+				).join("\n");
 			}
-
-
 
 			if(cardProps)
 			{

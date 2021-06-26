@@ -1,11 +1,12 @@
 import faq from "./faq.js";
-
+import * as cm from "../../model/cardManager.js";
 
 var mechanicsTOC = document.getElementById('target-toc-mechanics')!
 var cardsTOC = document.getElementById('target-toc-cards')!
 var mechanicsDiv = document.getElementById('target-mechanics')!
 var cardsDiv = document.getElementById('target-cards')!
 
+cm.init(["*"], {});
 
 function tocDiv(name:string, id:string)
 {
@@ -22,9 +23,11 @@ function tocDiv(name:string, id:string)
 
 for(var key in faq)
 {
-	if(key.indexOf(".") > -1)
+	if(key.indexOf(".") > -1) // tagged by card
 	{
-		cardsTOC.parentNode!.insertBefore(tocDiv(key, key), cardsTOC);
+
+		let headingTitle = cm.all()[key].title || key;
+		cardsTOC.parentNode!.insertBefore(tocDiv(headingTitle, key), cardsTOC);
 		
 		var jumpTarget = document.createElement('span');
 
@@ -36,7 +39,7 @@ for(var key in faq)
 		var heading = document.createElement('h3');
 		heading.className = "question-section";
 		heading.setAttribute('idf', key);
-		heading.innerHTML = key;
+		heading.innerHTML =  headingTitle;
 
 		cardsDiv.parentNode!.insertBefore(heading, cardsDiv);
 

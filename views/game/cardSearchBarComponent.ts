@@ -181,15 +181,33 @@ export function cardSearchBar(
 			if(isMatch)
 			{	
 				matches.push(key)
-				if(matches.length >= 10)
-				{
-					break;
-				}
 			}
 		}
 
+		matches.sort((a,b) => suggestionScore(a) - suggestionScore(b));
+		matches = matches.slice(0,10);
 		return matches.map(x => potentialResults[x]);
 	}
+
+	function suggestionScore(text: string): number
+	{
+		if(text.startsWith("type")) return 1;
+		if(text.startsWith("pack")) return 2;
+		if(text.startsWith("name")) return 3;
+		if(text.startsWith("race")) return 4;
+		if(text.startsWith("gender")) return 5;
+		if(text.startsWith("alttimeline")) return 6;
+		if(text.startsWith("changegoal")) return 7;
+		if(text.startsWith("count")) return 8;
+		if(text.startsWith("type")) return 9;
+		if(text.startsWith("action")) return 10;
+		if(text.startsWith("points")) return 11;
+		if(text.startsWith("goal")) return 12;
+		if(text.startsWith("keyword")) return 13;
+		if(text.startsWith("title")) return 14;
+		return 15;
+	}
+
 
 	return [bar, setFilters];
 }
@@ -233,6 +251,9 @@ function buildSuggestions(cards: {[key:string]: CardProps})
 					let [part1,part2, ...others] = piece.split(/=|!=| in | !in /g);
 
 					if(others.length != 0 || !part1 || !part2)
+						continue;
+
+					if(part1.trim().endsWith("_b"))
 						continue;
 
 					part1 = part1.trim();

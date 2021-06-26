@@ -1356,7 +1356,7 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord": {
-		"name": "Discord",
+		"name": "Discord/Twilight Sparkle",
 		"race": "alicorn",
 		"gender": "male",
 		"changeGoalPointValues": true,
