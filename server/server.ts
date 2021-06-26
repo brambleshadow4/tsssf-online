@@ -52,7 +52,8 @@ for(let lang in translations)
 		"/views/info/resources.md",
 		"/views/info/addYourOwnCards/addYourOwnCards.md",
 		"/views/info/quickRules.md",
-		"/views/info/rulebook.md"
+		"/views/info/rulebook.md",
+		"/views/info/faq.md"
 	]){
 
 		let fullFile = prefix + file;

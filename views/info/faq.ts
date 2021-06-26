@@ -159,7 +159,6 @@ export default {
 	"Core.Pony.FreedomFighterPinkiePie": {
 		"heading": "",
 		"questions": [
-			"<div class='question'>Does playing a card you got from Freedom Fighter Pinkie's power count as a play from hand for the purposes of goals?</div><div class='answer'>It does!</div>",
 			"<div class='question'>Does playing a card you got from Freedom Fighter Pinkie's power count as a play from hand for the purposes of goals?</div><div class='answer'>It does!</div>"
 		]
 	},
