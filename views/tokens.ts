@@ -131,6 +131,7 @@ export default {
 
 	"CardSelectNone": "None",
 	"CardSelectSome": "Some",
-	"CardSelectAll": "All"
+	"CardSelectAll": "All",
+
 
 }	

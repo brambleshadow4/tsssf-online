@@ -63,24 +63,53 @@ function buildPage()
 
 			let previouslyAsked = new Set();
 
+			let faqSections = [];
 
 			for(let tag of tags)
 			{
+				let sectionText = "";
+
 				if(!faq[tag]) continue;
-				for(let q of faq[tag])
-				{
+				for(let q of faq[tag].questions)
+				{	
 					if(!previouslyAsked.has(q))
 					{
+
 						previouslyAsked.add(q);
-						faqHTML += q + "\n";s
+						sectionText += q + "\n";s
 					}
 				}
+
+				if(sectionText)
+					faqSections.push([tag, sectionText]);
+
 			}
 
 
-			if(faqHTML.length)
+
+			if(faqSections.length)
 			{
-				faqHTML = "<h2>FAQ</h2>" + faqHTML;
+
+				faqHTML = "<h2>FAQ</h2>";
+
+				if(faqSections.length > 1)
+				{
+					
+					faqHTML += faqSections.map(
+						x => {
+
+							let sectionName = faq[x[0]].heading || cm.all()[x[0]].title || x[0];
+
+							return `<h3 class='question-section'>${sectionName}</h3>\n` + x[1];
+						}
+					).join("\n");
+				}
+				else
+				{
+					let [_, section] = faqSections[0];
+
+					faqHTML += section;
+				}	
 			}
 
 

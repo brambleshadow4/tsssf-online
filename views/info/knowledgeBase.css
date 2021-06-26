@@ -1,3 +1,9 @@
+.question-section
+{
+	color: #7721ad;
+}
+
+
 ins { color: green; }
 del {color: red; }
 .card-aside
@@ -31,6 +37,7 @@ body.cardlist
 	tab-size: 4;
 	-moz-tab-size: 4;
 }
+
 
 
 .card

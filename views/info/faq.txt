@@ -1,3 +1,4 @@
+[FAQ]
 Q: Can two-pony cards count as the same pony twice, or just two one-pony cards in the same spot?
 A: Two-pony cards do not count as two of the same pony; they're a team of two different ponies!
 #Core.Pony.Aloe&AloeAndLotus
@@ -424,3 +425,31 @@ A: The goals that deal with "on your turn" take into account your whole turn whe
 Q: I have a quick rule question about goal cards. If the player loses the qualifying conditions do they have to discard it or just once they meet it they keep it?
 A: You definitely keep it! In fact a lot of great plays involve creating the conditions for a goal, then immediately destroying everything to win another one.
 #goals
+
+[Headings]
+#alicorn Alicorns
+#alt-timeline Alt Timeline/Time Traveler
+#breaking-ships Breaking Ships
+#chain Chains
+#changeling Changelings
+#clone Clone Power
+#copy Copy Power
+#disconnected-cards Disconnected Cards
+#gender-change Gender Change
+#goals Goals
+#keyword-change Keyword Change
+#love-poison Love Poisons
+#male-female Multi-gendered Cards
+#new-goal New Goal Power
+#play-from-discard Playing from Discard
+#play-pony Playing Ponies
+#play-ship Playing Ships
+#pony-action Pony Powers
+#princess Princess Keyword
+#race-change Race Change
+#replace Replace Power
+#search Search Power
+#swap Swap Power
+#turn-order Turn Order
+#two-pony-card Double Pony Cards
+
