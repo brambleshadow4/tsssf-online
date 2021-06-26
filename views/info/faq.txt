@@ -1,7 +1,7 @@
 [FAQ]
 Q: Can two-pony cards count as the same pony twice, or just two one-pony cards in the same spot?
 A: Two-pony cards do not count as two of the same pony; they're a team of two different ponies!
-#Core.Pony.Aloe&AloeAndLotus
+#Core.Pony.AloeAndLotus
 #two-pony-card
 
 Q: Can a changeling become a 2-Pony card, like Aloe & Lotus?

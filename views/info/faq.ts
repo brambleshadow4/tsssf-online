@@ -26,10 +26,11 @@
  * two-pony-card
  */
 export default {
-	"Core.Pony.Aloe": {
+	"Core.Pony.AloeAndLotus": {
 		"heading": "",
 		"questions": [
-			"<div class='question'>Can two-pony cards count as the same pony twice, or just two one-pony cards in the same spot?</div><div class='answer'>Two-pony cards do not count as two of the same pony; they're a team of two different ponies!</div>"
+			"<div class='question'>Can two-pony cards count as the same pony twice, or just two one-pony cards in the same spot?</div><div class='answer'>Two-pony cards do not count as two of the same pony; they're a team of two different ponies!</div>",
+			"<div class='question'>Can a changeling become a 2-Pony card, like Aloe & Lotus?</div><div class='answer'>A changeling can become only a single pony. So it can become Aloe, but not Lotus, or the other way around.</div>"
 		]
 	},
 	"two-pony-card": {
@@ -42,12 +43,6 @@ export default {
 			"<div class='question'>OK, I think the card text makes this perfectly clear. But does a Gender Change or Race Change affect both ponies on a two-pony card?</div><div class='answer'>They do!</div>",
 			"<div class='question'>Since Race-change ships affect both ponies on a two-pony card, does that mean shipping Nightmare Moon with pricessified Aloe & Lotus fulfills Princess Pile?</div><div class='answer'>Indeedy!</div>",
 			"<div class='question'>It says the player \"may choose one Pony card attached to this Ship. Until the end of your turn, that Pony card counts as two ponies.\" Well, can we choose Aloe & Lotus and make that card four ponies?</div><div class='answer'>Any Pony CARD you choose will count as two Ponies. Since Aloe & Lotus is a single Pony card, it will simply continue to be two Ponies.</div>"
-		]
-	},
-	"Core.Pony.AloeAndLotus": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>Can a changeling become a 2-Pony card, like Aloe & Lotus?</div><div class='answer'>A changeling can become only a single pony. So it can become Aloe, but not Lotus, or the other way around.</div>"
 		]
 	},
 	"changeling": {
