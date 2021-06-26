@@ -837,8 +837,8 @@ var cards: {[key: string]: any} = {
 	"Core.Ship.WorldwideThreatOfDestruction": {
 		"title": "Worldwide Threat Of Destruction"
 	},
-	"Core.Ship.Yer a Princess, Harry!": {
-		"title": "YerAPrincessHarry",
+	"Core.Ship.YerAPrincessHarry": {
+		"title": "Yer a Princess, Harry!",
 		"action": "makePrincess"
 	},
 	"Core.Ship.YouHadMeAtNeigh": {

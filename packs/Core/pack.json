@@ -832,8 +832,8 @@
 			"WorldwideThreatOfDestruction": {
 				"title": "Worldwide Threat Of Destruction"
 			},
-			"Yer a Princess, Harry!": {
-				"title": "YerAPrincessHarry",
+			"YerAPrincessHarry": {
+				"title": "Yer a Princess, Harry!",
 				"action": "makePrincess"
 			},
 			"YouHadMeAtNeigh": {
