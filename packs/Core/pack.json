@@ -7,6 +7,7 @@
 	"cards": {
 		"start": {
 			"FanficAuthorTwilight": {
+				"title": "FanficAuthorTwilight",
 				"name": "Twilight Sparkle",
 				"race": "unicorn",
 				"gender": "female",
@@ -17,6 +18,7 @@
 		},
 		"pony": {
 			"AloeAndLotus": {
+				"title": "Aloe & Lotus",
 				"name": "Aloe/Lotus",
 				"race": "earth",
 				"gender": "female",
@@ -25,6 +27,7 @@
 				"keywords": []
 			},
 			"ApplejackBackgroundPony": {
+				"title": "Applejack: the Cutest, Smartest, All-Around-Best Background Pony",
 				"name": "Applejack",
 				"race": "earth",
 				"gender": "female",
@@ -35,6 +38,7 @@
 				]
 			},
 			"BBBFFShiningArmor": {
+				"title": "B.B.B.F.F. Shining Armor",
 				"name": "Shining Armor",
 				"race": "unicorn",
 				"gender": "male",
@@ -42,6 +46,7 @@
 				"keywords": []
 			},
 			"BerryPunch": {
+				"title": "Berry Punch",
 				"name": "Berry Punch",
 				"race": "earth",
 				"gender": "female",
@@ -49,6 +54,7 @@
 				"keywords": []
 			},
 			"BestFoalsitterCadance": {
+				"title": "Best Foalsitter Cadance",
 				"name": "Cadance",
 				"race": "alicorn",
 				"gender": "female",
@@ -58,6 +64,7 @@
 				]
 			},
 			"BigMacintosh": {
+				"title": "Big Macintosh",
 				"name": "Big Macintosh",
 				"race": "earth",
 				"gender": "male",
@@ -67,6 +74,7 @@
 				]
 			},
 			"BlackWidowRarity": {
+				"title": "Black Widow Rarity",
 				"name": "Rarity",
 				"race": "unicorn",
 				"gender": "female",
@@ -76,6 +84,7 @@
 				]
 			},
 			"Bloomberg": {
+				"title": "Bloomberg",
 				"name": "Bloomberg",
 				"gender": "male",
 				"action": "newGoal",
@@ -85,6 +94,7 @@
 				]
 			},
 			"BonBon": {
+				"title": "Bon Bon",
 				"name": "Bon Bon",
 				"race": "earth",
 				"gender": "female",
@@ -92,6 +102,7 @@
 				"keywords": []
 			},
 			"Braeburn": {
+				"title": "Braeburn",
 				"name": "Braeburn",
 				"race": "earth",
 				"gender": "male",
@@ -101,6 +112,7 @@
 				]
 			},
 			"BrokenWingRainbowDash": {
+				"title": "Broken Wing Rainbow Dash",
 				"name": "Rainbow Dash",
 				"race": "pegasus",
 				"gender": "female",
@@ -110,6 +122,7 @@
 				]
 			},
 			"BulkBiceps": {
+				"title": "Bulk Biceps",
 				"name": "Bulk Biceps",
 				"race": "pegasus",
 				"gender": "male",
@@ -117,6 +130,7 @@
 				"keywords": []
 			},
 			"Caramel": {
+				"title": "Caramel",
 				"name": "Caramel",
 				"race": "earth",
 				"gender": "male",
@@ -126,6 +140,7 @@
 				]
 			},
 			"EarthChangeling": {
+				"title": "Changeling",
 				"name": "Changeling",
 				"race": "earth",
 				"action": "Changeling(earth)",
@@ -135,6 +150,7 @@
 				]
 			},
 			"UnicornChangeling": {
+				"title": "Changeling",
 				"name": "Changeling",
 				"race": "unicorn",
 				"action": "Changeling(unicorn)",
@@ -144,6 +160,7 @@
 				]
 			},
 			"PegasusChangeling": {
+				"title": "Changeling",
 				"name": "Changeling",
 				"race": "pegasus",
 				"action": "Changeling(pegasus)",
@@ -153,12 +170,14 @@
 				]
 			},
 			"Cheerilee": {
+				"title": "Cheerilee",
 				"name": "Cheerilee",
 				"race": "earth",
 				"gender": "female",
 				"keywords": []
 			},
 			"CiderSeasonApplejack": {
+				"title": "Cider Season Applejack",
 				"name": "Applejack",
 				"race": "earth",
 				"gender": "female",
@@ -169,6 +188,7 @@
 				]
 			},
 			"Crackle": {
+				"title": "Crackle",
 				"name": "Crackle",
 				"race": "alicorn",
 				"gender": "female",
@@ -178,6 +198,7 @@
 				]
 			},
 			"CultLeaderFluttershy": {
+				"title": "Cult Leader Fluttershy",
 				"name": "Fluttershy",
 				"race": "pegasus",
 				"gender": "female",
@@ -189,12 +210,14 @@
 				]
 			},
 			"Derpy": {
+				"title": "Derpy Hooves",
 				"name": "Derpy",
 				"race": "pegasus",
 				"gender": "female",
 				"keywords": []
 			},
 			"Discord": {
+				"title": "Discord",
 				"name": "Discord",
 				"race": "alicorn",
 				"gender": "male",
@@ -206,6 +229,7 @@
 				]
 			},
 			"DoctorWhooves": {
+				"title": "Doctor Whooves",
 				"name": "Doctor Whooves",
 				"race": "earth",
 				"gender": "male",
@@ -215,6 +239,7 @@
 				]
 			},
 			"DramaticallyWoundedRarity": {
+				"title": "Dramatically Wounded Rarity",
 				"name": "Rarity",
 				"race": "unicorn",
 				"gender": "female",
@@ -224,6 +249,7 @@
 				]
 			},
 			"DruidFluttershy": {
+				"title": "Druid Fluttershy",
 				"name": "Fluttershy",
 				"race": "pegasus",
 				"gender": "female",
@@ -233,6 +259,7 @@
 				]
 			},
 			"FlimAndFlam": {
+				"title": "Flim & Flam",
 				"name": "Flim/Flam",
 				"race": "unicorn",
 				"gender": "male",
@@ -243,6 +270,7 @@
 				]
 			},
 			"FreedomFighterPinkiePie": {
+				"title": "Freedom Fighter Pinkie Pie",
 				"name": "Pinkie Pie",
 				"race": "earth",
 				"gender": "female",
@@ -252,6 +280,7 @@
 				]
 			},
 			"Gilda": {
+				"title": "Gilda",
 				"name": "Gilda",
 				"race": "pegasus",
 				"gender": "female",
@@ -262,6 +291,7 @@
 				]
 			},
 			"GrannySmith": {
+				"title": "Granny Smith",
 				"name": "Granny Smith",
 				"race": "earth",
 				"gender": "female",
@@ -272,6 +302,7 @@
 				]
 			},
 			"GypsyWitchPinkiePie": {
+				"title": "Gypsy Witch Pinkie Pie",
 				"name": "Pinkie Pie",
 				"race": "earth",
 				"gender": "female",
@@ -280,6 +311,7 @@
 				]
 			},
 			"HeartlessDictatorRarity": {
+				"title": "Heartless Dictator Rarity",
 				"name": "Rarity",
 				"race": "unicorn",
 				"gender": "female",
@@ -291,6 +323,7 @@
 				]
 			},
 			"IronWill": {
+				"title": "Iron Will",
 				"name": "Iron Will",
 				"race": "unicorn",
 				"gender": "male",
@@ -300,6 +333,7 @@
 				]
 			},
 			"Kefentse": {
+				"title": "Kefentse",
 				"name": "Kefentse",
 				"race": "alicorn",
 				"gender": "female",
@@ -309,6 +343,7 @@
 				]
 			},
 			"Lyra": {
+				"title": "Lyra",
 				"name": "Lyra",
 				"race": "unicorn",
 				"gender": "female",
@@ -316,12 +351,14 @@
 				"keywords": []
 			},
 			"MahouShoujoDerpy": {
+				"title": "Mahou Shoujo Derpy",
 				"name": "Derpy",
 				"race": "pegasus",
 				"gender": "female",
 				"keywords": []
 			},
 			"MajorGeneralDash": {
+				"title": "Major General Dash",
 				"name": "Rainbow Dash",
 				"race": "pegasus",
 				"gender": "female",
@@ -333,6 +370,7 @@
 				]
 			},
 			"MoeFluttershy": {
+				"title": "Moe Fluttershy",
 				"name": "Fluttershy",
 				"race": "pegasus",
 				"gender": "female",
@@ -342,6 +380,7 @@
 				]
 			},
 			"MortalCelestia": {
+				"title": "Mortal Celestia",
 				"name": "Celestia",
 				"race": "unicorn",
 				"gender": "female",
@@ -353,6 +392,7 @@
 				]
 			},
 			"MrCake": {
+				"title": "Mr. Cake",
 				"name": "Mr. Cake",
 				"race": "earth",
 				"gender": "male",
@@ -360,6 +400,7 @@
 				"keywords": []
 			},
 			"MrsCake": {
+				"title": "Mrs. Cake",
 				"name": "Mrs. Cake",
 				"race": "earth",
 				"gender": "female",
@@ -367,6 +408,7 @@
 				"keywords": []
 			},
 			"NightmareMoon": {
+				"title": "Nightmare Moon",
 				"name": "Luna",
 				"race": "alicorn",
 				"gender": "female",
@@ -378,6 +420,7 @@
 				]
 			},
 			"Octavia": {
+				"title": "Octavia",
 				"name": "Octavia",
 				"race": "earth",
 				"gender": "female",
@@ -385,6 +428,7 @@
 				"keywords": []
 			},
 			"Pinkamena": {
+				"title": "Pinkamena",
 				"name": "Pinkie Pie",
 				"race": "earth",
 				"gender": "female",
@@ -393,6 +437,7 @@
 				]
 			},
 			"PonyJoe": {
+				"title": "Pony Joe",
 				"name": "Pony Joe",
 				"race": "unicorn",
 				"gender": "male",
@@ -400,6 +445,7 @@
 				"keywords": []
 			},
 			"PrinceBlueblood": {
+				"title": "Prince Blueblood",
 				"name": "Prince Blueblood",
 				"race": "unicorn",
 				"gender": "male",
@@ -409,6 +455,7 @@
 				]
 			},
 			"PrincessCadance": {
+				"title": "Princess Cadance",
 				"name": "Cadance",
 				"race": "alicorn",
 				"gender": "female",
@@ -418,6 +465,7 @@
 				]
 			},
 			"PrincessCelestia": {
+				"title": "Princess Celestia",
 				"name": "Celestia",
 				"race": "alicorn",
 				"gender": "female",
@@ -428,6 +476,7 @@
 				]
 			},
 			"PrincessLuna": {
+				"title": "Princess Luna",
 				"name": "Luna",
 				"race": "alicorn",
 				"gender": "female",
@@ -438,6 +487,7 @@
 				]
 			},
 			"PrivateEyeTwilight": {
+				"title": "Private Eye Twilight",
 				"name": "Twilight Sparkle",
 				"race": "unicorn",
 				"gender": "female",
@@ -447,6 +497,7 @@
 				]
 			},
 			"QueenChrysalis": {
+				"title": "Queen Chrysalis",
 				"name": "Chrysalis",
 				"race": "alicorn",
 				"gender": "female",
@@ -458,6 +509,7 @@
 				]
 			},
 			"RoadWarriorSpike": {
+				"title": "Road Warrior Spike",
 				"name": "Spike",
 				"race": "earth",
 				"gender": "male",
@@ -468,6 +520,7 @@
 				]
 			},
 			"RoyalGuardHank": {
+				"title": "Royal Guard Hank",
 				"name": "Hank",
 				"race": "pegasus",
 				"gender": "male",
@@ -475,6 +528,7 @@
 				"keywords": []
 			},
 			"RoyalGuardShiningArmor": {
+				"title": "Royal Guard Shining Armor",
 				"name": "Shining Armor",
 				"race": "unicorn",
 				"gender": "male",
@@ -482,6 +536,7 @@
 				"keywords": []
 			},
 			"SharpshooterApplejack": {
+				"title": "Sharpshooter Applejack",
 				"name": "Applejack",
 				"race": "earth",
 				"gender": "female",
@@ -493,6 +548,7 @@
 				]
 			},
 			"SmartyPants": {
+				"title": "Smarty Pants",
 				"name": "Smarty Pants",
 				"race": "earth",
 				"gender": "female",
@@ -502,6 +558,7 @@
 				]
 			},
 			"StarStudentTwilight": {
+				"title": "Star Student Twilight",
 				"name": "Twilight Sparkle",
 				"race": "unicorn",
 				"gender": "female",
@@ -511,6 +568,7 @@
 				]
 			},
 			"StarswirlTheBearded": {
+				"title": "Starswirl the Bearded",
 				"name": "Starswirl",
 				"race": "unicorn",
 				"gender": "male",
@@ -520,6 +578,7 @@
 				]
 			},
 			"SuperSpyTwilight": {
+				"title": "Super Spy Twilight",
 				"name": "Twilight Sparkle",
 				"race": "unicorn",
 				"gender": "female",
@@ -530,6 +589,7 @@
 				]
 			},
 			"TheGreatAndPowerfulTrixie": {
+				"title": "The Great and Powerful Trixie",
 				"name": "Trixie",
 				"race": "unicorn",
 				"gender": "female",
@@ -539,12 +599,14 @@
 				]
 			},
 			"TheWonderbolts": {
+				"title": "The Wonderbolts",
 				"name": "The Wonderbolts",
 				"race": "pegasus",
 				"gender": "male/female",
 				"keywords": []
 			},
 			"Tom": {
+				"title": "Tom",
 				"name": "Tom",
 				"gender": "male",
 				"action": "replace",
@@ -553,6 +615,7 @@
 				]
 			},
 			"TsundereRainbowDash": {
+				"title": "Tsundere Rainbow Dash",
 				"name": "Rainbow Dash",
 				"race": "pegasus",
 				"gender": "female",
@@ -562,6 +625,7 @@
 				]
 			},
 			"VinylScratch": {
+				"title": "Vinyl Scratch",
 				"name": "Vinyl Scratch",
 				"race": "unicorn",
 				"gender": "female",
@@ -569,6 +633,7 @@
 				"keywords": []
 			},
 			"YoungAndHotGrannySmith": {
+				"title": "Young and Hot Granny Smith",
 				"name": "Granny Smith",
 				"race": "earth",
 				"gender": "female",
@@ -578,6 +643,7 @@
 				]
 			},
 			"Zecora": {
+				"title": "",
 				"name": "Zecora",
 				"race": "earth",
 				"gender": "female",
@@ -589,263 +655,394 @@
 		},
 		"ship": {
 			"Amnesia": {
+				"title": "Amnesia",
 				"action": "playFromDiscard"
 			},
 			"BadPonyGoToMyRoom": {
+				"title": "Bad Pony! Go to My Room!",
 				"action": "playFromDiscard"
 			},
-			"BeachEpisode": {},
-			"BoredOnASundayAfternoon": {},
+			"BeachEpisode": {
+				"title": "Beach Episode"
+			},
+			"BoredOnASundayAfternoon": {
+				"title": "Bored on a Sunday Afternoon"
+			},
 			"CabinInTheWoodsAwooo": {
+				"title": "Cabin in the Woods, Awooo!",
 				"action": "playFromDiscard"
 			},
 			"CanITellYouASecret": {
+				"title": "Can I Tell You a Secret?",
 				"action": "genderChange"
 			},
-			"CheckingItOffMyList": {},
-			"ClosedDoorNegotiations": {},
+			"CheckingItOffMyList": {
+				"title": "Checking It Off My List"
+			},
+			"ClosedDoorNegotiations": {
+				"title": "Closed Door Negotiations"
+			},
 			"CrossoverFic": {
+				"title": "Crossover Fic!",
 				"action": "playFromDiscard"
 			},
 			"CultMeeting": {
+				"title": "Cult Meeting",
 				"action": "raceChange"
 			},
-			"CutieMarkCrusadersMatchmakers": {},
-			"Detention": {},
-			"DivineIntervention": {},
+			"CutieMarkCrusadersMatchmakers": {
+				"title": "Cutie Mark Crusaders: Matchmakers!"
+			},
+			"Detention": {
+				"title": "Detention"
+			},
+			"DivineIntervention": {
+				"title": "Divine Intervention"
+			},
 			"DoYouThinkLoveCanBloomEvenOnABattlefield": {
+				"title": "Do You Think Love Can Bloom? Even on a Battlefield?",
 				"action": "timelineChange"
 			},
 			"DudeLooksLikeALady": {
+				"title": "Dude Looks Like a Lady",
 				"action": "genderChange"
 			},
-			"FillyhoodCrush": {},
+			"FillyhoodCrush": {
+				"title": "Fillyhood Crush"
+			},
 			"FromAnAlternateDimension": {
+				"title": "From an Alternate Dimension",
 				"action": "timelineChange"
 			},
-			"HaveYouMetMyFriend": {},
-			"HowToPickUpMaresAReferenceGuide": {},
-			"IReadThatInABookOnce": {},
-			"IWishIKnewHowToQuitYou": {},
-			"ItWasYouAllAlong": {},
-			"ItsASign": {},
-			"LeavingOnAPersonalCrusade": {},
-			"LifeThreateningIllness": {},
+			"HaveYouMetMyFriend": {
+				"title": "Have You Met My Friend?"
+			},
+			"HowToPickUpMaresAReferenceGuide": {
+				"title": "How To Pick Up Mares: A Reference Guide"
+			},
+			"IReadThatInABookOnce": {
+				"title": "I Read That in a Book Once!"
+			},
+			"IWishIKnewHowToQuitYou": {
+				"title": "I Wish I Knew How to Quit You!"
+			},
+			"ItWasYouAllAlong": {
+				"title": "IT Was You All Along!"
+			},
+			"ItsASign": {
+				"title": "It's a Sign"
+			},
+			"LeavingOnAPersonalCrusade": {
+				"title": "Leaving on a Personal Crusade"
+			},
+			"LifeThreateningIllness": {
+				"title": "Life-Threatening Illness"
+			},
 			"LovePoisonIsNoJoke": {
+				"title": "Love Poison Is No Joke!",
 				"action": "lovePoison"
 			},
-			"MyLittleShotgunWedding": {},
-			"NothingInCommonPerfectAnyway": {},
-			"NowKiss": {},
+			"MyLittleShotgunWedding": {
+				"title": "My Little Shotgun Wedding"
+			},
+			"NothingInCommonPerfectAnyway": {
+				"title": "Nothing in Common: Perfect Anyway"
+			},
+			"NowKiss": {
+				"title": "Now Kiss!"
+			},
 			"OnTheLam": {
+				"title": "On the Lam",
 				"action": "timelineChange"
 			},
 			"OopsWrongSpell": {
+				"title": "Oops! Wrong Spell.",
 				"action": "genderChange"
 			},
-			"PutARingOnIt": {},
+			"PutARingOnIt": {
+				"title": "Put a Ring on It"
+			},
 			"Rule63": {
+				"title": "Rule 63",
 				"action": "genderChange"
 			},
-			"SawYouInADream": {},
+			"SawYouInADream": {
+				"title": "Saw You in a Dream"
+			},
 			"ShmoopyBoo": {
+				"title": "Shmoopy Boo!",
 				"action": "lovePoison"
 			},
-			"SlapSlapKiss": {},
+			"SlapSlapKiss": {
+				"title": "Slap-Slap Kiss"
+			},
 			"SoThatsWhatThatDoes": {
+				"title": "So THAT'S What That Does!",
 				"action": "raceChange"
 			},
 			"StartlingConfession": {
+				"title": "Startling Confession",
 				"action": "genderChange"
 			},
 			"StepIntoMyBasement": {
+				"title": "Step into My Basement",
 				"action": "raceChange"
 			},
-			"StuckOnABalconyAllNight": {},
-			"SuspiciouslyRomanticRandomPicnic": {},
-			"TheOtherMare": {},
-			"ThereAreNoBrakesOnTheLoveTrain": {},
-			"TheyFightCrime": {},
-			"TheyreAtItAgain": {},
+			"StuckOnABalconyAllNight": {
+				"title": "Stuck on a Balcony All Night"
+			},
+			"SuspiciouslyRomanticRandomPicnic": {
+				"title": "Suspiciously Romantic Random Picnic"
+			},
+			"TheOtherMare": {
+				"title": "The Other Mare"
+			},
+			"ThereAreNoBrakesOnTheLoveTrain": {
+				"title": "There Are No Brakes on the Love Train"
+			},
+			"TheyFightCrime": {
+				"title": "They Fight Crime"
+			},
+			"TheyreAtItAgain": {
+				"title": "They're at It Again?!"
+			},
 			"TimeForAnExperiment": {
+				"title": "Time For an Experiment!",
 				"action": "raceChange"
 			},
-			"TradingUp": {},
-			"TrappedInAStorm": {},
-			"UnexpectedPregnancy": {},
+			"TradingUp": {
+				"title": "Trading Up"
+			},
+			"TrappedInAStorm": {
+				"title": "Trapped in a Storm"
+			},
+			"UnexpectedPregnancy": {
+				"title": "Unexpected Pregnancy"
+			},
 			"WantItNeedIt": {
+				"title": "Want It. Need It.",
 				"action": "lovePoison"
 			},
-			"WeveGottoStopMeetingLikeThis": {},
-			"WhatDidIDoLastNight": {},
-			"WorldwideThreatOfDestruction": {},
+			"WeveGotToStopMeetingLikeThis": {
+				"title": "We've Got to Stop Meeting Like This"
+			},
+			"WhatDidIDoLastNight": {
+				"title": "What Did I Do Last Night?!"
+			},
+			"WorldwideThreatOfDestruction": {
+				"title": "Worldwide Threat Of Destruction"
+			},
 			"YerAPrincessHarry": {
+				"title": "Yer a Princess, Harry!",
 				"action": "makePrincess"
 			},
-			"YouHadMeAtNeigh": {}
+			"YouHadMeAtNeigh": {
+				"title": "You Had Me at \"Neight\""
+			}
 		},
 		"goal": {
 			"BuddingCuriosity": {
+				"title": "Budding Curiosity",
 				"goalLogic": "ExistsShipGeneric(ShippedWithOppositeGenderedSelf)",
 				"points": "3"
 			},
 			"CargoShip": {
+				"title": "Cargo Ship",
 				"goalLogic": "ExistsShip(Object in keywords,Object in keywords)",
 				"points": "3"
 			},
 			"ChancellorPuddingheadsEntourage": {
+				"title": "Chancellor Puddinghead's Entourage",
 				"goalLogic": "PlayPonies(race=earth, 3)",
 				"points": "2"
 			},
 			"CharityAuction": {
+				"title": "Charity Auction",
 				"goalLogic": "ExistsShip(genderSwapped, genderSwapped)",
 				"points": "3"
 			},
 			"CommanderHurricanesArmy": {
+				"title": "Commander Hurricane's Army",
 				"goalLogic": "PlayPonies(race=pegasus, 3)",
 				"points": "2"
 			},
 			"DeepCover": {
+				"title": "Deep Cover",
 				"goalLogic": "ExistsShip(Changeling in keywords, Changeling in keywords)",
 				"points": "3"
 			},
 			"Epidemic": {
+				"title": "Epidemic",
 				"goalLogic": "PlayShipCards(action=lovePoison, 2)",
 				"points": "3"
 			},
 			"Fabulosity": {
+				"title": "Fabulosity",
 				"goalLogic": "ExistsShip(name=Rarity,name=Rarity)",
 				"points": "2"
 			},
 			"FriendshipIsBenefits": {
+				"title": "Friendship is Benefits",
 				"goalLogic": "ExistsChain(Mane 6 in keywords, 6)",
 				"points": "3-4"
 			},
 			"GoForthAndMultiply": {
+				"title": "Go Forth and Multiply",
 				"goalLogic": "PlayShips(gender=male,gender=female, 3)",
 				"points": "1"
 			},
 			"GoodEnough": {
+				"title": "Good Enough",
 				"goalLogic": "ExistsShip(name=Twilight Sparkle,name=Luna)",
 				"points": "2"
 			},
 			"HehPeasants": {
+				"title": "Heh. Peasants.",
 				"goalLogic": "PlayPonies(race=alicorn, 3)",
 				"points": "3"
 			},
 			"HelpImTrappedInAShippingCardGame": {
+				"title": "Help! I'm Trapped in a Shipping Card Game!",
 				"goalLogic": "ExistsShip(name=Cheerilee,*)",
 				"points": "0"
 			},
 			"HoldOnINeedToMakeAFlowChart": {
+				"title": "Hold On; I Need To Make a Flow Chart",
 				"goalLogic": "SwapCount(6)",
 				"points": "3"
 			},
 			"HostileTakeover": {
+				"title": "Hostile Takeover",
 				"goalLogic": "ExistsPony(Changeling in keywords, 3)",
 				"points": "3"
 			},
 			"HotForTeacher": {
+				"title": "Hot for Teacher",
 				"goalLogic": "ExistsShip(name=Twilight Sparkle, name=Celestia)",
 				"points": "2"
 			},
 			"IGuessYoullDo": {
+				"title": "I Guess You'll Do",
 				"goalLogic": "ExistsShip(name=Twilight Sparkle, name=Cheerilee)",
 				"points": "2"
 			},
 			"ISwearImNotGay": {
+				"title": "I Swear I'm Not Gay!",
 				"goalLogic": "ExistsPonyShippedTo(gender=male, Select(gender=male, 3))",
 				"points": "1"
 			},
 			"InvasiveSpecies": {
+				"title": "Invasive Species",
 				"goalLogic": "ExistsShip(race=earth,race=earth,6)",
 				"points": "3"
 			},
 			"ItsMagicalHornsAreTouching": {
+				"title": "It's Magical: Horns Are Touching",
 				"goalLogic": "ExistsShip(race=unicorn || race=alicorn, race=unicorn || race=alicorn, 3)",
 				"points": "1"
 			},
 			"ItsNotCreepy": {
+				"title": "It's Not Creepy!",
 				"goalLogic": "ExistsShip(name=Twilight Sparkle,name=Shining Armor)",
 				"points": "2"
 			},
 			"ItsNotEvil": {
+				"title": "It's Not Evil!",
 				"goalLogic": "BreakShip(name=Shining Armor, gender=female && name != Twilight Sparkle)",
 				"points": "1"
 			},
 			"ItsNotExactlyCheating": {
+				"title": "It's Not EXACTLY Cheating...",
 				"goalLogic": "ExistsPonyShippedTo(*, ShippedWith2Versions)",
 				"points": "2"
 			},
 			"JustExperimenting": {
+				"title": "\"Just Experimenting\"",
 				"goalLogic": "ExistsPonyShippedTo(name=Rainbow Dash, Select(gender=female,3))",
 				"points": "2"
 			},
 			"MyFirstSlash": {
+				"title": "My First Slash",
 				"goalLogic": "ExistsShip(name=Shining Armor,gender=male)",
 				"points": "1"
 			},
 			"NeedsMoreLesbians": {
+				"title": "Needs More Lesbians",
 				"goalLogic": "PlayShips(gender=female, gender=female, 3)",
 				"points": "1"
 			},
 			"Paradox": {
+				"title": "Paradox",
 				"goalLogic": "ExistsShip(name=Pinkie Pie,name=Pinkie Pie)",
 				"points": "2"
 			},
 			"Pomf": {
+				"title": "Pomf!",
 				"goalLogic": "ExistsShip(race=pegasus || race=alicorn, race=pegasus || race=alicorn,3)",
 				"points": "1"
 			},
 			"PrettyPrettyPrincess": {
+				"title": "Pretty Pretty Princess",
 				"goalLogic": "ExistsPony(name=Twilight Sparkle && race=alicorn && race_b != alicorn)",
 				"points": "3"
 			},
 			"PrincessPile": {
+				"title": "Princess Pile",
 				"goalLogic": "ExistsChain(Princess in keywords, 3)",
 				"points": "2"
 			},
 			"QueenPlatinumsCourt": {
+				"title": "Queen Platinum's Court",
 				"goalLogic": "PlayPonies(race=unicorn, 3)",
 				"points": "2"
 			},
 			"Quite": {
+				"title": "Quite.",
 				"goalLogic": "PlayShips(gender=male,gender=male, 3)",
 				"points": "2"
 			},
 			"RainbowDashFanClub": {
+				"title": "Rainbow Dash Fan Club",
 				"goalLogic": "ExistsShip(name=Rainbow Dash, name=Rainbow Dash)",
 				"points": "2"
 			},
 			"Rodeo": {
+				"title": "Rodeo",
 				"goalLogic": "ExistsShip(name=Applejack, name=Applejack)",
 				"points": "2"
 			},
 			"Sadfic": {
+				"title": "Sadfic",
 				"goalLogic": "BreakShip(name=Twilight Sparkle,*)",
 				"points": "1"
 			},
 			"SelfInsertion": {
+				"title": "Self-Insertion",
 				"goalLogic": "ExistsChain(name=Twilight Sparkle, 3)",
 				"points": "2"
 			},
-			"ShiningArmorApprovesofThisExperiment": {
+			"ShiningArmorApprovesOfThisExperiment": {
+				"title": "Shining Armor Approves of This Experiment",
 				"goalLogic": "ExistsShip(name=Cadance, gender=female)",
 				"points": "1"
 			},
 			"Shipwrecker": {
+				"title": "Shipwrecker",
 				"goalLogic": "BreakShip(*, *, 12)",
 				"points": "2"
 			},
 			"TheQuietGame": {
+				"title": "The Quiet Game",
 				"goalLogic": "ExistsShip(name=Fluttershy, name=Fluttershy)",
 				"points": "2"
 			},
 			"TimeTravelersAmongUs": {
+				"title": "Time Travelers Among Us",
 				"goalLogic": "ExistsPony(altTimeline=true, 5)",
 				"points": "3"
 			},
 			"WellMaybe": {
+				"title": "Well...Maybe",
 				"goalLogic": "ExistsShip(name=Twilight Sparkle, name=Zecora)",
 				"points": "2"
 			}

@@ -59,7 +59,7 @@
 
 */
 
-import * as cm from "../../server/cardManager.js";
+import * as cm from "../../model/cardManager.js";
 import s from "../tokens.js";
 
 import {
@@ -79,10 +79,10 @@ import {
 	slashStringToSet,
 	GameModel as GameModelShared,
 	Card, Location,
-	CardProps, GoalProps, ShipProps, PonyProps,
+	CardProps, GoalProps, ShipProps, PonyProps, OverrideProps,
 	Turnstate,
-	CardElement
-} from "../../server/lib.js";
+	CardElement,
+} from "../../model/lib.js";
 
 import {
 	updatePonyDiscard,
@@ -1355,7 +1355,7 @@ async function fullCopyAction(card: Card)
 }
 
 
-function getCardProp(card: Card, prop: string)
+function getCardProp(card: Card, prop: keyof OverrideProps | "*")
 {
 	let model = win.model;
 	var cardObj = model.turnstate.overrides[card] || {};
@@ -1367,19 +1367,21 @@ function getCardProp(card: Card, prop: string)
 	if(prop == "*")
 	{
 		var copy = {} as any;
-		for(var prop in cardObj)
-			copy[prop] = cardObj[prop]
+		for(var k in cardObj)
+		{
+			copy[k] = cardObj[k as keyof OverrideProps];
+		}
 
 		return copy;
 	}
 
 	if(cardObj && cardObj[prop])
-		return cardObj[prop]
+		return cardObj[prop ]
 
 	return (cm.inPlay()[baseCard] as any)[prop];
 }
 
-function setCardProp(card: Card, prop: string, value: any)
+function setCardProp(card: Card, prop: keyof OverrideProps, value: any)
 {
 	let model = win.model;
 	let cardProps = cm.inPlay()[card];
@@ -1551,7 +1553,8 @@ async function keywordChangeAction(shipCard: Card)
 		card2.onclick = ponySelect;
 		element.appendChild(card2);
 		
-		var row = document.createElement('div')
+		var buttonDiv = document.createElement('div');
+		buttonDiv.className = "keywordButtons";
 		for(let i=0; i< allKeywords.length; i++)
 		{
 
@@ -1566,17 +1569,11 @@ async function keywordChangeAction(shipCard: Card)
 				
 			}
 
-			row.appendChild(button);
+			buttonDiv.appendChild(button);
 
-
-			if(i%5 == 4)
-			{
-				element.appendChild(row);
-				row = document.createElement('div');
-			}
 		}
 
-		element.appendChild(row);
+		element.appendChild(buttonDiv);
 
 		return element;
 

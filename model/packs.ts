@@ -1,5 +1,5 @@
-//auto-generated file using npm run buildPacks
-import {PackListItem} from "../../server/lib.js";
+//auto-generated file using npm run build
+import {PackListItem} from "./lib.js";
 var order: PackListItem[] =[
 	{
 		"pack": "Core",

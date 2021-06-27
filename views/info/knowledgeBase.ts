@@ -1,8 +1,8 @@
 import {doesCardMatchFilters, cardSearchBar} from "../game/cardSearchBarComponent.js";
 import {makeCardElement} from "../game/cardComponent.js";
 import s from "../tokens.js";
-import * as lib from "../../server/lib.js";
-import * as cm from "../../server/cardManager.js";
+import * as lib from "../../model/lib.js";
+import * as cm from "../../model/cardManager.js";
 import faq from "./faq.js";
 
 function buildPage()
@@ -63,27 +63,45 @@ function buildPage()
 
 			let previouslyAsked = new Set();
 
+			let faqSections = [];
 
 			for(let tag of tags)
 			{
+				let sectionText = "";
+
 				if(!faq[tag]) continue;
-				for(let q of faq[tag])
-				{
+				for(let q of faq[tag].questions)
+				{	
 					if(!previouslyAsked.has(q))
 					{
+
 						previouslyAsked.add(q);
-						faqHTML += q + "\n";s
+						sectionText += q + "\n";s
 					}
 				}
+
+				if(sectionText)
+					faqSections.push([tag, sectionText]);
+
 			}
 
 
-			if(faqHTML.length)
+
+			if(faqSections.length)
 			{
-				faqHTML = "<h2>FAQ</h2>" + faqHTML;
+
+				faqHTML = "<h2>FAQ</h2>";
+
+			
+				faqHTML += faqSections.map(
+					x => {
+
+						let sectionName = faq[x[0]].heading || cm.all()[x[0]].title || x[0];
+
+						return `<h3 class='question-section'>${sectionName}</h3>\n` + x[1];
+					}
+				).join("\n");
 			}
-
-
 
 			if(cardProps)
 			{

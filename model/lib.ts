@@ -46,6 +46,21 @@ export type CardSetProps = {
 	card: string,
 }
 
+export type OverrideProps = {
+
+	action?: string,
+	name?: string,
+	gender?: "male" | "female",
+	race?: "earth" | "pegasus" | "unicorn" | "alicorn"
+	keywords?: string[],
+	altTimeline?: true,
+	count?: number,
+	changeGoalPointValues?: true,
+	card?: string,
+	fullCopy?: Card,
+	disguise?: Card, 
+	shipWithEverypony?: true
+}
 
 export type Location = string;
 
@@ -90,6 +105,14 @@ export interface GameModel
 	messageHistory: string[],
 }
 
+export interface GameModelServer extends GameModel
+{
+	cardLocations: {[k:string] : string};
+
+	getCurrentShipSet(): Set<string>;
+	getCurrentPositionMap(): {[key:string]: Location}
+}
+
 export interface GameOptions 
 {
 	cardDecks: string[],
@@ -112,28 +135,13 @@ export interface Turnstate
 {
 	currentPlayer: string,
 	overrides: {
-		[key:string]: {
-			[prop:string]: any
-		}
+		[key:string]: OverrideProps
 	}
 
 
 	playedShips: [Card, Card][],
 	playedShipCards: Card[],
 	playedPonies: Card[],
-
-
-	specialEffects:{
-		shipWithEverypony: Set<Card>,
-		larsonEffect?: boolean
-	}
-
-	updateSpecialEffects: (board: {[key:string]: {card: Card, element?: HTMLElement}}) => void,
-
-	playedThisTurn: Set<any>,
-
-	brokenShipsCommitted: Card[][],
-	brokenShips: Card[][],
 
 	positionMap: {
 		[card:string]: Location
@@ -148,9 +156,21 @@ export interface Turnstate
 
 	shipSet: Set<string>,
 
-	clientProps: () => any
+	playedThisTurn: Set<any>,
 
+	brokenShipsCommitted: Card[][],
+	brokenShips: Card[][],
+
+	specialEffects:{
+		shipWithEverypony: Set<Card>,
+		larsonEffect?: boolean
+	}
+
+	updateSpecialEffects: (board: {[key:string]: {card: Card, element?: HTMLElement}}) => void,
+	getChangeContext(card: Card): ChangelingContextList
+	clientProps: () => any
 }
+
 
 export function isPony(card: Card)
 {

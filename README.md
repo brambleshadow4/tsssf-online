@@ -25,11 +25,17 @@ Prerequisites: Familiarity with node/npm.
 	cd <repo-folder>
 	npm install 
 	npm run tsc
-	npm run buildPacks
+	npm run build
 	npm run tsc
 
-npm run buildPacks will install any card packs stored in the packs directory, generating the 
-image thumbnails as well as overwritting cards.ts and packOrder.ts. Hence, the need to build twice.
+npm run build performs several operations outlined below. It will need to be rerun if the source files are updated
+
+* Generates .thumb.png files
+* Creates .ts files from corresponding config files
+   * cards.ts
+   * packs.ts
+   * faq.ts
+
 
 ### Running the server ###
 

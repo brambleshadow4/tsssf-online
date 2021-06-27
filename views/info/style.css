@@ -7,6 +7,39 @@
 	font-family: Arial;
 }
 
+.level2 { padding-left: 20pt }
+.level3 { padding-left: 40pt }
+
+
+ins { color: green; }
+del {color: red; }
+
+.question:before {
+	content:  "Q: ";
+}
+
+.question
+{
+	font-weight: bold;
+	padding-left:  40pt;
+}
+
+.answer:before {
+	content: "A: ";
+	font-weight: bold;
+}
+
+.answer {
+	margin-bottom: 20px;
+	padding-left: 40pt;
+}
+
+.question-section
+{
+	color: #7721ad;
+}
+
+
 /* Menu styles */
 nav
 {
