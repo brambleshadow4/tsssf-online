@@ -328,7 +328,7 @@ function sendIfExists(url:string, lang: string, res: any)
 	}
 	else if(fs.existsSync(url))
 	{
-		if(url.endsWith(".html") || url == "/model/packs.js" || url.endsWith("View.js"))
+		if(url.endsWith(".html") || url.endsWith("packs.js") || url.endsWith("View.js"))
 		{
 			let fileText = fs.readFileSync(url, "utf8");
 
