@@ -898,6 +898,11 @@ function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 		if(useLarge || !src)
 			src = cards[card].url;
 
+		if(src.startsWith("http:") && window.location.protocol == "https:")
+		{
+			src = "/imgproxy?url=" +  encodeURIComponent(src);
+		}
+
 		element.style.backgroundImage = "url(\"" + src + "\")";
 
 		if(!useLarge)

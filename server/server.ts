@@ -7,6 +7,7 @@ import cards from "../model/cards.js"
 import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js";
 import {GameOptions} from "../model/lib.js";
+import fetch from "node-fetch";
 // @ts-ignore
 import {buildTemplate, buildTemplateHTML} from "../build/md.js";
 
@@ -196,6 +197,25 @@ app.get("/lobby", function(req,res)
 	}
 });
 
+app.get("/imgproxy", async function(req,res){
+
+	if(req.query.url)
+	{
+		let url = "" + req.query.url
+		let request = await fetch(url);
+		let blob = await request.blob() as any;
+		let arrayBuff = await blob.arrayBuffer();
+		let buff = Buffer.from(arrayBuff);
+
+		if(url.endsWith(".png")) res.setHeader("Content-Type", "image/png");
+		if(url.endsWith(".jpg")) res.setHeader("Content-Type", "image/jpeg");
+		if(url.endsWith(".jpeg")) res.setHeader("Content-Type", "image/jpeg");
+
+		res.send(buff);
+	}
+})
+
+
 app.get("/game", function(req, res)
 {
 	let query = req.originalUrl.substring(req.originalUrl.indexOf("?")+1);
@@ -328,7 +348,7 @@ function sendIfExists(url:string, lang: string, res: any)
 	}
 	else if(fs.existsSync(url))
 	{
-		if(url.endsWith(".html") || url == "/model/packs.js" || url.endsWith("View.js"))
+		if(url.endsWith(".html") || url.endsWith("packs.js") || url.endsWith("View.js"))
 		{
 			let fileText = fs.readFileSync(url, "utf8");
 
