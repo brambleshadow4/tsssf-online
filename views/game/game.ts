@@ -288,8 +288,13 @@ function LoadCards(): void
 		{
 			var img = document.createElement('img');
 
+			let src = cards[key].thumb;
+			if(src.startsWith("http:") && window.location.protocol == "https:")
+			{
+				src = "/imgproxy?url=" +  encodeURIComponent(src);
+			}
 
-			img.src = cards[key].thumb;
+			img.src = src;
 			preloadedImages.appendChild(img);	
 		}
 

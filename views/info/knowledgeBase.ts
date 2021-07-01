@@ -108,11 +108,18 @@ function buildPage()
 				let pageName = cardProps.title || card;
 
 
+				let url = cardProps.url;s
+
+				if(url.startsWith("http:") && window.location.protocol == "https:")
+				{
+					url = "/imgproxy?url=" +  encodeURIComponent(url);
+				}
+
 
 				main.innerHTML = `
 				<h1>${pageName}</h1>
 
-				<img class='card-aside' src="${cardProps.url}" />
+				<img class='card-aside' src="${url}" />
 
 				<div class='props-container'>
 					${makeJsonHTML(card, cardProps)}
