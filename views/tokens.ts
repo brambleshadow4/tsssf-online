@@ -128,6 +128,7 @@ export default {
 	// Todo translate the entire search bar
 	"SearchBarPlaceholder": "Search name, race, gender, etc.",
 
+	"CardReferenceFilterCount": "({0} cards)", // {0} is the number of cards
 
 	"CardSelectNone": "None",
 	"CardSelectSome": "Some",

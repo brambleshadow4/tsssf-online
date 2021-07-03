@@ -1291,6 +1291,7 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee": {
+		"title": "Test Subject Cheerilee",
 		"name": "Cheerilee",
 		"race": "earth",
 		"gender": "female",
