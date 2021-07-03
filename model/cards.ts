@@ -1291,6 +1291,7 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee": {
+		"title": "Test Subject Cheerilee",
 		"name": "Cheerilee",
 		"race": "earth",
 		"gender": "female",
@@ -2272,6 +2273,248 @@ var cards: {[key: string]: any} = {
 	"NoHoldsBarred.Goal.WhyIsEveryThingGlowing": {
 		"goalLogic": "ExistsPonyShippedTo(*, Select(OC in keywords, 4))",
 		"points": "1"
+	},
+	"NovelIdea.PanelOfPonies.Pony.AdagioDazzle": {
+		"title": "Adagio Dazzle, The Leader",
+		"name": "Adagio Dazzle",
+		"gender": "female",
+		"race": "pegasus",
+		"action": "replace",
+		"keywords": [
+			"EqG",
+			"Villain",
+			"Siren"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.AriaBlaze": {
+		"title": "Aria Blaze, the Plotter",
+		"name": "Aria Blaze",
+		"gender": "female",
+		"race": "pegasus",
+		"action": "newGoal",
+		"keywords": [
+			"EqG",
+			"Villain",
+			"Siren"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.CelestiaBaneOfEquestria": {
+		"title": "Celestia, Bane of Equestria",
+		"name": "Celestia",
+		"gender": "female",
+		"race": "alicorn",
+		"action": "newGoal",
+		"keywords": [
+			"Princess",
+			"Elder",
+			"Villain"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.ChrysalisElementOfLove": {
+		"title": "Chrysalis, Element of Love",
+		"name": "Chrysalis",
+		"gender": "female",
+		"race": "alicorn",
+		"action": "swap",
+		"keywords": [
+			"Duchess",
+			"Changeling"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.CutieMarkCrusaderDiscord": {
+		"title": "Cutie Mark Crusader: Discord",
+		"name": "Discord",
+		"gender": "male",
+		"race": "alicorn",
+		"keywords": [
+			"CMC"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.DerpyElementOfWisdom": {
+		"title": "Derpy, Element of Wisdom",
+		"name": "Derpy",
+		"gender": "female",
+		"race": "pegasus",
+		"keywords": []
+	},
+	"NovelIdea.PanelOfPonies.Pony.FlimAndFlamElementsOfFairness": {
+		"title": "Flim & Flam, Elements of Fairness",
+		"name": "Flim/Flam",
+		"gender": "male",
+		"race": "unicorn",
+		"count": 2,
+		"action": "swap",
+		"keywords": []
+	},
+	"NovelIdea.PanelOfPonies.Pony.GoodKingSombra": {
+		"title": "Good King Sombra",
+		"name": "Sombra",
+		"gender": "male",
+		"race": "unicorn",
+		"action": "search",
+		"keywords": [
+			"King"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.JimTheDog": {
+		"title": "Jim the Dog",
+		"name": "Jim the Dog",
+		"gender": "male",
+		"race": "earth",
+		"action": "draw",
+		"keywords": [
+			"Diamond Dog"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.KingAspen": {
+		"title": "King Aspen",
+		"name": "King Aspen",
+		"gender": "male",
+		"race": "unicorn",
+		"action": "search",
+		"keywords": [
+			"King",
+			"Deer"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.LovestruckCelestia": {
+		"title": "Lovestruck Celestia",
+		"name": "Celestia",
+		"gender": "female",
+		"race": "alicorn",
+		"action": "search",
+		"keywords": [
+			"Princess",
+			"Elder"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.LunaScourgeOfEquestria": {
+		"title": "Luan, Scourge of Equestria",
+		"name": "Luna",
+		"gender": "female",
+		"race": "alicorn",
+		"action": "replace",
+		"keywords": [
+			"Princess",
+			"Elder",
+			"Villain"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.Mina": {
+		"title": "Mina",
+		"name": "Mina",
+		"gender": "female",
+		"race": "earth",
+		"action": "swap",
+		"keywords": [
+			"Dragon"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.RadiantHope": {
+		"title": "Radiant Hope",
+		"name": "Radiant Hope",
+		"gender": "female",
+		"race": "unicorn",
+		"keywords": []
+	},
+	"NovelIdea.PanelOfPonies.Pony.SonataDusk": {
+		"title": "Sonata Dusk, the Joker",
+		"name": "Sonata Dusk",
+		"gender": "female",
+		"race": "pegasus",
+		"action": "search",
+		"keywords": [
+			"EqG",
+			"Villain",
+			"Siren"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.SunsetShimmerTheReformed": {
+		"title": "Sunset Shimmer, the Reformed",
+		"name": "Sunset Shimmer",
+		"gender": "female",
+		"race": "unicorn",
+		"action": "swap",
+		"keywords": [
+			"EqG"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.TheMysteryMare": {
+		"title": "The Mystery Mare!",
+		"name": "Cheerilee",
+		"gender": "female",
+		"race": "earth",
+		"keywords": []
+	},
+	"NovelIdea.PanelOfPonies.Pony.TrixieElementOfHumility": {
+		"title": "Trixie, the Element of Humility",
+		"name": "Trixie",
+		"gender": "female",
+		"race": "alicorn",
+		"action": "search",
+		"keywords": [
+			"Princess"
+		]
+	},
+	"NovelIdea.PanelOfPonies.Pony.WheatGrass": {
+		"title": "Wheat Grass",
+		"name": "Wheat Grass",
+		"gender": "female",
+		"race": "earth",
+		"action": "draw",
+		"keywords": []
+	},
+	"NovelIdea.PanelOfPonies.Ship.ATripToTheMoon": {
+		"title": "A Trip to the Moon"
+	},
+	"NovelIdea.PanelOfPonies.Ship.BanishedToAnotherDimension": {
+		"title": "Banished to Another Dimension"
+	},
+	"NovelIdea.PanelOfPonies.Ship.ChangelingTakeover": {
+		"title": "Changeling Takeover!"
+	},
+	"NovelIdea.PanelOfPonies.Ship.ConjuringADream": {
+		"title": "Conjuring a Dream"
+	},
+	"NovelIdea.PanelOfPonies.Ship.CrossCountryRoadTrip": {
+		"title": "Cross-Country Road Trip"
+	},
+	"NovelIdea.PanelOfPonies.Ship.FieldTripToThePast": {
+		"title": "Field Trip to the Past",
+		"action": "timelineChange"
+	},
+	"NovelIdea.PanelOfPonies.Ship.LetThemEatPie": {
+		"title": "Let them Eat Pie!"
+	},
+	"NovelIdea.PanelOfPonies.Ship.PheNomNomenonsSnackSpree": {
+		"title": "PheNomNomenons Snack Spree"
+	},
+	"NovelIdea.PanelOfPonies.Ship.PoliceChase": {
+		"title": "Police Chase!"
+	},
+	"NovelIdea.PanelOfPonies.Ship.PonyvilleDaysMassacre": {
+		"title": "Ponyville Days Massacre"
+	},
+	"NovelIdea.PanelOfPonies.Ship.PrankingSpree": {
+		"title": "Pranking Spree"
+	},
+	"NovelIdea.PanelOfPonies.Ship.SubvertingTheRegime": {
+		"title": "Subverting the Regime"
+	},
+	"NovelIdea.PanelOfPonies.Goal.RainbowOfHarmony": {
+		"title": "Rainbow of Harmony",
+		"points": "2",
+		"goalLogic": "ExistsChain(card=NovelIdea.PanelOfPonies.Pony.ChrysalisElementOfLove||card=NovelIdea.PanelOfPonies.Pony.DerpyElementOfWisdom||card=NovelIdea.PanelOfPonies.Pony.FlimAndFlamElementsOfFairness||card=NovelIdea.PanelOfPonies.Pony.TrixieElementOfHumility, 3)"
+	},
+	"NovelIdea.PanelOfPonies.Goal.ScavengerHunt": {
+		"title": "Scavenger Hunt",
+		"points": "2",
+		"goalFun": false
+	},
+	"NovelIdea.PanelOfPonies.Goal.StandIn": {
+		"title": "Stand-In",
+		"points": "1",
+		"goalLogic": "ExistsShip(card=NovelIdea.PanelOfPonies.Pony.TheMysteryMare, name=Cheerilee)"
 	},
 	"PU.Pony.StarQuarterbackSnips": {
 		"name": "Snips",

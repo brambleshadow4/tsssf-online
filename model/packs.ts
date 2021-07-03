@@ -28,6 +28,12 @@ var order: PackListItem[] =[
 		"startCards": []
 	},
 	{
+		"pack": "NovelIdea.PanelOfPonies",
+		"name": "Panel of Ponies by [Novel Idea](https://www.deviantart.com/mlp-novelidea/gallery/58059629/tsssf)",
+		"box": false,
+		"startCards": []
+	},
+	{
 		"h": "{{LobbyMiniExpansions}}"
 	},
 	{

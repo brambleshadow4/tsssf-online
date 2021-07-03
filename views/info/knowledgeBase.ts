@@ -36,7 +36,8 @@ function buildPage()
 			if(!inIframe())
 			{	
 				var main = document.getElementById('main')!;
-				main.innerHTML += "<h1>"+ s.HelpTabCardReference +"</h1>";
+				main.innerHTML += "<h1>"+ s.HelpTabCardReference +" <span id='filterCount'></span></h1>";
+				console.log("here");
 			}
 
 			cm.init(["*"], {});
@@ -112,7 +113,7 @@ function buildPage()
 
 				if(url.startsWith("http:") && window.location.protocol == "https:")
 				{
-					url = "/imgproxy?url=" +  encodeURIComponent(url);
+					url = "/imgproxy?url=" + encodeURIComponent(url);
 				}
 
 
@@ -259,9 +260,14 @@ export function cardReference(cards: {[key:string]: lib.CardProps}, openInNewTab
 		var ponyReference = document.createElement('div');
 		
 		keys.sort(namespaceSort);
+
+		var filterCount = 0;
+
 		for(let key of keys)
 		{
 			if(!doesCardMatchFilters(key, filters)) continue;
+
+			filterCount++;
 
 			let cardDiv = makeCardElement(key)
 
@@ -301,6 +307,11 @@ export function cardReference(cards: {[key:string]: lib.CardProps}, openInNewTab
 			}
 
 		}
+		let filterCountDiv = document.getElementById('filterCount')
+		if(filterCountDiv)
+		{
+			filterCountDiv.innerHTML = s.CardReferenceFilterCount.replace("{0}", ""+filterCount)
+		}
 
 		cardDiv.appendChild(ponyReference);
 	}
@@ -327,22 +338,20 @@ function filtersToQueryString(filters: [string, any][]): string
 	return "?" + filters.map(p => {
 
 		let [prop, value] = p;
-
-		return prop + "=" + ("" + value).replace(/#/g,"%23");
+		return prop + "=" + encodeURIComponent("" + value);
 	}).join("&");
 }	
 
 function queryStringToFilters(s: string): [string, any][]
 {
-	let query = decodeURI(s);
-	query = query.replace(/%23/g, "#");
+	let query = s;
 
-	let pieces = query.split("&");
+	let pieces = query.split("&")
 	let filters: [string,any][] = [];
 
 	for(let piece of pieces)
 	{
-		let [prop, value] = piece.split("=");
+		let [prop, value] = piece.split("=").map(decodeURIComponent);
 		let valueAny = value as any;
 
 		if(value == "true")

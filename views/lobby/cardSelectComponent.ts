@@ -12,8 +12,11 @@ export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: st
 	var header = document.createElement('div');
 	header.className = "cardSelect-header";
 	var nameSpan = document.createElement('span');
-	nameSpan.className = "name"
-	nameSpan.innerHTML = name.replace(/</g,"&lt;").replace(/>/g, "&gt;");
+	nameSpan.className = "name";
+
+
+	let escapedName = name.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\[(.*)\]\((.*)\)/g, "<a target='_blank' href='$2'>$1</a>");
+	nameSpan.innerHTML = escapedName;
 
 	var img = document.createElement('span');
 	img.className = 'collapse';

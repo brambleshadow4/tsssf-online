@@ -757,7 +757,7 @@ export default function(){
 
 	test("aloe/lotus ships count as two ships", () => {
 
-		let [game, player] = setupGame();;
+		let [game, player] = setupGame();
 
 		let aloelotus = "Core.Pony.AloeAndLotus";
 		let malePony = "Core.Pony.BigMacintosh";
@@ -780,6 +780,32 @@ export default function(){
 
 		expect(evalGoalLogic(game, "PlayShips(gender=male, gender=female, 2)")).toBe(true);
 	})
+
+	test("goals w/ card= prop", () =>{
+
+		let [game, player] = setupGame({
+			cardDecks: ["Core.*", "HorriblePeople.DungeonDelvers.*"]
+		});
+
+		let goal = "HorriblePeople.DungeonDelvers.Goal.YouMeetInATavern";
+
+		let pony1 = "HorriblePeople.DungeonDelvers.Pony.EnchantressRarity";
+		let pony2 = "Core.Pony.DruidFluttershy";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+
+		player.grab(pony1, pony2, ship1, ship2);
+		player.drawGoal(goal);
+		
+		expectGoalUnachieved(game, goal);
+
+		player.move(ship1, "hand", "sr,0,0");
+		player.move(pony1, "hand", "p,1,0");
+		player.move(ship2, "hand", "sr,1,0");
+		player.move(pony2, "hand", "p,2,0");
+
+		expectGoalAchieved(game, goal);
+	});
 
 	//test("ExistsChain", () =>{
 		//expect(0).toBe("unimplemented");

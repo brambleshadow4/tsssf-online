@@ -30,6 +30,7 @@
 				]
 			},
 			"TestSubjectCheerilee": {
+				"title": "Test Subject Cheerilee",
 				"name": "Cheerilee",
 				"race": "earth",
 				"gender": "female",

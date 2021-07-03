@@ -7,6 +7,8 @@
 	font-family: Arial;
 }
 
+
+
 .level2 { padding-left: 20pt }
 .level3 { padding-left: 40pt }
 
@@ -103,6 +105,17 @@ nav a, nav .hoverMenu
 
 @media screen and (max-width: 600px)
 {
+	body {
+		background-image: none !important;
+
+	}
+
+	.main 
+	{
+		padding: 0 10px 10px 10px;
+		border: none !important;
+	}
+
 	nav a, nav .hoverMenu
 	{
 		display: none;

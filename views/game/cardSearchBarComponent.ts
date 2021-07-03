@@ -219,7 +219,7 @@ function buildSuggestions(cards: {[key:string]: CardProps})
 {
 	var potentialResults: {[key:string]: [string, any]} = {};
 
-	var noSearchProps = new Set(["url","thumb", "goalFun", "changeGoalPointValues", "noLogic", "altTimeline"]);
+	var noSearchProps = new Set(["url","thumb", "goalFun", "changeGoalPointValues", "noLogic", "altTimeline", "card"]);
 
 	for(let card in cards)
 	{
@@ -266,7 +266,7 @@ function buildSuggestions(cards: {[key:string]: CardProps})
 						part2 = swap;	
 					}
 
-					if(part1 == "altTimeline")
+					if(part1 == "altTimeline" || noSearchProps.has(part1))
 					{
 						//potentialResults["alttimeline apocalpyse hourglass"] = ["altTimeline", true];
 						continue;
