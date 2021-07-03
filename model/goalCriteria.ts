@@ -164,8 +164,6 @@ function getCardProp<T extends keyof CardSetProps>(model: GameModel, cardFull: C
 
 function doesCardMatchSelector(model: GameModel, card: Card, selector: string): number
 {
-	//console.log("doesCardMatchSelector " + card + " " + selector);
-
 	let cards = cm.inPlay();
 	let trueValue = getCardProp(model, card, "count") || 1;
 	let falseValue = 0;
@@ -217,8 +215,7 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 
 		var cardValue = getCardProp(model, card, prop);
 
-		return cardValue.has(value) ? falseValue : trueValue;
-
+		return propEquals(cardValue, value) ? falseValue : trueValue;
 	}
 
 	if(selector.indexOf("=") > -1)
@@ -233,14 +230,8 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 			value = false;
 
 		var cardValue = getCardProp(model, card, prop);
-
-
-		if(prop == "action")
-		{
-			return cardValue == value ? trueValue : falseValue
-		}
 		
-		return cardValue.has(value) ? trueValue : falseValue;
+		return propEquals(cardValue, value) ? trueValue : falseValue;
 	}
 
 	if(selector.indexOf(" in ") > -1 || selector.indexOf(" !in ") > -1)
@@ -263,13 +254,21 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 
 		if(invert)
 		{
-			return (getCardProp(model, card, prop).has(value) ? falseValue : trueValue);
+			return propEquals(getCardProp(model, card, prop), (value)) ? falseValue : trueValue;
 		}
 
-		return (getCardProp(model, card, prop).has(value) ? trueValue : falseValue);
+		return (propEquals(getCardProp(model, card, prop), (value))  ? trueValue : falseValue);
 	}
 
 	return falseValue
+}
+
+function propEquals(prop: any, value: any): boolean
+{
+	if(typeof prop == "object")
+		return prop.has(value);
+	else
+		return prop === value;
 }
 
 /**

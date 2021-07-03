@@ -1,0 +1,256 @@
+{
+	"name":"Panel of Ponies by [Novel Idea](https://www.deviantart.com/mlp-novelidea/gallery/58059629/tsssf)",
+	"root": "https://tsssf.net/packs",
+	"namespace": "NovelIdea.PanelOfPonies",
+	"format": "pack:1",
+
+	"cards":{
+		"pony": {
+			"AdagioDazzle":{
+				"title": "Adagio Dazzle, The Leader",
+				"name": "Adagio Dazzle",
+				"gender": "female",
+				"race": "pegasus",
+				"action": "replace",
+				"keywords":[
+					"EqG",
+					"Villain",
+					"Siren"
+				]
+			},
+			"AriaBlaze":{
+				"title": "Aria Blaze, the Plotter",
+				"name": "Aria Blaze",
+				"gender": "female",
+				"race": "pegasus",
+				"action": "newGoal",
+				"keywords": [
+					"EqG",
+					"Villain",
+					"Siren"
+				]
+			},
+			"CelestiaBaneOfEquestria":{
+				"title": "Celestia, Bane of Equestria",
+				"name": "Celestia",
+				"gender": "female",
+				"race": "alicorn",
+				"action": "newGoal",
+				"keywords": [
+					"Princess",
+					"Elder",
+					"Villain"
+				]
+			},
+			"ChrysalisElementOfLove":{
+				"title": "Chrysalis, Element of Love",
+				"name": "Chrysalis",
+				"gender": "female",
+				"race": "alicorn",
+				"action": "swap",
+				"keywords": [
+					"Duchess",
+					"Changeling"
+				]
+			},
+			"CutieMarkCrusaderDiscord":{
+				"title": "Cutie Mark Crusader: Discord",
+				"name": "Discord",
+				"gender": "male",
+				"race": "alicorn",
+				"keywords": [
+					"CMC"
+				]
+			},
+			"DerpyElementOfWisdom":{
+				"title": "Derpy, Element of Wisdom",
+				"name": "Derpy",
+				"gender": "female",
+				"race": "pegasus",
+				"keywords": []
+			},
+			"FlimAndFlamElementsOfFairness":{
+				"title": "Flim & Flam, Elements of Fairness",
+				"name": "Flim/Flam",
+				"gender": "male",
+				"race": "unicorn",
+				"count": 2,
+				"action": "swap",
+				"keywords": []
+			},
+			"GoodKingSombra":{
+				"title": "Good King Sombra",
+				"name": "Sombra",
+				"gender": "male",
+				"race": "unicorn",
+				"action": "search",
+				"keywords": [
+					"King"
+				]
+			},
+			"JimTheDog":{
+				"title": "Jim the Dog",
+				"name": "Jim the Dog",
+				"gender": "male",
+				"race": "earth",
+				"action": "draw",
+				"keywords": [
+					"Diamond Dog"
+				]
+			},
+			"KingAspen":{
+				"title": "King Aspen",
+				"name": "King Aspen",
+				"gender": "male",
+				"race": "unicorn",
+				"action": "search",
+				"keywords": [
+					"King",
+					"Deer"
+				]
+			},
+			"LovestruckCelestia":{
+				"title": "Lovestruck Celestia",
+				"name": "Celestia",
+				"gender": "female",
+				"race": "alicorn",
+				"action": "search",
+				"keywords": [
+					"Princess",
+					"Elder"
+				]
+			},
+			"LunaScourgeOfEquestria":{
+				"title": "Luan, Scourge of Equestria",
+				"name": "Luna",
+				"gender": "female",
+				"race": "alicorn",
+				"action": "replace",
+				"keywords": [
+					"Princess",
+					"Elder",
+					"Villain"
+				]
+			},
+			"Mina":{
+				"title": "Mina",
+				"name": "Mina",
+				"gender": "female",
+				"race": "earth",
+				"action": "swap",
+				"keywords": [
+					"Dragon"
+				]
+			},
+			"RadiantHope":{
+				"title": "Radiant Hope",
+				"name": "Radiant Hope",
+				"gender": "female",
+				"race": "unicorn",
+				"keywords": []
+			},
+			"SonataDusk":{
+				"title": "Sonata Dusk, the Joker",
+				"name": "Sonata Dusk",
+				"gender": "female",
+				"race": "pegasus",
+				"action": "search",
+				"keywords": [
+					"EqG",
+					"Villain",
+					"Siren"
+				]
+			},
+			"SunsetShimmerTheReformed":{
+				"title": "Sunset Shimmer, the Reformed",
+				"name": "Sunset Shimmer",
+				"gender": "female",
+				"race": "unicorn",
+				"action": "swap",
+				"keywords": [
+					"EqG"
+				]
+			},
+			"TheMysteryMare":{
+				"title": "The Mystery Mare!",
+				"name": "Cheerilee",
+				"gender": "female",
+				"race": "earth",
+				"keywords": []
+			},
+			"TrixieElementOfHumility":{
+				"title": "Trixie, the Element of Humility",
+				"name": "Trixie",
+				"gender": "female",
+				"race": "alicorn",
+				"action": "search",
+				"keywords": [
+					"Princess"
+				]
+			},
+			"WheatGrass":{
+				"title": "Wheat Grass",
+				"name": "Wheat Grass",
+				"gender": "female",
+				"race": "earth",
+				"action": "draw",
+				"keywords": []
+			}
+		},
+		"ship": {
+			"ATripToTheMoon":{
+				"title": "A Trip to the Moon"
+			},
+			"BanishedToAnotherDimension":{
+				"title": "Banished to Another Dimension"
+			},
+			"ChangelingTakeover":{
+				"title": "Changeling Takeover!"
+			},
+			"ConjuringADream":{
+				"title": "Conjuring a Dream"
+			},
+			"CrossCountryRoadTrip":{
+				"title": "Cross-Country Road Trip"
+			},
+			"FieldTripToThePast":{
+				"title": "Field Trip to the Past",
+				"action": "timelineChange"
+			},
+			"LetThemEatPie":{
+				"title": "Let them Eat Pie!"
+			},
+			"PheNomNomenonsSnackSpree":{
+				"title": "PheNomNomenons Snack Spree"
+			},
+			"PoliceChase":{
+				"title": "Police Chase!"
+			},
+			"PonyvilleDaysMassacre":{
+				"title": "Ponyville Days Massacre"
+			},
+			"PrankingSpree":{
+				"title": "Pranking Spree"
+			},
+			"SubvertingTheRegime":{
+				"title": "Subverting the Regime"
+			}		
+		},
+		"goal":{
+			"RainbowOfHarmony":{
+				"title": "Rainbow of Harmony",
+				"points": "2",
+				"goalLogic": "ExistsChain(card=NovelIdea.PanelOfPonies.Pony.ChrysalisElementOfLove||card=NovelIdea.PanelOfPonies.Pony.DerpyElementOfWisdom||card=NovelIdea.PanelOfPonies.Pony.FlimAndFlamElementsOfFairness||card=NovelIdea.PanelOfPonies.Pony.TrixieElementOfHumility, 3)"
+			},
+			"ScavengerHunt":{
+				"title": "Scavenger Hunt",
+				"points": "2"
+			},
+			"StandIn":{
+				"title": "Stand-In",
+				"points": "1",
+				"goalLogic": "ExistsShip(card=NovelIdea.PanelOfPonies.Pony.TheMysteryMare, name=Cheerilee)"
+			}
+		}
+	}
+}
