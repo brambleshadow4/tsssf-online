@@ -1,7 +1,6 @@
 [FAQ]
 Q: What keywords count as a racial keyword?
-A: "Batpony", "Breezy", "Buffalo", "Changeling", "Deer", "Diamond Dog", "Draconequus", "Dragon", "Fluffy Pony", "Griffon", "Minoutuar", "Siren", and "Zebra". This
-list won't be complete if you're using custom cards with other racial keywords TSSSF.net doesn't know about.
+A: "Batpony", "Breezy", "Buffalo", "Changeling", "Deer", "Diamond Dog", "Draconequus", "Dragon", "Fluffy Pony", "Griffon", "Minoutuar", "Siren", and "Zebra". This list won't be complete if you're using custom cards with other racial keywords TSSSF.net doesn't know about.
 #NoHoldsBarred.Goal.FromForeignLands
 
 Q: How does the Derpy Hooves card work?

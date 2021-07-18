@@ -29,7 +29,7 @@ export default {
 	"NoHoldsBarred.Goal.FromForeignLands": {
 		"heading": "",
 		"questions": [
-			"<div class='question'>What keywords count as a racial keyword?</div><div class='answer'>\"Batpony\", \"Breezy\", \"Buffalo\", \"Changeling\", \"Deer\", \"Diamond Dog\", \"Draconequus\", \"Dragon\", \"Fluffy Pony\", \"Griffon\", \"Minoutuar\", \"Siren\", and \"Zebra\". Thislist won't be complete if you're using custom cards with other racial keywords TSSSF.net doesn't know about.</div>"
+			"<div class='question'>What keywords count as a racial keyword?</div><div class='answer'>\"Batpony\", \"Breezy\", \"Buffalo\", \"Changeling\", \"Deer\", \"Diamond Dog\", \"Draconequus\", \"Dragon\", \"Fluffy Pony\", \"Griffon\", \"Minoutuar\", \"Siren\", and \"Zebra\". This list won't be complete if you're using custom cards with other racial keywords TSSSF.net doesn't know about.</div>"
 		]
 	},
 	"Core.Pony.Derpy": {

@@ -409,6 +409,7 @@
 				"points": "4"
 			},
 			"FromForeignLands": {
+				"title": "From Foreign Lands",
 				"goalLogic": "ExistsShip(racialKeyword, racialKeyword)",
 				"points": "2"
 			},

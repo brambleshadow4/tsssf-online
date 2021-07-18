@@ -2252,6 +2252,7 @@ var cards: {[key: string]: any} = {
 		"points": "4"
 	},
 	"NoHoldsBarred.Goal.FromForeignLands": {
+		"title": "From Foreign Lands",
 		"goalLogic": "ExistsShip(racialKeyword, racialKeyword)",
 		"points": "2"
 	},
