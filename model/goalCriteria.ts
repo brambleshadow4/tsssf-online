@@ -180,6 +180,27 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 
 		return originalGender.size == 1 && currentGender.size == 1 && combined.has("male") && combined.has("female") ? trueValue : falseValue;
 	}
+	if(selector.trim() == "racialKeyword")
+	{
+		// See card 
+		var racialKeywords = [
+			"Batpony",
+			"Breezy",
+			"Buffalo",
+			"Changeling",
+			"Deer",
+			"Diamond Dog",
+			"Draconequus",
+			"Dragon",
+			"Fluffy Pony",
+			"Griffon",
+			"Minoutuar",
+			"Siren",
+			"Zebra"
+		]
+
+		return doesCardMatchSelector(model, card, racialKeywords.map(x => x + " in keywords").join("||"));
+	}
 
 	var clauses = selector.split("&&");
 

@@ -1,4 +1,84 @@
 [FAQ]
+Q: What keywords count as a racial keyword?
+A: "Batpony", "Breezy", "Buffalo", "Changeling", "Deer", "Diamond Dog", "Draconequus", "Dragon", "Fluffy Pony", "Griffon", "Minoutuar", "Siren", and "Zebra". This
+list won't be complete if you're using custom cards with other racial keywords TSSSF.net doesn't know about.
+#NoHoldsBarred.Goal.FromForeignLands
+
+Q: How does the Derpy Hooves card work?
+A: Derpy Hooves is played like any other Pony card. When she is attached to the grid via a ship card is when her power triggers, and you must swap Fan Fiction Author Twilight with any other Pony card. Derpy can be discarded, swapped, and pulled from the discard pile like any other Pony card, and her power can be activated after she's already on the grid like any other power.
+#Core.Pony.Derpy 
+
+
+Q: Hi, I was wondering how the pony card Discord works. Can I select 1 pony card and move it to break a chain? Or do I have to do a proper swap (ie. move 2 pony cards)?
+A: For Discord's power, choose either 2 or 3 ponies on the grid. Discord can be one of the ponies you choose. Pick them up. Then put them back in any order. No card can be in the same place it was before you picked them up.
+#Core.Pony.Discord 
+
+Q: Gypsy Witch Pinkie Pie. After you draw your cards, must you immediately discard. Or can you play those cards in your hand and discard at the end?
+A: You must immediately discard. But you can discard from your entire hand, and not just the ones you drew!
+#Core.Pony.GypsyWitchPinkiePie
+
+Q: Gypsy Witch Pinkie Pie is broken! I played a game where a player was able to move her around the board, and nearly emptied the pony deck in one turn!
+A: When constructing TSSSF, we've tried to leave the rules as simple as possible, and put as few restrictions on play, to give players a freedom to lose themselves in the game without worrying too much about mechanics, while at the same time letting them get those long chains of combos if that's what they enjoy. However, we've still been getting a number of complaints, especially about how easy it is to abuse pony powers. If you don't like how a particular mechanic plays, we highly encourage houseruling it to what feels right. To limit the effectiveness of pony powers, we recommend the houserule: "A Pony card's power can only ever be activated once per turn."
+#Core.Pony.GypsyWitchPinkiePie 
+
+
+Q: I'm confused as to what exactly Pinkamena's card power does. It sounds a lot like replace, but it repeats the phrase "if you do, discard another pony card."
+A: Yep! Pinkamena is special. She replaces a card on the grid—and then you choose another pony to discard as well. She takes someone down with her, in effect, so you're discarding both the pony she replaces and another pony of your choice for a total of two cards.
+#Core.Pony.Pinkamena 
+
+Q: Not sure if it was asked already but for the goal card "Cargo Ship" the wording is "Ship 2 ponies with the "Object" keyword". I took this as ship two of the TOGETHER, but a friend took it as just ship an object keyword with any two ponies. What was the intended ruling?
+A: It's ship 2 ponies with the Object keyword together as you surmised, yep!
+#Core.Goal.CargoShip 
+
+
+Q: Alicorns count as pegasus correct? So three of them would count for the goal of "Commander Hurricane's Army"?
+A: Alas, the only time alicorns and pegasi count for the same Goal is for Pomf!, which is *specifically* referring to things with wings. It does not count for Commander Hurricane's Army, which is specifically only referring to Pegasi.
+#Core.Goal.CommanderHurricansArmy 
+
+
+Q: For this Goal, can more than six cards be used, so long as they are all versions of the Mane 6 (and of course, there's at least one of each involved)?
+A: More than six cards can be used so long as they're all part of the Mane 6!
+#Core.Goal.FriendshipIsBenefits 
+
+
+Q: With invasive species, does it mean you only need to have six earth ponies on the board, or do they need to all be connected?
+A: There need to be 6 pairs of earth ponies shipped together on the board! They don't all have to be shipped in one giant line, but there need to be 6 separate ships on which two earth ponies are attached. (For a total of 12 earth ponies.)
+#Core.Goal.InvasiveSpecies
+
+Q: Would shipping one earth pony with four others count? Would you count the center pony once or once for each pony its shipped with?
+A: That would count! It would count for each earth pony ship the center pony is attached to! However, you'd need two more ships to actually complete the Goal, as that is only a total of 4 Ships.
+#Core.Goal.InvasiveSpecies 
+
+Q: Random Question. How does the copy ability work with a Special Ability like "Test Subject Cheerilee"? If you copy her ability, does the power only last until the end of the turn, or permanently?
+A: For the special promo cards, we've taken care to make sure the power says the name of the card instead of "this Pony." That means, if it does get copied, it would just basically make Test Subject Cheerilee do what she always does.
+For example, if Trixie copied her power, Trixie's new power would be:
+When Cheerilee is shipped with four Pony cards, discard her from the grid. Turn over a Temporary Goal. Temporary Goals are not replaced with a new Goal when they are won.
+... That said, it seems we've forgotten to specify Test Subject Cheerilee. Rules As Written, I suppose that means it could affect any other Cheerilee card; Rules as Intended, it's only supposed to affect Test Subject Cheerilee.
+Take that as you will.
+#HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee 
+
+Q: What is a Temporary Goal?
+A: Temporary Goals are a mechanic introduced by some of our non-core cards, such as the BronyCAN 2014 Convention Exclusive, Test Subject Cheerilee. Temporary Goals are goals that are added to the board after specific circumstances on the card are met. A Temporary Goal:
+<ul><li>...does not count toward the number of Goals in play.</li>
+<li>...is not replenished when it is won.</li>
+<li>...can be replaced with any appropriate pony power that would get a new Goal, including New Goal powers and cards such as Mahou Shoujo Derpy. That new Goal is still a Temporary Goal.</li>
+#HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee
+
+
+Q: During a play using Luna, Queen of that bats a question came up. What would happen in the slim chance that she is played in the middle of a 4 way ship and her effect cant be completed?
+A: In that case, you would play a ship from the Ship card deck between Luna and any adjacent pony. If you're playing with the Advanced rules, you could then choose to set off that other pony's power, since it was shipped with an adjacent pony.
+#HorriblePeople.2014ConExclusives.Pony.LunaQueenOfTheBats 
+
+Q: When you have to discard a card without replacing it (wild fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?
+A: If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.
+#HorriblePeople.2014ConExclusives.Pony.BlazinHotWildFire
+#disconnected-cards 
+
+Q: What does the text on Ahcyknnt say?
+A: Well, if I told you, you won't have any fun figuring it out, would you? <div id='hints'></div><button onclick="AhcyknntHint(this)">Please just tell me</button>
+#NoHoldsBarred.Pony.Ahcyknnt
+
+
 Q: Can two-pony cards count as the same pony twice, or just two one-pony cards in the same spot?
 A: Two-pony cards do not count as two of the same pony; they're a team of two different ponies!
 #Core.Pony.AloeAndLotus
@@ -83,35 +163,13 @@ Q: What happens when I play a Gender Change ship on a multi-gendered card, like 
 A: A Gender Change ship has no effect on a multi-gendered Pony card, or on a Pony card with no gender.
 #Core.Pony.TheWonderbolts #changeling #gender-change #male-female 
 
-
-Q: How does the Derpy Hooves card work?
-A: Derpy Hooves is played like any other Pony card. When she is attached to the grid via a ship card is when her power triggers, and you must swap Fan Fiction Author Twilight with any other Pony card. Derpy can be discarded, swapped, and pulled from the discard pile like any other Pony card, and her power can be activated after she's already on the grid like any other power.
-#Core.Pony.Derpy 
-
-
-Q: Hi, I was wondering how the pony card Discord works. Can I select 1 pony card and move it to break a chain? Or do I have to do a proper swap (ie. move 2 pony cards)?
-A: For Discord's power, choose either 2 or 3 ponies on the grid. Discord can be one of the ponies you choose. Pick them up. Then put them back in any order. No card can be in the same place it was before you picked them up.
-#Core.Pony.Discord 
-
-
 Q: Does playing a card you got from Freedom Fighter Pinkie's power count as a play from hand for the purposes of goals?
 A: It does!
 #Core.Pony.FreedomFighterPinkiePie
 #play-pony #play-ship
 
 
-Q: Gypsy Witch Pinkie Pie. After you draw your cards, must you immediately discard. Or can you play those cards in your hand and discard at the end?
-A: You must immediately discard. But you can discard from your entire hand, and not just the ones you drew!
-#Core.Pony.GypsyWitchPinkiePie
 
-Q: Gypsy Witch Pinkie Pie is broken! I played a game where a player was able to move her around the board, and nearly emptied the pony deck in one turn!
-A: When constructing TSSSF, we've tried to leave the rules as simple as possible, and put as few restrictions on play, to give players a freedom to lose themselves in the game without worrying too much about mechanics, while at the same time letting them get those long chains of combos if that's what they enjoy. However, we've still been getting a number of complaints, especially about how easy it is to abuse pony powers. If you don't like how a particular mechanic plays, we highly encourage houseruling it to what feels right. To limit the effectiveness of pony powers, we recommend the houserule: "A Pony card's power can only ever be activated once per turn."
-#Core.Pony.GypsyWitchPinkiePie 
-
-
-Q: I'm confused as to what exactly Pinkamena's card power does. It sounds a lot like replace, but it repeats the phrase "if you do, discard another pony card."
-A: Yep! Pinkamena is special. She replaces a card on the grid—and then you choose another pony to discard as well. She takes someone down with her, in effect, so you're discarding both the pony she replaces and another pony of your choice for a total of two cards.
-#Core.Pony.Pinkamena 
 
 
 Q: My friends and I are currently debating whether or not a genderswapped Prince Blueblood becomes a princess (for all princess related goals)? We noticed he doesn't have 'prince' as a keyword...
@@ -124,34 +182,13 @@ A: Both simultaneously.
 #Core.Pony.TheWonderbolts #male-female 
 
 
-Q: Not sure if it was asked already but for the goal card "Cargo Ship" the wording is "Ship 2 ponies with the "Object" keyword". I took this as ship two of the TOGETHER, but a friend took it as just ship an object keyword with any two ponies. What was the intended ruling?
-A: It's ship 2 ponies with the Object keyword together as you surmised, yep!
-#Core.Goal.CargoShip 
-
-
-Q: Alicorns count as pegasus correct? So three of them would count for the goal of "Commander Hurricane's Army"?
-A: Alas, the only time alicorns and pegasi count for the same Goal is for Pomf!, which is *specifically* referring to things with wings. It does not count for Commander Hurricane's Army, which is specifically only referring to Pegasi.
-#Core.Goal.CommanderHurricansArmy 
-
-
-Q: For this Goal, can more than six cards be used, so long as they are all versions of the Mane 6 (and of course, there's at least one of each involved)?
-A: More than six cards can be used so long as they're all part of the Mane 6!
-#Core.Goal.FriendshipIsBenefits 
-
-
 Q: Do Replace effects count as position changes for the purposes of I Need to Make A Flowchart?
 A: "Hold On; I Need To Make a Flow Chart" specifically references swapping ponies, so by the text Replace powers wouldn't work. However, in terms of game balance, I don't see why Replace powers couldn't work as well. You'd need twice as many to get the same effect, and they follows the spirit of the Goal.
 If you like, feel free to houserule that that Goal says "You Swap or Replace 6 Pony card positions in one turn."
 #replace #Core.Goal.HoldOnINeedToMakeAFlowChart  
 
 
-Q: With invasive species, does it mean you only need to have six earth ponies on the board, or do they need to all be connected?
-A: There need to be 6 pairs of earth ponies shipped together on the board! They don't all have to be shipped in one giant line, but there need to be 6 separate ships on which two earth ponies are attached. (For a total of 12 earth ponies.)
-#Core.Goal.InvasiveSpecies
 
-Q: Would shipping one earth pony with four others count? Would you count the center pony once or once for each pony its shipped with?
-A: That would count! It would count for each earth pony ship the center pony is attached to! However, you'd need two more ships to actually complete the Goal, as that is only a total of 4 Ships.
-#Core.Goal.InvasiveSpecies 
 
 
 Q: I had Shining Armor shipped with Cider Season Applejack, and then used a ship card to change Applejack into a male. My friend and I agreed that that counted for the goal, but I'm a bit unconvinced in hindsight, what would you say?
@@ -200,19 +237,6 @@ Q: Does "immune to love poison" only mean those ponies can't be moved from their
 A: They can't be moved from the grid via love poison card.
 #love-poison 
 
-
-Q: Random Question. How does the copy ability work with a Special Ability like "Test Subject Cheerilee"? If you copy her ability, does the power only last until the end of the turn, or permanently?
-A: For the special promo cards, we've taken care to make sure the power says the name of the card instead of "this Pony." That means, if it does get copied, it would just basically make Test Subject Cheerilee do what she always does.
-For example, if Trixie copied her power, Trixie's new power would be:
-When Cheerilee is shipped with four Pony cards, discard her from the grid. Turn over a Temporary Goal. Temporary Goals are not replaced with a new Goal when they are won.
-... That said, it seems we've forgotten to specify Test Subject Cheerilee. Rules As Written, I suppose that means it could affect any other Cheerilee card; Rules as Intended, it's only supposed to affect Test Subject Cheerilee.
-Take that as you will.
-#HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee 
-
-
-Q: During a play using Luna, Queen of that bats a question came up. What would happen in the slim chance that she is played in the middle of a 4 way ship and her effect cant be completed?
-A: In that case, you would play a ship from the Ship card deck between Luna and any adjacent pony. If you're playing with the Advanced rules, you could then choose to set off that other pony's power, since it was shipped with an adjacent pony.
-#HorriblePeople.2014ConExclusives.Pony.LunaQueenOfTheBats 
 
 
 Q: Do pony card abilities always activate when played? The way my friend and I played, we were only forced to activate the ability if the word "must" was used in the instructions for the ability. If the ability used the word "may" we figured we had a choice of activation. Is this the case or were we playing it wrong?
@@ -351,11 +375,6 @@ A: My first instinct is that the current player gets to discard the cards in wha
 That said, if you're not a fan of this answer, I'd recommend adding a houserule where you have to shuffle the discard pile any time multiple cards go into the discard pile as the result of a single effect.
 #disconnected-cards
 
-Q: When you have to discard a card without replacing it (wild fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?
-A: If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.
-#HorriblePeople.2014ConExclusives.Pony.BlazinHotWildFire
-#disconnected-cards 
-
 
 Q: I'm a little confused as to the order in which Ship and Pony cards activate. I had a situation where I wanted to use a race-changing ship card and attach a new pony with a swap power, and the order of operations mattered.
 A: The order of operations is thus: you play the ship card, then the pony card to attach it to. Then the Ship's power is activated. Then the Pony's power is activated. Therefore, you would race-change one of the two cards in the original ship, and not the pony you swapped into the ship. <ins>This is not precisely true in the online version. When initially attached to the grid, changeling powers will activate prior to the ship, but otherwise this holds.</ins>
@@ -371,12 +390,7 @@ Q: Do alicorns always count as Princesses?
 A: No. The only ponies who count as princesses are those with the Princess keyword.
 #alicorn #princess
 
-Q: What is a Temporary Goal?
-A: Temporary Goals are a mechanic introduced by some of our non-core cards, such as the BronyCAN 2014 Convention Exclusive, Test Subject Cheerilee. Temporary Goals are goals that are added to the board after specific circumstances on the card are met. A Temporary Goal:
-<ul><li>...does not count toward the number of Goals in play.</li>
-<li>...is not replenished when it is won.</li>
-<li>...can be replaced with any appropriate pony power that would get a new Goal, including New Goal powers and cards such as Mahou Shoujo Derpy. That new Goal is still a Temporary Goal.</li>
-#HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee
+
 
 Q: What order do players play in?
 A: <del>We'll leave that up to your players to decide, but we go by the standard: Play starts with the player to the left of the dealer, and proceeds to the left. If a player won the last game, they get to choose who goes first.</del><ins>The websites assigns a random order automatically.</ins>

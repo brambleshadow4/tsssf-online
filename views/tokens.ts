@@ -136,6 +136,11 @@ export default {
 	"CardSelectSome": "Some",
 	"CardSelectAll": "All",
 
-	"CardReferenceHelp": "Click on any card here to view the properties and FAQ for that card. In game, you can open up the FAQ by clicking the card while holding shift."
+	"CardReferenceHelp": "Click on any card here to view the properties and FAQ for that card. In game, you can open up the FAQ by clicking the card while holding shift.",
+
+	"AhcyknntHint0": "The text on Ahcyknnt does mean something, it's just been scrambled.",
+	"AhcyknntHint1": "It's been scrambled using a Vigenère cipher",
+	"AhcyknntHint2": "The secret key for the cipher is \"Aeterna\"",
+	"AhcyknntHint3": "Adjutant. Changeling, OC. Revisionist history (special). Choose one pony and one ship card currently on the shipping grid except for Changelings and Love Potions. You may copy the powers of those cards. This power cannot be copied. If you can read this, you're trying way too hard",
 
 }	

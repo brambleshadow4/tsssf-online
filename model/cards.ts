@@ -327,7 +327,7 @@ var cards: {[key: string]: any} = {
 		"gender": "male",
 		"action": "swap",
 		"keywords": [
-			"Minoutuar"
+			"Minotaur"
 		]
 	},
 	"Core.Pony.Kefentse": {
@@ -1968,6 +1968,7 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"NoHoldsBarred.Pony.Ahcyknnt": {
+		"title": "Ahcyknnt",
 		"name": "Ahcyknnt",
 		"race": "alicorn",
 		"gender": "female",
@@ -2251,7 +2252,7 @@ var cards: {[key: string]: any} = {
 		"points": "4"
 	},
 	"NoHoldsBarred.Goal.FromForeignLands": {
-		"goalLogic": "ExistsShip(Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords, Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords)",
+		"goalLogic": "ExistsShip(racialKeyword, racialKeyword)",
 		"points": "2"
 	},
 	"NoHoldsBarred.Goal.FateBreakers": {

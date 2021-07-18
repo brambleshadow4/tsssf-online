@@ -413,3 +413,17 @@ function namespaceSort(a: lib.Card, b: lib.Card)
 
 	return keyA < keyB ? -1 : 1;
 }
+
+(window as any).AhcyknntHint = function AhcyknntHint(button: HTMLElement)
+{
+	var hints = document.getElementById('hints')!;
+	var hintCount = hints.children.length;
+	var text = (s as any)["AhcyknntHint" + hintCount];
+
+	if(text)
+	{
+		hints.innerHTML += "<div>"+text+"</div>"
+	}
+
+	if(hintCount == 3){ button!.parentNode!.removeChild(button);}
+}
