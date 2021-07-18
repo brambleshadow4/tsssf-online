@@ -123,7 +123,6 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 	return points;
 }
 
-
 export function makeCardElement(card: Card, location?: Location, isDraggable?: boolean, isDropTarget?: boolean): CardElement
 {
 	let cards = cm.inPlay();
@@ -199,8 +198,12 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 	}
 
 
-	imgElement.onclick = function()
+	imgElement.onclick = function(e)
 	{	
+		if(e.shiftKey)
+		{
+			window.open(cardRefURL(card, cards[card]));
+		}
 		if(isDkeyPressed && isItMyTurn())
 		{
 			location = location!;
@@ -591,6 +594,18 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 	return imgElement as unknown as CardElement;
 }
 
+export function cardRefURL(card: Card, info: CardProps)
+{
+	if(card.startsWith('X.'))
+	{
+		return "/info/card?" + card + ":base64," + btoa(JSON.stringify(info));
+	}
+	else
+	{
+		return "/info/card?" + card;
+	}
+}
+
 function showTrashButton(card: Card, location:Location)
 {
 	var trashTarget: string | undefined;
@@ -908,6 +923,16 @@ function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 		if(!useLarge)
 			addShiftHover(card, element);
 	}
+}
+
+export function addCardClickHandler(el: HTMLElement, fn: Function)
+{
+	el.addEventListener("click", function(e){
+
+		if(e.shiftKey) return;
+		if(isDkeyPressed) return;
+		fn(e);
+	})
 }
 
 function enlargeCard()

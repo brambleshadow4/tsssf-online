@@ -114,7 +114,7 @@ export default {
 	"QuickStartSwitchToMobile": "Ver instrucciones para dispositivos táctiles",
 
 	"QuickStartDesktop1": "Roba cartas de pony, de ship y de goal tocando en los mazos de la izquierda.",
-	"QuickStartDesktop2": "Mantenga pulsada la tecla <span class='key'>Shift</span> y pase el ratón por encima de una cartas para verla con más detalle.",
+	"QuickStartDesktop2": "Mantenga pulsada la tecla <span class='key'>Shift</span> y pase el ratón por encima de una cartas para verla con más detalle.<br><span class='key'>Shift</span>+Click a card to view the card's FAQ.",
 	"QuickStartDesktop3": "Coloca las cartas al tablero arrastrándolas y soltándolas desde tu mano.",
 	"QuickStartDesktop4": "Descarta las cartas manteniendo pulsado <span class='key'>D</span> y haciendo clic en ellas.",
 	"QuickStartDesktop5": "Intercambia las cartas por el tablero arrastrándolas y soltándolas sobre otra carta",

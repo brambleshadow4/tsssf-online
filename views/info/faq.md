@@ -2,9 +2,9 @@ This FAQ is based off of a [public FAQ document](https://docs.google.com/documen
 released by Horrible People.
 
 It has been reorganized to (hopefully) be easier to navigate in this web version. Every question has been tagged
-so that questions about any specific card/concept can be found by searching for that card in the
-[Card Reference](/info/cardlist) page. This page, with all the questions laid out in a single document,
-is for legacy purposes.
+so that questions about any specific card/concept can be found by shift-clicking the card in game or by
+searching for that card in the [Card Reference](/info/cardlist) page. This page, with all the questions laid out
+in a single document, is for legacy purposes.
 
 Any ways tsssf.net deviates from this FAQ will be signified with <del>strike through text</del> and <ins>inserted text</ins>
 
