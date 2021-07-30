@@ -100,7 +100,7 @@ Other Implementations
 Believe it or not, TSSSF.net is a newcomer to the shipfic scene. There's lots of other ways
 to play shipfic online if you're not a fan of TSSSF.net
 
-Vassel: <http://www.vassalengine.org/wiki/Module:Twilight_Sparkle%27s_Secret_Shipfic_Folder>
+Vassal: <http://www.vassalengine.org/wiki/Module:Twilight_Sparkle%27s_Secret_Shipfic_Folder>
 
 ### Table Top Simulator: ### 
 
