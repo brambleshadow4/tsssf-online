@@ -1284,6 +1284,7 @@ var cards: {[key: string]: any} = {
 	},
 	"HorriblePeople.2014ConExclusives.Pony.BlazinHotWildFire": {
 		"name": "Wild Fire",
+		"title": "Blazin' Hot Wild Fire",
 		"race": "pegasus",
 		"gender": "female",
 		"keywords": [
@@ -1299,6 +1300,7 @@ var cards: {[key: string]: any} = {
 	},
 	"HorriblePeople.2014ConExclusives.Pony.LunaQueenOfTheBats": {
 		"name": "Luna",
+		"title": "Luna, Queen of the Bats",
 		"race": "alicorn",
 		"gender": "female",
 		"keywords": [

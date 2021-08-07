@@ -23,6 +23,7 @@
 			},
 			"BlazinHotWildFire": {
 				"name": "Wild Fire",
+				"title": "Blazin' Hot Wild Fire",
 				"race": "pegasus",
 				"gender": "female",
 				"keywords": [
@@ -38,6 +39,7 @@
 			},
 			"LunaQueenOfTheBats": {
 				"name": "Luna",
+				"title": "Luna, Queen of the Bats",
 				"race": "alicorn",
 				"gender": "female",
 				"keywords": [

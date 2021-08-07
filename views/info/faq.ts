@@ -92,19 +92,19 @@ export default {
 	"HorriblePeople.2014ConExclusives.Pony.LunaQueenOfTheBats": {
 		"heading": "",
 		"questions": [
-			"<div class='question'>During a play using Luna, Queen of that bats a question came up. What would happen in the slim chance that she is played in the middle of a 4 way ship and her effect cant be completed?</div><div class='answer'>In that case, you would play a ship from the Ship card deck between Luna and any adjacent pony. If you're playing with the Advanced rules, you could then choose to set off that other pony's power, since it was shipped with an adjacent pony.</div>"
+			"<div class='question'>During a play using Luna, Queen of the Bats a question came up. What would happen in the slim chance that she is played in the middle of a 4 way ship and her effect cant be completed?</div><div class='answer'>In that case, you would play a ship from the Ship card deck between Luna and any adjacent pony. If you're playing with the Advanced rules, you could then choose to set off that other pony's power, since it was shipped with an adjacent pony.</div>"
 		]
 	},
 	"HorriblePeople.2014ConExclusives.Pony.BlazinHotWildFire": {
 		"heading": "",
 		"questions": [
-			"<div class='question'>When you have to discard a card without replacing it (wild fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?</div><div class='answer'>If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.</div>"
+			"<div class='question'>When you have to discard a card without replacing it (Wild Fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?</div><div class='answer'>If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.</div>"
 		]
 	},
 	"disconnected-cards": {
 		"heading": "Disconnected Cards",
 		"questions": [
-			"<div class='question'>When you have to discard a card without replacing it (wild fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?</div><div class='answer'>If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.</div>",
+			"<div class='question'>When you have to discard a card without replacing it (Wild Fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?</div><div class='answer'>If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.</div>",
 			"<div class='question'>When cards get disconnected, are there any suggested rules for what order they go on the discard pile? Sometimes people would like to cause something to get discarded in order to use a \"play from discard\" power and activate the other card's power. Can people put things on the discard in any order they want?</div><div class='answer'>My first instinct is that the current player gets to discard the cards in whatever order they want. It's a clever combo, and one I wouldn't want to penalize.That said, if you're not a fan of this answer, I'd recommend adding a houserule where you have to shuffle the discard pile any time multiple cards go into the discard pile as the result of a single effect.</div>"
 		]
 	},

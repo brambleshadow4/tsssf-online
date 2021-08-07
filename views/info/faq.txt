@@ -64,11 +64,11 @@ A: Temporary Goals are a mechanic introduced by some of our non-core cards, such
 #HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee
 
 
-Q: During a play using Luna, Queen of that bats a question came up. What would happen in the slim chance that she is played in the middle of a 4 way ship and her effect cant be completed?
+Q: During a play using Luna, Queen of the Bats a question came up. What would happen in the slim chance that she is played in the middle of a 4 way ship and her effect cant be completed?
 A: In that case, you would play a ship from the Ship card deck between Luna and any adjacent pony. If you're playing with the Advanced rules, you could then choose to set off that other pony's power, since it was shipped with an adjacent pony.
 #HorriblePeople.2014ConExclusives.Pony.LunaQueenOfTheBats 
 
-Q: When you have to discard a card without replacing it (wild fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?
+Q: When you have to discard a card without replacing it (Wild Fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?
 A: If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.
 #HorriblePeople.2014ConExclusives.Pony.BlazinHotWildFire
 #disconnected-cards 
