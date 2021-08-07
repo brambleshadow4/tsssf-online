@@ -121,6 +121,7 @@
 				]
 			},
 			"Ahcyknnt": {
+				"title": "Ahcyknnt",
 				"name": "Ahcyknnt",
 				"race": "alicorn",
 				"gender": "female",
@@ -408,7 +409,8 @@
 				"points": "4"
 			},
 			"FromForeignLands": {
-				"goalLogic": "ExistsShip(Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords, Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords)",
+				"title": "From Foreign Lands",
+				"goalLogic": "ExistsShip(racialKeyword, racialKeyword)",
 				"points": "2"
 			},
 			"FateBreakers": {

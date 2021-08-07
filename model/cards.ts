@@ -327,7 +327,7 @@ var cards: {[key: string]: any} = {
 		"gender": "male",
 		"action": "swap",
 		"keywords": [
-			"Minoutuar"
+			"Minotaur"
 		]
 	},
 	"Core.Pony.Kefentse": {
@@ -1284,6 +1284,7 @@ var cards: {[key: string]: any} = {
 	},
 	"HorriblePeople.2014ConExclusives.Pony.BlazinHotWildFire": {
 		"name": "Wild Fire",
+		"title": "Blazin' Hot Wild Fire",
 		"race": "pegasus",
 		"gender": "female",
 		"keywords": [
@@ -1299,6 +1300,7 @@ var cards: {[key: string]: any} = {
 	},
 	"HorriblePeople.2014ConExclusives.Pony.LunaQueenOfTheBats": {
 		"name": "Luna",
+		"title": "Luna, Queen of the Bats",
 		"race": "alicorn",
 		"gender": "female",
 		"keywords": [
@@ -1968,6 +1970,7 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"NoHoldsBarred.Pony.Ahcyknnt": {
+		"title": "Ahcyknnt",
 		"name": "Ahcyknnt",
 		"race": "alicorn",
 		"gender": "female",
@@ -2251,7 +2254,8 @@ var cards: {[key: string]: any} = {
 		"points": "4"
 	},
 	"NoHoldsBarred.Goal.FromForeignLands": {
-		"goalLogic": "ExistsShip(Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords, Zebra in keywords || Batpony in keywords || Changeling in keywords || Dragon in keywords)",
+		"title": "From Foreign Lands",
+		"goalLogic": "ExistsShip(racialKeyword, racialKeyword)",
 		"points": "2"
 	},
 	"NoHoldsBarred.Goal.FateBreakers": {
@@ -2389,7 +2393,7 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"NovelIdea.PanelOfPonies.Pony.LunaScourgeOfEquestria": {
-		"title": "Luan, Scourge of Equestria",
+		"title": "Luna, Scourge of Equestria",
 		"name": "Luna",
 		"gender": "female",
 		"race": "alicorn",

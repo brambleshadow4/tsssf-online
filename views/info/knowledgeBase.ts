@@ -1,5 +1,5 @@
 import {doesCardMatchFilters, cardSearchBar} from "../game/cardSearchBarComponent.js";
-import {makeCardElement} from "../game/cardComponent.js";
+import {makeCardElement, cardRefURL} from "../game/cardComponent.js";
 import s from "../tokens.js";
 import * as lib from "../../model/lib.js";
 import * as cm from "../../model/cardManager.js";
@@ -245,8 +245,12 @@ export function cardReference(cards: {[key:string]: lib.CardProps}, openInNewTab
 	var popupPage = document.createElement('div')
 	popupPage.className = "popupPage";
 
+	popupPage.innerHTML = "<p>" + s.CardReferenceHelp + "</p>";
+
 	var [serachBar, setFilters] = cardSearchBar(cards, renderCards);
 	popupPage.appendChild(serachBar);
+
+
 
 
 	var cardDiv = document.createElement("div");
@@ -271,22 +275,19 @@ export function cardReference(cards: {[key:string]: lib.CardProps}, openInNewTab
 
 			let cardDiv = makeCardElement(key)
 
-			let refURL = key;
+			let refURL = cardRefURL(key, {} as lib.CardProps);
 
-			if(key.startsWith('X.'))
-			{
-				refURL = key + ":base64," + btoa(JSON.stringify(cards[key]));
-			}
+			
 
 			cardDiv.onclick = function(e)
 			{
 				if(openInNewTab || e.ctrlKey)
 				{
-					window.open("/info/card?" + refURL);
+					window.open(refURL);
 				}
 				else
 				{
-					location.href = "/info/card?" + refURL;
+					location.href = refURL;
 				}
 			};
 			
@@ -411,4 +412,18 @@ function namespaceSort(a: lib.Card, b: lib.Card)
 		return 0;
 
 	return keyA < keyB ? -1 : 1;
+}
+
+(window as any).AhcyknntHint = function AhcyknntHint(button: HTMLElement)
+{
+	var hints = document.getElementById('hints')!;
+	var hintCount = hints.children.length;
+	var text = (s as any)["AhcyknntHint" + hintCount];
+
+	if(text)
+	{
+		hints.innerHTML += "<div>"+text+"</div>"
+	}
+
+	if(hintCount == 3){ button!.parentNode!.removeChild(button);}
 }

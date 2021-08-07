@@ -56,7 +56,7 @@ body.cardlist
 
 	display: inline-block;
 
-	border-radius: 5px;
+	border-radius: .7vh;
 
 	box-sizing: border-box;
 	user-select: none;

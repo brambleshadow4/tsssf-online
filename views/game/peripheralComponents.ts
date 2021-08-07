@@ -32,7 +32,8 @@ import {
 	makeCardElement,
 	updateCardElement,
 	isDeleteClick,
-	endMoveShared
+	endMoveShared,
+	addCardClickHandler
 } from "./cardComponent.js"
 
 import {
@@ -255,7 +256,7 @@ export function updateShipDiscard(tempCard?: Card)
 	)
 
 	var element = document.getElementById("shipDiscardPile")!;
-	element.addEventListener('click', async function(){
+	addCardClickHandler(element,  async function(){
 		
 		if(model.shipDiscardPile.length)
 		{
@@ -296,7 +297,8 @@ export function updateGoalDiscard(tempCard?: Card)
 
 
 	element = document.getElementById("goalDiscardPile")!
-	element.onclick = async function()
+
+	addCardClickHandler(element, async function()
 	{
 		if(model.goalDiscardPile.length)
 		{
@@ -313,7 +315,7 @@ export function updateGoalDiscard(tempCard?: Card)
 				broadcastMove(card, loc, "goal," + openGoal);
 			}
 		}
-	}
+	});
 }
 
 var lastArrowClick = 0;
@@ -655,10 +657,10 @@ export function openCardSelect(title: string, heading: string, cards: Card[], mi
 			var cardElement = makeCardElement(card);
 			div.appendChild(cardElement);
 
-			cardElement.onclick = function()
+			addCardClickHandler(cardElement, function()
 			{
 				closePopupWithVal(card);
-			}
+			});
 		}
 
 		return div;
@@ -699,10 +701,10 @@ export function openSearchCardSelect(title: string, heading: string, cards: Card
 			var cardElement = makeCardElement(card);
 			div.appendChild(cardElement);
 
-			cardElement.onclick = function()
+			addCardClickHandler(cardElement, function()
 			{
 				closePopupWithVal(card);
-			}
+			});
 		}
 
 		return div;

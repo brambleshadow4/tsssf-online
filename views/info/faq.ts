@@ -26,6 +26,94 @@
  * two-pony-card
  */
 export default {
+	"NoHoldsBarred.Goal.FromForeignLands": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>What keywords count as a racial keyword?</div><div class='answer'>\"Batpony\", \"Breezy\", \"Buffalo\", \"Changeling\", \"Deer\", \"Diamond Dog\", \"Draconequus\", \"Dragon\", \"Fluffy Pony\", \"Griffon\", \"Minoutuar\", \"Siren\", and \"Zebra\". This list won't be complete if you're using custom cards with other racial keywords TSSSF.net doesn't know about.</div>"
+		]
+	},
+	"Core.Pony.Derpy": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>How does the Derpy Hooves card work?</div><div class='answer'>Derpy Hooves is played like any other Pony card. When she is attached to the grid via a ship card is when her power triggers, and you must swap Fan Fiction Author Twilight with any other Pony card. Derpy can be discarded, swapped, and pulled from the discard pile like any other Pony card, and her power can be activated after she's already on the grid like any other power.</div>"
+		]
+	},
+	"Core.Pony.Discord": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>Hi, I was wondering how the pony card Discord works. Can I select 1 pony card and move it to break a chain? Or do I have to do a proper swap (ie. move 2 pony cards)?</div><div class='answer'>For Discord's power, choose either 2 or 3 ponies on the grid. Discord can be one of the ponies you choose. Pick them up. Then put them back in any order. No card can be in the same place it was before you picked them up.</div>"
+		]
+	},
+	"Core.Pony.GypsyWitchPinkiePie": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>Gypsy Witch Pinkie Pie. After you draw your cards, must you immediately discard. Or can you play those cards in your hand and discard at the end?</div><div class='answer'>You must immediately discard. But you can discard from your entire hand, and not just the ones you drew!</div>",
+			"<div class='question'>Gypsy Witch Pinkie Pie is broken! I played a game where a player was able to move her around the board, and nearly emptied the pony deck in one turn!</div><div class='answer'>When constructing TSSSF, we've tried to leave the rules as simple as possible, and put as few restrictions on play, to give players a freedom to lose themselves in the game without worrying too much about mechanics, while at the same time letting them get those long chains of combos if that's what they enjoy. However, we've still been getting a number of complaints, especially about how easy it is to abuse pony powers. If you don't like how a particular mechanic plays, we highly encourage houseruling it to what feels right. To limit the effectiveness of pony powers, we recommend the houserule: \"A Pony card's power can only ever be activated once per turn.\"</div>"
+		]
+	},
+	"Core.Pony.Pinkamena": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>I'm confused as to what exactly Pinkamena's card power does. It sounds a lot like replace, but it repeats the phrase \"if you do, discard another pony card.\"</div><div class='answer'>Yep! Pinkamena is special. She replaces a card on the grid—and then you choose another pony to discard as well. She takes someone down with her, in effect, so you're discarding both the pony she replaces and another pony of your choice for a total of two cards.</div>"
+		]
+	},
+	"Core.Goal.CargoShip": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>Not sure if it was asked already but for the goal card \"Cargo Ship\" the wording is \"Ship 2 ponies with the \"Object\" keyword\". I took this as ship two of the TOGETHER, but a friend took it as just ship an object keyword with any two ponies. What was the intended ruling?</div><div class='answer'>It's ship 2 ponies with the Object keyword together as you surmised, yep!</div>"
+		]
+	},
+	"Core.Goal.CommanderHurricanesArmy": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>Alicorns count as pegasus correct? So three of them would count for the goal of \"Commander Hurricane's Army\"?</div><div class='answer'>Alas, the only time alicorns and pegasi count for the same Goal is for Pomf!, which is *specifically* referring to things with wings. It does not count for Commander Hurricane's Army, which is specifically only referring to Pegasi.</div>"
+		]
+	},
+	"Core.Goal.FriendshipIsBenefits": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>For this Goal, can more than six cards be used, so long as they are all versions of the Mane 6 (and of course, there's at least one of each involved)?</div><div class='answer'>More than six cards can be used so long as they're all part of the Mane 6!</div>"
+		]
+	},
+	"Core.Goal.InvasiveSpecies": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>With invasive species, does it mean you only need to have six earth ponies on the board, or do they need to all be connected?</div><div class='answer'>There need to be 6 pairs of earth ponies shipped together on the board! They don't all have to be shipped in one giant line, but there need to be 6 separate ships on which two earth ponies are attached. (For a total of 12 earth ponies.)</div>",
+			"<div class='question'>Would shipping one earth pony with four others count? Would you count the center pony once or once for each pony its shipped with?</div><div class='answer'>That would count! It would count for each earth pony ship the center pony is attached to! However, you'd need two more ships to actually complete the Goal, as that is only a total of 4 Ships.</div>"
+		]
+	},
+	"HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>Random Question. How does the copy ability work with a Special Ability like \"Test Subject Cheerilee\"? If you copy her ability, does the power only last until the end of the turn, or permanently?</div><div class='answer'>For the special promo cards, we've taken care to make sure the power says the name of the card instead of \"this Pony.\" That means, if it does get copied, it would just basically make Test Subject Cheerilee do what she always does.For example, if Trixie copied her power, Trixie's new power would be:When Cheerilee is shipped with four Pony cards, discard her from the grid. Turn over a Temporary Goal. Temporary Goals are not replaced with a new Goal when they are won.... That said, it seems we've forgotten to specify Test Subject Cheerilee. Rules As Written, I suppose that means it could affect any other Cheerilee card; Rules as Intended, it's only supposed to affect Test Subject Cheerilee.Take that as you will.</div>",
+			"<div class='question'>What is a Temporary Goal?</div><div class='answer'>Temporary Goals are a mechanic introduced by some of our non-core cards, such as the BronyCAN 2014 Convention Exclusive, Test Subject Cheerilee. Temporary Goals are goals that are added to the board after specific circumstances on the card are met. A Temporary Goal:<ul><li>...does not count toward the number of Goals in play.</li><li>...is not replenished when it is won.</li><li>...can be replaced with any appropriate pony power that would get a new Goal, including New Goal powers and cards such as Mahou Shoujo Derpy. That new Goal is still a Temporary Goal.</li></div>"
+		]
+	},
+	"HorriblePeople.2014ConExclusives.Pony.LunaQueenOfTheBats": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>During a play using Luna, Queen of the Bats a question came up. What would happen in the slim chance that she is played in the middle of a 4 way ship and her effect cant be completed?</div><div class='answer'>In that case, you would play a ship from the Ship card deck between Luna and any adjacent pony. If you're playing with the Advanced rules, you could then choose to set off that other pony's power, since it was shipped with an adjacent pony.</div>"
+		]
+	},
+	"HorriblePeople.2014ConExclusives.Pony.BlazinHotWildFire": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>When you have to discard a card without replacing it (Wild Fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?</div><div class='answer'>If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.</div>"
+		]
+	},
+	"disconnected-cards": {
+		"heading": "Disconnected Cards",
+		"questions": [
+			"<div class='question'>When you have to discard a card without replacing it (Wild Fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?</div><div class='answer'>If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.</div>",
+			"<div class='question'>When cards get disconnected, are there any suggested rules for what order they go on the discard pile? Sometimes people would like to cause something to get discarded in order to use a \"play from discard\" power and activate the other card's power. Can people put things on the discard in any order they want?</div><div class='answer'>My first instinct is that the current player gets to discard the cards in whatever order they want. It's a clever combo, and one I wouldn't want to penalize.That said, if you're not a fan of this answer, I'd recommend adding a houserule where you have to shuffle the discard pile any time multiple cards go into the discard pile as the result of a single effect.</div>"
+		]
+	},
+	"NoHoldsBarred.Pony.Ahcyknnt": {
+		"heading": "",
+		"questions": [
+			"<div class='question'>What does the text on Ahcyknnt say?</div><div class='answer'>Well, if I told you, you won't have any fun figuring it out, would you? <div id='hints'></div><button onclick=\"AhcyknntHint(this)\">Please just tell me</button></div>"
+		]
+	},
 	"Core.Pony.AloeAndLotus": {
 		"heading": "",
 		"questions": [
@@ -139,18 +227,6 @@ export default {
 			"<div class='question'>Let's say that one of the active goals is \"It's not Evil\" (break Shining Armor up from any female except Twilight). Let's also say that he is currently shipped with 4 females (none of whom are Twilight) would playing something like Broken Wing Rainbow Dash (female, replace) on any of the 4 ships count to win the goal?</div><div class='answer'>Yep! Replacing counts as breaking up a ship!</div>"
 		]
 	},
-	"Core.Pony.Derpy": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>How does the Derpy Hooves card work?</div><div class='answer'>Derpy Hooves is played like any other Pony card. When she is attached to the grid via a ship card is when her power triggers, and you must swap Fan Fiction Author Twilight with any other Pony card. Derpy can be discarded, swapped, and pulled from the discard pile like any other Pony card, and her power can be activated after she's already on the grid like any other power.</div>"
-		]
-	},
-	"Core.Pony.Discord": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>Hi, I was wondering how the pony card Discord works. Can I select 1 pony card and move it to break a chain? Or do I have to do a proper swap (ie. move 2 pony cards)?</div><div class='answer'>For Discord's power, choose either 2 or 3 ponies on the grid. Discord can be one of the ponies you choose. Pick them up. Then put them back in any order. No card can be in the same place it was before you picked them up.</div>"
-		]
-	},
 	"Core.Pony.FreedomFighterPinkiePie": {
 		"heading": "",
 		"questions": [
@@ -179,37 +255,6 @@ export default {
 			"<div class='question'>Slipping a Ship between two Stallions already on the board counts as \"playing a ship\" for Quite., correct?</div><div class='answer'>Correct! As long as you play a card from your hand to complete a ship, it counts as being \"From your hand.\"</div>"
 		]
 	},
-	"Core.Pony.GypsyWitchPinkiePie": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>Gypsy Witch Pinkie Pie. After you draw your cards, must you immediately discard. Or can you play those cards in your hand and discard at the end?</div><div class='answer'>You must immediately discard. But you can discard from your entire hand, and not just the ones you drew!</div>",
-			"<div class='question'>Gypsy Witch Pinkie Pie is broken! I played a game where a player was able to move her around the board, and nearly emptied the pony deck in one turn!</div><div class='answer'>When constructing TSSSF, we've tried to leave the rules as simple as possible, and put as few restrictions on play, to give players a freedom to lose themselves in the game without worrying too much about mechanics, while at the same time letting them get those long chains of combos if that's what they enjoy. However, we've still been getting a number of complaints, especially about how easy it is to abuse pony powers. If you don't like how a particular mechanic plays, we highly encourage houseruling it to what feels right. To limit the effectiveness of pony powers, we recommend the houserule: \"A Pony card's power can only ever be activated once per turn.\"</div>"
-		]
-	},
-	"Core.Pony.Pinkamena": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>I'm confused as to what exactly Pinkamena's card power does. It sounds a lot like replace, but it repeats the phrase \"if you do, discard another pony card.\"</div><div class='answer'>Yep! Pinkamena is special. She replaces a card on the grid—and then you choose another pony to discard as well. She takes someone down with her, in effect, so you're discarding both the pony she replaces and another pony of your choice for a total of two cards.</div>"
-		]
-	},
-	"Core.Goal.CargoShip": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>Not sure if it was asked already but for the goal card \"Cargo Ship\" the wording is \"Ship 2 ponies with the \"Object\" keyword\". I took this as ship two of the TOGETHER, but a friend took it as just ship an object keyword with any two ponies. What was the intended ruling?</div><div class='answer'>It's ship 2 ponies with the Object keyword together as you surmised, yep!</div>"
-		]
-	},
-	"Core.Goal.CommanderHurricansArmy": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>Alicorns count as pegasus correct? So three of them would count for the goal of \"Commander Hurricane's Army\"?</div><div class='answer'>Alas, the only time alicorns and pegasi count for the same Goal is for Pomf!, which is *specifically* referring to things with wings. It does not count for Commander Hurricane's Army, which is specifically only referring to Pegasi.</div>"
-		]
-	},
-	"Core.Goal.FriendshipIsBenefits": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>For this Goal, can more than six cards be used, so long as they are all versions of the Mane 6 (and of course, there's at least one of each involved)?</div><div class='answer'>More than six cards can be used so long as they're all part of the Mane 6!</div>"
-		]
-	},
 	"replace": {
 		"heading": "Replace Power",
 		"questions": [
@@ -225,13 +270,6 @@ export default {
 		"heading": "",
 		"questions": [
 			"<div class='question'>Do Replace effects count as position changes for the purposes of I Need to Make A Flowchart?</div><div class='answer'>\"Hold On; I Need To Make a Flow Chart\" specifically references swapping ponies, so by the text Replace powers wouldn't work. However, in terms of game balance, I don't see why Replace powers couldn't work as well. You'd need twice as many to get the same effect, and they follows the spirit of the Goal.If you like, feel free to houserule that that Goal says \"You Swap or Replace 6 Pony card positions in one turn.\"</div>"
-		]
-	},
-	"Core.Goal.InvasiveSpecies": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>With invasive species, does it mean you only need to have six earth ponies on the board, or do they need to all be connected?</div><div class='answer'>There need to be 6 pairs of earth ponies shipped together on the board! They don't all have to be shipped in one giant line, but there need to be 6 separate ships on which two earth ponies are attached. (For a total of 12 earth ponies.)</div>",
-			"<div class='question'>Would shipping one earth pony with four others count? Would you count the center pony once or once for each pony its shipped with?</div><div class='answer'>That would count! It would count for each earth pony ship the center pony is attached to! However, you'd need two more ships to actually complete the Goal, as that is only a total of 4 Ships.</div>"
 		]
 	},
 	"Core.Goal.ItsNotEvil": {
@@ -262,7 +300,7 @@ export default {
 			"<div class='question'>Since Race-change ships affect both ponies on a two-pony card, does that mean shipping Nightmare Moon with pricessified Aloe & Lotus fulfills Princess Pile?</div><div class='answer'>Indeedy!</div>"
 		]
 	},
-	"Core.Goal.Swinging": {
+	"EC.Goal.Swinging": {
 		"heading": "",
 		"questions": [
 			"<div class='question'>To complete Swinging (pair one pony with Mr. and Mrs. Cake), would it work to, for example, pair Mr. Cake with Lyra, then pair Mrs. Cake with a Changeling disguised as Lyra?</div><div class='answer'>Nope! Has to be the same Pony card, so they'd both have to pair off with the same Lyra card.</div>"
@@ -272,19 +310,6 @@ export default {
 		"heading": "Love Poisons",
 		"questions": [
 			"<div class='question'>Does \"immune to love poison\" only mean those ponies can't be moved from their position with love poison, or does it also mean you can't move another pony to be shipped with them with love poison?</div><div class='answer'>They can't be moved from the grid via love poison card.</div>"
-		]
-	},
-	"HorriblePeople.2014ConExclusives.Pony.TestSubjectCheerilee": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>Random Question. How does the copy ability work with a Special Ability like \"Test Subject Cheerilee\"? If you copy her ability, does the power only last until the end of the turn, or permanently?</div><div class='answer'>For the special promo cards, we've taken care to make sure the power says the name of the card instead of \"this Pony.\" That means, if it does get copied, it would just basically make Test Subject Cheerilee do what she always does.For example, if Trixie copied her power, Trixie's new power would be:When Cheerilee is shipped with four Pony cards, discard her from the grid. Turn over a Temporary Goal. Temporary Goals are not replaced with a new Goal when they are won.... That said, it seems we've forgotten to specify Test Subject Cheerilee. Rules As Written, I suppose that means it could affect any other Cheerilee card; Rules as Intended, it's only supposed to affect Test Subject Cheerilee.Take that as you will.</div>",
-			"<div class='question'>What is a Temporary Goal?</div><div class='answer'>Temporary Goals are a mechanic introduced by some of our non-core cards, such as the BronyCAN 2014 Convention Exclusive, Test Subject Cheerilee. Temporary Goals are goals that are added to the board after specific circumstances on the card are met. A Temporary Goal:<ul><li>...does not count toward the number of Goals in play.</li><li>...is not replenished when it is won.</li><li>...can be replaced with any appropriate pony power that would get a new Goal, including New Goal powers and cards such as Mahou Shoujo Derpy. That new Goal is still a Temporary Goal.</li></div>"
-		]
-	},
-	"HorriblePeople.2014ConExclusives.Pony.LunaQueenOfTheBats": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>During a play using Luna, Queen of that bats a question came up. What would happen in the slim chance that she is played in the middle of a 4 way ship and her effect cant be completed?</div><div class='answer'>In that case, you would play a ship from the Ship card deck between Luna and any adjacent pony. If you're playing with the Advanced rules, you could then choose to set off that other pony's power, since it was shipped with an adjacent pony.</div>"
 		]
 	},
 	"pony-action": {
@@ -340,19 +365,6 @@ export default {
 		"heading": "Chains",
 		"questions": [
 			"<div class='question'>Are chains allowed to have branches?</div><div class='answer'>For chains, the path only needs to be a single unbroken line. Branches are fine!</div>"
-		]
-	},
-	"disconnected-cards": {
-		"heading": "Disconnected Cards",
-		"questions": [
-			"<div class='question'>When cards get disconnected, are there any suggested rules for what order they go on the discard pile? Sometimes people would like to cause something to get discarded in order to use a \"play from discard\" power and activate the other card's power. Can people put things on the discard in any order they want?</div><div class='answer'>My first instinct is that the current player gets to discard the cards in whatever order they want. It's a clever combo, and one I wouldn't want to penalize.That said, if you're not a fan of this answer, I'd recommend adding a houserule where you have to shuffle the discard pile any time multiple cards go into the discard pile as the result of a single effect.</div>",
-			"<div class='question'>When you have to discard a card without replacing it (wild fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?</div><div class='answer'>If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.</div>"
-		]
-	},
-	"HorriblePeople.2014ConExclusives.Pony.BlazinHotWildFire": {
-		"heading": "",
-		"questions": [
-			"<div class='question'>When you have to discard a card without replacing it (wild fire's passive for example) do the ship cards attached to it get discarded as well? Or do they stay open for another pony to swoop in and steal their hearts?</div><div class='answer'>If a Ship card ever doesn't have two Ponies connected to it, it must be discarded.</div>"
 		]
 	},
 	"alt-timeline": {

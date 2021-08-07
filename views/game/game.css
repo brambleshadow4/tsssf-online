@@ -93,7 +93,7 @@ body.cardsUnapproved .card.custom
 {
 	/*filter: grayscale(100%);*/
 	user-drag: element;
-    -khtml-user-drag: element;
+	-khtml-user-drag: element;
 }
 
 .card.justPlayed
@@ -224,7 +224,7 @@ input[type="number"]
 
 	display: inline-block;
 
-	border-radius: 5px;
+	border-radius: .7vh;
 
 	box-sizing: border-box;
 	user-select: none;

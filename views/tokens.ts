@@ -55,6 +55,8 @@ export default {
 	"GameRemoveUnconnectedCardsButton": "Remove Unconnected Cards",
 
 
+
+
 	"PopupTitleSelectDisguise": "Select Disguise",
 	"PopupTitleSpecial": "Special",
 	"PopupTitleCopy": "Copy",
@@ -112,8 +114,8 @@ export default {
 	"QuickStartSwitchToDesktop": "See instructions for desktop computers",
 	"QuickStartSwitchToMobile": "See instructions for touch devices",
 
-	"QuickStartDesktop1":"Draw pony, ship, and goal cards by clicking the decks on the left",
-	"QuickStartDesktop2": "Hold <span class='key'>Shift</span> and hover over a card to see the card in much more detail.",
+	"QuickStartDesktop1": "Draw pony, ship, and goal cards by clicking the decks on the left",
+	"QuickStartDesktop2": "Hold <span class='key'>Shift</span> and hover over a card to see the card in much more detail.<br><span class='key'>Shift</span>+Click a card to view the card's FAQ.",
 	"QuickStartDesktop3": "Move cards onto the grid by dragging and dropping them from your hand.",
 	"QuickStartDesktop4": "Discard cards by holding down <span class='key'>D</span> and clicking them.",
 	"QuickStartDesktop5": "Swap cards around the grid by dragging and dropping them onto other cards.",
@@ -134,5 +136,11 @@ export default {
 	"CardSelectSome": "Some",
 	"CardSelectAll": "All",
 
+	"CardReferenceHelp": "Click on any card here to view the properties and FAQ for that card. In game, you can open up the FAQ by clicking the card while holding shift.",
+
+	"AhcyknntHint0": "The text on Ahcyknnt does mean something, it's just been scrambled.",
+	"AhcyknntHint1": "It's been scrambled using a Vigenère cipher",
+	"AhcyknntHint2": "The secret key for the cipher is \"Aeterna\"",
+	"AhcyknntHint3": "Adjutant. Changeling, OC. Revisionist history (special). Choose one pony and one ship card currently on the shipping grid except for Changelings and Love Potions. You may copy the powers of those cards. This power cannot be copied. If you can read this, you're trying way too hard",
 
 }	

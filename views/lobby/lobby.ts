@@ -90,9 +90,6 @@ export function loadView(isOpen: boolean)
 
 function loadCardPages(options: GameOptions)
 {
-	console.log(options);
-	console.log(typeof options);
-
 	document.getElementById('uploadErrors')!.innerHTML = "";
 	(document.getElementById('packUpload') as HTMLInputElement).value = "";
 
@@ -170,7 +167,6 @@ function loadCardPages(options: GameOptions)
 			{
 				box.classList.add('selected');
 				deckElementList[i].getElementsByTagName('button')[2].click();
-				//console.log(cardSelectorElements[i].getElementsByTagName('button')[2]);
 			}
 		}
 	}
@@ -238,8 +234,6 @@ function getPackString(card: Card)
 
 function loadGameOptions(options: GameOptions)
 {
-	console.log(options)
-
 	if(options.ruleset == "turnsOnly")
 		input("turnsOnly").checked = true;
 	else if (options.ruleset == "sandbox")
@@ -449,8 +443,6 @@ function setLobbyOptions()
 			options.teams[playerName] = teamName;
 		}
 	}
-
-	console.log(options);
 
 	options.keepLobbyOpen = !!input('keepLobbyOpen').checked;
 

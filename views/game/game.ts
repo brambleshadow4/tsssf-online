@@ -135,6 +135,7 @@ interface GameModel extends GameModelShared
 	turnstate: Turnstate & {
 		openShips: {[card: string]: true}
 		removedFrom: [Location, Card];
+		shipTarget?: Location 
 	};
 }
 
@@ -737,7 +738,6 @@ export async function moveCard(
 
 	if(startLocation == endLocation)
 	{
-		//console.log("same location: " + startLocation);
 		return;
 	}
 
@@ -757,9 +757,12 @@ export async function moveCard(
 
 	if(startLocation == "hand")
 	{
-		let i = model.hand.indexOf(card);
 
-		startPos = getPosFromId("hand" + i);
+		let orderedHand = model.hand.filter(x => isPony(x)).concat(model.hand.filter(x => isShip(x)));
+		let i = model.hand.indexOf(card);
+		let displayPos = orderedHand.indexOf(card);
+
+		startPos = getPosFromId("hand" + displayPos);
 
 		if(i == -1) { return };
 		model.hand.splice(i,1);
@@ -1097,30 +1100,26 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 	let model = win.model;
 	let cardLocations = win.cardLocations;
 
-	var isImmediatePlay = (e.startLocation == "hand" || e.startLocation == "ponyDiscardPile,top")
+	var isImmediatePlay = (e.startLocation == "hand" || e.startLocation == "ponyDiscardPile,top" || e.startLocation == "shipDiscardPile,top")
 
 
 	if(isPonyOrStart(e.card) && isBoardLoc(e.endLocation))
 	{
 		var neighbors = getNeighborCards(e.card);
 
+		let shipTarget = "";
+
 		if(model.turnstate)
 		{
 			if(!model.turnstate.openShips)
 				model.turnstate.openShips = {};
 
-			/*if(neighbors.length == 1 && model.turnstate.openShips[neighbors[0]])
-			{
-				model.turnstate.triggerShip = neighbors[0];
-			}
-			else
-			{
-				model.turnstate.triggerShip = "";
-			}*/
+
+			shipTarget = model.turnstate.shipTarget || "";
 		}
 
 		var fn = getCardAction(e.card);
-		if(fn && (isImmediatePlay || doActionOnSwap(e.card)))
+		if(fn && (isImmediatePlay || doActionOnSwap(e.card) || e.endLocation == shipTarget))
 		{
 			await fn(e.card);
 		}
@@ -1138,6 +1137,24 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 
 				model.turnstate.openShips[e.card] = true;
 			}
+
+			if(!isShipClosed(e.card) && isImmediatePlay)
+			{
+				let [ponyLoc1, ponyLoc2] = getNeighborKeys(e.endLocation);
+				if(!model.board[ponyLoc1]?.card || isBlank(model.board[ponyLoc1].card))
+				{
+					model.turnstate.shipTarget = ponyLoc1;
+				}
+				else if(!model.board[ponyLoc2]?.card || isBlank(model.board[ponyLoc2].card))
+				{
+					model.turnstate.shipTarget = ponyLoc2;
+				}
+			}
+			else
+			{
+				delete model.turnstate.shipTarget;
+			}
+
 		}
 	}
 
@@ -1221,7 +1238,11 @@ function getNeighborCards(shipCard: Card)
 	return neighborCards;
 }
 
-function getCardAction(card: Card)
+/**
+ * Normally, this returns the action only if the action can be run,
+ * If you want to skip these checks, set skipValidation to true
+ */
+function getCardAction(card: Card, skipValidation?: boolean)
 {	
 	var cardInfo = cm.inPlay()[card];
 
@@ -1236,6 +1257,21 @@ function getCardAction(card: Card)
 	{
 		params = actionName.substring(a+1,b).split(",").map( x => x.trim());
 		actionName = actionName.substring(0,a);
+	}
+
+	if(!skipValidation)
+	{
+		if(actionName == "fullCopy")
+		{
+			if(win.model.turnstate?.overrides[card]?.fullCopy) { return; }
+		}
+		if(actionName == "ChangelingNoRedisguise")
+		{
+			let cards = cm.inPlay();
+			let cardInfo = cards[card] as PonyProps;
+
+			if(win.model.turnstate?.overrides[card]?.disguise) { return; }
+		}
 	}
 
 	switch(actionName)
@@ -1276,9 +1312,13 @@ function changelingAction(type: string)
 	let cardLocations = win.cardLocations;
 	return async function(card: Card)
 	{
+		let cards = cm.inPlay();
+		let cardInfo = cards[card] as PonyProps;
+		let allowRedisguise = (cardInfo.action && cardInfo.action.startsWith("Changeling("))
+
+
 		if(model.turnstate)
-		{
-			let cards = cm.inPlay();
+		{			
 			var cardNames = Object.keys(cards);
 			var disguises = cardNames.filter(x => isPony(x) && cards[x].count == undefined && x != card);
 

@@ -509,6 +509,13 @@ export function doesCardMatchFilters(card: Card, filters: [string, any][]): bool
 			{
 				return false;
 			}
+			else if(propName == "title")
+			{
+				if(propValue != cardPropValue)
+				{
+					return false;
+				}
+			}
 			else if( cardProps.goalLogic!.indexOf(propValue) == -1 || cardProps.goalLogic!.indexOf(propName) == -1)
 			{
 				return false;
