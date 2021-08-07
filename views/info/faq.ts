@@ -63,7 +63,7 @@ export default {
 			"<div class='question'>Not sure if it was asked already but for the goal card \"Cargo Ship\" the wording is \"Ship 2 ponies with the \"Object\" keyword\". I took this as ship two of the TOGETHER, but a friend took it as just ship an object keyword with any two ponies. What was the intended ruling?</div><div class='answer'>It's ship 2 ponies with the Object keyword together as you surmised, yep!</div>"
 		]
 	},
-	"Core.Goal.CommanderHurricansArmy": {
+	"Core.Goal.CommanderHurricanesArmy": {
 		"heading": "",
 		"questions": [
 			"<div class='question'>Alicorns count as pegasus correct? So three of them would count for the goal of \"Commander Hurricane's Army\"?</div><div class='answer'>Alas, the only time alicorns and pegasi count for the same Goal is for Pomf!, which is *specifically* referring to things with wings. It does not count for Commander Hurricane's Army, which is specifically only referring to Pegasi.</div>"
@@ -300,7 +300,7 @@ export default {
 			"<div class='question'>Since Race-change ships affect both ponies on a two-pony card, does that mean shipping Nightmare Moon with pricessified Aloe & Lotus fulfills Princess Pile?</div><div class='answer'>Indeedy!</div>"
 		]
 	},
-	"Core.Goal.Swinging": {
+	"EC.Goal.Swinging": {
 		"heading": "",
 		"questions": [
 			"<div class='question'>To complete Swinging (pair one pony with Mr. and Mrs. Cake), would it work to, for example, pair Mr. Cake with Lyra, then pair Mrs. Cake with a Changeling disguised as Lyra?</div><div class='answer'>Nope! Has to be the same Pony card, so they'd both have to pair off with the same Lyra card.</div>"

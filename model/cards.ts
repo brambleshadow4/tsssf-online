@@ -2391,7 +2391,7 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"NovelIdea.PanelOfPonies.Pony.LunaScourgeOfEquestria": {
-		"title": "Luan, Scourge of Equestria",
+		"title": "Luna, Scourge of Equestria",
 		"name": "Luna",
 		"gender": "female",
 		"race": "alicorn",

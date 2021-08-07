@@ -738,7 +738,6 @@ export async function moveCard(
 
 	if(startLocation == endLocation)
 	{
-		//console.log("same location: " + startLocation);
 		return;
 	}
 
@@ -758,9 +757,12 @@ export async function moveCard(
 
 	if(startLocation == "hand")
 	{
-		let i = model.hand.indexOf(card);
 
-		startPos = getPosFromId("hand" + i);
+		let orderedHand = model.hand.filter(x => isPony(x)).concat(model.hand.filter(x => isShip(x)));
+		let i = model.hand.indexOf(card);
+		let displayPos = orderedHand.indexOf(card);
+
+		startPos = getPosFromId("hand" + displayPos);
 
 		if(i == -1) { return };
 		model.hand.splice(i,1);

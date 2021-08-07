@@ -1,5 +1,6 @@
 import faq from "./faq.js";
 import * as cm from "../../model/cardManager.js";
+import "./knowledgeBase.js";
 
 var mechanicsTOC = document.getElementById('target-toc-mechanics')!
 var cardsTOC = document.getElementById('target-toc-cards')!
@@ -25,8 +26,14 @@ for(var key in faq)
 {
 	if(key.indexOf(".") > -1) // tagged by card
 	{
+		let headingTitle = "";
 
-		let headingTitle = cm.all()[key].title || key;
+		try {
+			headingTitle = cm.all()[key].title || key;
+		}		
+		catch(e) {
+			console.error("Bad FAQ card name: " + key);
+		}
 		cardsTOC.parentNode!.insertBefore(tocDiv(headingTitle, key), cardsTOC);
 		
 		var jumpTarget = document.createElement('span');

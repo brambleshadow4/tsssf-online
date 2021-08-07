@@ -230,9 +230,9 @@ export default function(){
 		let p2 = "Core.Pony.BonBon";
 		let changeling = "Core.Pony.UnicornChangeling";
 
-		// start -  p2 
-		//   |      |
-		//   p1  - change
+		//   S - X
+		//   |   |
+		//   A - B 
 
 		beforeEach(() => {
 			[game, player] = setupGame();

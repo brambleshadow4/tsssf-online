@@ -32,7 +32,7 @@ A: It's ship 2 ponies with the Object keyword together as you surmised, yep!
 
 Q: Alicorns count as pegasus correct? So three of them would count for the goal of "Commander Hurricane's Army"?
 A: Alas, the only time alicorns and pegasi count for the same Goal is for Pomf!, which is *specifically* referring to things with wings. It does not count for Commander Hurricane's Army, which is specifically only referring to Pegasi.
-#Core.Goal.CommanderHurricansArmy 
+#Core.Goal.CommanderHurricanesArmy 
 
 
 Q: For this Goal, can more than six cards be used, so long as they are all versions of the Mane 6 (and of course, there's at least one of each involved)?
@@ -229,7 +229,7 @@ A: Indeedy!
 
 Q: To complete Swinging (pair one pony with Mr. and Mrs. Cake), would it work to, for example, pair Mr. Cake with Lyra, then pair Mrs. Cake with a Changeling disguised as Lyra?
 A: Nope! Has to be the same Pony card, so they'd both have to pair off with the same Lyra card.
-#Core.Goal.Swinging 
+#EC.Goal.Swinging
 
 
 Q: Does "immune to love poison" only mean those ponies can't be moved from their position with love poison, or does it also mean you can't move another pony to be shipped with them with love poison?
