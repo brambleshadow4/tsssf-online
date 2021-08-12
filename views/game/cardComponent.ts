@@ -125,7 +125,7 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 
 export function makeCardElement(card: Card, location?: Location, isDraggable?: boolean, isDropTarget?: boolean): CardElement
 {
-	let cards = cm.inPlay();
+	let cards = cm.all();
 
 	let imgElement = document.createElement('div') as unknown as CardElement;
 	imgElement.classList.add("card");
@@ -869,7 +869,7 @@ export function addTempSymbol(element: CardElement, symbol: string, tooltip?: st
 
 function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 {
-	let cards = cm.inPlay();
+	let cardProps = cm.all()[card];
 
 	if(isAnon(card))
 	{
@@ -909,9 +909,9 @@ function setCardBackground(element: CardElement, card: Card, useLarge?: boolean)
 		else if (isPonyOrStart(card))
 			element.classList.add('start');
 
-		var src = cards[card].thumb;
+		var src = cardProps.thumb;
 		if(useLarge || !src)
-			src = cards[card].url;
+			src = cardProps.url;
 
 		if(src.startsWith("http:") && window.location.protocol == "https:")
 		{

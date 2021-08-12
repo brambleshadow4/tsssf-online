@@ -1,5 +1,5 @@
 import cards from "./cards.js";
-import {CardProps} from "./lib.js";
+import {CardProps, isStart} from "./lib.js";
 
 var allCards: {[key:string]: CardProps} = {};
 var gameCards: {[key:string]: CardProps} = {};
@@ -42,7 +42,6 @@ export function init(filter: string[], customCards: {[key:string]: CardProps})
 
 	allCards = newAllCards;
 
-
 	// set gameCards global
 	var newGameCards: {[key:string]: CardProps} = {}
 
@@ -62,7 +61,7 @@ export function init(filter: string[], customCards: {[key:string]: CardProps})
 		{
 			let match = pattern.substring(0, pattern.indexOf("*"));
 
-			if(key.startsWith(match))
+			if(key.startsWith(match) && !isStart(key))
 			{
 				newGameCards[key] = allCards[key];
 				continue;
