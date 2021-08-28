@@ -123,6 +123,7 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 	return points;
 }
 
+
 export function makeCardElement(card: Card, location?: Location, isDraggable?: boolean, isDropTarget?: boolean): CardElement
 {
 	let cards = cm.all();
@@ -443,7 +444,8 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			ghostCard.style.opacity = ".5";
 			ghostCard.style.position = "absolute";
 			ghostCard.style.top = e.pageY + "px";
-			ghostCard.style.left = e.pageX + "px"
+			ghostCard.style.left = e.pageX + "px";
+			ghostCard.style.zIndex = "var(--dragControlsZLevel)";
 			
 			showTrashButton(card, location!);
 
@@ -509,6 +511,11 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				overMainDiv = true;
 			}
 
+			console.log(draggedCard)
+			console.log(card);
+			console.log(location);
+			console.log(isValidMove(draggedCard, card, location!))
+
 			if(isValidMove(draggedCard, card, location!))
 			{
 				if (isBlank(card) || srcLocation == "hand" || srcLocation == "ponyDiscardPile,top")
@@ -552,7 +559,12 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			{
 				offsetGhost.parentNode!.removeChild(offsetGhost);
 				offsetGhost = undefined;
-			}	
+			}
+
+			if(location == "removed")
+			{
+				setCardBackground(imgElement, card);
+			}
 
 			e.preventDefault();
 
@@ -594,6 +606,19 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 	return imgElement as unknown as CardElement;
 }
 
+export function makeCardDropTarget(allowedDrops: "any" | "goal", location: Location)
+{
+	let card = "blank:pony";
+
+	if(allowedDrops == "goal")
+		card = "blank:goal";
+
+	var div = makeCardElement(card, location, false, true);
+
+	return div;
+	//addCardClickHandler(div, () => {});
+}
+
 export function cardRefURL(card: Card, info: CardProps)
 {
 	if(card.startsWith('X.'))
@@ -632,7 +657,7 @@ function showTrashButton(card: Card, location:Location)
 		trashButton.style.left = left + "px"
 		trashButton.style.width = "13vh";
 
-		trashButton.style.zIndex = "3";
+		trashButton.style.zIndex = "var(--dragControlsZLevel)";
 
 
 		document.body.appendChild(trashButton);

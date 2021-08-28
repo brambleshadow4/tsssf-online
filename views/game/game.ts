@@ -91,7 +91,7 @@ import {
 	updateWinnings,
 	updatePlayerList,
 	updateGoals,
-	updateHand,
+	updateHand, updateTableOffside,
 	initPeripherals,
 	openCardSelect,
 	openSearchCardSelect,
@@ -336,7 +336,6 @@ function animateCardMove(card: Card, startPos: {[key:string]: string}, endPos: {
 		(floatCard as any).style[key] = startPos[key];
 	}
 
-	floatCard.style.zIndex = "4";
 	floatCard.style.transition = "top .5s, left .5s";
 	floatCard.style.transitionTimingFunction = "linear";
 
@@ -628,6 +627,7 @@ export async function updateGame(newModel?: GameModel)
 	cardLocations[model.goalDiscardPile[model.goalDiscardPile.length-1]] = "goalDiscardPile,top";
 
 	updateWinnings();
+	updateTableOffside();
 	updatePlayerList();
 	updateTurnstate();
 }
@@ -654,20 +654,25 @@ export function getDataTransfer()
 }
 
 
-export function isValidMove(cardDragged: Card, targetCard: Card, endLocation: Location)
+export function isValidMove(cardDragged: Card, dropZone: Card, endLocation: Location)
 {
-	if(cardDragged == targetCard) return false;
+	if(cardDragged == dropZone) return false;
 	let model = win.model;
 
-	if(isStart(targetCard) && !isBoardLoc(win.cardLocations[cardDragged] ))
+	if(isStart(dropZone) && !isBoardLoc(win.cardLocations[cardDragged] ))
 	{
 		return false;
 	}
 
-	if(isPonyOrStart(targetCard) && isPonyOrStart(cardDragged))
+	if(isPonyOrStart(dropZone) && isPonyOrStart(cardDragged))
 	{
 		var offsetLoc = endLocation.replace("p,","offset,");
 		return !model.board[offsetLoc];
+	}
+
+	if(endLocation == "removed")
+	{
+		return !isStart(cardDragged);
 	}
 
 	if(!isItMyTurn())
@@ -675,8 +680,8 @@ export function isValidMove(cardDragged: Card, targetCard: Card, endLocation: Lo
 		return false;
 	}
 
-	return (targetCard == "blank:ship" && (isShip(cardDragged) || cm.inPlay()[cardDragged].action == "ship")
-		|| (targetCard == "blank:pony" && isPonyOrStart(cardDragged))
+	return (dropZone == "blank:ship" && (isShip(cardDragged) || cm.inPlay()[cardDragged].action == "ship")
+		|| (dropZone == "blank:pony" && isPonyOrStart(cardDragged))
 	);
 }
 
@@ -755,7 +760,7 @@ export async function moveCard(
 		}
 	}
 
-	if(startLocation == "hand")
+	else if(startLocation == "hand")
 	{
 
 		let orderedHand = model.hand.filter(x => isPony(x)).concat(model.hand.filter(x => isShip(x)));
@@ -769,6 +774,8 @@ export async function moveCard(
 
 		updateHand("-" + card);
 	}
+
+
 	else if(isDiscardLoc(startLocation))
 	{
 		
@@ -803,14 +810,6 @@ export async function moveCard(
 			player.hand.splice(i, 1);
 		}
 	}
-	/*else if(isOffsetLoc(startLocation))
-	{
-		var element = model.board[startLocation].element;
-		startPos = getPosFromElement(element);
-		element.parentNode.removeChild(element);
-
-		delete model.board[startLocation];
-	}*/
 	else if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
 	{
 		startPos = getPosFromElement(model.board[startLocation].element!);
@@ -836,6 +835,12 @@ export async function moveCard(
 		model.currentGoals[i] = {card:"blank:goal", achieved: false};
 
 		updateGoals();
+	}
+	else if(startLocation.startsWith("removed"))
+	{
+		let i = model.removed.indexOf(card);
+		model.removed.splice(i,1);
+		updateTableOffside();
 	}
 
 	/// removing
@@ -959,6 +964,12 @@ export async function moveCard(
 		model.currentGoals[i] = {card, achieved: false};
 		updateFun = () => updateGoals(i)
 	}
+	else if(endLocation.startsWith("removed"))
+	{
+		model.removed.push(card);
+		updateTableOffside();
+	}
+
 
 	cardLocations[card] = endLocation;
 	
@@ -979,6 +990,7 @@ export async function moveCard(
 
 	if(startLocation != "limbo" && !options.noAnimiation
 		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation)) // not going from discard to discard
+		&& startLocation != "removed" && endLocation != "removed"
 		&& (
 			isDiscardLoc(endLocation)
 			|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1

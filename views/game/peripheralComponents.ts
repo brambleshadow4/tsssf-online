@@ -33,7 +33,8 @@ import {
 	updateCardElement,
 	isDeleteClick,
 	endMoveShared,
-	addCardClickHandler
+	addCardClickHandler,
+	makeCardDropTarget
 } from "./cardComponent.js"
 
 import {
@@ -178,6 +179,23 @@ export function initPeripherals()
 		}
 	}
 
+
+	document.getElementById("expandOffside")!.onclick = function()
+	{
+		var tableOffside = document.getElementById("tableOffside") as HTMLDivElement;
+		if(tableOffside.classList.contains("open"))
+		{
+			tableOffside.classList.remove("open");
+		}
+		else
+		{
+			tableOffside.classList.add("open");
+		}
+	};
+
+
+	let removedCards = document.getElementById('removedCards') as HTMLDivElement;
+	removedCards.appendChild(makeCardDropTarget("any", "removed"));
 }
 
 function preRequestDrawGoal()
@@ -580,6 +598,26 @@ export function updateHand(updateInfo?: string)
 
 
 	updateCardRowHeight();
+}
+
+export function updateTableOffside()
+{
+	var removed = document.getElementById('removedCards')!;
+
+	var cards = removed.getElementsByClassName('card');
+
+	while(cards.length > 1)
+	{
+		cards[0].parentNode!.removeChild(cards[0]);	
+	}
+
+	var dropZone = cards[0];
+
+	for(let card of win.model.removed)
+	{	
+		dropZone.parentNode!.insertBefore(makeCardElement(card, "removed", true), dropZone);
+	}
+
 }
 
 window.addEventListener('resize', updateCardRowHeight);

@@ -99,6 +99,8 @@ export interface GameModel
 	goalDrawPile: Card[],
 
 	currentGoals: {card: Card, achieved: boolean}[],
+	removed: Card[],
+	tempGoals: Card[],
 
 	turnstate?: Turnstate,
 

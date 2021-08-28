@@ -264,6 +264,8 @@ export class GameModel implements GameModelShared
 	public goalDrawPile: Card[] = [];
 
 	public currentGoals: {card: Card, achieved: boolean}[] = [];
+	public tempGoals: Card[] = [];
+	public removed: Card[] = [];
 
 	public runGoalLogic = true;
 
@@ -1240,6 +1242,8 @@ export class GameModel implements GameModelShared
 		model.customCards = this.customCards;
 
 		model.currentGoals = this.currentGoals;
+		model.removed = this.removed;
+		model.tempGoals = this.tempGoals;
 
 		model.goalDrawPileLength = this.goalDrawPile.length;
 		model.ponyDrawPileLength = this.ponyDrawPile.length;
@@ -1250,6 +1254,7 @@ export class GameModel implements GameModelShared
 		model.hand = player.hand;
 		model.winnings = player.winnings;
 		model.playerName = player.name;
+
 
 		model.players = this.getPlayerListForThisPlayer(socket)
 
@@ -1468,6 +1473,9 @@ export class GameModel implements GameModelShared
 			{card:"blank:goal", achieved: false},
 			{card:"blank:goal", achieved: false}
 		];
+
+		this.removed = [];
+		this.tempGoals = [];
 
 		// client only props
 		//     hand:
@@ -1836,6 +1844,12 @@ export class GameModel implements GameModelShared
 			
 		}
 
+		if(startLocation == "removed")
+		{
+			let i = this.removed.indexOf(card);
+			this.removed.splice(i,1);
+		}
+
 		// move to end location
 
 		if(endLocation == "hand")
@@ -1881,6 +1895,10 @@ export class GameModel implements GameModelShared
 			}
 		}
 
+		if(endLocation == "removed")
+		{
+			this.removed.push(card);
+		}
 
 		//postmove
 

@@ -9,6 +9,29 @@
 	1: ship cards
  */
 
+:root {
+
+	--giantCardZLevel: 20;
+	--abovePopupZLevel: 16;
+	--popupZLevel: 15;
+	--animatedCardZLevel: 10;
+
+
+	--dragControlsZLevel: 8;
+
+	--sidebarZLevel: 7;
+
+
+	--offsideZLevel: 5;
+
+	--offsetCardsZLevel: 3;
+	--controlsZLevel: 3;
+	--cardsZLevel: 2;
+	--shipCardsZLevel: 1;
+	
+
+}
+
 
 #playingArea
 {
@@ -36,7 +59,7 @@
 	display: flex;
 	flex-direction: row;
 
-	z-index: 3;
+	z-index: var(--controlsZLevel);
 }
 
 #playerList
@@ -52,7 +75,7 @@
 
 #actionButtons
 {
-	z-index: 3;
+	z-index: var(--controlsZLevel);
 }
 
 #actionButtons img
@@ -81,8 +104,69 @@
 	position: absolute;
 	bottom: 0;
 	right: 0;
-	z-index: 3;
+	z-index: var(--controlsZLevel);
 }
+
+#tableOffside
+{
+	position: absolute;
+
+	top: 0px;
+	bottom: 20%;
+
+	right: calc(100% - 29vh);
+	z-index: var(--offsideZLevel);
+	
+	width: calc(80% - 29vh);
+	background-color: white;
+
+	transition-property: right;
+	transition-duration: .5s;
+}
+
+#tableOffsideBody
+{
+	width: 100%;
+	height: 100%;
+	overflow-y: auto;
+}
+
+#expandOffside
+{
+	position: absolute;
+	height: 40px;
+	top: calc(50% - 20px);
+	right: -20px;
+	width: 20px;
+
+	border-top-right-radius: 5px;
+	border-bottom-right-radius: 5px;
+	background-color: white;
+	cursor: pointer;
+
+}
+
+#expandOffside img 
+{
+	width: 100%;
+	margin-top: 10px;
+}
+
+#tableOffside.open
+{
+	right: 20%;
+	
+}
+
+#tableOffside.open img 
+{
+	transform: rotateZ(180deg);
+}
+
+#tableOffside h2 {
+	font-size: initial;
+}
+
 
 body.cardsUnapproved .card.custom
 {
@@ -174,7 +258,10 @@ body.cardsUnapproved .card.custom
 	top: 0px;
 	bottom: 20%;
 
+	z-index: var(--sidebarZLevel);
+
 	width: 29vh;
+	background-color: white;
 }
 
 
@@ -219,7 +306,7 @@ input[type="number"]
 	margin-top: 1vh;
 	margin-left: 1vh;
 
-	z-index: 2;
+	z-index: var(--cardsZLevel);
 	cursor: pointer;
 
 	display: inline-block;
@@ -231,6 +318,10 @@ input[type="number"]
 	vertical-align: middle;
 
 	position: relative;
+}
+.card.flying, .card.ship.flying
+{
+	z-index: var(--animatedCardZLevel);
 }
 
 #playingArea .card
@@ -256,16 +347,17 @@ input[type="number"]
 	background-image: url(/img/Pony-Back.png);
 }
 
-.card.ship, .card.ship.flying
+.card.ship
 {
 	background-color: #C9305D;
 	background-image: url(/img/Ship-Back.png);
-	z-index: 1;
+	z-index: var(--shipCardZLevel);
+
 }
 
 .card.pony.shippos
 {
-	z-index: 1;
+	z-index: var(--shipCardsZLevel);
 }
 
 .card.start
@@ -294,14 +386,14 @@ input[type="number"]
 .card.sideways
 {
 	transform: rotate(90deg);
-	z-index: 0;
+	z-index: var(--shipCardsZLevel); /*might be wrong*/
 }
 
 .cardActionButton
 {
 	position: absolute;
 	bottom: 0px;
-	z-index: 2;
+	z-index: var(--cardsZLevel);
 }
 
 .desktopmobileswitch.desktop .mobile {display: none;}
@@ -334,7 +426,7 @@ input[type="number"]
 	background-color: white;
 }
 
-.nomove #cardRow, .nomove #sidebar
+.nomove #cardRow, .nomove #sidebar, .nomove #tableOffside, .nomove #expandOffside
 {
 	background-color: #C8C8C8;
 }
@@ -389,7 +481,7 @@ input[type="number"]
 	left: -2vh;
 	cursor: pointer;
 	vertical-align: middle;
-	z-index: 3;
+	z-index: var(--controlsZLevel);
 }
 
 .shuffleContainer
@@ -422,7 +514,7 @@ input[type="number"]
 {
 	font-size: initial;
 	border: solid 2px black;
-	z-index: 5;
+	z-index: var(--popupZLevel);
 	background-color: white;
 	overflow-y: auto;
 
@@ -562,7 +654,7 @@ input[type="number"]
 	font-size: 12pt;
 	width: 200px;
 	position: absolute;
-	z-index: 6;
+	z-index: var(--abovePopupZLevel);
 	background-color: white;
 
 	box-sizing: border-box;
@@ -699,7 +791,7 @@ input[type="number"]
 	width: 13vh;
 	right: 0vh;
 	height: 24pt;
-	z-index: 3;
+	z-index: var(--controlsZLevel);
 	font-weight: bold;
 	color: #EB0687;
 	font-size: 24pt;
@@ -855,11 +947,11 @@ iframe
 
 
 @keyframes changeling {
-  0% {opacity: 0}
-  25% {opacity: 1}
-  50% {opacity: 1}
-  75% {opacity: 0}
-  100% {opacity: 0}
+	0% {opacity: 0}
+	25% {opacity: 1}
+	50% {opacity: 1}
+	75% {opacity: 0}
+	100% {opacity: 0}
 }
 
 .noLogic

@@ -54,8 +54,8 @@ export default {
 	"GamePointsWithUnit": "{0}pts", // {0} is the number of points the player has. "points" should be shortened to something really short, a.k.a. "pts"
 	"GameRemoveUnconnectedCardsButton": "Remove Unconnected Cards",
 
-
-
+	"OffsideTemporaryGoals": "Temporary Goals",
+	"OffsideRemovedCards": "Removed Cards",
 
 	"PopupTitleSelectDisguise": "Select Disguise",
 	"PopupTitleSpecial": "Special",
