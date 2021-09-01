@@ -152,13 +152,18 @@
 	margin-top: 10px;
 }
 
+#tableOffside:not(.open) #expandOffside.achieved
+{
+	box-shadow: 0 0 1.6vh 1.6vh green;
+}
+
 #tableOffside.open
 {
 	right: 20%;
 	
 }
 
-#tableOffside.open img 
+#tableOffside.open #expandOffside img 
 {
 	transform: rotateZ(180deg);
 }
@@ -408,6 +413,15 @@ input[type="number"]
 	cursor: pointer;
 }
 
+
+.goalDrawIcon
+{
+	position: absolute;
+	top: 6.5vh;
+	left: 4vh;
+	width: 5vh;
+	height: 5vh;
+}
 
 #cardRow
 {

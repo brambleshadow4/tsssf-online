@@ -14,7 +14,8 @@ import {
 	updateShipDiscard,
 	updateGoalDiscard,
 	updatePlayerList,
-	updateGoals
+	updateGoals,
+	updateTableOffside
 } from "./peripheralComponents.js";
 
 import {WebSocketPlus} from "../viewSelector.js";
@@ -232,6 +233,10 @@ export function attachToSocket(socket: WebSocketPlus)
 			model.achievedGoals = new Set(achievedCards);
 
 			updateGoals(undefined, true);
+			if(model.tempGoals)
+			{
+				updateTableOffside();
+			}
 		}
 	};
 
@@ -279,10 +284,15 @@ export function requestDrawShip()
 		broadcast("draw;ship");
 }
 
-export function requestDrawGoal()
+export function requestDrawGoal(specialLocation?: string)
 {
 	if(isItMyTurn())
-		broadcast("draw;goal");
+	{
+		if(specialLocation)
+			broadcast("draw;goal;" + specialLocation);
+		else
+			broadcast("draw;goal");
+	}
 }
 
 

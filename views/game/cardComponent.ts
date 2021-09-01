@@ -5,7 +5,7 @@ import {
 	isDiscardLoc,
 	isPonyOrStart,
 	isBoardLoc,
-	isGoalLoc,
+	isGoalLoc, isGoalActiveInLocation,
 	isPony,
 	isGoal,
 	Card,
@@ -138,7 +138,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 
 	setCardBackground(imgElement, card);
 
-	if(!isBlank(card) && cards[card] && !(cards[card] as GoalProps).goalLogic && location && isGoalLoc(location))
+	if(!isBlank(card) && cards[card] && !(cards[card] as GoalProps).goalLogic && location && isGoalActiveInLocation(location))
 	{
 		var warningSym = document.createElement('img')
 		warningSym.src = "/img/warning.svg";
@@ -149,7 +149,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 	}
 
 
-	function addGoalCheck(imgElement: HTMLElement, goalNo: number)
+	function addGoalCheck(imgElement: HTMLElement, card: Card, location: Location)
 	{
 		if(!isItMyTurn()) return;
 
@@ -170,7 +170,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				e.stopPropagation();
 
 				var model = globals.model;
-				var card = model.currentGoals[goalNo];
+				
 				var achieved = model.achievedGoals.has(card);
 				var points = getGoalPoints(model, card, achieved);
 
@@ -181,7 +181,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				if(value == undefined)
 					return;
 
-				moveCard(card, "goal," + goalNo, "winnings", {extraArg: value})
+				moveCard(card, location, "winnings", {extraArg: value})
 			}
 		}
 
@@ -190,11 +190,12 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 		imgElement.appendChild(img);
 	}
 
-	if(location && isGoalLoc(location) && !isBlank(card))
+	if(location && isGoalActiveInLocation(location) && !isBlank(card))
 	{
+		let x = location;
 		imgElement.addEventListener("mouseenter", function(e)
 		{
-			addGoalCheck(imgElement, Number(location!.split(',')[1]))
+			addGoalCheck(imgElement, card, x);
 		});
 	}
 
@@ -269,7 +270,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			completeMoveShared();
 			endMoveShared();
 		}
-		else if(isItMyTurn() && (isDraggable || (!isBlank(card) && isGoalLoc(location))))
+		else if(isItMyTurn() && (isDraggable || (!isBlank(card) && isGoalLoc(location)))) // TODO refactor this
 		{
 			if(location.startsWith("p,"))
 			{
@@ -299,9 +300,9 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 
 			imgElement.classList.add('selected');
 
-			if(isGoalLoc(location))
+			if(isGoalActiveInLocation(location))
 			{
-				addGoalCheck(imgElement, Number(location.split(',')[1]));
+				addGoalCheck(imgElement, card, location);
 			}
 
 			
@@ -510,11 +511,6 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			{
 				overMainDiv = true;
 			}
-
-			console.log(draggedCard)
-			console.log(card);
-			console.log(location);
-			console.log(isValidMove(draggedCard, card, location!))
 
 			if(isValidMove(draggedCard, card, location!))
 			{

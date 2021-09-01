@@ -270,6 +270,11 @@ export function isGoalLoc(location: Location)
 	return location.startsWith("goal,");
 }
 
+export function isGoalActiveInLocation(location: Location)
+{
+	return location.startsWith("goal,") || location == "tempGoals";
+}
+
 export function isPlayerLoc(location: Location)
 {
 	return location.startsWith("player,");

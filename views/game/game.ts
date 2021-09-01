@@ -735,8 +735,6 @@ export async function moveCard(
 
 		updateHand("-" + card);
 	}
-
-
 	else if(isDiscardLoc(startLocation))
 	{
 		
@@ -801,6 +799,12 @@ export async function moveCard(
 	{
 		let i = model.removed.indexOf(card);
 		model.removed.splice(i,1);
+		updateTableOffside();
+	}
+	else if(startLocation == "tempGoals")
+	{
+		let i = model.tempGoals.indexOf(card);
+		model.tempGoals.splice(i,1);
 		updateTableOffside();
 	}
 
@@ -930,6 +934,11 @@ export async function moveCard(
 		model.removed.push(card);
 		updateTableOffside();
 	}
+	else if(endLocation.startsWith("tempGoals"))
+	{
+		model.tempGoals.push(card);
+		updateTableOffside();
+	}
 
 
 	cardLocations[card] = endLocation;
@@ -947,11 +956,16 @@ export async function moveCard(
 	}
 
 	// run animation (if applicable)
+
+	function isOffside(location: string)
+	{
+		return location == "removed" || location == "tempGoals";
+	}
 	
 
 	if(startLocation != "limbo" && !options.noAnimiation
 		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation)) // not going from discard to discard
-		&& startLocation != "removed" && endLocation != "removed"
+		&& !isOffside(startLocation) && !isOffside(endLocation)
 		&& (
 			isDiscardLoc(endLocation)
 			|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1

@@ -196,6 +196,22 @@ export function initPeripherals()
 
 	let removedCards = document.getElementById('removedCards') as HTMLDivElement;
 	removedCards.appendChild(makeCardDropTarget("any", "removed"));
+
+
+	let tempGoalsDrawButton = makeCardElement("blank:goal");
+	
+	addCardClickHandler(tempGoalsDrawButton, function(){
+		requestDrawGoal("tempGoals");
+	});
+
+	let icon = document.createElement('img');
+	icon.src = "/img/goal-plus.svg";
+	icon.className = "goalDrawIcon";
+	tempGoalsDrawButton.appendChild(icon);
+
+	
+
+	document.getElementById('tempGoals')!.appendChild(tempGoalsDrawButton);
 }
 
 function preRequestDrawGoal()
@@ -602,6 +618,7 @@ export function updateHand(updateInfo?: string)
 
 export function updateTableOffside()
 {
+	// REmoved section
 	var removed = document.getElementById('removedCards')!;
 
 	var cards = removed.getElementsByClassName('card');
@@ -618,6 +635,35 @@ export function updateTableOffside()
 		dropZone.parentNode!.insertBefore(makeCardElement(card, "removed", true), dropZone);
 	}
 
+
+	// temp goals
+	var tempGoals = document.getElementById('tempGoals')!;
+
+	cards = tempGoals.getElementsByClassName('card');
+
+	while(cards.length > 1)
+	{
+		cards[0].parentNode!.removeChild(cards[0]);	
+	}
+
+	var dropZone = cards[0];
+
+	let model = win.model;
+
+	let expander = document.getElementById('expandOffside')!;
+	expander.classList.remove("achieved");
+
+	for(let card of win.model.tempGoals)
+	{	
+		let cardDiv = makeCardElement(card, "tempGoals", true);
+		dropZone.parentNode!.insertBefore(cardDiv, dropZone);
+
+		if(model.achievedGoals.has(card))
+		{
+			cardDiv.classList.add('achieved');
+			expander.classList.add("achieved");
+		}
+	}
 }
 
 window.addEventListener('resize', updateCardRowHeight);
