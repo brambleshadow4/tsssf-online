@@ -263,7 +263,8 @@ export class GameModel implements GameModelShared
 	public shipDrawPile: Card[] = [];
 	public goalDrawPile: Card[] = [];
 
-	public currentGoals: {card: Card, achieved: boolean}[] = [];
+	public currentGoals: Card[] = [];
+	public achievedGoals: Set<Card> = new Set();
 	public tempGoals: Card[] = [];
 	public removed: Card[] = [];
 
@@ -692,12 +693,12 @@ export class GameModel implements GameModelShared
 
 				if(typ == "goal")
 				{
-					var goalNo = game.currentGoals.map(x => x.card).indexOf("blank:goal")
+					var goalNo = game.currentGoals.indexOf("blank:goal")
 
 					if(len && goalNo > -1)
 					{
 						let card = model2[typ + "DrawPile"].pop();
-						game.currentGoals[goalNo] = {card, achieved: false};
+						game.currentGoals[goalNo] = card
 						game.cardLocations[card] = "goal," + goalNo;
 
 						var msg = "draw;" + typ + ";" + (len - 1);
@@ -1242,6 +1243,7 @@ export class GameModel implements GameModelShared
 		model.customCards = this.customCards;
 
 		model.currentGoals = this.currentGoals;
+		model.achievedGoals = [...this.achievedGoals] as any;
 		model.removed = this.removed;
 		model.tempGoals = this.tempGoals;
 
@@ -1365,24 +1367,32 @@ export class GameModel implements GameModelShared
 
 		var sendUpdate = false;
 
-		for(var goalInfo of this.currentGoals)
+		for(var goal of this.currentGoals)
 		{
 			var achieved = false;
 
-			if(!isBlank(goalInfo.card))
-				achieved = evalGoalCard(goalInfo.card, this)
+			if(!isBlank(goal))
+				achieved = evalGoalCard(goal, this)
 
-			if(goalInfo.achieved != achieved)
+			if(achieved != this.achievedGoals.has(goal))
 			{
 				sendUpdate = true;
 			}
 
-			goalInfo.achieved = achieved;
+			if(achieved)
+			{
+				this.achievedGoals.add(goal);
+			}
+			else
+			{
+				this.achievedGoals.delete(goal);
+			}
 		}
 
 		if(sendUpdate)
 		{
-			this.toEveryone("goalachieved;" + this.currentGoals.map(x => x.achieved ? "1" : "").join(";"));
+			let list = ["goalachieved", ...this.achievedGoals];
+			this.toEveryone(list.join(";"));
 		}
 	}
 
@@ -1469,10 +1479,10 @@ export class GameModel implements GameModelShared
 		this.shipDiscardPile = [];
 
 		this.currentGoals = [
-			{card:"blank:goal", achieved: false},
-			{card:"blank:goal", achieved: false},
-			{card:"blank:goal", achieved: false}
+			"blank:goal","blank:goal","blank:goal"
 		];
+
+		this.achievedGoals = new Set();
 
 		this.removed = [];
 		this.tempGoals = [];
@@ -1583,7 +1593,7 @@ export class GameModel implements GameModelShared
 			if(this.currentGoals[goalNo] == undefined)
 				return false;
 
-			return this.currentGoals[goalNo].card != "blank:goal"
+			return this.currentGoals[goalNo] != "blank:goal"
 		}
 
 		return false;
@@ -1839,8 +1849,8 @@ export class GameModel implements GameModelShared
 		{
 			let [_,iStr] = startLocation.split(",")
 			let i = Number(iStr);
-			if(this.currentGoals[i].card != "blank:goal")
-				this.currentGoals[i].card = "blank:goal";
+			if(this.currentGoals[i] != "blank:goal")
+				this.currentGoals[i] = "blank:goal";
 			
 		}
 
@@ -1872,7 +1882,7 @@ export class GameModel implements GameModelShared
 		{
 			var [_,goalNoStr] = endLocation.split(",")
 			let goalNo = Number(goalNoStr);
-			this.currentGoals[goalNo].card = card;
+			this.currentGoals[goalNo] = card;
 			this.cardLocations[card] = "goal," + goalNo;
 		}
 
@@ -2125,7 +2135,7 @@ function handleCrash(this: any, fun: Function)
 		try {
 			fun(...args) 
 		}
-		catch(e)
+		catch(e: any)
 		{
 			var data = [];
 

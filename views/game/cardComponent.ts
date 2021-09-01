@@ -170,8 +170,8 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				e.stopPropagation();
 
 				var model = globals.model;
-				var card = model.currentGoals[goalNo].card;
-				var achieved = model.currentGoals[goalNo].achieved
+				var card = model.currentGoals[goalNo];
+				var achieved = model.achievedGoals.has(card);
 				var points = getGoalPoints(model, card, achieved);
 
 				var value = points[0];

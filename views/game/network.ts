@@ -4,7 +4,7 @@ import {
 } from "./game.js";
 
 import {
-	GameModel,
+	GameModelPlayer as GameModel,
 	Location,
 	Card
 } from "../../model/lib.js";
@@ -132,8 +132,12 @@ export function attachToSocket(socket: WebSocketPlus)
 		if(event.data.startsWith("model;"))
 		{
 			let modelPreviouslyLoaded = model;
-		
-			updateGame(JSON.parse(event.data.substring(6)));
+			
+			let newModel = JSON.parse(event.data.substring(6)) as GameModel;
+
+			newModel.achievedGoals = new Set(newModel.achievedGoals as any);
+
+			updateGame(newModel);
 
 			if(!modelPreviouslyLoaded)
 			{
@@ -222,12 +226,10 @@ export function attachToSocket(socket: WebSocketPlus)
 
 		if(event.data.startsWith("goalachieved;"))
 		{
-			let _, achievedCards: boolean[];
-			[_, ...achievedCards] = (event.data as string).split(";").map( x => !!x);
+			let _, achievedCards: Card[];
+			[_, ...achievedCards] = (event.data as string).split(";");
 
-			model.currentGoals[0].achieved = achievedCards[0];
-			model.currentGoals[1].achieved = achievedCards[1];
-			model.currentGoals[2].achieved = achievedCards[2];
+			model.achievedGoals = new Set(achievedCards);
 
 			updateGoals(undefined, true);
 		}

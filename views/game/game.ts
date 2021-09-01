@@ -28,35 +28,6 @@
 	type CardID is a string used to represent what the card is. It looks something like "Core.Pony.SuperSpyTwilight"
 
 
-	model: {
-		board: map BoardLocation -> {element: HTMLElement, card: CardID}
-
-		offsets: {
-			// existence of the offset key signifies the card is offset
-			[offsetKey]: string // the string is the id of the card element added to the DOM
-		}
-		
-		players: map int ->
-
-		playerName: string // the name of this player
-
-		currentGoals: {
-			card: CardID,
-			achieved: boolean
-		}[]
-
-		// turnstate is undefined in sandbox mode
-		turnstate:{
-			currentPlayer: string // the name of the player whose turn it is
-			overrides: map CardID -> {
-				race?: string
-				gender?: string
-				disguise?: cardID 
-				doublePony?: boolean
-			}
-		}
-	}
-
 */
 
 import * as cm from "../../model/cardManager.js";
@@ -77,7 +48,7 @@ import {
 	isCardIncluded,
 	getNeighborKeys,
 	slashStringToSet,
-	GameModel as GameModelShared,
+	GameModelPlayer as GameModel,
 	Card, Location,
 	CardProps, GoalProps, ShipProps, PonyProps, OverrideProps,
 	Turnstate,
@@ -127,17 +98,7 @@ import {
 } from "./network.js";
 
 
-interface GameModel extends GameModelShared
-{
-	hand: Card[],
-	winnings: {card: Card, value: number}[],
-	playerName: string,
-	turnstate: Turnstate & {
-		openShips: {[card: string]: true}
-		removedFrom: [Location, Card];
-		shipTarget?: Location 
-	};
-}
+
 
 import {createPopup} from "./popupComponent.js";
 
@@ -694,7 +655,7 @@ function getCardAtLoc(loc: Location)
 	}
 	if(isGoalLoc(loc))
 	{
-		return model.currentGoals[Number(loc.split(",")[1])].card;
+		return model.currentGoals[Number(loc.split(",")[1])];
 	}
 }
 
@@ -832,7 +793,7 @@ export async function moveCard(
 
 		startPos = getPosFromElement(document.getElementById('currentGoals')!.getElementsByClassName('card')[i] as HTMLElement);
 
-		model.currentGoals[i] = {card:"blank:goal", achieved: false};
+		model.currentGoals[i] = "blank:goal";
 
 		updateGoals();
 	}
@@ -961,7 +922,7 @@ export async function moveCard(
 
 		endPos = getPosFromElement(document.getElementById('currentGoals')!.getElementsByClassName('card')[i] as HTMLElement);
 
-		model.currentGoals[i] = {card, achieved: false};
+		model.currentGoals[i] = card;
 		updateFun = () => updateGoals(i)
 	}
 	else if(endLocation.startsWith("removed"))

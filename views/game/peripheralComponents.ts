@@ -204,7 +204,7 @@ function preRequestDrawGoal()
 	var i = 0;
 	while(i < model.currentGoals.length)
 	{
-		if(isBlank(model.currentGoals[i].card))
+		if(isBlank(model.currentGoals[i]))
 			break;
 		i++;
 	}
@@ -321,7 +321,7 @@ export function updateGoalDiscard(tempCard?: Card)
 		if(model.goalDiscardPile.length)
 		{
 			var card = await openSearchCardSelect(s.PopupTitleDiscardedGoals, "", model.goalDiscardPile, true);
-			var openGoal = model.currentGoals.map(x => x.card).indexOf("blank:goal");
+			var openGoal = model.currentGoals.indexOf("blank:goal");
 
 
 			if(card && isItMyTurn() && openGoal > -1)
@@ -405,7 +405,7 @@ export function updateWinnings()
 
 		lastArrowClick = newTime;
 
-		var goalSlot = model.currentGoals.map(x => x.card).indexOf("blank:goal");
+		var goalSlot = model.currentGoals.indexOf("blank:goal");
 		if(goalSlot > -1)
 		{
 			if(model.winnings.length == 1)
@@ -502,11 +502,11 @@ export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 
 		let element = updateCardElement(
 			goalDiv.getElementsByClassName('card')[i] as HTMLElement,
-			model.currentGoals[i].card, "goal," + i, false, false);
+			model.currentGoals[i], "goal," + i, false, false);
 
-		win.cardLocations[model.currentGoals[i].card] = "goal," + i;
+		win.cardLocations[model.currentGoals[i]] = "goal," + i;
 
-		if(model.currentGoals[i].achieved)
+		if(model.achievedGoals.has(model.currentGoals[i]))
 		{
 			element.classList.add('achieved');
 		}
@@ -758,9 +758,6 @@ export function openSearchCardSelect(title: string, heading: string, cards: Card
 	return createSearchPopup(title, cardProps, renderFun);
 
 }
-
-
-
 
 
 win.openSettings = function()

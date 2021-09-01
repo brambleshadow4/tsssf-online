@@ -98,13 +98,27 @@ export interface GameModel
 	shipDrawPile: Card[],
 	goalDrawPile: Card[],
 
-	currentGoals: {card: Card, achieved: boolean}[],
+	currentGoals: Card[],
+	achievedGoals: Set<Card>,
+
 	removed: Card[],
 	tempGoals: Card[],
 
 	turnstate?: Turnstate,
 
 	messageHistory: string[],
+}
+
+export interface GameModelPlayer extends GameModel
+{
+	hand: Card[],
+	winnings: {card: Card, value: number}[],
+	playerName: string,
+	turnstate: Turnstate & {
+		openShips: {[card: string]: true}
+		removedFrom: [Location, Card];
+		shipTarget?: Location 
+	};
 }
 
 export interface GameModelServer extends GameModel
