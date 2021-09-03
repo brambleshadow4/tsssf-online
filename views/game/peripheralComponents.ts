@@ -198,7 +198,7 @@ export function initPeripherals()
 	removedCards.appendChild(makeCardDropTarget("any", "removed"));
 
 
-	let tempGoalsDrawButton = makeCardElement("blank:goal");
+	let tempGoalsDrawButton = makeCardElement("blank:goal", "tempGoals", false, true);
 	
 	addCardClickHandler(tempGoalsDrawButton, function(){
 		requestDrawGoal("tempGoals");
@@ -326,7 +326,7 @@ export function updateGoalDiscard(tempCard?: Card)
 		document.getElementById("goalDiscardPile")!,
 		topCard,
 		"goalDiscardPile,top",
-		false, false
+		l > 0, false
 	);
 
 
@@ -518,7 +518,7 @@ export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 
 		let element = updateCardElement(
 			goalDiv.getElementsByClassName('card')[i] as HTMLElement,
-			model.currentGoals[i], "goal," + i, false, false);
+			model.currentGoals[i], "goal," + i, true, true);
 
 		win.cardLocations[model.currentGoals[i]] = "goal," + i;
 
@@ -612,8 +612,7 @@ export function updateHand(updateInfo?: string)
 		cardDivs[i].id = "hand" + i;
 	}
 
-
-	updateCardRowHeight();
+	setTimeout(updateCardRowHeight, 10);
 }
 
 export function updateTableOffside()
@@ -628,7 +627,7 @@ export function updateTableOffside()
 		cards[0].parentNode!.removeChild(cards[0]);	
 	}
 
-	var dropZone = cards[0];
+	var dropZone = cards[0] as HTMLElement;
 
 	for(let card of win.model.removed)
 	{	
@@ -639,6 +638,8 @@ export function updateTableOffside()
 	// temp goals
 	var tempGoals = document.getElementById('tempGoals')!;
 
+
+
 	cards = tempGoals.getElementsByClassName('card');
 
 	while(cards.length > 1)
@@ -646,7 +647,9 @@ export function updateTableOffside()
 		cards[0].parentNode!.removeChild(cards[0]);	
 	}
 
-	var dropZone = cards[0];
+	dropZone = cards[0] as HTMLElement;
+
+	dropZone.style.backgroundImage = "url(/img/blank.svg)";
 
 	let model = win.model;
 
@@ -696,7 +699,7 @@ function getScrollBarWidth () {
 };
 
 
-function updateCardRowHeight()
+export function updateCardRowHeight()
 {
 	var cardRow = document.getElementById("cardRow");
 

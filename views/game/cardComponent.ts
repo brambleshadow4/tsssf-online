@@ -376,7 +376,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 		}
 	}
 
-	if(isDraggable && location)
+	if(isDraggable && location && !isBlank(card))
 	{
 		var isInterruptCard = cm.inPlay()[card].action == "interrupt" && location == "hand";
 
@@ -1010,7 +1010,6 @@ function enlargeCard()
 	giantCard.style.left = x + "px";
 	giantCard.style.width = width + "px";
 	giantCard.style.height = height + "px";
-	giantCard.style.zIndex = "6";
 	giantCard.style.borderRadius = "15px";
 	giantCard.style.backgroundPosition = "center";
 	giantCard.style.backgroundSize = "cover";

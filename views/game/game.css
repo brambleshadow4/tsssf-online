@@ -17,15 +17,18 @@
 	--animatedCardZLevel: 10;
 
 
-	--dragControlsZLevel: 8;
+	--controls2ZLevel: 7;
+	--dragControlsZLevel: 6;
+	--controlsZLevel: 6;
+	--cardRowZLevel: 6;
 
-	--sidebarZLevel: 7;
+
+	--sidebarZLevel: 5;
 
 
-	--offsideZLevel: 5;
-
+	--offsideZLevel: 4;
 	--offsetCardsZLevel: 3;
-	--controlsZLevel: 3;
+	
 	--cardsZLevel: 2;
 	--shipCardsZLevel: 1;
 	
@@ -109,6 +112,7 @@
 
 #tableOffside
 {
+	padding-top: 20px;
 	position: absolute;
 
 	top: 0px;
@@ -434,6 +438,8 @@ input[type="number"]
 
 	width: 100%;
 
+	z-index: var(--cardRowZLevel);
+
 	overflow-x: auto;
 	overflow-y: hidden;
 
@@ -472,6 +478,11 @@ input[type="number"]
 .card.grab
 {
 	cursor: grab; 
+}
+
+#giantCard
+{
+	z-index: var(--giantCardZLevel);
 }
 
 
@@ -815,7 +826,7 @@ input[type="number"]
 {
 	display: none;
 	width: 5vh;
-	z-index: 5;
+	z-index: var(--controls2ZLevel);
 	margin-right: 1vh;
 	margin-bottom: 1vh;
 	position: relative;

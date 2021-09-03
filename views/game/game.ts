@@ -583,6 +583,16 @@ export async function updateGame(newModel?: GameModel)
 		cardLocations[card] = "goalDiscardPile,stack";
 	}
 
+	for(var card of model.tempGoals)
+	{
+		cardLocations[card] = "tempGoals";
+	}
+
+	for(var card of model.removed)
+	{
+		cardLocations[card] = "removed";
+	}
+
 	cardLocations[model.ponyDiscardPile[model.ponyDiscardPile.length-1]] = "ponyDiscardPile,top";
 	cardLocations[model.shipDiscardPile[model.shipDiscardPile.length-1]] = "shipDiscardPile,top";
 	cardLocations[model.goalDiscardPile[model.goalDiscardPile.length-1]] = "goalDiscardPile,top";
@@ -617,8 +627,16 @@ export function getDataTransfer()
 
 export function isValidMove(cardDragged: Card, dropZone: Card, endLocation: Location)
 {
-	if(cardDragged == dropZone) return false;
 	let model = win.model;
+	if(cardDragged == dropZone) return false;
+
+	if(win.cardLocations[cardDragged] == endLocation) return false;
+	
+
+	if((isGoalLoc(endLocation) || endLocation =="tempGoals") && isBlank(dropZone) && isGoal(cardDragged))
+	{
+		return true;
+	}
 
 	if(isStart(dropZone) && !isBoardLoc(win.cardLocations[cardDragged] ))
 	{

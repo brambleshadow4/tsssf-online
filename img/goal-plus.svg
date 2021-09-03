@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.959798"
-     inkscape:cx="241.4657"
-     inkscape:cy="8.3325933"
+     inkscape:zoom="2.8"
+     inkscape:cx="223.72351"
+     inkscape:cy="-26.523926"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -58,6 +58,13 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-1.3113022e-6,-244.08335)">
+    <rect
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect816"
+       width="33.408691"
+       height="35.947754"
+       x="9.7229147"
+       y="252.61035" />
     <path
        style="opacity:1;fill:#10ace8;fill-opacity:1;stroke:none;stroke-width:10.00062752;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        d="M 100 0 A 99.999996 99.999996 0 0 0 0 100 A 99.999996 99.999996 0 0 0 100 200 A 99.999996 99.999996 0 0 0 200 100 A 99.999996 99.999996 0 0 0 100 0 z M 87.5 40 L 112.5 40 L 112.5 87.5 L 160 87.5 L 160 112.5 L 112.5 112.5 L 112.5 160 L 87.5 160 L 87.5 112.5 L 40 112.5 L 40 87.5 L 87.5 87.5 L 87.5 40 z "
