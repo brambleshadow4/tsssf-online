@@ -224,7 +224,6 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 
 	if(selector.indexOf("!=") > -1)
 	{
-		
 		[prop, value] = selector.split("!=");
 		prop = prop.trim();
 		value = value.trim();
@@ -270,8 +269,6 @@ function doesCardMatchSelector(model: GameModel, card: Card, selector: string): 
 
 		prop = prop.trim();
 		value = value.trim();
-
-		//console.log(`getCardProp(model, ${card}, ${prop}) = ${getCardProp(model, card, prop)}`)
 
 		if(invert)
 		{

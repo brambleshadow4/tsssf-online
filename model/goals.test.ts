@@ -21,17 +21,17 @@ interface MockPlayer extends Player
 
 function expectGoalUnachieved(game: GameModel, goal: Card)
 {
-	let i = game.currentGoals.map(x => x.card).indexOf(goal);
+	let i = game.currentGoals.indexOf(goal);
 	expect(i >= 0 && i <= 3).toBe(true);
-	expect(game.currentGoals[i].achieved).toBe(false);
+	expect(game.achievedGoals.has(goal)).toBe(false);
 }
 
 function expectGoalAchieved(game: GameModel, goal: Card)
 {
-	let i = game.currentGoals.map(x => x.card).indexOf(goal);
+	let i = game.currentGoals.indexOf(goal);
 
 	expect(i >= 0 && i <= 3).toBe(true);
-	expect(game.currentGoals[i].achieved).toBe(true);
+	expect(game.achievedGoals.has(goal)).toBe(true);
 }
 
 
@@ -84,7 +84,7 @@ function setupGame(setupOptions?:{
 		{
 			let i = game.goalDrawPile.indexOf(goalCard);
 			game.goalDrawPile.splice(i, 1);
-			game.currentGoals[0] = {card: goalCard, achieved: false};
+			game.currentGoals[0] = goalCard
 			game.cardLocations[goalCard] = "goal,1";
 		},
 		move: function(card: Card, start: Location, end: Location)

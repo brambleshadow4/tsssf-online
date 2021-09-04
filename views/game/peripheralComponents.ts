@@ -33,7 +33,8 @@ import {
 	updateCardElement,
 	isDeleteClick,
 	endMoveShared,
-	addCardClickHandler
+	addCardClickHandler,
+	makeCardDropTarget
 } from "./cardComponent.js"
 
 import {
@@ -70,6 +71,8 @@ var SCROLL_BAR_WIDTH = getScrollBarWidth();
 
 export function initPeripherals()
 {
+	updateLangSelector()	
+
 	document.getElementById("ponyDrawPile")!.onclick = requestDrawPony;
 	document.getElementById("shipDrawPile")!.onclick = requestDrawShip;
 	document.getElementById("goalDrawPile")!.onclick = preRequestDrawGoal;
@@ -106,6 +109,8 @@ export function initPeripherals()
 
 	}
 
+
+
 	var hand = document.getElementById('hand')!
 	hand.ondragover = function(e)
 	{
@@ -118,6 +123,8 @@ export function initPeripherals()
 			e.preventDefault();
 		}
 	}
+
+
 
 
 	var inDragZone = false;
@@ -155,7 +162,7 @@ export function initPeripherals()
 						div.parentNode.removeChild(div);
 					var [card, startLoc] = getDataTransfer().split(";")
 
-					moveCard(card, startLoc, "hand");
+					moveCard(card, startLoc, "hand", {noAnimation: true});
 					broadcastMove(card, startLoc, "hand");
 				}
 
@@ -178,6 +185,40 @@ export function initPeripherals()
 		}
 	}
 
+
+	document.getElementById("expandOffside")!.onclick = function()
+	{
+		var tableOffside = document.getElementById("tableOffside") as HTMLDivElement;
+		if(tableOffside.classList.contains("open"))
+		{
+			tableOffside.classList.remove("open");
+		}
+		else
+		{
+			tableOffside.classList.add("open");
+		}
+	};
+
+
+	let removedCards = document.getElementById('removedCards') as HTMLDivElement;
+	removedCards.appendChild(makeCardDropTarget("any", "removed"));
+
+
+	let tempGoalsDrawButton = makeCardElement("blank:goal", "tempGoals", false, true);
+	
+	addCardClickHandler(tempGoalsDrawButton, function(){
+		requestDrawGoal("tempGoals");
+	});
+
+	let icon = document.createElement('img');
+	icon.src = "/img/goal-plus.svg";
+	icon.className = "goalDrawIcon";
+	icon.style.cursor = "pointer";
+	tempGoalsDrawButton.appendChild(icon);
+
+	
+
+	document.getElementById('tempGoals')!.appendChild(tempGoalsDrawButton);
 }
 
 function preRequestDrawGoal()
@@ -186,7 +227,7 @@ function preRequestDrawGoal()
 	var i = 0;
 	while(i < model.currentGoals.length)
 	{
-		if(isBlank(model.currentGoals[i].card))
+		if(isBlank(model.currentGoals[i]))
 			break;
 		i++;
 	}
@@ -292,7 +333,7 @@ export function updateGoalDiscard(tempCard?: Card)
 		document.getElementById("goalDiscardPile")!,
 		topCard,
 		"goalDiscardPile,top",
-		false, false
+		l > 0, false
 	);
 
 
@@ -303,7 +344,7 @@ export function updateGoalDiscard(tempCard?: Card)
 		if(model.goalDiscardPile.length)
 		{
 			var card = await openSearchCardSelect(s.PopupTitleDiscardedGoals, "", model.goalDiscardPile, true);
-			var openGoal = model.currentGoals.map(x => x.card).indexOf("blank:goal");
+			var openGoal = model.currentGoals.indexOf("blank:goal");
 
 
 			if(card && isItMyTurn() && openGoal > -1)
@@ -387,7 +428,7 @@ export function updateWinnings()
 
 		lastArrowClick = newTime;
 
-		var goalSlot = model.currentGoals.map(x => x.card).indexOf("blank:goal");
+		var goalSlot = model.currentGoals.indexOf("blank:goal");
 		if(goalSlot > -1)
 		{
 			if(model.winnings.length == 1)
@@ -484,11 +525,11 @@ export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 
 		let element = updateCardElement(
 			goalDiv.getElementsByClassName('card')[i] as HTMLElement,
-			model.currentGoals[i].card, "goal," + i, false, false);
+			model.currentGoals[i], "goal," + i, true, true);
 
-		win.cardLocations[model.currentGoals[i].card] = "goal," + i;
+		win.cardLocations[model.currentGoals[i]] = "goal," + i;
 
-		if(model.currentGoals[i].achieved)
+		if(model.achievedGoals.has(model.currentGoals[i]))
 		{
 			element.classList.add('achieved');
 		}
@@ -578,8 +619,153 @@ export function updateHand(updateInfo?: string)
 		cardDivs[i].id = "hand" + i;
 	}
 
+	setTimeout(updateCardRowHeight, 10);
+}
 
-	updateCardRowHeight();
+export function updateTableOffside(cardUpdate?: string)
+{	
+	let model = win.model;
+	let expander = document.getElementById('expandOffside')!;
+	
+
+	if(cardUpdate)
+	{
+		let card = cardUpdate.substring(1);
+		let updateType = cardUpdate[0];
+
+		if(updateType == "+")
+		{
+			for(let [arrayName,elId] of [["tempGoals", "tempGoals"], ["removed", "removedCards"]])
+			{
+				if((model as any)[arrayName].indexOf(card) > -1)
+				{
+					let cardDivs = document.getElementById(elId)!.getElementsByClassName('card');
+
+					if(cardDivs.length -1 == (model as any)[arrayName].length)
+					{
+						return; // card has already been added because updateTableOffside() has been called.
+					}
+
+
+					let lastCard = cardDivs[cardDivs.length-1] as HTMLElement;
+
+					let newCard = makeCardElement(card, arrayName, true)
+					lastCard.parentNode!.insertBefore(newCard, lastCard);
+
+					lastCard.style.backgroundImage = "url(/img/blank.svg)";
+
+					if(arrayName == "tempGoals" && model.achievedGoals.has(card))
+					{
+						newCard.classList.add('achieved');
+						expander.classList.add("achieved");
+					}
+				}
+			}
+		}
+
+		return;
+	}
+
+	expander.classList.remove("achieved");
+
+
+	// REmoved section
+	var removed = document.getElementById('removedCards')!;
+
+	var cards = removed.getElementsByClassName('card');
+
+	while(cards.length > 1)
+	{
+		cards[0].parentNode!.removeChild(cards[0]);	
+	}
+
+	var dropZone = cards[0] as HTMLElement;
+
+	for(let card of win.model.removed)
+	{	
+		dropZone.parentNode!.insertBefore(makeCardElement(card, "removed", true), dropZone);
+	}
+
+
+	// temp goals
+	var tempGoals = document.getElementById('tempGoals')!;
+	cards = tempGoals.getElementsByClassName('card');
+
+	while(cards.length > 1)
+	{
+		cards[0].parentNode!.removeChild(cards[0]);	
+	}
+
+	dropZone = cards[0] as HTMLElement;
+
+	dropZone.style.backgroundImage = "url(/img/blank.svg)";
+
+	
+
+	
+
+	for(let card of win.model.tempGoals)
+	{	
+		let cardDiv = makeCardElement(card, "tempGoals", true);
+		dropZone.parentNode!.insertBefore(cardDiv, dropZone);
+
+		if(model.achievedGoals.has(card))
+		{
+			cardDiv.classList.add('achieved');
+			expander.classList.add("achieved");
+		}
+	}
+}
+
+function updateLangSelector()
+{
+	var langSelector = document.getElementById('langSelector') as HTMLElement;
+	langSelector.innerHTML = "";
+
+	var img = document.createElement('img');
+
+	
+
+	img.src = getLangImg(s.Lang);
+
+	langSelector.appendChild(img);
+
+	img.onclick = function()
+	{
+		img.onclick = updateLangSelector;
+
+
+		for(let lang of ["en-US","es-ES"])
+		{
+			if(lang != s.Lang)
+			{
+				console.log(lang);
+
+				let newImg = document.createElement('img');
+				newImg.src = getLangImg(lang);
+				newImg.onclick = () => switchLang(lang);
+				langSelector.appendChild(newImg);
+			}
+		}
+
+	}
+
+	function getLangImg(lang: string)
+	{
+		switch(lang)
+		{
+			case "es-ES": return "/img/lang/es-ES.png";
+			default: return "/img/lang/en-US.png";
+		}
+	}
+
+	async function switchLang(lang: string)
+	{
+		await fetch("/?lang=" + lang);
+		(window as any).location.reload(true);
+	}
+
+	
 }
 
 window.addEventListener('resize', updateCardRowHeight);
@@ -612,7 +798,7 @@ function getScrollBarWidth () {
 };
 
 
-function updateCardRowHeight()
+export function updateCardRowHeight()
 {
 	var cardRow = document.getElementById("cardRow");
 
@@ -720,9 +906,6 @@ export function openSearchCardSelect(title: string, heading: string, cards: Card
 	return createSearchPopup(title, cardProps, renderFun);
 
 }
-
-
-
 
 
 win.openSettings = function()

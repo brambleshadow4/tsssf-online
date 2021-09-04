@@ -260,12 +260,14 @@ export function cardReference(cards: {[key:string]: lib.CardProps}, openInNewTab
 	{
 		cardDiv.innerHTML = "";
 
+
 		var keys = Object.keys(cards);
 		var ponyReference = document.createElement('div');
 		
 		keys.sort(namespaceSort);
 
 		var filterCount = 0;
+
 
 		for(let key of keys)
 		{
@@ -275,7 +277,9 @@ export function cardReference(cards: {[key:string]: lib.CardProps}, openInNewTab
 
 			let cardDiv = makeCardElement(key)
 
-			let refURL = cardRefURL(key, {} as lib.CardProps);
+
+
+			let refURL = cardRefURL(key, cards[key] || {} as lib.CardProps);
 
 			
 

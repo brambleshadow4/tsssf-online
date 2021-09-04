@@ -29,6 +29,19 @@ var HTML = `
 		<div id="goalDiscardPile" class='card discard'></div>
 		<div id='turnInfo'></div>
 	</div>
+	<div id='tableOffside'>
+		<div id='expandOffside'><img src="/img/ios-arrow-forward.svg"/></div>
+		<div id='tableOffsideBody'>
+			<div>
+				<h2>{{OffsideTemporaryGoals}}</h2>
+				<div id='tempGoals'></div>
+			</div>
+			<div>
+				<h2>{{OffsideRemovedCards}}</h2>
+				<div id='removedCards'></div>
+			</div>
+		</div>
+	</div>
 	<div id='playingArea'>
 		<div id='topToolbar'>
 			<div id='playerList'></div>
@@ -37,6 +50,7 @@ var HTML = `
 				<img id='hostButton' style="display: none;" onclick="openSettings()" src="/img/settings.svg"/>
 				<img id='fullscreenButton' onclick="toggleFullScreen()" src="/img/fullscreen.svg"/>
 				<img id='helpButton' onclick="createHelpPopup()" src="/img/help.svg"/>
+				<span id='langSelector'></span>
 			</div>
 		</div>
 		<div id='winnings'></div>

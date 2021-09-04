@@ -176,6 +176,7 @@ footer
 	width: 30px;
 	border: solid 2px white;
 	border-radius: 10px;
+	cursor:  pointer;
 }
 
 .selected  img { border-color: #0074E8; }
