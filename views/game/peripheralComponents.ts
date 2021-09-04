@@ -616,8 +616,33 @@ export function updateHand(updateInfo?: string)
 	setTimeout(updateCardRowHeight, 10);
 }
 
-export function updateTableOffside()
-{
+export function updateTableOffside(cardUpdate?: string)
+{	
+	let model = win.model;
+
+	if(cardUpdate)
+	{
+		let card = cardUpdate.substring(1);
+		let updateType = cardUpdate[0];
+
+		if(updateType == "+")
+		{
+			for(let [arrayName,elId] of [["tempGoals", "tempGoals"], ["removed", "removedCards"]])
+			{
+				if((model as any)[arrayName].indexOf(card) > -1)
+				{
+					let cardDivs = document.getElementById(elId)!.getElementsByClassName('card');
+					let lastCard = cardDivs[cardDivs.length-1];
+
+					lastCard.parentNode!.insertBefore(makeCardElement(card, arrayName, true), lastCard);
+				}
+			}
+		}
+
+		return;
+	}
+
+
 	// REmoved section
 	var removed = document.getElementById('removedCards')!;
 
@@ -652,7 +677,7 @@ export function updateTableOffside()
 
 	dropZone.style.backgroundImage = "url(/img/blank.svg)";
 
-	let model = win.model;
+	
 
 	let expander = document.getElementById('expandOffside')!;
 	expander.classList.remove("achieved");

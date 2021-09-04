@@ -741,7 +741,6 @@ export async function moveCard(
 
 	else if(startLocation == "hand")
 	{
-
 		let orderedHand = model.hand.filter(x => isPony(x)).concat(model.hand.filter(x => isShip(x)));
 		let i = model.hand.indexOf(card);
 		let displayPos = orderedHand.indexOf(card);
@@ -816,12 +815,28 @@ export async function moveCard(
 	else if(startLocation.startsWith("removed"))
 	{
 		let i = model.removed.indexOf(card);
+
+		let cardDivs = document.getElementById('removedCards')!.getElementsByClassName('card');
+
+		if(cardDivs[i])
+		{
+			startPos = getPosFromElement(cardDivs[i] as HTMLElement);
+		}
+
 		model.removed.splice(i,1);
 		updateTableOffside();
 	}
 	else if(startLocation == "tempGoals")
 	{
 		let i = model.tempGoals.indexOf(card);
+
+		let cardDivs = document.getElementById('tempGoals')!.getElementsByClassName('card');
+
+		if(cardDivs[i])
+		{
+			startPos = getPosFromElement(cardDivs[i] as HTMLElement);
+		}
+
 		model.tempGoals.splice(i,1);
 		updateTableOffside();
 	}
@@ -952,14 +967,14 @@ export async function moveCard(
 		var removedCards = document.getElementById("removedCards")!.getElementsByClassName('card');
 		endPos = getPosFromElement(removedCards[removedCards.length-1] as HTMLElement);
 		model.removed.push(card);
-		updateTableOffside();
+		updateFun = () => updateTableOffside("+"+card);
 	}
 	else if(endLocation.startsWith("tempGoals"))
 	{
 		var tempGoals = document.getElementById("tempGoals")!.getElementsByClassName('card');
 		endPos = getPosFromElement(tempGoals[tempGoals.length-1] as HTMLElement);
 		model.tempGoals.push(card);
-		updateTableOffside();
+		updateFun = () => updateTableOffside("+"+card);
 	}
 
 
@@ -1004,7 +1019,7 @@ export async function moveCard(
 	if(isGoalLoc(startLocation)) slAnim = true;
 	if(startLocation == "winnings") slAnim = true;
 	if(startLocation == "hand") slAnim = true;
-	//if(isTableOffsideLoc(startLocation)) slAnim = document.getElementById('tableOffside')!.classList.contains('open');
+	if(isTableOffsideLoc(startLocation)) slAnim = document.getElementById('tableOffside')!.classList.contains('open');
 	if(isBoardLoc(startLocation)) slAnim = true;
 	if(isOffsetLoc(startLocation)) slAnim = true;
 
@@ -1015,7 +1030,7 @@ export async function moveCard(
 	if(isGoalLoc(endLocation)) elAnim = true;
 	if(endLocation == "winnings") elAnim = true;
 	if(endLocation == "hand") elAnim = true;
-	//if(isTableOffsideLoc(endLocation)) elAnim = document.getElementById('tableOffside')!.classList.contains('open');
+	if(isTableOffsideLoc(endLocation)) elAnim = document.getElementById('tableOffside')!.classList.contains('open');
 	// board + offset not here
 
 
