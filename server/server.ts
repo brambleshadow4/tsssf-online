@@ -267,8 +267,6 @@ app.get('/**', fmap("/**", "./views/**"));
 
 function getLang(req: any)
 {
-	console.log(req.headers["accept-language"]);
-	console.log(req.cookies.lang || getLangFromReq(req) || defaultLocale);
 	return req.cookies.lang || getLangFromReq(req) || defaultLocale;
 }
 
