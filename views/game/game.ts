@@ -41,7 +41,7 @@ import {
 	isBoardLoc,
 	isOffsetLoc,
 	isPlayerLoc,
-	isDiscardLoc,
+	isDiscardLoc, isDrawLoc, isTableOffsideLoc,
 	isBlank,
 	isPonyOrStart,
 	isStart,
@@ -685,7 +685,7 @@ export async function moveCard(
 	options?:{
 		forceCardToMove?: boolean,
 		extraArg?: any,
-		noAnimiation?: boolean
+		noAnimation?: boolean
 	}
 ){
 	var startPos = {};
@@ -949,11 +949,15 @@ export async function moveCard(
 	}
 	else if(endLocation.startsWith("removed"))
 	{
+		var removedCards = document.getElementById("removedCards")!.getElementsByClassName('card');
+		endPos = getPosFromElement(removedCards[removedCards.length-1] as HTMLElement);
 		model.removed.push(card);
 		updateTableOffside();
 	}
 	else if(endLocation.startsWith("tempGoals"))
 	{
+		var tempGoals = document.getElementById("tempGoals")!.getElementsByClassName('card');
+		endPos = getPosFromElement(tempGoals[tempGoals.length-1] as HTMLElement);
 		model.tempGoals.push(card);
 		updateTableOffside();
 	}
@@ -981,18 +985,46 @@ export async function moveCard(
 	}
 	
 
-	if(startLocation != "limbo" && !options.noAnimiation
-		&& !(isDiscardLoc(startLocation) && isDiscardLoc(endLocation)) // not going from discard to discard
-		&& !isOffside(startLocation) && !isOffside(endLocation)
-		&& (
-			isDiscardLoc(endLocation)
-			|| ["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1
-			|| endLocation == "winnings"
-			|| isGoalLoc(endLocation)
-			|| isPlayerLoc(endLocation)
-			|| (isPlayerLoc(startLocation) && endLocation == "hand")
-		)
-	)
+	var doAnimation = true;
+
+	if(options.noAnimation)
+		doAnimation = false;
+
+	// not going from discard to discard
+	if(isDiscardLoc(startLocation) && isDiscardLoc(endLocation))
+		doAnimation = false;
+
+
+	var slAnim = false;
+	var elAnim = false;
+
+	if(isDrawLoc(startLocation))  slAnim = true; 
+	if(isDiscardLoc(startLocation)) slAnim = true; 
+	if(isPlayerLoc(startLocation)) slAnim = true; 
+	if(isGoalLoc(startLocation)) slAnim = true;
+	if(startLocation == "winnings") slAnim = true;
+	if(startLocation == "hand") slAnim = true;
+	//if(isTableOffsideLoc(startLocation)) slAnim = document.getElementById('tableOffside')!.classList.contains('open');
+	if(isBoardLoc(startLocation)) slAnim = true;
+	if(isOffsetLoc(startLocation)) slAnim = true;
+
+
+	if(isDrawLoc(endLocation)) elAnim = true; 
+	if(isDiscardLoc(endLocation)) elAnim = true; 
+	if(isPlayerLoc(endLocation)) elAnim = true; 
+	if(isGoalLoc(endLocation)) elAnim = true;
+	if(endLocation == "winnings") elAnim = true;
+	if(endLocation == "hand") elAnim = true;
+	//if(isTableOffsideLoc(endLocation)) elAnim = document.getElementById('tableOffside')!.classList.contains('open');
+	// board + offset not here
+
+
+	if(!(elAnim && slAnim))
+		doAnimation = false;
+
+
+
+	if(doAnimation)
 	{
 		animateCardMove(card, startPos || {}, endPos || {}, updateFun);
 	}

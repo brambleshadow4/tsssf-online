@@ -265,8 +265,6 @@ export function broadcastMove(card: Card, startLocation: Location, endLocation: 
 
 export function broadcast(message: string)
 {
-	//console.log("sending " + message);
-
 	//setTimeout(function(){
 	win.socket.send(message);
 	//},3000);

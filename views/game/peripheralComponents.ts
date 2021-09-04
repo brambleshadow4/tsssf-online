@@ -156,7 +156,7 @@ export function initPeripherals()
 						div.parentNode.removeChild(div);
 					var [card, startLoc] = getDataTransfer().split(";")
 
-					moveCard(card, startLoc, "hand");
+					moveCard(card, startLoc, "hand", {noAnimation: true});
 					broadcastMove(card, startLoc, "hand");
 				}
 
@@ -207,6 +207,7 @@ export function initPeripherals()
 	let icon = document.createElement('img');
 	icon.src = "/img/goal-plus.svg";
 	icon.className = "goalDrawIcon";
+	icon.style.cursor = "pointer";
 	tempGoalsDrawButton.appendChild(icon);
 
 	

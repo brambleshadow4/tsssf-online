@@ -275,6 +275,11 @@ export function isGoalActiveInLocation(location: Location)
 	return location.startsWith("goal,") || location == "tempGoals";
 }
 
+export function isTableOffsideLoc(location: Location)
+{
+	return location == "tempGoals" || location == "removed";
+}
+
 export function isPlayerLoc(location: Location)
 {
 	return location.startsWith("player,");
@@ -285,6 +290,13 @@ export function isDiscardLoc(location: Location)
 	return location.startsWith("shipDiscardPile,") || 
 		location.startsWith("ponyDiscardPile,") || 
 		location.startsWith('goalDiscardPile,')
+}
+
+export function isDrawLoc(location: Location)
+{
+	return location.startsWith("shipDrawPile") || 
+		location.startsWith("ponyDrawPile") || 
+		location.startsWith('goalDrawPile')
 }
 
 export function slashStringToSet(s: string | undefined): Set<string>

@@ -257,7 +257,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 		if(!location)
 			return;
 
-		if(isBoardLoc(location) || location.startsWith("shipDiscardPile,") || location.startsWith("ponyDiscardPile"))
+		if(isBoardLoc(location) || location.indexOf("DiscardPile,") > -1)
 		{
 			e.preventDefault();
 			e.stopPropagation();
@@ -291,6 +291,11 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				if(location.startsWith("ponyDiscardPile,"))
 				{
 					document.getElementById('ponyDiscardPile')!.click();
+				}
+
+				if(location.startsWith("goalDiscardPile,"))
+				{
+					document.getElementById('goalDiscardPile')!.click();
 				}
 
 				return;
@@ -343,7 +348,6 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				offsetLoc = "offset," + x + "," + y;
 
 
-
 				if(startLoc == "hand")
 				{
 					moveCard(offsetCard, location, "ponyDiscardPile,top");
@@ -357,9 +361,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				else
 				{
 					moveCard(offsetCard, location, offsetLoc);
-				}
-				
-					
+				}	
 			}
 			else
 			{
@@ -368,7 +370,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			}
 		}
 
-		moveCard(card, startLoc, location!);
+		moveCard(card, startLoc, location!, {noAnimation: true});
 
 		if(doReactiveMoveBack)
 		{
@@ -681,7 +683,7 @@ function showTrashButton(card: Card, location:Location)
 			e.stopPropagation();
 
 			endMoveShared();
-			moveCard(card, location!, trashTarget + ",top", {noAnimiation: true});
+			moveCard(card, location!, trashTarget + ",top", {noAnimation: true});
 		}
 	}
 }
