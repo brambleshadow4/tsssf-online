@@ -640,7 +640,7 @@ function showTrashButton(card: Card, location:Location)
 	else if(isGoal(card))
 		trashTarget = "goalDiscardPile";
 
-	if(trashTarget && location.startsWith(trashTarget))
+	if(trashTarget && !location.startsWith(trashTarget))
 	{
 		var trashTargetEl = document.getElementById(trashTarget)!;
 
