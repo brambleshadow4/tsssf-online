@@ -1411,8 +1411,11 @@ export class GameModel implements GameModelShared
 
 		if(sendUpdate)
 		{
-			let list = ["goalachieved", ...this.achievedGoals];
-			this.toEveryone(list.join(";"));
+			let message = ["goalachieved", ...this.achievedGoals].join(";");
+			if(message == "goalachieved")
+				message += ";"
+
+			this.toEveryone(message);
 		}
 	}
 

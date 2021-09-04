@@ -634,6 +634,13 @@ export function updateTableOffside(cardUpdate?: string)
 				if((model as any)[arrayName].indexOf(card) > -1)
 				{
 					let cardDivs = document.getElementById(elId)!.getElementsByClassName('card');
+
+					if(cardDivs.length -1 == (model as any)[arrayName].length)
+					{
+						return; // card has already been added because updateTableOffside() has been called.
+					}
+
+
 					let lastCard = cardDivs[cardDivs.length-1] as HTMLElement;
 
 					let newCard = makeCardElement(card, arrayName, true)

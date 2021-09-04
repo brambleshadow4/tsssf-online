@@ -230,6 +230,9 @@ export function attachToSocket(socket: WebSocketPlus)
 			let _, achievedCards: Card[];
 			[_, ...achievedCards] = (event.data as string).split(";");
 
+			if(achievedCards[0] == "")
+				achievedCards = [];
+
 			model.achievedGoals = new Set(achievedCards);
 
 			updateGoals(undefined, true);
