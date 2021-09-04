@@ -124,8 +124,10 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 }
 
 
-export function makeCardElement(card: Card, location?: Location, isDraggable?: boolean, isDropTarget?: boolean): CardElement
+export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?: boolean, isDropTarget?: boolean): CardElement
 {
+	let location = locationOpt || "";
+
 	let cards = cm.all();
 
 	let imgElement = document.createElement('div') as unknown as CardElement;
@@ -208,7 +210,6 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 		}
 		if(isDkeyPressed && isItMyTurn())
 		{
-			location = location!;
 			if(location.startsWith("p,"))
 			{
 				var relativeOffset = location.replace("p,","offset,")
@@ -370,7 +371,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			}
 		}
 
-		moveCard(card, startLoc, location!, {noAnimation: true});
+		moveCard(card, startLoc, location, {noAnimation: true});
 
 		if(doReactiveMoveBack)
 		{
@@ -414,9 +415,9 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				return;
 			}
 
-			if(location!.startsWith("p,"))
+			if(location.startsWith("p,"))
 			{
-				var offset = location!.replace("p,","offset,");
+				var offset = location.replace("p,","offset,");
 
 				if(globals.model.board[offset])
 					return false;
@@ -450,7 +451,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 			ghostCard.style.left = e.pageX + "px";
 			ghostCard.style.zIndex = "var(--dragControlsZLevel)";
 			
-			showTrashButton(card, location!);
+			showTrashButton(card, location);
 
 			ghostCardDragHandler = function(e: DragEvent)
 			{
@@ -492,7 +493,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 		{
 			var draggedCard = getDataTransfer().split(";")[0];
 
-			if(isValidMove(draggedCard, card, location!))
+			if(isValidMove(draggedCard, card, location))
 				e.preventDefault();
 		}
 
@@ -514,7 +515,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				overMainDiv = true;
 			}
 
-			if(isValidMove(draggedCard, card, location!))
+			if(isValidMove(draggedCard, card, location))
 			{
 				if (isBlank(card) || srcLocation == "hand" || srcLocation == "ponyDiscardPile,top")
 				{
@@ -522,7 +523,7 @@ export function makeCardElement(card: Card, location?: Location, isDraggable?: b
 				}
 				else
 				{
-					let [_, xs, ys] = location!.split(",");
+					let [_, xs, ys] = location.split(",");
 					let x = Number(xs);
 					let y = Number(ys);
 
@@ -639,7 +640,7 @@ function showTrashButton(card: Card, location:Location)
 	else if(isGoal(card))
 		trashTarget = "goalDiscardPile";
 
-	if(trashTarget && !location.startsWith(trashTarget))
+	if(trashTarget && location.startsWith(trashTarget))
 	{
 		var trashTargetEl = document.getElementById(trashTarget)!;
 
@@ -683,7 +684,7 @@ function showTrashButton(card: Card, location:Location)
 			e.stopPropagation();
 
 			endMoveShared();
-			moveCard(card, location!, trashTarget + ",top", {noAnimation: true});
+			moveCard(card, location, trashTarget + ",top", {noAnimation: true});
 		}
 	}
 }

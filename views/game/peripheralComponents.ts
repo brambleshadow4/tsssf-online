@@ -71,6 +71,8 @@ var SCROLL_BAR_WIDTH = getScrollBarWidth();
 
 export function initPeripherals()
 {
+	updateLangSelector()	
+
 	document.getElementById("ponyDrawPile")!.onclick = requestDrawPony;
 	document.getElementById("shipDrawPile")!.onclick = requestDrawShip;
 	document.getElementById("goalDrawPile")!.onclick = preRequestDrawGoal;
@@ -107,6 +109,8 @@ export function initPeripherals()
 
 	}
 
+
+
 	var hand = document.getElementById('hand')!
 	hand.ondragover = function(e)
 	{
@@ -119,6 +123,8 @@ export function initPeripherals()
 			e.preventDefault();
 		}
 	}
+
+
 
 
 	var inDragZone = false;
@@ -709,6 +715,57 @@ export function updateTableOffside(cardUpdate?: string)
 			expander.classList.add("achieved");
 		}
 	}
+}
+
+function updateLangSelector()
+{
+	var langSelector = document.getElementById('langSelector') as HTMLElement;
+	langSelector.innerHTML = "";
+
+	var img = document.createElement('img');
+
+	
+
+	img.src = getLangImg(s.Lang);
+
+	langSelector.appendChild(img);
+
+	img.onclick = function()
+	{
+		img.onclick = updateLangSelector;
+
+
+		for(let lang of ["en-US","es-ES"])
+		{
+			if(lang != s.Lang)
+			{
+				console.log(lang);
+
+				let newImg = document.createElement('img');
+				newImg.src = getLangImg(lang);
+				newImg.onclick = () => switchLang(lang);
+				langSelector.appendChild(newImg);
+			}
+		}
+
+	}
+
+	function getLangImg(lang: string)
+	{
+		switch(lang)
+		{
+			case "es-ES": return "/img/lang/es-ES.png";
+			default: return "/img/lang/en-US.png";
+		}
+	}
+
+	async function switchLang(lang: string)
+	{
+		await fetch("/?lang=" + lang);
+		(window as any).location.reload(true);
+	}
+
+	
 }
 
 window.addEventListener('resize', updateCardRowHeight);

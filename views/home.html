@@ -37,13 +37,19 @@
 				</div>
 				<p>
 					<span class='languages'>
-						<a id='select:en-US' href="/?lang=en-US"><img src="/img/lang/en-US.png" /></a>
-						<a id='select:es-ES' href="/?lang=es-ES"><img src="/img/lang/es-ES.png" /></a>
-						<!--<a href="/?lang=zz-ZZ">Test Lang</a>-->
+						<span id='select:en-US' onclick='switchLang("en-US")'><img src="/img/lang/en-US.png" /></span>
+						<span id='select:es-ES' onclick='switchLang("es-ES")'><img src="/img/lang/es-ES.png" /></span>
+						<!--<span id='select:es-ES' lang="es-ES"><img src="/img/lang/es-ES.png" />Test Lang</span>-->
 						<input id="lang" type="hidden" value="{{Lang}}"/>
 						<script>
 							let lang = document.getElementById('lang').value;
 							document.getElementById("select:" + lang).classList.add('selected');
+
+							async function switchLang(lang)
+							{
+								await fetch("/?lang=" + lang);
+								location.reload(true);
+							}
 						</script>
 					</span><br>
 					<span>{{HomepageTranslatedBy}}</span>

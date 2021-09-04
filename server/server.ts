@@ -121,8 +121,9 @@ app.get('/', function(req:any,res:any, next:any){
 		case "es-ES":
 		case "zz-ZZ":
 
-			res.cookie('lang', req.query.lang)
-			res.redirect("/?t=" + new Date().getTime());
+			res.cookie('lang', req.query.lang);
+			res.setHeader("Content-Type", "text/json");
+			res.sendStatus(200);
 			return;
 	}
 
@@ -167,8 +168,7 @@ app.get("/lobby/packOrder.js", file("./views/lobby/packOrder.js"))
 app.get("/tokens.js", function(req, res){
 
 	res.setHeader("Content-Type", "text/javascript");
-	let lang = req.cookies.lang || defaultLocale;
-	res.send("export default " + JSON.stringify(translations[lang]));
+	res.send("export default " + JSON.stringify(translations[getLang(req)]));
 });
 
 
@@ -189,7 +189,7 @@ app.get("/lobby", function(req,res)
 
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
-		sendIfExists("./views/app.html", req.cookies.lang, res);
+		sendIfExists("./views/app.html", getLang(req), res);
 	}
 	else
 	{
@@ -224,7 +224,7 @@ app.get("/game", function(req, res)
 
 	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 	{
-		sendIfExists("./views/app.html", req.cookies.lang, res);
+		sendIfExists("./views/app.html", getLang(req), res);
 	}
 	else
 	{
@@ -264,6 +264,34 @@ app.get("/host", function(req, res){
 
 
 app.get('/**', fmap("/**", "./views/**"));
+
+function getLang(req: any)
+{
+	console.log(req.headers["accept-language"]);
+	console.log(req.cookies.lang || getLangFromReq(req) || defaultLocale);
+	return req.cookies.lang || getLangFromReq(req) || defaultLocale;
+}
+
+function getLangFromReq(req: any)
+{
+	let langs = req.headers["accept-language"].split(";")[0].split(",");
+
+	for(let lang of langs)
+	{
+		if(lang.startsWith("en"))
+		{
+			return "en-US";
+		}
+		if(lang.startsWith("es"))
+		{
+			return "es-ES";
+		}
+	}
+
+	return "";
+}
+
+
 
 
 var server;
@@ -313,7 +341,7 @@ function file(url: string)
 {
 	return function(req: any, res: Response){
 
-		sendIfExists(url, req.cookies.lang, res);
+		sendIfExists(url, getLang(req), res);
 	} as any
 }
 
@@ -330,7 +358,7 @@ function fmap(routeUri: string, fileUrl: string): any
 		url = url.replace(/%20/g," ");
 
 		//setTimeout(function(){
-		sendIfExists(url, req.cookies.lang, res);
+		sendIfExists(url, getLang(req), res);
 		//},1000)	
 	}
 }
@@ -352,7 +380,7 @@ function sendIfExists(url:string, lang: string, res: any)
 		{
 			let fileText = fs.readFileSync(url, "utf8");
 
-			fileText = addTranslatedTokens(fileText, lang || defaultLocale);
+			fileText = addTranslatedTokens(fileText, lang);
 
 			if(url.indexOf(".js") > -1)
 			{

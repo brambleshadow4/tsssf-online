@@ -87,6 +87,13 @@
 	height: 25px;
 
 	cursor: pointer;
+	vertical-align: top;
+}
+
+#langSelector
+{
+	display: inline-block;
+	width: 25px;
 }
 
 
