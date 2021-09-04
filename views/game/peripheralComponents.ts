@@ -619,6 +619,8 @@ export function updateHand(updateInfo?: string)
 export function updateTableOffside(cardUpdate?: string)
 {	
 	let model = win.model;
+	let expander = document.getElementById('expandOffside')!;
+	
 
 	if(cardUpdate)
 	{
@@ -632,15 +634,26 @@ export function updateTableOffside(cardUpdate?: string)
 				if((model as any)[arrayName].indexOf(card) > -1)
 				{
 					let cardDivs = document.getElementById(elId)!.getElementsByClassName('card');
-					let lastCard = cardDivs[cardDivs.length-1];
+					let lastCard = cardDivs[cardDivs.length-1] as HTMLElement;
 
-					lastCard.parentNode!.insertBefore(makeCardElement(card, arrayName, true), lastCard);
+					let newCard = makeCardElement(card, arrayName, true)
+					lastCard.parentNode!.insertBefore(newCard, lastCard);
+
+					lastCard.style.backgroundImage = "url(/img/blank.svg)";
+
+					if(arrayName == "tempGoals" && model.achievedGoals.has(card))
+					{
+						newCard.classList.add('achieved');
+						expander.classList.add("achieved");
+					}
 				}
 			}
 		}
 
 		return;
 	}
+
+	expander.classList.remove("achieved");
 
 
 	// REmoved section
@@ -663,9 +676,6 @@ export function updateTableOffside(cardUpdate?: string)
 
 	// temp goals
 	var tempGoals = document.getElementById('tempGoals')!;
-
-
-
 	cards = tempGoals.getElementsByClassName('card');
 
 	while(cards.length > 1)
@@ -679,8 +689,7 @@ export function updateTableOffside(cardUpdate?: string)
 
 	
 
-	let expander = document.getElementById('expandOffside')!;
-	expander.classList.remove("achieved");
+	
 
 	for(let card of win.model.tempGoals)
 	{	
