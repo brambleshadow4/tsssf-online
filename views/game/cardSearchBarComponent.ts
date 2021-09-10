@@ -456,7 +456,7 @@ function propValueOverrides(prop: string, value: string | undefined): [string, s
  */
 export function doesCardMatchFilters(card: Card, filters: [string, any][]): boolean
 {
-	let cardProps = cm.inPlay()[card];
+	let cardProps = cm.all()[card];
 	for(let filter of filters)
 	{
 		let propName = filter[0];
