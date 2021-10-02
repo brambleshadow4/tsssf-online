@@ -2104,7 +2104,8 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"NoHoldsBarred.Pony.WaifuThiefFlashSentry": {
-		"name": "Waifu Thief Flash Sentry",
+		"title": "Waifu Thief Flash Sentry",
+		"name": "Flash Sentry",
 		"race": "pegasus",
 		"gender": "male",
 		"keywords": [
