@@ -128,14 +128,16 @@ var haveCardsLoaded = false;
 
 function toggleFullScreen()
 {
-	if(document.fullscreenElement)
+	let doc = document as any;
+
+	if(doc.fullscreenElement)
 	{
-		document.exitFullscreen();
+		doc.exitFullscreen();
 	}
 	else
 	{
-		if(document.documentElement.requestFullscreen)
-			document.documentElement.requestFullscreen();
+		doc.documentElement.requestFullscreen();
+		// this doesn't work in Safari
 	}		
 }
 

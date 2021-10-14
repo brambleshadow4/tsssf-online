@@ -141,7 +141,7 @@ export function validateCard(name:string, cardType: "Pony" | "Ship" | "Start" | 
 		try{
 			typecheckGoal(card);
 		}
-		catch(e)
+		catch(e: any)
 		{
 			errors.push("goal " + name + "\n" + e.toString());
 		}

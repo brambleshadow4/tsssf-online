@@ -138,6 +138,8 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 		imgElement.classList.add('custom');
 	}
 
+	imgElement.setAttribute("cardID", card);
+
 	setCardBackground(imgElement, card);
 
 	if(!isBlank(card) && cards[card] && !(cards[card] as GoalProps).goalLogic && location && isGoalActiveInLocation(location))
@@ -1046,8 +1048,10 @@ window.addEventListener('keydown', function(e){
 	if(e.key == "Shift")
 	{
 		isShiftPressed = true;
-		if(hoverCard.length)
+		if(hoverCard?.length)
+		{
 			enlargeCard();
+		}
 	}
 });
 

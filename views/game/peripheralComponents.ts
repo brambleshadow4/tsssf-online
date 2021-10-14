@@ -588,7 +588,7 @@ export function updateHand(updateInfo?: string)
 
 			(win as any).x = cm.inPlay(); 
 
-			if(cardDiv && cardDiv.style.backgroundImage == "url(\"" + cm.inPlay()[card].thumb + "\")")
+			if(cardDiv && cardDiv.getAttribute("cardID") == card)
 			{
 				cardDiv.parentNode!.removeChild(cardDiv);
 				break;
