@@ -57,6 +57,8 @@ export function expect(value1: any)
 
 import goalTests from "./goals.test.js"; goalTests();
 
+import packLibTests from "./packLib.test.js"; packLibTests();
+
 let passCount = 0;
 let fails = [];
 

@@ -651,7 +651,7 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"Core.Start.FanficAuthorTwilight": {
-		"title": "FanficAuthorTwilight",
+		"title": "Fanfic Author Twilight",
 		"name": "Twilight Sparkle",
 		"race": "unicorn",
 		"gender": "female",
@@ -887,7 +887,7 @@ var cards: {[key: string]: any} = {
 	"Core.Goal.FriendshipIsBenefits": {
 		"title": "Friendship is Benefits",
 		"goalLogic": "ExistsChain(Mane 6 in keywords, 6)",
-		"points": "3-4"
+		"points": "3/4"
 	},
 	"Core.Goal.GoForthAndMultiply": {
 		"title": "Go Forth and Multiply",
@@ -2104,7 +2104,8 @@ var cards: {[key: string]: any} = {
 		]
 	},
 	"NoHoldsBarred.Pony.WaifuThiefFlashSentry": {
-		"name": "Waifu Thief Flash Sentry",
+		"title": "Waifu Thief Flash Sentry",
+		"name": "Flash Sentry",
 		"race": "pegasus",
 		"gender": "male",
 		"keywords": [

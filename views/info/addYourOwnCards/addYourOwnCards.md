@@ -360,9 +360,9 @@ tsssf.net.
 	<tr>
 		<th>Attribute</th><th>Valid Values</th><th>Notes/Description</th>
 	</tr>
-	<tr><td rowspan=2>points</td><td>any number in quotes, e.g. "3"</td><td></td></tr>
+	<tr><td rowspan=2>points</td><td>any number in quotes, e.g. "3", "-1", "0.5"</td><td></td></tr>
 	<tr>
-		<td>two integers (second one larger than the first), separated by a hyphen in quotes<br>e.g."3-4"</td>
+		<td>multiple numbers (which follow the above rules) separated by a slash in quotes e.g."3/4"</td>
 		<td>Used for cards which can be worth different point values, depending on certain criteria</td>
 	</tr>
 	<tr class='alt'><td>goalLogic</td><td>See <a href="#appendix-c-goal-logic">Appendix C: Goal Logic</a></td><td></td>

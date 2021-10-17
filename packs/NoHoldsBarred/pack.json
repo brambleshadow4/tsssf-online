@@ -255,7 +255,8 @@
 				]
 			},
 			"WaifuThiefFlashSentry": {
-				"name": "Waifu Thief Flash Sentry",
+				"title": "Waifu Thief Flash Sentry",
+				"name": "Flash Sentry",
 				"race": "pegasus",
 				"gender": "male",
 				"keywords": [

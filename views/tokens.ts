@@ -10,7 +10,7 @@ export default {
 	"HomepageSourceCode": "Source code",
 	"HomepageSubmitBug": "Submit a bug",
 	"HomepageFindPlayers": "Find Players",
-	"HomepageTranslatedBy": "", // "Translated by brambleshadow4" English version doesn't need this message, but other translations should have this
+	"HomepageTranslatedBy": "", // e.g. "Translated by brambleshadow4" English version doesn't need this message, but other translations should have this
 
 
 	"LobbyJoinGame": "Join Game",
@@ -53,6 +53,7 @@ export default {
 	"GameEffectCopying": "Copying {0}", // {0} is the name of a card,
 	"GamePointsWithUnit": "{0}pts", // {0} is the number of points the player has. "points" should be shortened to something really short, a.k.a. "pts"
 	"GameRemoveUnconnectedCardsButton": "Remove Unconnected Cards",
+	"GameNoGoalLogicWarning": "This card does not have any goal logic associated with it.\nIt will not highlight when achieved.", // This warning appears on goal cards if they don't have the goal logic property set.
 
 	"OffsideTemporaryGoals": "Temporary Goals",
 	"OffsideRemovedCards": "Removed Cards",
@@ -115,7 +116,7 @@ export default {
 	"QuickStartSwitchToMobile": "See instructions for touch devices",
 
 	"QuickStartDesktop1": "Draw pony, ship, and goal cards by clicking the decks on the left",
-	"QuickStartDesktop2": "Hold <span class='key'>Shift</span> and hover over a card to see the card in much more detail.<br><span class='key'>Shift</span>+Click a card to view the card's FAQ.",
+	"QuickStartDesktop2": "Hold <span class='key'>Shift</span> and hover over a card to see the card in much more detail.<br>Right click a card to view the card's FAQ.",
 	"QuickStartDesktop3": "Move cards onto the grid by dragging and dropping them from your hand.",
 	"QuickStartDesktop4": "Discard cards by holding down <span class='key'>D</span> and clicking them.",
 	"QuickStartDesktop5": "Swap cards around the grid by dragging and dropping them onto other cards.",

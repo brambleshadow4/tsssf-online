@@ -1,6 +1,6 @@
 var HEAD = `
 	<link href="/game/game.css" type="text/css" rel="stylesheet" />
-	<title>In Game</title>
+	<title>In Game: Twilight Sparkle's Secret Shipfic Folder Online</title>
 	<meta property="og:title" content="Game in Progress">
 	<meta property="og:description" content="Play and host TSSSF games through the magic of the internet">
 	<meta property="og:image" content="http://tsssf.net/img/tsssf-box.png">

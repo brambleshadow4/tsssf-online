@@ -25,9 +25,12 @@ function buildPage()
 	document.head.innerHTML += "<link href='/info/knowledgeBase.css' type='text/css' rel='stylesheet' />";
 
 
+	let title = document.head.getElementsByTagName('title')[0] as HTMLTitleElement;
 
 	switch(location.pathname)
 	{
+
+
 		case "/info/cardlist":
 
 
@@ -37,6 +40,7 @@ function buildPage()
 			{	
 				var main = document.getElementById('main')!;
 				main.innerHTML += "<h1>"+ s.HelpTabCardReference +" <span id='filterCount'></span></h1>";
+				title.innerHTML = s.HelpTabCardReference + ": Twilight Sparkle's Secret Shipfic Folder Online";
 				console.log("here");
 			}
 
@@ -107,6 +111,9 @@ function buildPage()
 			if(cardProps)
 			{
 				let pageName = cardProps.title || card;
+
+				
+				title.innerHTML = pageName + ": Twilight Sparkle's Secret Shipfic Folder Online";
 
 
 				let url = cardProps.url;s

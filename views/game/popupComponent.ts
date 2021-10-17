@@ -65,14 +65,27 @@ function createPopupShared(
 		// so that the render can close the popup with value val
 		function newAccept(val?: any)
 		{
-			if(parent.parentNode)
+			if(parent.parentNode){
 				parent.parentNode.removeChild(parent);
+			}
+
+			window.removeEventListener("keyup", closePopupListener);
 
 			oldPopupAccept = undefined;
 			accept(val);
 		}
 
 		closeButton.onclick = function(){newAccept();}
+
+		function closePopupListener(e: any)
+		{
+			if(e.key == "Escape")
+			{
+				newAccept();
+			}
+		}
+
+		window.addEventListener("keyup", closePopupListener);
 
 		oldPopupAccept = newAccept;
 
@@ -89,15 +102,15 @@ function createPopupShared(
 			{
 				let tab = document.createElement('div');
 				let tabName = opt.tabs[i].name;
-				if(tabName)
+				if(tabName){
 					tab.innerHTML = tabName;
+				}
+
 				tabDiv.appendChild(tab);
 
 				tab.onclick = function()
 				{
-
-					for(let j=0; j<tabDiv.children.length; j++)
-					{
+					for(let j=0; j<tabDiv.children.length; j++){
 						tabDiv.children[j].classList.remove('selected')
 					}
 
