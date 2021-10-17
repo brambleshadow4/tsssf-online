@@ -38,6 +38,9 @@ export default {
 	"LobbyMiniExpansions": "Mini Expansions zzz",
 	"LobbyUploads": "Uploads zzz",
 
+	"GameNoGoalLogicWarning": "zzz This card does not have any goal logic associated with it.\nIt will not highlight when achieved.", // This warning appears on goal cards if they don't have the goal logic property set.
+
+
 
 	"GameYourTurn": "It is currently your turn zzz",
 	"GamePlayerTurn": "It is currently {0}'s turn  zzz", // {0} is the player's name

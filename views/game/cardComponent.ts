@@ -83,23 +83,7 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 	var points: (number | "*")[] = [];
 	var pointString = (cards[card] as GoalProps).points;
 
-	let parse = /^(-?\d+)(-(-?\d+))?$/.exec(pointString);
-
-	if(parse && parse[3] !== undefined)
-	{
-		var i = pointString.indexOf("-")
-		var minPts = Number(parse[1])
-		var maxPts = Number(parse[3]);
-
-		for(i=minPts; i<=maxPts; i++)
-		{
-			points.push(i);
-		}
-	}
-	else
-	{
-		points = [Number(parse![1])];
-	}
+	points = pointString.split("/").map(Number).filter(x => !isNaN(x));
 
 	var changeGoalPointValues = false;
 
@@ -108,15 +92,13 @@ function getGoalPoints(model: GameModel, card: Card, achieved: boolean)
 		if(key.startsWith('p,'))
 		{
 			var card = model.board[key].card;
-			if(cards[card] && cards[card].changeGoalPointValues)
-			{
+			if(cards[card] && cards[card].changeGoalPointValues){
 				changeGoalPointValues = true;
 			}
 		}
 	}
 
-	if(!achieved || changeGoalPointValues)
-	{
+	if(!achieved || changeGoalPointValues){
 		points.push("*");
 	}
 
@@ -133,8 +115,7 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 	let imgElement = document.createElement('div') as unknown as CardElement;
 	imgElement.classList.add("card");
 
-	if(card.startsWith("X."))
-	{
+	if(card.startsWith("X.")){
 		imgElement.classList.add('custom');
 	}
 
@@ -149,7 +130,7 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 		warningSym.className = "noLogic";
 		imgElement.appendChild(warningSym);
 
-		imgElement.title = "This card does not have any goal logic associated with it.\nIt will not highlight when achieved."
+		imgElement.title = s.GameNoGoalLogicWarning;
 	}
 
 
@@ -197,45 +178,44 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 	if(location && isGoalActiveInLocation(location) && !isBlank(card))
 	{
 		let x = location;
-		imgElement.addEventListener("mouseenter", function(e)
-		{
+		imgElement.addEventListener("mouseenter", function(e){
 			addGoalCheck(imgElement, card, x);
 		});
+	}
+
+	imgElement.oncontextmenu = function(e)
+	{
+		e.preventDefault();
+		window.open(cardRefURL(card, cards[card]));
 	}
 
 
 	imgElement.onclick = function(e)
 	{	
-		if(e.shiftKey)
-		{
-			window.open(cardRefURL(card, cards[card]));
-		}
 		if(isDkeyPressed && isItMyTurn())
 		{
 			if(location.startsWith("p,"))
 			{
 				var relativeOffset = location.replace("p,","offset,")
-				if(globals.model.board[relativeOffset])
+				if(globals.model.board[relativeOffset]){
 					return;
+				}
 			}
 
-			if(isDiscardLoc(location) || location == "winnings")
+			if(isDiscardLoc(location) || location == "winnings"){
 				return;
+			}
 
-			if(isPony(card))
-			{	
+			if(isPony(card)) {	
 				moveCard(card, location, "ponyDiscardPile,top");
 			}
-			else if(isShip(card))
-			{	
+			else if(isShip(card)) {	
 				moveCard(card, location, "shipDiscardPile,top");
 			}
-			else if (isGoal(card))
-			{
+			else if (isGoal(card)) {
 				moveCard(card, location, "goalDiscardPile,top");
 			}
-			else
-			{
+			else {
 				return;
 			}
 		}
@@ -257,8 +237,9 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 			return;
 		}
 
-		if(!location)
+		if(!location) {
 			return;
+		}
 
 		if(isBoardLoc(location) || location.indexOf("DiscardPile,") > -1)
 		{
@@ -278,26 +259,24 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 			if(location.startsWith("p,"))
 			{
 				var offset = location.replace("p,","offset,");
-				if(globals.model.board[offset])
+				if(globals.model.board[offset]){
 					return false;
+				}
 			}
 
 			if(imgElement.classList.contains('selected'))
 			{
 				endMoveShared();
 
-				if(location.startsWith("shipDiscardPile,"))
-				{
+				if(location.startsWith("shipDiscardPile,")){
 					document.getElementById('shipDiscardPile')!.click();
 				}
 
-				if(location.startsWith("ponyDiscardPile,"))
-				{
+				if(location.startsWith("ponyDiscardPile,")){
 					document.getElementById('ponyDiscardPile')!.click();
 				}
 
-				if(location.startsWith("goalDiscardPile,"))
-				{
+				if(location.startsWith("goalDiscardPile,")) {
 					document.getElementById('goalDiscardPile')!.click();
 				}
 
@@ -308,8 +287,7 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 
 			imgElement.classList.add('selected');
 
-			if(isGoalActiveInLocation(location))
-			{
+			if(isGoalActiveInLocation(location)) {
 				addGoalCheck(imgElement, card, location);
 			}
 
@@ -317,13 +295,11 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 			showTrashButton(card, location);
 			
 
-			if(isPonyOrStart(card))
-			{
+			if(isPonyOrStart(card)){
 				document.getElementById('playingArea')!.classList.add('draggingPony');
 			}
 
-			if(isShip(card) || (cards[card] as ShipProps).action == "ship")
-			{
+			if(isShip(card) || (cards[card] as ShipProps).action == "ship"){
 				document.getElementById('playingArea')!.classList.add('draggingShip');
 			}
 

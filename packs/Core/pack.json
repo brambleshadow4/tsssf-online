@@ -7,7 +7,7 @@
 	"cards": {
 		"start": {
 			"FanficAuthorTwilight": {
-				"title": "FanficAuthorTwilight",
+				"title": "Fanfic Author Twilight",
 				"name": "Twilight Sparkle",
 				"race": "unicorn",
 				"gender": "female",
@@ -884,7 +884,7 @@
 			"FriendshipIsBenefits": {
 				"title": "Friendship is Benefits",
 				"goalLogic": "ExistsChain(Mane 6 in keywords, 6)",
-				"points": "3-4"
+				"points": "3/4"
 			},
 			"GoForthAndMultiply": {
 				"title": "Go Forth and Multiply",
