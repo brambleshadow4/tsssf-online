@@ -147,7 +147,10 @@
 				"name": "Radiant Hope",
 				"gender": "female",
 				"race": "unicorn",
-				"keywords": []
+				"keywords": [
+					"Elder",
+					"Crystal Pony"
+				]
 			},
 			"SonataDusk":{
 				"title": "Sonata Dusk, the Joker",
