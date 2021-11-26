@@ -232,6 +232,8 @@ app.get("/game", function(req, res)
 	}
 });
 
+app.get("/tutorial", file("./views/app.html"));
+
 app.get("/stats", async function(req, res){
 
 	var template = fs.readFileSync('./views/stats.html', 'utf8');

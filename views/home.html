@@ -33,6 +33,7 @@
 				<h2>Beta {{Version}}</h2>
 				<div>
 					<!--div><button onclick="join()">Join Game</button></div-->
+					<div><button onclick="startTutorial()">{{HomepageTutorial}}</button></div>
 					<div><button onclick="host()">{{HomepageHostGame}}</button></div>
 				</div>
 				<p>
@@ -90,6 +91,11 @@
 			function join()
 			{
 				window.location.href = "/join"
+			}
+
+			function startTutorial()
+			{
+				window.location.href = "/tutorial"
 			}
 
 			window.onkeypress = function(e)

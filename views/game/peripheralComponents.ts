@@ -13,7 +13,7 @@ import {
 	isBlank,
 	isAnon,
 	isPonyOrStart,
-	GameModel,
+	GameModelPlayer as GameModel,
 	Card, Location, CardProps
 } from "../../model/lib.js";
 

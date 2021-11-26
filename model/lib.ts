@@ -66,6 +66,21 @@ export type Location = string;
 
 export type CardElement = HTMLElement & {brand: "card"}
 
+export interface Player
+{
+	id: number,
+	name: string,
+
+	hand: Card[],
+	disconnected: boolean,
+	team: string,
+	winnings: any[],
+	ponies: number,
+	ships: number,
+	
+	socket: any,
+}
+
 export interface GameModel
 {
 
@@ -76,9 +91,9 @@ export interface GameModel
 		cards: {[key: string]: CardProps}
 	},
 
-	keepLobbyOpen: boolean,
+	//keepLobbyOpen: boolean,
 	startCard: Card,
-	ruleset: string,
+	//ruleset: string,
 
 	players: any[],
 
@@ -94,19 +109,13 @@ export interface GameModel
 	shipDiscardPile: Card[],
 	goalDiscardPile: Card[],
 
-	ponyDrawPile: Card[],
-	shipDrawPile: Card[],
-	goalDrawPile: Card[],
-
 	currentGoals: Card[],
 	achievedGoals: Set<Card>,
 
 	removed: Card[],
 	tempGoals: Card[],
 
-	turnstate?: Turnstate,
-
-	messageHistory: string[],
+	//messageHistory: string[],
 }
 
 export interface GameModelPlayer extends GameModel
@@ -114,20 +123,31 @@ export interface GameModelPlayer extends GameModel
 	hand: Card[],
 	winnings: {card: Card, value: number}[],
 	playerName: string,
-	turnstate: Turnstate & {
+
+	// this state is maintained by the client
+	
+	turnstate?: TurnstateBase & {
+		
+		removedFrom: [Location, Card]
 		openShips: {[card: string]: true}
-		removedFrom: [Location, Card];
 		shipTarget?: Location 
+		
 	};
 }
 
-export interface GameModelServer extends GameModel
+/*export interface GameModelServer extends GameModel
 {
+	ponyDrawPile: Card[],
+	shipDrawPile: Card[],
+	goalDrawPile: Card[],
+
+	turnstate?: Turnstate
+
 	cardLocations: {[k:string] : string};
 
 	getCurrentShipSet(): Set<string>;
 	getCurrentPositionMap(): {[key:string]: Location}
-}
+}*/
 
 export interface GameOptions 
 {
@@ -147,14 +167,17 @@ export interface ChangelingContextList
 	preSwapShippedTo: Card[]
 }
 
-export interface Turnstate
+export interface TurnstateBase
 {
+	playedThisTurn: Set<any>,
 	currentPlayer: string,
 	overrides: {
 		[key:string]: OverrideProps
 	}
+}
 
-
+export interface Turnstate extends TurnstateBase
+{
 	playedShips: [Card, Card][],
 	playedShipCards: Card[],
 	playedPonies: Card[],
@@ -171,8 +194,6 @@ export interface Turnstate
 	swaps: number,
 
 	shipSet: Set<string>,
-
-	playedThisTurn: Set<any>,
 
 	brokenShipsCommitted: Card[][],
 	brokenShips: Card[][],
@@ -201,7 +222,6 @@ export function isGoal(card: Card)
 {
 	return card.indexOf(".Goal.") >= 0;
 }
-
 
 export function isPonyOrStart(card: Card)
 {

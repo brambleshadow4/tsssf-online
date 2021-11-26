@@ -1,3 +1,5 @@
+import * as Game from "./game/game.js"
+import * as Lobby from "./lobby/lobby.js"
 
 export type WebSocketPlus = WebSocket & {
 	onMessageHandler: Function,
@@ -16,61 +18,64 @@ switch(window.location.protocol)
 }
 
 var host = window.location.host.replace(/:.*/,"");
-var socket = new WebSocket(protocol + "//" + host + ":" + port + "/" + window.location.search) as WebSocketPlus;
-(window as any).socket = socket;
 
+var liveGames = new Set(["/lobby","/game"]);
 
-import * as Game from "./game/game.js"
-import * as Lobby from "./lobby/lobby.js"
-
-
-
-socket.addEventListener("open", function()
+if(liveGames.has(window.location.pathname))
 {
-	socket.send("handshake;" + (localStorage["playerID"] || 0));
-	//socket.send("requestmodel;" + (localStorage["playerID"] || 0))
-});
+	var socket = new WebSocket(protocol + "//" + host + ":" + port + "/" + window.location.search) as WebSocketPlus;
+	(window as any).socket = socket;
 
-
-socket.addEventListener('message', function (event)
-{
-	if(socket.onMessageHandler)
-		socket.onMessageHandler(event);
-});
-
-socket.addEventListener('close', function (event)
-{
-	if(socket.onCloseHandler)
-		socket.onCloseHandler(event);
-});
-
-socket.addEventListener('message', function (event)
-{
-	if(event.data.startsWith("handshake;"))
+	socket.addEventListener("open", function()
 	{
-		var [_, view] = event.data.split(";");
+		socket.send("handshake;" + (localStorage["playerID"] || 0));
+		//socket.send("requestmodel;" + (localStorage["playerID"] || 0))
+	});
 
-		if(view == "game") 
+	socket.addEventListener('message', function (event)
+	{
+		if(socket.onMessageHandler)
+			socket.onMessageHandler(event);
+	});
+
+	socket.addEventListener('close', function (event)
+	{
+		if(socket.onCloseHandler)
+			socket.onCloseHandler(event);
+	});
+
+	socket.addEventListener('message', function (event)
+	{
+		if(event.data.startsWith("handshake;"))
+		{
+			var [_, view] = event.data.split(";");
+
+			if(view == "game") 
+			{
+				Game.loadView();
+			}
+			else if(view == "lobby")
+			{
+				Lobby.loadView(true);
+			}
+			else if(view == "closed")
+			{
+				Lobby.loadView(false);
+			}
+		}
+
+		if(event.data.startsWith("startgame"))
 		{
 			Game.loadView();
 		}
-		else if(view == "lobby")
+
+		if(event.data.startsWith("startlobby"))
 		{
 			Lobby.loadView(true);
 		}
-		else if(view == "closed")
-		{
-			Lobby.loadView(false);
-		}
-	}
-
-	if(event.data.startsWith("startgame"))
-	{
-		Game.loadView();
-	}
-
-	if(event.data.startsWith("startlobby"))
-	{
-		Lobby.loadView(true);
-	}
-});
+	});
+}
+else if(window.location.pathname == "/tutorial")
+{
+	Game.loadView();
+}

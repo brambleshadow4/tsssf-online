@@ -17,14 +17,15 @@ import {
 	getNeighborKeys,
 	Card,
 	Location,
-	GameModel as GameModelShared,
 	CardProps,
 	ChangelingContextList,
 	PackListPack,
 	GameOptions
 } from "../model/lib.js";
 
-import Turnstate from "./turnstate.js";
+import GameModel from "../model/GameModel.js";
+
+import Turnstate from "../model/turnstate.js";
 
 import * as cm from "../model/cardManager.js";
 import {validatePack, flattenPack, mergePacks} from "../model/packLib.js";
@@ -77,7 +78,7 @@ const TEMP_DISCONNECT_TIME = 15*1000;
 const NO_MOVE_EXPIRE_TIME = 60*60*1000; // 1 hour
 export class TsssfGameServer
 {
-	public games: {[key:string] : GameModel};
+	public games: {[key:string] : GameInstance};
 
 	private wsServer: ws.Server;
 
@@ -98,7 +99,7 @@ export class TsssfGameServer
 
 				if(timeSinceLastMove > NO_MOVE_EXPIRE_TIME)
 				{
-					for(var player of games[key].players)
+					for(var player of games[key].model.players)
 					{
 						player.socket.send("closed;");
 						player.socket.close();
@@ -225,54 +226,22 @@ export class TsssfGameServer
 const UPLOAD_LIMIT = 1024*1024;
 //const UPLOAD_LIMIT = 2000;
 
-export class GameModel implements GameModelShared
+/**
+ * A GameInstance is an individual server-node running the game + sending messages to each of the players.
+ */
+export class GameInstance
 {
-	public players: Player[] = [];
+	public model = new GameModel();
+
 	public startTime?: number = 0;
 	public isInGame = false;
 	public isLobbyOpen = true; 
 	public keepLobbyOpen = false;
 	public deathCount = 0;
 
-	public board: {
-		[key:string]: {card: Card}
-	} = {};
-
-	public cardLocations: {
-		[card:string]: Location
-	} = {};
-
-	public cardDecks: string[] = ["Core.*"];
-	public customCards: {
-		descriptions: PackListPack[], 
-		cards: {[key:string]: CardProps},
-		currentSize: number
-	} = {
-		descriptions: [],
-		cards: {},
-		currentSize: 0
-	};
-
 	public lastMessageTimestamp: number;
 
-	public ponyDiscardPile: Card[] = [];
-	public shipDiscardPile: Card[] = [];
-	public goalDiscardPile: Card[] = [];
-
-	public ponyDrawPile: Card[] = [];
-	public shipDrawPile: Card[] = [];
-	public goalDrawPile: Card[] = [];
-
-	public currentGoals: Card[] = [];
-	public achievedGoals: Set<Card> = new Set();
-	public tempGoals: Card[] = [];
-	public removed: Card[] = [];
-
-	public runGoalLogic = true;
-
 	public turnstate? = new Turnstate();
-
-	public startCard: Card = "Core.Start.FanficAuthorTwilight";
 
 	public ruleset: "sandbox" | "turnsOnly" = "turnsOnly";
 
@@ -280,11 +249,10 @@ export class GameModel implements GameModelShared
 
 	public messageHistory: string[] = [];
 
-
 	public debug = false;
 
-	constructor(){
-
+	constructor()
+	{
 		this.lastMessageTimestamp = new Date().getTime();
 	}
 
@@ -296,15 +264,10 @@ export class GameModel implements GameModelShared
 		socket.on('message', handleCrash(this.onMessage(this, socket)));
 		socket.on('close', handleCrash(this.onClose(this, socket)));
 
-		if(!this.host)
-		{
-			var players = this.players;
-		}
-
 		this.sendLobbyList();		
 	}
 
-	public onMessage(game: GameModel, socket: ws)
+	public onMessage(game: GameInstance, socket: ws)
 	{
 		return function(message: string)
 		{
@@ -374,7 +337,9 @@ export class GameModel implements GameModelShared
 
 				if(message.startsWith("uploadCards;") && game.host == socket)
 				{
-					if(game.customCards.currentSize > UPLOAD_LIMIT || message.length > UPLOAD_LIMIT)
+					let customCards = game.model.customCards;
+
+					if(customCards.currentSize > UPLOAD_LIMIT || message.length > UPLOAD_LIMIT)
 					{
 						socket.send("uploadCardsError;Upload limit reached for this lobby.");
 						return;
@@ -415,14 +380,14 @@ export class GameModel implements GameModelShared
 						startCards: Object.keys(cards).filter( x => isStart(x))
 					};
 
-					if(game.customCards.descriptions.filter(x => x.pack == description.pack).length == 0)
+					if(customCards.descriptions.filter(x => x.pack == description.pack).length == 0)
 					{
-						game.customCards.descriptions.push(description);
+						customCards.descriptions.push(description);
 					}
 
-					game.customCards.cards = mergePacks(game.customCards.cards, cards);
+					customCards.cards = mergePacks(customCards.cards, cards);
 
-					game.customCards.currentSize = JSON.stringify(game.customCards.cards).length + JSON.stringify(game.customCards.descriptions).length;
+					customCards.currentSize = JSON.stringify(customCards.cards).length + JSON.stringify(customCards.descriptions).length;
 
 					if(game.host)
 					{
@@ -453,12 +418,13 @@ export class GameModel implements GameModelShared
 
 			if(game.isInGame && message.startsWith("startlobby") && socket == game.host)
 			{
+				// TODO rework lobbying system.
 				game.isInGame = false;
 				game.isLobbyOpen = true;
 				game.toEveryone("startlobby;");
 				game.sendLobbyList();
 
-				for(let player of game.players)
+				for(let player of game.model.players)
 				{
 					if(game.isRegistered(player))
 						player.socket.send("registered;" + player.id);
@@ -489,7 +455,7 @@ export class GameModel implements GameModelShared
 			if(message.startsWith("requestmodel;"))
 			{	
 				// If a new player joins + there's no one else connected (rejoining a dead game), make sure it's their turn.
-				if(game.players.filter(x => x.socket.isAlive).length == 1)
+				if(game.model.players.filter(x => x.socket.isAlive).length == 1)
 				{
 					game.host = socket;
 					game.sendHostMessage(game.host, true)
@@ -505,154 +471,23 @@ export class GameModel implements GameModelShared
 
 				let cards = cm.inPlay();
 
+				let card, no, prop, value, arg;
+				var stuff = message.split(";");
+
+				// TODO validate props + values
+
+				if(stuff.length == 4)
+					[_, card, prop, value] = stuff;
+				else
+					return;
+
+				if(!cards[card]) return;
+
 				try{
-					let card, no, prop, value, arg;
-					var stuff = message.split(";");
-
-					// TODO validate props + values
-
-					if(stuff.length == 4)
-						[_, card, prop, value] = stuff;
-					else
-						return;
-
-					if(!cards[card]) return;
-
-
-					if(prop == "disguise")
-					{
-						if(!cards[value]) return;
-					}
-					else if(prop == "keywords")
-					{
-
-					}
-					else if(prop == "count")
-					{
-						value = Number(value);
-						if(isNaN(value)) return;
-					}
-					else if(prop == "fullCopy")
-					{
-						if(!cards[value]) return;
-					}
-					else
-					{
-						if(!PROP_VALUES[prop] || !PROP_VALUES[prop][value]) return;
-					}
-
-					if(value == "true") 
-						value = true;
-
-
-					var obj;
-
-
-					if(!game.turnstate.overrides[card])
-						game.turnstate.overrides[card] = {};
-
-					obj = game.turnstate.overrides[card]
-
 					
-					if(prop == "disguise")
-					{
-						var oldOverride = game.turnstate.overrides[card];
 
-						game.turnstate.overrides[card] = {"disguise": value};
-
-						if(oldOverride.shipWithEverypony)
-							game.turnstate.overrides[card].shipWithEverypony = true;
-
-
-						var cc = game.turnstate.getChangeContext(card);
-						var newEntry = (cc.list.length > 1) ? cc.list.length : 1;
-
-						cc.list[newEntry] = game.turnstate.overrides[card];
-						var oldEntry = newEntry - 1;
-
-						var oldChangeling = card + ":" + oldEntry;
-						var newChangeling = card + ":" + newEntry;
+					game.model.addEffect(card, prop, value);
 					
-						// rollback played ponies
-						if(cc.method == "play" && game.turnstate.playedPonies[game.turnstate.playedPonies.length - 1] == oldChangeling)
-						{
-							game.turnstate.playedPonies[game.turnstate.playedPonies.length - 1] = newChangeling;
-						}
-
-
-						var shippedWith = [cc.shipRollbackPony];
-						if(cc.method != "ship")
-						{
-							var loc = game.cardLocations[card];
-							shippedWith = getConnectedPonies(game, loc).map(x => game.appendChangelingContext(x));
-						}
-
-						// update played ships so they have the correct context.
-						if(cc.method == "play" || cc.method == "replace" || cc.method == "ship" || cc.method == "lovePoison")
-						{
-							for(let pony of shippedWith)
-							{
-								for(var i = 0; i < game.turnstate.playedShips.length; i++)
-								{
-									var [p1, p2] = game.turnstate.playedShips[i];
-
-									if(p1 == pony && p2 == oldChangeling || p2 == pony && p1 == oldChangeling )
-									{
-										game.turnstate.playedShips[i] = [pony, newChangeling];
-										break;
-									}
-								}
-							}
-						}
-
-						
-						// rollback shipSet to make sure extra break ships don't get counted
-						let preSwapShippedTo = new Set(cc.preSwapShippedTo);
-						for(let pony of shippedWith)
-						{
-
-							// with swaps, you have to be careful. 
-							// if a ship A/X existed before the swap, then 
-							// X gets shipped back to A but redisguised as Y,
-							// it still counts as breaking up A/X which we normaly rollback.
-
-							let oldShip = game.shipString(oldChangeling, pony);
-							let newShip = game.shipString(newChangeling, pony);
-
-							let preSwapCondition = false;
-
-							if(cc.method != "swap")
-							{
-								preSwapCondition = !preSwapShippedTo.has(pony)
-							}
-
-							if(preSwapCondition && game.turnstate.shipSet.has(oldShip))
-							{
-								// replace the [pony, changeling:old] ship with [pony, changeling:new]
-								game.turnstate.shipSet.delete(oldShip);
-								game.turnstate.shipSet.add(newShip);
-								
-							}
-
-						}
-					}
-					else if(prop == "keywords")
-					{
-				
-						if(!obj[prop])
-						{
-							obj[prop] = [];
-						}
-
-						if(obj[prop].indexOf(value) == -1)
-						{
-							obj[prop].push(value);
-						}
-					}
-					else
-					{
-						obj[prop] = value;
-					}
 
 					game.toEveryoneElse( socket, "effects;" + JSON.stringify(game.turnstate.overrides));
 
@@ -853,58 +688,26 @@ export class GameModel implements GameModelShared
 
 		var [_, playerName] = message.split(";");
 
-		var playerIndex = -1;
-		for(var i=0; i< this.players.length; i++)
-		{
-			if(this.players[i].name == playerName)
-			{
-				playerIndex = i; 
-				break;
-			}
-		}
-
-		if(playerIndex == -1) { return; }
+		
+		let player = this.model.getPlayerByName(playerName);
+		if(!player) {return;}
 
 
-		var hand = this.players[i].hand;
-		var winnings = this.players[i].winnings;
+		player.socket.send("kick");
+		player.socket.close();
 
-		if(this.turnstate && this.turnstate.currentPlayer == playerName)
-			this.changeTurnToNextPlayer();
+		this.model.removePlayer(playerName);
 
-		this.players[i].socket.send("kick");
-		this.players[i].socket.close()
-		this.players.splice(i,1);
 
-		var ponies = hand.filter(x => isPony(x));
-		var ships = hand.filter(x => isShip(x));
 
-		this.shipDiscardPile = this.shipDiscardPile.concat(ships);
-		this.ponyDiscardPile = this.ponyDiscardPile.concat(ponies);
-		this.goalDiscardPile = this.goalDiscardPile.concat(winnings.map(x => x.card));
 
-		for(var card of ponies)
-		{
-			this.cardLocations[card] = "ponyDiscardPile,stack"
-		}
+		
 
-		for(var card of ships)
-		{
-			this.cardLocations[card] = "shipDiscardPile,stack"
-		}
 
-		for(let card of winnings)
-		{
-			this.cardLocations[card.card] = "goalDiscardPile,stack"
-		}
-
-		this.cardLocations[this.shipDiscardPile[this.shipDiscardPile.length-1]] = "shipDiscardPile,top";
-		this.cardLocations[this.goalDiscardPile[this.goalDiscardPile.length-1]] = "goalDiscardPile,top";
-		this.cardLocations[this.ponyDiscardPile[this.ponyDiscardPile.length-1]] = "ponyDiscardPile,top";
-
+		
 		// request game
 
-		for(let player of this.players)
+		for(let player of this.model.players)
 		{
 			this.sendCurrentState(player.socket);
 		}
@@ -916,7 +719,7 @@ export class GameModel implements GameModelShared
 		var gameCopy = {} as any;
 
 		gameCopy.messageHistory = this.messageHistory;
-		gameCopy.board = this.board;
+		gameCopy.board = this.model.board;
 
 		if(this.turnstate)
 		{
@@ -952,7 +755,8 @@ export class GameModel implements GameModelShared
 
 		if(type == "exchangeCardsBetweenHands")
 		{
-			let playersInGame = this.players.filter(x => this.isRegistered(x));
+			// TODO check this
+			let playersInGame = this.model.players.filter(x => this.isRegistered(x));
 			let playerCount = playersInGame.length;
 
 			let playersShifted = [...playersInGame.slice(1), playersInGame[0]];
@@ -981,7 +785,7 @@ export class GameModel implements GameModelShared
 				if(card)
 				{
 					playersShifted[i].hand.push(card);
-					this.cardLocations[card] = "player," + playersShifted[i].name;
+					this.model.cardLocations[card] = "player," + playersShifted[i].name;
 					playersInGame[i].socket.send("move;" + card + ";hand;player," + playersShifted[i].name); // take all the cards first
 				}
 			}
@@ -998,7 +802,7 @@ export class GameModel implements GameModelShared
 
 	}
 
-	private onClose(game: GameModel, socket: ws & {isAlive: boolean, isDead: boolean})
+	private onClose(game: GameInstance, socket: ws & {isAlive: boolean, isDead: boolean})
 	{
 		return function()
 		{
@@ -1225,110 +1029,25 @@ export class GameModel implements GameModelShared
 		}
 	}
 
-	public toEveryoneElse(thissocket: ws, message: string)
+	public toEveryoneElse(playerName: string, message: string)
 	{
-		for(var i=0; i < this.players.length; i++)
+		for(var player of this.model.players)
 		{
-			var socket = this.players[i].socket;
-			if(socket != thissocket && socket.isAlive)
+			if(player.name != playerName)
 			{
-				socket.send(message);
+				player.socket.send(message);
 			}
 		}
 	}	
 
 	public toEveryone( message: string)
 	{
-		for(var i=0; i < this.players.length; i++)
+		for(var player of this.model.players)
 		{
-			var socket = this.players[i].socket;
-			
-			if(socket.isAlive)
-				socket.send(message);
+			player.socket.send(message);
 		}
 	}	
 
-	public getPlayerModel(socket: ws)
-	{
-		var model = {} as any;
-
-		model.board = this.board;
-		model.cardDecks = this.cardDecks;
-
-		model.ponyDiscardPile = this.ponyDiscardPile;
-		model.shipDiscardPile = this.shipDiscardPile;
-		model.goalDiscardPile = this.goalDiscardPile;
-
-		model.customCards = this.customCards;
-
-		model.currentGoals = this.currentGoals;
-		model.achievedGoals = [...this.achievedGoals] as any;
-		model.removed = this.removed;
-		model.tempGoals = this.tempGoals;
-
-		model.goalDrawPileLength = this.goalDrawPile.length;
-		model.ponyDrawPileLength = this.ponyDrawPile.length;
-		model.shipDrawPileLength = this.shipDrawPile.length;
-
-		var player = this.getPlayer(socket)!;
-
-		model.hand = player.hand;
-		model.winnings = player.winnings;
-		model.playerName = player.name;
-
-
-		model.players = this.getPlayerListForThisPlayer(socket)
-
-		let ts = this.turnstate;
-		if(ts)
-		{
-			model.turnstate = ts.clientProps();
-		}
-
-		model.keepLobbyOpen = this.isLobbyOpen;
-
-		model.startCard = this.startCard;
-
-		return model;
-	}
-
-	public getPlayerListForThisPlayer(socket: ws)
-	{
-		var playerCount = this.players.length 
-		var players = [];
-
-		if(playerCount > 1)
-		{
-			var playerIndex = this.getPlayerIndex(socket);
-			var player = this.getPlayer(socket)!;
-
-			for(var i=(playerIndex+1) % playerCount; i != playerIndex; i = ((i + 1) % playerCount))
-			{
-				let other = this.players[i];
-				
-				let otherPlayerStats = {
-					name: other.name,
-					team: other.team,
-					disconnected: !other.socket.isAlive,
-					ponies: other.hand.filter(x => isPony(x)).length,
-					ships: other.hand.filter(x => isShip(x)).length,
-					winnings: other.winnings
-				} as any;
-
-				if(other.team === player.team && player.team != undefined)
-				{
-					otherPlayerStats.hand = other.hand.slice();
-				}
-
-				if(other.name != "") // Players who are still registering have a name of ""
-				{
-					players.push(otherPlayerStats);
-				}
-			}
-		}
-
-		return players;
-	}
 
 	public sendPlayerlistsToEachPlayer()
 	{
@@ -1460,7 +1179,7 @@ export class GameModel implements GameModelShared
 	{	
 		this.isLobbyOpen = this.keepLobbyOpen;
 
-		if(!preset)
+		/*if(!preset)
 		{
 			// remove players which disconnected before the games started
 			for(var i=0; i<this.players.length; i++)
@@ -1474,88 +1193,26 @@ export class GameModel implements GameModelShared
 
 			if(this.players.length == 0)
 				return false;
-		}
+		}*/
 
 		this.startTime = new Date().getTime();
 
-		
-
-		this.cardLocations = {};
-		this.board = {
-			"p,0,0":{
-				card: this.startCard
-			}
-		};
-
-		for(var player of this.players)
-		{
-			player.hand = [];
-			player.winnings = [];
-		}
+	
 
 		this.isInGame = true;
-		this.cardLocations[this.startCard] = "p,0,0";
-
-
-		this.goalDiscardPile = [];
-		this.ponyDiscardPile = [];
-		this.shipDiscardPile = [];
-
-		this.currentGoals = [
-			"blank:goal","blank:goal","blank:goal"
-		];
-
-		this.achievedGoals = new Set();
-
-		this.removed = [];
-		this.tempGoals = [];
-
-		// client only props
-		//     hand:
-		//     winnings
-
-		// private props
-		this.goalDrawPile = [];
-		this.ponyDrawPile = [];
-		this.shipDrawPile = [];
-
+		
 
 		logGameHosted();
 
-		for(let i of this.players.filter(x => this.isRegistered(x)))
+		for(let i of this.model.players.filter(x => this.isRegistered(x)))
 		{
 			logPlayerJoined();
 		}
 
-		for(var cardName in cm.inPlay())
-		{
-			if(!isCardIncluded(cardName, this))
-				continue;
+		
+		// TODO test rulesets
 
-			if(isGoal(cardName))
-			{
-				this.goalDrawPile.push(cardName);
-				this.cardLocations[cardName] = "goalDrawPile";
-			}
-			else if(isPony(cardName))
-			{	
-				this.ponyDrawPile.push(cardName);
-				this.cardLocations[cardName] = "ponyDrawPile";
-			}
-			else if(isShip(cardName))
-			{
-				this.shipDrawPile.push(cardName);
-				this.cardLocations[cardName] = "shipDrawPile";
-			}
-		}
-
-		randomizeOrder(this.players);
-		randomizeOrder(this.goalDrawPile);
-		randomizeOrder(this.ponyDrawPile);
-		randomizeOrder(this.shipDrawPile);
-
-
-		if(this.ruleset == "turnsOnly")
+		/*if(this.ruleset == "turnsOnly")
 		{
 			this.turnstate = new Turnstate();
 			this.turnstate.init(this, this.players[0] ? this.players[0].name : "")
@@ -1563,13 +1220,15 @@ export class GameModel implements GameModelShared
 		else
 		{
 			delete this.turnstate;
-		}
+		}*/
 		
-		if(preset)
-			this.loadPreset(preset);
+		// TODO
+		//if(preset)
+		//	this.loadPreset(preset);
 	}
 
-	private loadPreset(hand: Card[])
+	// TODO
+	/*private loadPreset(hand: Card[])
 	{
 		console.log("Loading Preset Game");
 
@@ -1600,27 +1259,8 @@ export class GameModel implements GameModelShared
 				this.shipDrawPile.splice(this.shipDrawPile.indexOf(card), 1);
 			}
 		}
-	}
+	}*/
 
-	private isLocOccupied(loc: Location)
-	{
-		if(isBoardLoc(loc) || isOffsetLoc(loc))
-		{
-
-			return (this.board[loc] != undefined)
-		}
-		if(isGoalLoc(loc))
-		{
-			var goalNo = Number(loc.split(",")[1]);
-
-			if(this.currentGoals[goalNo] == undefined)
-				return false;
-
-			return this.currentGoals[goalNo] != "blank:goal"
-		}
-
-		return false;
-	}
 
 	private sendPlayerCounts(player:Player)
 	{
@@ -1631,112 +1271,7 @@ export class GameModel implements GameModelShared
 		this.toEveryoneElse(player.socket, args.join(";"));
 	}
 
-	private isChangeling(card:Card)
-	{
-		card = card.split(":")[0];
-		return isPony(card) && cm.inPlay()[card]?.action?.startsWith("Changeling(");
-	}
 
-	public getCurrentShipSet(): Set<string>
-	{
-		var s: Set<string> = new Set();
-		for(var key in this.board)
-		{
-			if (key.startsWith("s"))
-			{
-				var pair = this.getShippedPonies(key);
-
-				if(pair.length == 2)
-				{	
-					s.add(this.shipString(pair[0], pair[1]));
-				}
-			}
-
-			if(this.turnstate && this.turnstate.specialEffects.shipWithEverypony)
-			{
-				var pony1 = this.board[key].card;
-				for(var pony2 of this.turnstate.specialEffects.shipWithEverypony)
-				{
-					if(pony1 != pony2)
-					{
-						s.add(this.shipString(this.appendChangelingContext(pony1), this.appendChangelingContext(pony2)));
-					}
-				}
-			}
-		}
-
-		return s;
-	}
-
-	public getCurrentPositionMap(): {[key:string]: Location}
-	{
-		var map:{[key:string]: Location} = {};
-
-		for(var loc in this.board)
-		{
-			if (loc.startsWith("p,") && !isBlank(this.board[loc].card))
-			{
-				map[this.board[loc].card] = loc;
-			}
-		}
-
-		return map;
-
-	}
-
-	private isShipClosed(shipLoc: Location)
-	{
-		return this.getShippedPonies(shipLoc).length == 2;
-	}
-
-
-	public appendChangelingContext(card: Card)
-	{
-		if(this.turnstate && this.isChangeling(card))
-		{
-			var cc = this.turnstate.getChangeContext(card);
-			var contextNo =  cc ? Math.max(cc.list.length - 1, 0) : 0
-			return card + ":" + contextNo;
-		}
-
-		return card;
-	}
-
-	private getShippedPonies(shipLoc: Location): Card[]
-	{
-		var neighbors = getNeighborKeys(shipLoc);
-
-		var shipClosed = true;
-		var ponies = [];
-		for(var n of neighbors)
-		{
-			if(this.board[n] && !isBlank(this.board[n].card))
-			{
-				var card = this.board[n].card;
-
-				card = this.appendChangelingContext(card);
-
-				ponies.push(card)
-			}
-		}
-
-		return ponies;
-	}
-
-	private getBrokenShips(startSet: Set<string>, endSet: Set<string>)
-	{
-		var broken:[Card,Card][] = [];
-
-		for(var ship of startSet)
-		{
-			if(!endSet.has(ship))
-			{
-				broken.push(ship.split("/") as [Card, Card]);
-			}
-		}
-
-		return broken;
-	}
 
 	private getSwappedCount(startPositions: {[loc: string]: Card}, endPositions: {[loc: string]: Card})
 	{
@@ -1755,203 +1290,38 @@ export class GameModel implements GameModelShared
 
 	private changeTurnToNextPlayer()
 	{
-		let ts = this.turnstate;
-		if(!ts)
-			return;
-
-		var rotation = this.players.filter(x => !x.socket.isDead && x.name != "");
-
-		if(rotation.length == 0)
-			return;
-
-		var k = rotation.map(x=> x.name).indexOf(ts.currentPlayer);
-		k = (k+1)%rotation.length;
-
-		this.turnstate = new Turnstate();
-		this.turnstate.init(this, rotation[k].name);
+		this.model.changeTurnToNextPlayer();
 
 		this.toEveryone("turnstate;" + JSON.stringify(this.turnstate!.clientProps()));
 
 		this.checkIfGoalsWereAchieved();
 	}
 
-	private moveCard(message: string, socket: ws)
+	private moveCard(message: string, playerName: string)
 	{
 		var [_,card, startLocation, endLocation, extraArg] = message.split(";");
-		var player = this.getPlayer(socket)!;
+		var player = this.model.getPlayerByName(playerName);
+
+		if(!player) { return; }
 
 		let serverStartLoc = startLocation;
 		if(startLocation == "hand" || startLocation == "winnings")
 			serverStartLoc = "player," + player.name;
 
 
-		// if the player has an incorrect position for a card, move it to where it actually should be.
-		if(this.cardLocations[card] != serverStartLoc || this.isLocOccupied(endLocation))
-		{						
-			var whereTheCardActuallyIs = this.cardLocations[card];
-			if(whereTheCardActuallyIs == "player," + player.name)
-			{
-				if(isGoal(card))
-					whereTheCardActuallyIs = "winnings";
-				else
-					whereTheCardActuallyIs = "hand";
-			}
-
-			if(this.debug)
-			{
-				console.log("X " + message);
-				console.log("  P: " + player.name);
-
-				console.log("  whereTheCardActuallyIs = " + whereTheCardActuallyIs);
-				console.log("  move;" + card + ";limbo;" + whereTheCardActuallyIs);
-			}
-			
-			socket.send("move;" + card + ";limbo;" + whereTheCardActuallyIs);
-
+		let actualLocation = this.model.isInvalidMoveOnClient(playerName, card, startLocation, endLocation);
+		if(actualLocation)
+		{
+			player.socket.send("move;" + card + ";limbo;" + actualLocation);
 			return;
 		}
 
-		if(this.debug)
-		{
-			console.log("\u221A " + message);
-			console.log("  P: " + player.name);
-		}
-		
 
-		let serverEndLoc = endLocation;
-		if(serverEndLoc == "hand" || serverEndLoc == "winnings")
-			serverEndLoc = "player," + player.name;
-
-		this.cardLocations[card] = serverEndLoc;
-
-
-		this.updateTurnstatePreMove(card, startLocation, endLocation);
-
-
-		// remove from old location
-		if(startLocation == "hand")
-		{
-			var i = this.getPlayer(socket)!.hand.indexOf(card);
-
-			this.getPlayer(socket)!.hand.splice(i, 1);
-		}
-
-		
-
-		if(startLocation == "winnings")
-		{
-			let player = this.getPlayer(socket)!
-			var i = player.winnings.map(x => x.card).indexOf(card);
-			player.winnings.splice(i, 1);
-		}
-
-		if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
-		{
-			if(this.board[startLocation] && this.board[startLocation].card == card)
-			{
-
-				delete this.board[startLocation];
-			}
-		}
-
-		if(isDiscardLoc(startLocation))
-		{
-			let model = this as any;
-			var [pile,slot] = startLocation.split(",");
-			let i = model[pile].indexOf(card);
-			model[pile].splice(i,1);
-
-			if(model[pile].length)
-			{
-				var topCard = model[pile][model[pile].length-1]
-				model.cardLocations[topCard] = pile+",top";
-			}
-		}
-
-		if(isGoalLoc(startLocation))
-		{
-			let [_,iStr] = startLocation.split(",")
-			let i = Number(iStr);
-			if(this.currentGoals[i] != "blank:goal")
-				this.currentGoals[i] = "blank:goal";
-			
-		}
-
-		if(startLocation == "removed")
-		{
-			let i = this.removed.indexOf(card);
-			this.removed.splice(i,1);
-		}
-
-		if(startLocation == "tempGoals")
-		{
-			let i = this.tempGoals.indexOf(card);
-			this.tempGoals.splice(i,1);
-		}
-
-		// move to end location
-
-		if(endLocation == "hand")
-		{
-			this.getPlayer(socket)!.hand.push(card)
-			this.checkIfGoalsWereAchieved();
-		}
-
-		if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
-		{
-			this.board[endLocation] = {card: card};
-
-			if(this.turnstate)
-			{
-				this.turnstate.playedThisTurn.add(card);
-			}
-		}
-
-		if(isGoalLoc(endLocation))
-		{
-			var [_,goalNoStr] = endLocation.split(",")
-			let goalNo = Number(goalNoStr);
-			this.currentGoals[goalNo] = card;
-			this.cardLocations[card] = "goal," + goalNo;
-		}
-
-		if(endLocation == "winnings")
-		{
-			player.winnings.push({card, value: Number(extraArg) || 0});
-		}
-
-		if(isDiscardLoc(endLocation))
-		{
-			// the only valid placement is on top of the discard pile
-			var [pile,slot] = endLocation.split(",");
-			let model = this as any;
-			model[pile].push(card);
-
-			if(model[pile].length > 1)
-			{
-				var underCard = model[pile][model[pile].length-2];
-				model.cardLocations[underCard] = pile + ",stack";
-			}
-		}
-
-		if(endLocation == "removed")
-		{
-			this.removed.push(card);
-		}
-
-		if(endLocation == "tempGoals")
-		{
-			this.tempGoals.push(card);
-		}
-
-		//postmove
-
-		this.updateTurnstatePostMove(card, startLocation, endLocation);
-
+		this.model.moveCard(playerName, card, startLocation, endLocation, extraArg);
 
 		// cant move to a goal location yet
 
-		socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
+		player.socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
 
 		if(startLocation == "hand" || startLocation == "winnings")
 			startLocation = "player,"+player.name;
@@ -1979,152 +1349,11 @@ export class GameModel implements GameModelShared
 			}
 		}
 	
+		// TODO
 		this.checkIfGoalsWereAchieved();
 	}
 
-	private updateTurnstatePreMove(card: Card, startLocation: string, endLocation: string): void
-	{
-		if(!this.turnstate) { return; }
 
-
-
-		if(this.isChangeling(card))
-		{
-			let cc = this.turnstate.getChangeContext(card);
-
-			if(this.board[startLocation] && this.board[startLocation].card == card)
-			{
-				cc.method = "swap";
-				cc.preSwapShippedTo = getConnectedPonies(this, startLocation).map( x => this.appendChangelingContext(x));
-
-				if(this.turnstate.openPonyLocations.has(endLocation))
-				{
-					cc.method = "lovePoison";
-				}
-			}
-			else
-			{
-				cc.method = "play"; // could be play or replace, doesn't actually matter
-			}
-		}
-	}
-
-	public updateCountsFromBoardState(commit: boolean)
-	{
-		if(!this.turnstate) {return;}
-
-		var newSet = this.getCurrentShipSet();
-
-		var brokenShipsTentative = this.getBrokenShips(this.turnstate.shipSet, newSet);
-		this.turnstate.brokenShips = this.turnstate.brokenShipsCommitted.concat(brokenShipsTentative);
-
-		var curPositionMap = this.getCurrentPositionMap();
-		var newlySwapped = this.getSwappedCount(this.turnstate.positionMap, curPositionMap)
-
-		this.turnstate.swaps = this.turnstate.swapsCommitted + newlySwapped;
-
-		if(commit)
-		{
-			this.turnstate.brokenShipsCommitted = this.turnstate.brokenShips;
-			//this.turnstate.playedShipsCommitted = this.turnstate.playedShips;
-			this.turnstate.swapsCommitted = this.turnstate.swaps;
-			this.turnstate.shipSet = newSet;
-			this.turnstate.positionMap = curPositionMap;
-		}
-	}
-
-
-	private updateTurnstatePostMove(card: Card, startLocation: Location, endLocation: Location)
-	{
-		if(!this.turnstate) { return }
-
-		if(isPony(card) 
-			&& (this.turnstate.openPonyLocations.has(endLocation) || startLocation == "hand" || startLocation == "ponyDiscardPile,top") // need both because replace powers aren't open.
-			&& isBoardLoc(endLocation))
-		{
-	
-			let cardContext = this.appendChangelingContext(card);
-
-			if(startLocation == "hand" || startLocation == "ponyDiscardPile,top") // this will be false for love poisons
-			{
-				this.turnstate.playedPonies.push(cardContext);
-			}
-
-			let connectedPonies = getConnectedPonies(this, endLocation);
-
-			let newShips: [string,string][] = connectedPonies.map( x => [x, cardContext]);
-			this.turnstate.playedShips = this.turnstate.playedShips.concat(newShips);
-		}
-
-		if(isPony(card) && isBoardLoc(endLocation))
-		{
-			this.turnstate.openPonyLocations.delete(endLocation);
-		}
-
-		if(isShip(card) 
-			&& (startLocation == "hand" || startLocation == "shipDiscardPile,top")
-			&& isBoardLoc(endLocation))
-		{
-			this.turnstate.playedShipCards.push(card);
-
-			let connectedPonies = this.getShippedPonies(endLocation);
-
-			if(connectedPonies.length == 2)
-			{
-				this.turnstate.playedShips.push(connectedPonies as [string, string]);
-			}
-			else
-			{
-				var slots = getNeighborKeys(endLocation);
-				slots = slots.filter(x => !this.board[x]?.card);
-				slots.forEach(x => this.turnstate!.openPonyLocations.add(x));
-			}
-		}
-
-		
-
-
-		if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
-		{
-			this.turnstate.updateSpecialEffects(this.board);
-		}
-
-
-		let commitCounts = (startLocation == "hand" || 
-			startLocation == "shipDiscardPile,top" || startLocation == "ponyDiscardPile,top"
-			|| endLocation == "shipDiscardPile,top" || endLocation == "ponyDiscardPile,top");
-
-		this.updateCountsFromBoardState(commitCounts);
-
-
-		if(isShip(card)
-			&& (startLocation == "hand" || startLocation == "shipDiscardPile,top")
-			&& isBoardLoc(endLocation))
-		{
-
-			if(this.isShipClosed(endLocation))
-			{
-				//i.e. played a ship card between two ponies
-
-				var shippedPonies = this.getShippedPonies(endLocation);
-				var noCtxShipped = shippedPonies.map(x => x.split(":")[0]);
-				
-				if(this.isChangeling(noCtxShipped[0]))
-				{
-					let cc = this.turnstate.getChangeContext(noCtxShipped[0]);
-					cc.method = "ship";
-					cc.shipRollbackPony = shippedPonies[1];
-				}
-
-				if(this.isChangeling(noCtxShipped[1]))
-				{
-					let cc = this.turnstate.getChangeContext(noCtxShipped[1]);
-					cc.method = "ship";
-					cc.shipRollbackPony = shippedPonies[0];
-				}
-			}
-		}
-	}
 }
 
 

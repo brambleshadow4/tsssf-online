@@ -89,7 +89,7 @@ import {
 import * as GameView from "./gameView.js" 
 
 import {WebSocketPlus} from "../viewSelector.js"
-
+import * as TutorialManager from "./tutorialManager.js";
 import {
 	broadcastMove,
 	broadcast,
@@ -145,10 +145,20 @@ win.toggleFullScreen = toggleFullScreen;
 
 export function loadView()
 {
-	if(window.location.pathname != "/game")
+	switch(window.location.pathname)
 	{
-		history.replaceState(null, "", "/game" + window.location.search)
+		case "/lobby":
+			history.replaceState(null, "", "/game" + window.location.search)
+			attachToSocket(win.socket);
+			break;
+		case "/tutorial":
+			TutorialManager.boot();
+			break;
+		case "/game":
+			attachToSocket(win.socket);
+			break;
 	}
+
 
 	turnStateChangelings = {};
 	haveCardsLoaded = false;
@@ -169,7 +179,7 @@ export function loadView()
 		showingHelpPopup = true;
 	}
 
-	attachToSocket(win.socket);
+	
 
 	win.updateGame = updateGame;
 
@@ -352,7 +362,7 @@ export function updateTurnstate()
 	{
 		document.body.classList.add("nomove");
 
-		div.innerHTML = `<div>`+ s.GamePlayerTurn.replace("{0}", model.turnstate.currentPlayer) + `</div>`;
+		div.innerHTML = `<div>`+ s.GamePlayerTurn.replace("{0}", turnstate.currentPlayer) + `</div>`;
 
 
 		var thisPlayer = model.players.filter(x => x.name == turnstate.currentPlayer)[0];
@@ -1166,8 +1176,9 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 		if(model.turnstate)
 		{
 			if(!model.turnstate.openShips)
+			{
 				model.turnstate.openShips = {};
-
+			}
 
 			shipTarget = model.turnstate.shipTarget || "";
 		}
@@ -1184,13 +1195,15 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 		var cardInfo = cm.inPlay()[e.card];
 		if(isShip(e.card) && isBoardLoc(e.endLocation))
 		{
-			if(model.turnstate)
-			{
-				if(!model.turnstate.openShips)
-					model.turnstate.openShips = {};
+			if(!model.turnstate){ return; }
 
-				model.turnstate.openShips[e.card] = true;
+			if(!model.turnstate.openShips)
+			{
+				model.turnstate.openShips = {};
 			}
+
+			model.turnstate.openShips[e.card] = true;
+	
 
 			if(!isShipClosed(e.card) && isImmediatePlay)
 			{
@@ -1208,7 +1221,6 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 			{
 				delete model.turnstate.shipTarget;
 			}
-
 		}
 	}
 
@@ -1229,7 +1241,10 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 				delete model.turnstate.openShips[shipCard];
 
 				fn = getCardAction(shipCard);
-				if(fn) await fn(shipCard);
+				if(fn) 
+				{
+					await fn(shipCard);
+				}
 
 
 				// add action buttons to other cards
@@ -1242,8 +1257,6 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 					for(let pony of ponies)
 					{
 						let fn = getCardAction(pony);
-
-
 
 						var cardElement = model.board[cardLocations[pony]].element!;
 
@@ -1457,7 +1470,7 @@ async function fullCopyAction(card: Card)
 function getCardProp(card: Card, prop: keyof OverrideProps | "*")
 {
 	let model = win.model;
-	var cardObj = model.turnstate.overrides[card] || {};
+	var cardObj = model.turnstate?.overrides[card] || {};
 
 	var baseCard = card;
 

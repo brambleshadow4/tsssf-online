@@ -11,7 +11,7 @@ import {
 	isAnon,
 	isPonyOrStart,
 	getNeighborKeys,
-	GameModel,
+	GameModelPlayer as GameModel,
 	Location,
 	Card,
 	CardElement

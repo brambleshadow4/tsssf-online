@@ -45,7 +45,6 @@ export default class Turnstate
 
 	public updateSpecialEffects(board: {[key: string]: {card: Card}})
 	{
-
 		delete this.specialEffects["larsonEffect"];
 		for(var key in board)
 		{

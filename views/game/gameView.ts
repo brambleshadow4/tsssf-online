@@ -19,9 +19,7 @@ var HTML = `
 		<div class='shuffleContainer'>
 			<img id='shipShuffle' class='shuffle' src="/img/shuffle.svg"/>
 		</div>
-		<div id="shipDiscardPile" class='card discard'>
-			<img class="discardPileTrash" id='shipDiscardPileTrash' src="/img/trash.svg"/>
-		</div>
+		<div id="shipDiscardPile" class='card discard'></div>
 		<div id="goalDrawPile" class='card goal'></div>
 		<div class='shuffleContainer'>
 			<img id='goalShuffle' class='shuffle' src="/img/shuffle.svg"/>
