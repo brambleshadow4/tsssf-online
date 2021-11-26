@@ -115,6 +115,7 @@ export interface GameModel
 	removed: Card[],
 	tempGoals: Card[],
 
+
 	//messageHistory: string[],
 }
 

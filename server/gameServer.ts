@@ -20,7 +20,8 @@ import {
 	CardProps,
 	ChangelingContextList,
 	PackListPack,
-	GameOptions
+	GameOptions,
+	Player
 } from "../model/lib.js";
 
 import GameModel from "../model/GameModel.js";
@@ -63,17 +64,6 @@ var PROP_VALUES = {
 }*/
 
 
-export interface Player 
-{
-	socket: any,
-	team?: string,
-	name: string,
-	hand: string[],
-	winnings: {card: Card, value: number}[],
-	id: number,
-}
-
-
 const TEMP_DISCONNECT_TIME = 15*1000;
 const NO_MOVE_EXPIRE_TIME = 60*60*1000; // 1 hour
 export class TsssfGameServer
@@ -111,9 +101,9 @@ export class TsssfGameServer
 				// no player alive expiration
 
 				var anyPlayersAlive = false;
-				for(var i=0; i < games[key].players.length; i++)
+				for(var i=0; i < games[key].model.players.length; i++)
 				{
-					if(games[key].players[i].socket.isAlive)
+					if(games[key].model.players[i].socket.isAlive)
 					{
 						anyPlayersAlive = true;
 						break;
@@ -158,7 +148,7 @@ export class TsssfGameServer
 			while(this.games[key] !== undefined)
 		}
 		
-		this.games[key] = new GameModel();
+		this.games[key] = new GameInstance();
 
 		return key;
 	}
@@ -187,7 +177,7 @@ export class TsssfGameServer
 			if(this.games[key].isInGame)
 			{
 				stats.games++;
-				stats.players += this.games[key].players.filter(x => x.socket.isAlive).length;
+				stats.players += this.games[key].model.players.filter(x => x.socket.isAlive).length;
 
 				let thisStartTime = this.games[key].startTime; 
 				if(thisStartTime !== undefined)
@@ -226,6 +216,24 @@ export class TsssfGameServer
 const UPLOAD_LIMIT = 1024*1024;
 //const UPLOAD_LIMIT = 2000;
 
+function defaultGameOptions(): GameOptions
+{
+	return {
+		cardDecks: ["Core.*"],
+		customCards: {
+			descriptions: [],
+			cards: {}
+		},
+		startCard: "Core.Start.FanficAuthorTwilight",
+		keepLobbyOpen: false,
+		teams: {},
+		ruleset: "turnsOnly"
+	};
+}
+
+
+
+
 /**
  * A GameInstance is an individual server-node running the game + sending messages to each of the players.
  */
@@ -239,11 +247,12 @@ export class GameInstance
 	public keepLobbyOpen = false;
 	public deathCount = 0;
 
+	public gameOptions: GameOptions = defaultGameOptions();
+
 	public lastMessageTimestamp: number;
 
 	public turnstate? = new Turnstate();
 
-	public ruleset: "sandbox" | "turnsOnly" = "turnsOnly";
 
 	private host?: ws;
 
@@ -274,7 +283,7 @@ export class GameInstance
 			if(!game) // not quite sure how this happens, but this crashed one time.
 				return;
 
-			let logPlayerName = game.getPlayer(socket)?.name || ":unknown:"; 
+			let logPlayerName = game.getPlayerBySocket(socket)?.name || ":unknown:"; 
 
 			game.messageHistory.push(logPlayerName + ";" + message);
 			game.lastMessageTimestamp = new Date().getTime();
@@ -441,7 +450,9 @@ export class GameInstance
 				game.toEveryone("keepLobbyOpen;" + (keepLobbyOpen ? 1 : 0));
 			}
 
-			if(!game.isRegistered(game.getPlayer(socket)))
+			let player = game.getPlayerBySocket(socket);
+
+			if(!player)
 			{
 				return;
 			}
@@ -461,7 +472,7 @@ export class GameInstance
 					game.sendHostMessage(game.host, true)
 				}
 
-				game.sendCurrentState(socket);
+				game.sendCurrentState(player.name);
 				return;
 			}
 
@@ -470,7 +481,6 @@ export class GameInstance
 				// effects;<card>;prop;value
 
 				let cards = cm.inPlay();
-
 				let card, no, prop, value, arg;
 				var stuff = message.split(";");
 
@@ -485,23 +495,10 @@ export class GameInstance
 
 				try{
 					
-
 					game.model.addEffect(card, prop, value);
 					
-
-					game.toEveryoneElse( socket, "effects;" + JSON.stringify(game.turnstate.overrides));
-
-					// a changeling update can create more broken ships
-					if(game.turnstate)
-					{
-						if(prop == "shipWithEverypony")
-						{
-							game.turnstate.specialEffects.shipWithEverypony.add(card);
-						}
-
-						game.updateCountsFromBoardState(false);
-					}
-
+					game.toEveryoneElse(player.name, "effects;" + JSON.stringify(game.turnstate.overrides));
+					
 					game.checkIfGoalsWereAchieved();
 				}
 				catch(e)
@@ -522,68 +519,28 @@ export class GameInstance
 				if(typ != "ship" && typ != "pony" && typ != "goal")
 					return;
 
-				let model2 = game as any;
+				let [success, newLen, card, newLoc] = game.model.drawCard(player.name, typ as any, specialLoc);
 
-				var len = model2[typ + "DrawPile"].length as number;
-
-				if(typ == "goal" && len)
+				if(!success)
 				{
+					return;
+				}
 
-					if(specialLoc)
-					{
-						if(specialLoc == "tempGoals")
-						{
-							let card = model2["goalDrawPile"].pop() as Card;					
-
-							game.tempGoals.push(card);
-							game.cardLocations[card] = "tempGoals";
-		
-							game.toEveryone("draw;goal;" + (len - 1));
-							game.toEveryone("move;" + card + ";goalDrawPile;tempGoals");
-							game.checkIfGoalsWereAchieved();
-						}
-					}
-					else
-					{
-						var goalNo = game.currentGoals.indexOf("blank:goal")
-
-						if(goalNo > -1)
-						{
-							let card = model2["goalDrawPile"].pop();
-							game.currentGoals[goalNo] = card
-							game.cardLocations[card] = "goal," + goalNo;
-
-							var msg = "draw;" + typ + ";" + (len - 1);
-
-							game.toEveryone(msg);
-							game.toEveryone( "move;" + card + ";goalDrawPile;goal," + goalNo);
-							game.checkIfGoalsWereAchieved();
-						}
-						else
-							return ;
-					}
-
-					
+				if(typ == "goal")
+				{
+					game.toEveryone("draw;goal;" + newLen);
+					game.toEveryone("move;" + card + ";goalDrawPile;" + newLoc);
+					game.checkIfGoalsWereAchieved();
 				}
 				else
 				{
-					if(len)
-					{
-						let card = model2[typ + "DrawPile"].pop();
+					var msg = "draw;" + typ + ";" + newLen;
+					game.toEveryone(msg);
+					socket.send("move;" + card + ";" + typ + "DrawPile;hand");
 
-						let player = game.getPlayer(socket)!
-						player.hand.push(card);
-						game.cardLocations[card] = "player," + player.name;
-
-						var msg = "draw;" + typ + ";" + (len - 1);
-						game.toEveryone(msg);
-						socket.send("move;" + card + ";" + typ + "DrawPile;hand");
-
-						game.toTeamMembers(socket, "move;" + card + ";" + typ + "DrawPile;player," + player.name)
-						game.toNonTeamMembers(socket, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
-					
-						game.sendPlayerCounts(player);
-					}
+					game.toTeamMembers(player.name, "move;" + card + ";" + typ + "DrawPile;player," + player.name)
+					game.toNonTeamMembers(player.name, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
+					game.sendPlayerCounts(player);
 				}
 			}
 
@@ -593,47 +550,20 @@ export class GameInstance
 
 				if(["pony","goal","ship"].indexOf(typ) > -1)
 				{
-					let model2 = game as any;
-					var swap = model2[typ + "DrawPile"];
-					model2[typ+"DrawPile"] = model2[typ+"DiscardPile"];
-					model2[typ+"DiscardPile"] = swap;
-
-					randomizeOrder(model2[typ+"DrawPile"]);
-
-					for(let card of model2[typ+"DrawPile"])
-					{
-						model2.cardLocations[card] = typ + "DrawPile,stack";
-					}
-
-
-					var pileArr = model2[typ+"DiscardPile"];
-					
-					if(pileArr.length >0)
-					{
-						for(let card of pileArr)
-						{
-							model2.cardLocations[card] = typ + "DiscardPile,stack";
-						}
-
-						var topCard = pileArr[pileArr.length-1];
-						model2.cardLocations[topCard] = typ+"DiscardPile,top";
-					}
-					
+					game.model.swapShuffle(typ as any);
+					let model2 = game.model as any;
 					game.toEveryone(["swapshuffle", typ, model2[typ+"DrawPile"].length, ...model2[typ+"DiscardPile"]].join(";"));
 				}
 			}
 
 			if(message.startsWith("move;"))
 			{
-				game.moveCard(message, socket);
+				game.moveCard(message, player.name);
 			}
 
 			if(message == "endturn")
 			{
-				let player = game.getPlayer(socket)!;
-
 				if(!game.turnstate) return;
-
 
 				if(player.name == game.turnstate.currentPlayer)
 				{
@@ -648,19 +578,29 @@ export class GameInstance
 	{
 		let id = Number(message.split(";")[1]);
 
-		var player = this.getPlayer(socket, id);
+		var player = this.getPlayerBySocket(socket)
 
 		if(!player)
 		{
-			player = this.addPlayerConnection(socket);
+			player = this.getPlayerByID(id)
+
+			if(player)
+			{
+				player.socket = socket;
+			}
+			else
+			{
+				player = this.addPlayerConnection(socket);
+			}
 		}
 
+	
 		if(this.isRegistered(player) && this.isInGame)
 		{
 			socket.send("handshake;game");
 			this.sendPlayerlistsToEachPlayer();
 
-			if(this.players.filter(x => !x.socket.isDead).length == 1)
+			if(this.model.players.filter(x => !x.socket.isDead).length == 1)
 				this.changeTurnToNextPlayer(); // only one alive player. Make sure it's their turn.
 		}
 		else if(this.isLobbyOpen)
@@ -675,7 +615,7 @@ export class GameInstance
 
 		if(!this.host)
 		{
-			var players = this.players
+			var players = this.model.players
 			this.host = players[0].socket;
 			this.sendHostMessage( players[0].socket, true);
 		}
@@ -808,7 +748,7 @@ export class GameInstance
 		{
 			socket.isAlive = false;
 
-			let player = game.getPlayer(socket)
+			let player = game.getPlayerBySocket(socket)
 			let deadName = player ? player.name : "";
 
 			// mark the socket as dead after 15 s. 
@@ -831,7 +771,7 @@ export class GameInstance
 
 			if(game.host == socket)
 			{
-				var connectedPlayers = game.players.filter(x => x.socket.isAlive);
+				var connectedPlayers = game.model.players.filter(x => x.socket.isAlive);
 
 				if(game.isInGame)
 					connectedPlayers = connectedPlayers.filter(x => game.isRegistered(x));
@@ -840,7 +780,7 @@ export class GameInstance
 				// 
 				if(!game.isInGame)
 				{
-					game.cardDecks = game.cardDecks.filter( (x: Card)=> !x.startsWith("X."))
+					game.model.cardDecks = game.model.cardDecks.filter( (x: Card)=> !x.startsWith("X."))
 				}
 
 				if(connectedPlayers.length)
@@ -856,13 +796,14 @@ export class GameInstance
 			}
 
 
+			// TODO rewrite this. Should use connecting var
 			if(game.isLobbyOpen && !game.isInGame)
 			{
-				for(var i=0; i < game.players.length; i++)
+				for(var i=0; i < game.model.players.length; i++)
 				{
-					if(socket == game.players[i].socket)
+					if(socket == game.model.players[i].socket)
 					{
-						game.players.splice(i, 1);
+						game.model.players.splice(i, 1);
 						break;
 					}
 				}
@@ -884,9 +825,9 @@ export class GameInstance
 
 	private checkNameIsUnique(name: string)
 	{
-		for(var i=0; i < this.players.length; i++)
+		for(var i=0; i < this.model.players.length; i++)
 		{
-			if(this.players[i].name == name)
+			if(this.model.players[i].name == name)
 			{
 				return false;
 			}
@@ -895,21 +836,26 @@ export class GameInstance
 		return true;
 	}
 
+	// TODO rework this
 	private addPlayerConnection(socket: ws): Player
 	{
-		var player = this.getPlayer(socket)
+		var player = this.getPlayerBySocket(socket)
 
 		if(!player)
 		{
-			player = {
+			let x = {
 				socket: socket,
 				hand: [],
+				team: "",
 				winnings: [],
 				id: 0,
+				disconnected: true,
+				ponies: 0,
+				ships: 0,
 				name: ""
-			}
-
-			this.players.push(player);
+			};
+			this.model.players.push(x);
+			return x;
 		}
 
 		return player;
@@ -920,7 +866,7 @@ export class GameInstance
 		var count = 0;
 		var newName = name;
 
-		var player = this.getPlayer(socket)
+		var player = this.getPlayerBySocket(socket)
 
 		if(!player)
 		{
@@ -949,82 +895,64 @@ export class GameInstance
 
 	public sendLobbyList()
 	{
-		var allPlayers = this.players.filter(x => x.socket.isAlive)
+		var allPlayers = this.model.players.filter(x => x.socket.isAlive)
 			.map(x => x.name).join(",");
 
-		for(var player of this.players)
+		for(var player of this.model.players)
 		{
 			player.socket.send("lobbylist;" + player.name + ";" + allPlayers);
 		}
 	}
 
-	public getPlayer(thissocket: ws, id?: number): Player | undefined
+	public getPlayerBySocket(thissocket: ws)
 	{
-		for(var i=0; i < this.players.length; i++)
+		for(let player of this.model.players)
 		{
-			var socket = this.players[i].socket;
-
-			if(socket == thissocket || Number(this.players[i].id) == id)
+			if(player.socket  && player.socket == thissocket)
 			{
-				if(socket != thissocket)
-					 this.players[i].socket = thissocket;
+				return player;
+			}
+		}
+	}
 
-				if(socket.replace)
-					this.players[i].socket = thissocket;
-
-				return this.players[i] 
+	public getPlayerByID(id: number)
+	{
+		for(let player of this.model.players)
+		{
+			if(player.id && player.id == id)
+			{
+				return player;
 			}
 		}
 	}
 
 	public getPlayerByName(name: string)
 	{
-		for(var i=0; i < this.players.length; i++)
+		return this.model.getPlayerByName(name);
+	}
+
+	public toTeamMembers(playerName: string, message: string)
+	{
+		let player = this.getPlayerByName(playerName)!;
+
+		for(let p of this.model.players)
 		{
-			if(name == this.players[i].name)
+			if(player.team && p != player && player.team == p.team)
 			{
-				return this.players[i] 
+				p.socket.send(message);
 			}
 		}
 	}
 
-	public getPlayerIndex(thissocket: ws): number
+	public toNonTeamMembers(playerName: string, message: string)
 	{
-		for(var i=0; i < this.players.length; i++)
+		let player = this.getPlayerByName(playerName)!;
+
+		for(let p of this.model.players)
 		{
-			var socket = this.players[i].socket;
-
-			if(socket == thissocket)
+			if(p != player && (!player.team || player.team != p.team))
 			{
-				return i;
-			}
-		}
-
-		throw new Error("no player index");
-	}
-
-	public toTeamMembers(thissocket: ws, message: string)
-	{
-		let player = this.getPlayer(thissocket)!;;
-		for(var i=0; i < this.players.length; i++)
-		{
-			var socket = this.players[i].socket;
-			if(socket != thissocket && socket.isAlive && player.team == this.players[i].team && player.team !== undefined)
-			{
-				socket.send(message);
-			}
-		}
-	}
-
-	public toNonTeamMembers(thissocket: ws, message: string)
-	{
-		let player = this.getPlayer(thissocket)!;;
-		for(var i=0; i < this.players.length; i++)
-		{
-			var socket = this.players[i].socket;
-			if(socket != thissocket && socket.isAlive && (player.team != this.players[i].team || player.team == undefined))
-			{
-				socket.send(message);
+				p.socket.send(message);
 			}
 		}
 	}
@@ -1051,12 +979,14 @@ export class GameInstance
 
 	public sendPlayerlistsToEachPlayer()
 	{
-		for(var player of this.players)
+		for(var player of this.model.players)
 		{
 			if(player.socket.isAlive && player.name != "")
 			{
-				var playerlist = this.getPlayerListForThisPlayer(player.socket);
-				player.socket.send("playerlist;" + JSON.stringify(playerlist))
+				var playerlist = this.model.getPlayerListForPlayer(player.name);
+				player.socket.send("playerlist;" + JSON.stringify(playerlist));
+
+				// TODO update recieving end.
 			}
 		}
 	}
@@ -1068,7 +998,7 @@ export class GameInstance
 		if(isHost)
 		{
 			let teams: {[key: string]: string} = {};
-			for(let player of this.players)
+			for(let player of this.model.players)
 			{
 				if(player.team !== undefined)
 				{
@@ -1076,61 +1006,25 @@ export class GameInstance
 				}
 			}
 
-			let lobbyOptions: GameOptions = {
-				cardDecks: this.cardDecks,
-				startCard: this.startCard,
-				teams,
-				ruleset: this.ruleset,
-				keepLobbyOpen: this.keepLobbyOpen,
-				customCards: this.customCards
-			}
-
-			var payload = JSON.stringify(lobbyOptions);
+			var payload = JSON.stringify(this.gameOptions);
 		}
 			
 
 		socket.send("ishost;" + payload)
 	}
 
-	private sendCurrentState( socket: ws)
+	private sendCurrentState(playerName: string)
 	{
-		var model = this.getPlayerModel(socket);
-		socket.send("model;" + JSON.stringify(model));
+		let player = this.getPlayerByName(playerName)!;
+		var model = this.model.getPlayerModel(playerName);
+		player.socket.send("model;" + JSON.stringify(model));
 	}
 
 	private checkIfGoalsWereAchieved()
 	{
-		if(!this.runGoalLogic)
-			return;
-
-		var sendUpdate = false;
-		var allGoals = this.currentGoals.concat(this.tempGoals);
-
-		for(var goal of allGoals)
+		if(this.model.wereGoalsAchieved())
 		{
-			var achieved = false;
-
-			if(!isBlank(goal))
-				achieved = evalGoalCard(goal, this)
-
-			if(achieved != this.achievedGoals.has(goal))
-			{
-				sendUpdate = true;
-			}
-
-			if(achieved)
-			{
-				this.achievedGoals.add(goal);
-			}
-			else
-			{
-				this.achievedGoals.delete(goal);
-			}
-		}
-
-		if(sendUpdate)
-		{
-			let message = ["goalachieved", ...this.achievedGoals].join(";");
+			let message = ["goalachieved", ...this.model.achievedGoals].join(";");
 			if(message == "goalachieved")
 				message += ";"
 
@@ -1150,10 +1044,12 @@ export class GameInstance
 
 	public setLobbyOptions(options: GameOptions)
 	{
-		this.startCard = options.startCard || "Core.Start.FanficAuthorTwilight";
-		this.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
-		this.keepLobbyOpen = !!options.keepLobbyOpen;
-		this.ruleset = options.ruleset.substring(0,200) as "turnsOnly" | "sandbox";
+		let newOptions = defaultGameOptions();
+
+		newOptions.startCard = options.startCard || newOptions.startCard;
+		this.model.runGoalLogic = options.startCard != "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord" && options.ruleset == "turnsOnly";
+		newOptions.keepLobbyOpen = !!options.keepLobbyOpen;
+		newOptions.ruleset = options.ruleset.substring(0,200) as "turnsOnly" | "sandbox";
 
 		for(let playerName in options.teams)
 		{
@@ -1170,15 +1066,18 @@ export class GameInstance
 			decks = options.cardDecks;
 		}
 
-		cm.init(decks.concat([this.startCard]), this.customCards.cards);
+		cm.init(decks.concat([newOptions.startCard]), newOptions.customCards.cards);
 
-		this.cardDecks = decks;
+		this.model.cardDecks = decks;
+
+		this.gameOptions = newOptions;
 	}
 
 	public startGame(preset?: any)
 	{	
 		this.isLobbyOpen = this.keepLobbyOpen;
 
+		// TODO
 		/*if(!preset)
 		{
 			// remove players which disconnected before the games started
@@ -1329,7 +1228,7 @@ export class GameInstance
 		if(endLocation == "hand" || endLocation == "winnings")
 			endLocation = "player,"+player.name;
 
-		this.toEveryoneElse(socket, "move;" + card + ";" + startLocation + ";" + endLocation);
+		this.toEveryoneElse(playerName, "move;" + card + ";" + startLocation + ";" + endLocation);
 
 
 		if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
@@ -1349,11 +1248,8 @@ export class GameInstance
 			}
 		}
 	
-		// TODO
 		this.checkIfGoalsWereAchieved();
 	}
-
-
 }
 
 

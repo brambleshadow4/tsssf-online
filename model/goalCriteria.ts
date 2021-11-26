@@ -2,7 +2,7 @@
 import * as cm from "./cardManager.js";
 
 import {slashStringToSet, isBlank, Card, CardProps, CardSetProps, OverrideProps, Location} from "./lib.js";
-import {GameModelServer as GameModel} from "./lib.js";
+import GameModel from "./GameModel.js";
 
 
 

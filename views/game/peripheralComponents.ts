@@ -14,7 +14,7 @@ import {
 	isAnon,
 	isPonyOrStart,
 	GameModelPlayer as GameModel,
-	Card, Location, CardProps
+	Card, Location, CardProps, GameOptions
 } from "../../model/lib.js";
 
 import * as cm from "../../model/cardManager.js";
@@ -61,6 +61,7 @@ import {cardReference} from "../info/knowledgeBase.js";
 
 let win = window as unknown as {
 	model: GameModel,
+	gameOptions: GameOptions,
 	openSettings: () => void;
 	cardLocations: {[key:string]: Location};
 	createHelpPopup: () => void;
@@ -397,7 +398,7 @@ export function updateWinnings()
 		var scoreElement = document.createElement('span');
 		scoreElement.className = 'score';
 
-		scoreElement.innerHTML = s.GamePointsWithUnit.replace("{0}", points);
+		scoreElement.innerHTML = s.GamePointsWithUnit.replace("{0}", "" + points);
 		element.appendChild(scoreElement);
 	}
 	
@@ -952,7 +953,7 @@ win.openSettings = function()
 
 		let keepLobbyOpen = div.querySelector("#keepLobbyOpen") as HTMLInputElement;
 
-		if(win.model.keepLobbyOpen)
+		if(win.gameOptions.keepLobbyOpen)
 		{
 			keepLobbyOpen.checked = true;
 		}

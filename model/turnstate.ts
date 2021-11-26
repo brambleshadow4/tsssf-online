@@ -1,4 +1,5 @@
-import {Card, ChangelingContextList, GameModelServer as GameModel} from "../model/lib.js";
+import {Card, ChangelingContextList} from "./lib.js";
+import GameModel from "./GameModel.js"
 
 
 export default class Turnstate

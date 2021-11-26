@@ -1,11 +1,12 @@
-import {Player, GameModel} from "../server/gameServer.js";
+import {GameInstance} from "../server/gameServer.js";
 import * as cm from "./cardManager.js";
 import {test, expect, beforeEach, group} from "./testFramework.js";
 import {
 	isPony,
 	isShip,
 	isGoal,
-	Card, Location, GameOptions
+	Card,
+	Location, GameOptions, Player, GameModel
 } from "./lib.js";
 
 import {typecheckGoal} from "./goalCriteria.js";
@@ -39,9 +40,9 @@ function setupGame(setupOptions?:{
 	cardDecks?: string[],
 	startCard?: string
 
-}):[GameModel, MockPlayer]
+}):[GameInstance, MockPlayer]
 {	
-	let game = new GameModel();
+	let game = new GameInstance();
 
 	cm.init(["*"], {});
 
@@ -52,10 +53,14 @@ function setupGame(setupOptions?:{
 	let sendMessage = game.onMessage(game, fakeSocket);
 
 	let fakePlayer = {
+		disconnected: false,
 		name: "Test",
 		socket: fakeSocket,
+		team: "",
 		hand: [],
 		winnings: [],
+		ponies: 0,
+		ships: 0,
 		id: 42, 
 		grab: function(...cards: Card[])
 		{
@@ -63,29 +68,29 @@ function setupGame(setupOptions?:{
 			{
 				if(isShip(card))
 				{
-					let i = game.shipDrawPile.indexOf(card);
+					let i = game.model.shipDrawPile.indexOf(card);
 					if (i == -1) return;
-					game.shipDrawPile.splice(i,1);
+					game.model.shipDrawPile.splice(i,1);
 					fakePlayer.hand.push(card);
-					game.cardLocations[card] = "player," + fakePlayer.name;
+					game.model.cardLocations[card] = "player," + fakePlayer.name;
 				}
 				if(isPony(card))
 				{
-					let i = game.ponyDrawPile.indexOf(card);
+					let i = game.model.ponyDrawPile.indexOf(card);
 					if (i == -1) return;
-					game.ponyDrawPile.splice(i,1);
+					game.model.ponyDrawPile.splice(i,1);
 					fakePlayer.hand.push(card);
-					game.cardLocations[card] = "player," + fakePlayer.name;
+					game.model.cardLocations[card] = "player," + fakePlayer.name;
 				}
 			}
 			
 		},
 		drawGoal: function(goalCard: Card)
 		{
-			let i = game.goalDrawPile.indexOf(goalCard);
-			game.goalDrawPile.splice(i, 1);
-			game.currentGoals[0] = goalCard
-			game.cardLocations[goalCard] = "goal,1";
+			let i = game.model.goalDrawPile.indexOf(goalCard);
+			game.model.goalDrawPile.splice(i, 1);
+			game.model.currentGoals[0] = goalCard
+			game.model.cardLocations[goalCard] = "goal,1";
 		},
 		move: function(card: Card, start: Location, end: Location)
 		{
@@ -101,7 +106,7 @@ function setupGame(setupOptions?:{
 		}
 	} as MockPlayer;
 
-	game.players.push(fakePlayer);
+	game.model.players.push(fakePlayer);
 	game.setLobbyOptions({
 		cardDecks: setupOptions?.cardDecks || ["Core.*"],
 		ruleset: "turnsOnly",
@@ -156,7 +161,7 @@ export default function(){
 		let twi2 = "Core.Pony.SuperSpyTwilight";
 
 		player.drawGoal(goal);
-		expectGoalUnachieved(game, goal);
+		expectGoalUnachieved(game.model, goal);
 
 		player.grab(ship);
 		player.grab(twi2);
@@ -166,7 +171,7 @@ export default function(){
 
 		player.setEffect(twi2, "gender", "male");
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 	});
 
 	test("PlayPonies", ()=>{
@@ -187,12 +192,12 @@ export default function(){
 		player.move(ships[1], "hand", "sb,1,0");
 		player.move(ponies[1], "hand", "p,1,1");
 
-		expectGoalUnachieved(game, goal);
+		expectGoalUnachieved(game.model, goal);
 
 		player.move(ships[2], "hand", "sr,0,1");
 		player.move(ponies[2], "hand", "p,0,1");
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 
 	});
 
@@ -218,7 +223,7 @@ export default function(){
 	group("changeling redisguise", () =>{
 
 
-		let game: GameModel;
+		let game: GameInstance;
 		let player: MockPlayer;
 		let ship1 = "Core.Ship.BadPonyGoToMyRoom"
 		let ship2 = "Core.Ship.BoredOnASundayAfternoon"
@@ -307,7 +312,7 @@ export default function(){
 	group("love poison changeling", () =>{
 
 
-		let game: GameModel, player: MockPlayer;
+		let game: GameInstance, player: MockPlayer;
 		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
 		let ship2 = "Core.Ship.BoredOnASundayAfternoon"
 		let lovePoison = "Core.Ship.LovePoisonIsNoJoke";
@@ -376,7 +381,7 @@ export default function(){
 		//   |      ->   | |    ->    | |
 		// S-X-A       S-X-A        S-C-A
 
-		let game: GameModel, player: MockPlayer;
+		let game: GameInstance, player: MockPlayer;
 
 		let start = "Core.Start.FanficAuthorTwilight"
 		let changeling = "Core.Pony.UnicornChangeling";
@@ -477,7 +482,7 @@ export default function(){
 		player.move(changeling, "p,2,0", "p,1,1");
 		player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 	});
 
 
@@ -541,7 +546,7 @@ export default function(){
 		player.move(pony2, "hand", "p,1,1");
 		player.setEffect(pony2, "gender", "female");
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 	});
 
 	test("PlayLovePoisons", () => {
@@ -559,13 +564,13 @@ export default function(){
 		player.move(lovePoison1, "hand", "sr,0,0");
 		player.move(pony, "hand", "p,1,0");
 
-		expectGoalUnachieved(game, goal);
+		expectGoalUnachieved(game.model, goal);
 
 		player.move(lovePoison2, "hand", "sd,0,0");
 		player.move(pony, "p,1,0", "p,0,1");
 
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 	});
 
 	test("PlayPonies takes into account card.count property", () =>{
@@ -583,12 +588,12 @@ export default function(){
 		player.move(ship1, "hand", "sr,0,0");
 		player.move(unicorn, "hand", "p,1,0");
 
-		expectGoalUnachieved(game, goal);
+		expectGoalUnachieved(game.model, goal);
 
 		player.move(ship1, "hand", "sr,1,0");
 		player.move(flimFlam, "hand", "p,2,0");
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 	});
 
 	test("Alicorn Big Mac + Star Student Twilight achieve Pretty Pretty Princess", () =>{
@@ -611,12 +616,12 @@ export default function(){
 		player.move(ship1, "hand", "sr,0,0");
 		player.move(bigmac, "hand", "p,1,0");
 
-		expectGoalUnachieved(game, goal);
+		expectGoalUnachieved(game.model, goal);
 
 		player.move(ship2, "hand", "sr,1,0");
 		player.move(twi, "hand", "p,2,0");
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 	});
 
 	test("larson effect still applies when turn ends", () =>{
@@ -642,11 +647,11 @@ export default function(){
 		player.move(ship2, "hand", "sr,1,0");
 		player.move(twi, "hand", "p,2,0");
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 
 		player.endTurn();
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 
 	});
 
@@ -672,9 +677,9 @@ export default function(){
 		player.move(ship2, "hand", "sr,-1,0");
 		player.move(changeling, "hand", "p,-1,0");
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 
 	});
 
@@ -696,12 +701,12 @@ export default function(){
 		player.move(ship2, "hand", "sd,0,0");
 		player.move(pixelPrism, "hand", "p,0,1");
 
-		expect(evalGoalLogic(game, "ExistsShip(gender=male, gender=female, 2)")).toBe(false);
+		expect(evalGoalLogic(game.model, "ExistsShip(gender=male, gender=female, 2)")).toBe(false);
 
 		player.setEffect(pixelPrism, "fullCopy", male);
 
-		expect(evalGoalLogic(game, "ExistsShip(gender=male, gender=female, 2)")).toBe(true);
-		expect(evalGoalLogic(game, "ExistsShip(gender=female, gender=female, 1)")).toBe(true);
+		expect(evalGoalLogic(game.model, "ExistsShip(gender=male, gender=female, 2)")).toBe(true);
+		expect(evalGoalLogic(game.model, "ExistsShip(gender=female, gender=female, 1)")).toBe(true);
 	});
 
 	test("fullCopy keeps both races", () => {
@@ -722,13 +727,13 @@ export default function(){
 		player.move(ship2, "hand", "sd,0,0");
 		player.move(pixelPrism, "hand", "p,0,1");
 
-		expect(evalGoalLogic(game, "ExistsPony(race=earth, 2)")).toBe(false);
-		expect(evalGoalLogic(game, "ExistsPony(race=unicorn, 2)")).toBe(true);
+		expect(evalGoalLogic(game.model, "ExistsPony(race=earth, 2)")).toBe(false);
+		expect(evalGoalLogic(game.model, "ExistsPony(race=unicorn, 2)")).toBe(true);
 
 		player.setEffect(pixelPrism, "fullCopy", male);
 		
-		expect(evalGoalLogic(game, "ExistsPony(race=earth, 2)")).toBe(true);
-		expect(evalGoalLogic(game, "ExistsPony(race=unicorn, 2)")).toBe(true);
+		expect(evalGoalLogic(game.model, "ExistsPony(race=earth, 2)")).toBe(true);
+		expect(evalGoalLogic(game.model, "ExistsPony(race=unicorn, 2)")).toBe(true);
 	});
 
 	test("fullCopy keeps both names", () => {
@@ -751,8 +756,8 @@ export default function(){
 
 		player.setEffect(pixelPrism, "fullCopy", male);
 		
-		expect(evalGoalLogic(game, "ExistsShip(name=Twilight Sparkle, name=Big Macintosh, 2)")).toBe(true);
-		expect(evalGoalLogic(game, "ExistsShip(name=Twilight Sparkle, name=Pixel Prism)")).toBe(true);
+		expect(evalGoalLogic(game.model, "ExistsShip(name=Twilight Sparkle, name=Big Macintosh, 2)")).toBe(true);
+		expect(evalGoalLogic(game.model, "ExistsShip(name=Twilight Sparkle, name=Pixel Prism)")).toBe(true);
 	});
 
 	test("aloe/lotus ships count as two ships", () => {
@@ -773,12 +778,12 @@ export default function(){
 		player.move(malePony, "hand", "p,1,0");
 
 		player.endTurn();
-		expect(evalGoalLogic(game, "PlayShips(gender=male, gender=female, 2)")).toBe(false);
+		expect(evalGoalLogic(game.model, "PlayShips(gender=male, gender=female, 2)")).toBe(false);
 
 		player.move(ship2, "hand", "sr,1,0");
 		player.move(aloelotus, "hand", "p,2,0");
 
-		expect(evalGoalLogic(game, "PlayShips(gender=male, gender=female, 2)")).toBe(true);
+		expect(evalGoalLogic(game.model, "PlayShips(gender=male, gender=female, 2)")).toBe(true);
 	})
 
 	test("goals w/ card= prop", () =>{
@@ -797,14 +802,14 @@ export default function(){
 		player.grab(pony1, pony2, ship1, ship2);
 		player.drawGoal(goal);
 		
-		expectGoalUnachieved(game, goal);
+		expectGoalUnachieved(game.model, goal);
 
 		player.move(ship1, "hand", "sr,0,0");
 		player.move(pony1, "hand", "p,1,0");
 		player.move(ship2, "hand", "sr,1,0");
 		player.move(pony2, "hand", "p,2,0");
 
-		expectGoalAchieved(game, goal);
+		expectGoalAchieved(game.model, goal);
 	});
 
 	//test("ExistsChain", () =>{

@@ -6,7 +6,8 @@ import {
 import {
 	GameModelPlayer as GameModel,
 	Location,
-	Card
+	Card,
+	GameOptions
 } from "../../model/lib.js";
 
 import {
@@ -23,6 +24,7 @@ import {WebSocketPlus} from "../viewSelector.js";
 
 let win = window as unknown as {
 	model: GameModel,
+	gameOptions: GameOptions,
 	cardLocations: {[key: string]: Location},
 	moveToStartCard: () => any;
 	socket: WebSocketPlus;
@@ -101,7 +103,8 @@ export function attachToSocket(socket: WebSocketPlus)
 
 		if(event.data.startsWith('keepLobbyOpen;'))
 		{
-			model.keepLobbyOpen = !!Number(event.data.split(";")[1]);
+			// TODO
+			// model.keepLobbyOpen = !!Number(event.data.split(";")[1]);
 		}
 
 		if(event.data.startsWith('closed;'))

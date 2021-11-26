@@ -225,7 +225,19 @@ export default class GameModelServer implements GameModel
 		{
 			obj[prop] = value;
 		}
+
+
+		// TODO check that this works
+		if(prop == "shipWithEverypony")
+		{
+			this.turnstate.specialEffects.shipWithEverypony.add(card);
+		}
+
+		this.updateCountsFromBoardState(false);
 	}
+
+
+
 
 
 	public removePlayer(playerName: string)
@@ -342,122 +354,92 @@ export default class GameModelServer implements GameModel
 	// game.onSpecialMessage
 
 
-	public drawCard()
+	public drawCard(playerName: string, typ: "ship" | "pony" | "goal", endLocation: Location): [boolean, number, Card, Location]
 	{
-		/*
-			if(message.startsWith("draw;"))
+		let model2 = this as any;
+
+		var len = model2[typ + "DrawPile"].length as number;
+
+		if(typ == "goal" && len)
+		{
+
+			if(endLocation)
 			{
-				var [_, typ, specialLoc] = message.split(";");
-
-				if(typ != "ship" && typ != "pony" && typ != "goal")
-					return;
-
-				let model2 = game as any;
-
-				var len = model2[typ + "DrawPile"].length as number;
-
-				if(typ == "goal" && len)
+				if(endLocation == "tempGoals")
 				{
+					let card = model2["goalDrawPile"].pop() as Card;					
 
-					if(specialLoc)
-					{
-						if(specialLoc == "tempGoals")
-						{
-							let card = model2["goalDrawPile"].pop() as Card;					
+					this.tempGoals.push(card);
+					this.cardLocations[card] = "tempGoals";
 
-							game.tempGoals.push(card);
-							game.cardLocations[card] = "tempGoals";
-		
-							game.toEveryone("draw;goal;" + (len - 1));
-							game.toEveryone("move;" + card + ";goalDrawPile;tempGoals");
-							game.checkIfGoalsWereAchieved();
-						}
-					}
-					else
-					{
-						var goalNo = game.currentGoals.indexOf("blank:goal")
 
-						if(goalNo > -1)
-						{
-							let card = model2["goalDrawPile"].pop();
-							game.currentGoals[goalNo] = card
-							game.cardLocations[card] = "goal," + goalNo;
+					return [true, len-1, card, "tempGoals"];
 
-							var msg = "draw;" + typ + ";" + (len - 1);
-
-							game.toEveryone(msg);
-							game.toEveryone( "move;" + card + ";goalDrawPile;goal," + goalNo);
-							game.checkIfGoalsWereAchieved();
-						}
-						else
-							return ;
-					}
-
-					
 				}
-				else
-				{
-					if(len)
-					{
-						let card = model2[typ + "DrawPile"].pop();
 
-						let player = game.getPlayer(socket)!
-						player.hand.push(card);
-						game.cardLocations[card] = "player," + player.name;
 
-						var msg = "draw;" + typ + ";" + (len - 1);
-						game.toEveryone(msg);
-						socket.send("move;" + card + ";" + typ + "DrawPile;hand");
-
-						game.toTeamMembers(socket, "move;" + card + ";" + typ + "DrawPile;player," + player.name)
-						game.toNonTeamMembers(socket, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
-					
-						game.sendPlayerCounts(player);
-					}
-				}
 			}
+			else
+			{
+				var goalNo = this.currentGoals.indexOf("blank:goal")
 
-		*/	
+				if(goalNo > -1)
+				{
+					let card = model2["goalDrawPile"].pop();
+					this.currentGoals[goalNo] = card
+					this.cardLocations[card] = "goal," + goalNo;
+
+					return [true, len-1, card, "goal," + goalNo];
+				}
+				
+			}
+		}
+		else
+		{
+			if(len)
+			{
+				let card = model2[typ + "DrawPile"].pop();
+
+				let player = this.getPlayerByName(playerName)!
+				player.hand.push(card);
+				this.cardLocations[card] = "player," + player.name;
+
+				return [true, len-1, card, "hand"];
+			}
+		}
+
+		return [false, 0, "", ""];
+
+
 	}
 
-	public swapShuffle()
+	public swapShuffle(typ: "pony" | "ship" | "goal")
 	{
-		/*
-		var [_,typ] = message.split(";");
+		let model2 = this as any;
+		var swap = model2[typ + "DrawPile"];
+		model2[typ+"DrawPile"] = model2[typ+"DiscardPile"];
+		model2[typ+"DiscardPile"] = swap;
 
-				if(["pony","goal","ship"].indexOf(typ) > -1)
-				{
-					let model2 = game as any;
-					var swap = model2[typ + "DrawPile"];
-					model2[typ+"DrawPile"] = model2[typ+"DiscardPile"];
-					model2[typ+"DiscardPile"] = swap;
+		randomizeOrder(model2[typ+"DrawPile"]);
 
-					randomizeOrder(model2[typ+"DrawPile"]);
-
-					for(let card of model2[typ+"DrawPile"])
-					{
-						model2.cardLocations[card] = typ + "DrawPile,stack";
-					}
+		for(let card of model2[typ+"DrawPile"])
+		{
+			model2.cardLocations[card] = typ + "DrawPile,stack";
+		}
 
 
-					var pileArr = model2[typ+"DiscardPile"];
-					
-					if(pileArr.length >0)
-					{
-						for(let card of pileArr)
-						{
-							model2.cardLocations[card] = typ + "DiscardPile,stack";
-						}
+		var pileArr = model2[typ+"DiscardPile"];
+		
+		if(pileArr.length >0)
+		{
+			for(let card of pileArr)
+			{
+				model2.cardLocations[card] = typ + "DiscardPile,stack";
+			}
 
-						var topCard = pileArr[pileArr.length-1];
-						model2.cardLocations[topCard] = typ+"DiscardPile,top";
-					}
-					
-					game.toEveryone(["swapshuffle", typ, model2[typ+"DrawPile"].length, ...model2[typ+"DiscardPile"]].join(";"));
-				}
-
-
-		*/
+			var topCard = pileArr[pileArr.length-1];
+			model2.cardLocations[topCard] = typ+"DiscardPile,top";
+		}		
 	}
 
 
@@ -492,57 +474,7 @@ export default class GameModelServer implements GameModel
 		model.playerName = player.name;
 
 
-		for(let pl of this.players)
-		{
-			let plCopy: Player;
-			if(pl.name == player.name)
-			{
-				plCopy = {
-					id: pl.id,
-					name: pl.name,
-
-					hand: pl.hand,
-					disconnected: false,
-					team: pl.team,
-					winnings: pl.winnings,
-					ponies: 0,
-					ships: 0,
-					socket: undefined
-				}
-			}
-			else if (pl.team == player.team)
-			{
-				plCopy = {
-					id: pl.id,
-					name: pl.name,
-
-					hand: pl.hand,
-					disconnected: false,
-					team: pl.team,
-					winnings: pl.winnings,
-					ponies: 0,
-					ships: 0,
-					socket: undefined
-				}
-			}
-			else 
-			{
-				plCopy = { 
-					id: 0,
-					name: pl.name,
-					hand: [],
-					disconnected: pl.disconnected,
-					team: pl.team,
-					winnings: pl.winnings,
-					ponies: pl.hand.filter(isPony).length,
-					ships: pl.hand.filter(isShip).length,
-
-					socket: undefined
-				};
-			}
-
-			model.players.push(plCopy);
-		}
+		model.players = this.getPlayerListForPlayer(player.name);
 
 		let ts = this.turnstate;
 		if(ts)
@@ -558,15 +490,70 @@ export default class GameModelServer implements GameModel
 	}
 
 
+	public getPlayerListForPlayer(playerName: string)
+	{
+		let player = this.getPlayerByName(playerName)!;
+
+		return this.players.map(x => {
+
+			if(x.name == player.name)
+			{
+				return {
+					id: x.id,
+					name: x.name,
+
+					hand: x.hand,
+					disconnected: false,
+					team: x.team,
+					winnings: x.winnings,
+					ponies: 0,
+					ships: 0,
+					socket: undefined
+				}
+			}
+			else if (x.team == player.team)
+			{
+				return {
+					id: x.id,
+					name: x.name,
+
+					hand: x.hand,
+					disconnected: false,
+					team: x.team,
+					winnings: x.winnings,
+					ponies: 0,
+					ships: 0,
+					socket: undefined
+				}
+			}
+			else 
+			{
+				return { 
+					id: 0,
+					name: x.name,
+					hand: [],
+					disconnected: x.disconnected,
+					team: x.team,
+					winnings: x.winnings,
+					ponies: x.hand.filter(isPony).length,
+					ships: x.hand.filter(isShip).length,
+
+					socket: undefined
+				};
+			}
+		});	
+	}
+
+
 	public getPlayerByName(playerName: string): Player | undefined
 	{
 		return this.players.filter(x => x.name == playerName)[0];
 	}
 
-	private checkIfGoalsWereAchieved()
+	public wereGoalsAchieved()
 	{
 		if(!this.runGoalLogic)
-			return;
+			return false;
 
 		var sendUpdate = false;
 		var allGoals = this.currentGoals.concat(this.tempGoals);
@@ -592,6 +579,8 @@ export default class GameModelServer implements GameModel
 				this.achievedGoals.delete(goal);
 			}
 		}
+
+		return sendUpdate;
 
 		// TODO
 		/*if(sendUpdate)
@@ -1066,7 +1055,8 @@ export default class GameModelServer implements GameModel
 			}
 		}*/
 	
-		this.checkIfGoalsWereAchieved();
+		// TODO
+		// this.checkIfGoalsWereAchieved();
 	}
 
 	private updateTurnstatePreMove(card: Card, startLocation: string, endLocation: string): void
