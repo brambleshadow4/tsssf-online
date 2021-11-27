@@ -1,4 +1,4 @@
-import {Card, ChangelingContextList} from "./lib.js";
+import {Card, ChangelingContextList, Location} from "./lib.js";
 import GameModel from "./GameModel.js"
 
 
@@ -8,12 +8,14 @@ export default class Turnstate
 	public overrides: {[key:string]: any} = {};
 
 	public openPonyLocations: Set<string> = new Set();
-	
+	public playedThisTurn: Set<string> = new Set();
+
+
+	// Used By Server Only
 	public playedPonies: Card[] = [];
 	public playedShips: [Card, Card][] = [];
 	public playedShipCards: Card[] = [];
 
-	public playedThisTurn = new Set();
 
 	public brokenShipsCommitted: [Card,Card][] = [];
 	public brokenShips: [Card,Card][] = [];
@@ -32,6 +34,11 @@ export default class Turnstate
 	} = {
 		shipWithEverypony: new Set()
 	};
+
+	// Used by Client
+	public openShips: {[card: string]: true} = {};
+	public shipTarget?: Location
+	public removedFrom?: [Location, Card]; 
 
 	public constructor(){}
 

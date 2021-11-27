@@ -11,7 +11,7 @@ import {
 	isAnon,
 	isPonyOrStart,
 	getNeighborKeys,
-	GameModelPlayer as GameModel,
+	GameModelPlayer as GameModel, GameOptions,
 	Location,
 	Card,
 	CardElement
@@ -36,7 +36,8 @@ const gridWidth = 22;
 
 let win = window as unknown as {
 	moveToStartCard: Function,
-	model: GameModel
+	model: GameModel,
+	gameOptions: GameOptions,
 	cardLocations: {[key: string]: Location}
 }
 
@@ -149,7 +150,7 @@ export async function initBoard()
 		refPoint.style.transform = "scale(1,1)";
 		zoomScale = 1;
 
-		var loc = win.cardLocations[win.model.startCard];
+		var loc = win.cardLocations[win.gameOptions.startCard];
 
 		var [_, xs, ys] = loc.split(",");
 

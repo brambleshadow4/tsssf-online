@@ -25,5 +25,5 @@ export function boot(): GameModel
 
 function loadInitialState()
 {
-
+	
 }

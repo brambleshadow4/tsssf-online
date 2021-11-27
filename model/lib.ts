@@ -72,7 +72,7 @@ export interface Player
 	name: string,
 
 	hand: Card[],
-	disconnected: boolean,
+	disconnected: number,
 	team: string,
 	winnings: any[],
 	ponies: number,
@@ -92,10 +92,9 @@ export interface GameModel
 	},
 
 	//keepLobbyOpen: boolean,
-	startCard: Card,
 	//ruleset: string,
 
-	players: any[],
+	players: Player[],
 
 	// Game state
 	board: {
@@ -123,15 +122,13 @@ export interface GameModelPlayer extends GameModel
 {
 	hand: Card[],
 	winnings: {card: Card, value: number}[],
-	playerName: string,
+	
 
 	// this state is maintained by the client
 	
 	turnstate?: TurnstateBase & {
 		
-		removedFrom: [Location, Card]
-		openShips: {[card: string]: true}
-		shipTarget?: Location 
+		
 		
 	};
 }

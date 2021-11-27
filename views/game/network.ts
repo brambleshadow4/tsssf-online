@@ -4,7 +4,6 @@ import {
 } from "./game.js";
 
 import {
-	GameModelPlayer as GameModel,
 	Location,
 	Card,
 	GameOptions
@@ -20,6 +19,8 @@ import {
 } from "./peripheralComponents.js";
 
 import {WebSocketPlus} from "../viewSelector.js";
+
+import GameModel, {playerGameModelFromObj} from "../../model/GameModel.js";
 
 
 let win = window as unknown as {
@@ -136,12 +137,17 @@ export function attachToSocket(socket: WebSocketPlus)
 		if(event.data.startsWith("model;"))
 		{
 			let modelPreviouslyLoaded = model;
-			
-			let newModel = JSON.parse(event.data.substring(6)) as GameModel;
 
-			newModel.achievedGoals = new Set(newModel.achievedGoals as any);
+			let gameOptions: GameOptions;
+			let newModel: GameModel;
 
-			updateGame(newModel);
+			[gameOptions, newModel] = JSON.parse(event.data.substring(6))
+
+
+			let newerModel = playerGameModelFromObj(newModel);
+			win.gameOptions = gameOptions;
+
+			updateGame(newerModel);
 
 			if(!modelPreviouslyLoaded)
 			{
@@ -259,6 +265,11 @@ export function attachToSocket(socket: WebSocketPlus)
 	}
 
 	socket.send("requestmodel;" + (localStorage["playerID"] || 0))
+}
+
+export function doLoad()
+{
+
 }
 
 

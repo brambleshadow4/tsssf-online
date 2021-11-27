@@ -32,7 +32,7 @@ var cardSelectorElements: {[key: string]: Element} = {}
 
 
 var currentOptions: GameOptions;
-var currentPlayers: string[];
+var currentPlayers: string[] = [];
 
 
 var globals = window as unknown as {
@@ -56,8 +56,10 @@ globals.decks =  {
 }
 
 
-export function loadView(isOpen: boolean)
+export function loadView(handshakeMessage: string)
 {
+	console.log(handshakeMessage);
+
 	if(window.location.pathname != "/lobby")
 	{
 		history.replaceState(null, "", "/lobby" + window.location.search)
@@ -68,12 +70,12 @@ export function loadView(isOpen: boolean)
 	document.body.innerHTML = LobbyView.HTML;
 	document.head.innerHTML = LobbyView.HEAD;
 
-	if(isOpen)
+	var isClosed: boolean = JSON.parse(handshakeMessage.substring("lobby;".length)).isClosed;
+
+	if(!isClosed)
 	{
 		(document.getElementById('inviteURL') as HTMLInputElement).value = window.location.href;
 		let socket = globals.socket;
-
-		socket.send("ishost;");
 
 		socket.onMessageHandler = onMessage;
 
@@ -81,11 +83,15 @@ export function loadView(isOpen: boolean)
 		globals.startGame = startGame;
 
 		document.getElementById('packUpload')!.addEventListener('change', handleFileSelect, false);
+
+		onMessage({data: handshakeMessage} as MessageEvent);
 	}
 	else
 	{
 		changePage(undefined, "pageClosed");
 	}
+
+	
 }
 
 function loadCardPages(options: GameOptions)
@@ -263,40 +269,31 @@ function loadGameOptions(options: GameOptions)
 }
 
 
+
+
 function onMessage(event: MessageEvent)
 {
-	if(event.data.startsWith("registered;"))
+	if(event.data.startsWith("lobby;"))
 	{
-		var [_,id] = event.data.split(";")
-		localStorage["playerID"] = id;
+		let payload = JSON.parse(event.data.substring("lobby;".length))
 
-		document.getElementById('main')!.classList.add('registered');
-		document.getElementById('main')!.classList.remove('unregistered');
-	}
-
-	if(event.data.startsWith("ishost;"))
-	{
-		var val = event.data.substring(event.data.indexOf(";")+1);
-
-		var options = JSON.parse(val) as GameOptions;
-
-		if(options)
+		if(!ishost && payload.isHost)
 		{
-			currentOptions = options;
+			currentOptions = payload.gameOptions;
 
 			ishost = true;
 			document.getElementById('rightSide')!.classList.add('host');
 
-			loadCardPages(options);
+			loadCardPages(payload.gameOptions);
 
 			for(var key in cardBoxElements)
 			{
 				cardBoxElements[key].classList.remove('selected')
 			}
 
-			if(options.cardDecks)
+			if(payload.gameOptions.cardDecks)
 			{
-				var s = new Set(options.cardDecks);
+				var s = new Set(payload.gameOptions.cardDecks);
 
 				var boxes = document.getElementsByClassName('cardbox') as HTMLCollectionOf<HTMLElement>;
 				for(var el of boxes)
@@ -334,55 +331,62 @@ function onMessage(event: MessageEvent)
 
 				for(var el of cardDivs)
 				{
-					if(el.getAttribute('card') == options.startCard)
+					if(el.getAttribute('card') == payload.gameOptions.startCard)
 					{
 						el.click();
 					}
 				}
 			}
 				
-			loadGameOptions(options)
+			loadGameOptions(payload.gameOptions)
 		}
-	}
 
 
-	if(event.data.startsWith("lobbylist;"))
-	{
-		var [_, myName, names] = event.data.split(";");
-
-		var names = names.split(",");
-		var list = document.getElementById('playerList')!;
-
-		currentPlayers = names;
-		
-		if(currentOptions)
+		if(payload.name)
 		{
-			loadGameOptions(currentOptions);
+			localStorage["playerID"] = payload.id;
+
+			document.getElementById('main')!.classList.add('registered');
+			document.getElementById('main')!.classList.remove('unregistered');
 		}
-		
 
-		list.innerHTML = "";
 
-		for(var name of names)
+		if(payload.players)
 		{
-			name = name.replace(/</g, "&lt;")
-			if(name == "")
-				name = "<span class='loadingPlayer'></span>";
+			
+			var list = document.getElementById('playerList')!;
 
-			list.innerHTML += "<div>" + name + "</div>"
-		}
+			currentPlayers = payload.players;
+			
+			if(currentOptions)
+			{
+				loadGameOptions(currentOptions);
+			}
+			
 
-		document.getElementById('playerList2')!.innerHTML = list.innerHTML
+			list.innerHTML = "";
 
-		
-		if(myName != "")
-		{
-			sentName = true;
-		}
-		else
-		{
-			sentName = false;
-		}
+			for(var name of payload.players)
+			{
+				name = name.replace(/</g, "&lt;")
+				if(name == "")
+					name = "<span class='loadingPlayer'></span>";
+
+				list.innerHTML += "<div>" + name + "</div>"
+			}
+
+			document.getElementById('playerList2')!.innerHTML = list.innerHTML
+
+			
+			if(payload.name != "")
+			{
+				sentName = true;
+			}
+			else
+			{
+				sentName = false;
+			}
+		}		
 	}
 
 	if(event.data.startsWith("uploadCardsError;"))
@@ -402,7 +406,7 @@ function input(id: string): HTMLInputElement
 function register()
 {
 	var name = input("playerName").value;
-	globals.socket.send("register;" + (localStorage["playerID"] || 0) + ";" + name);
+	globals.socket.send("handshake;;" + name);
 }
 
 function setLobbyOptions()
@@ -454,7 +458,7 @@ function setLobbyOptions()
 function startGame()
 {
 	setLobbyOptions();
-	globals.socket.send("startgame;");
+	globals.socket.send("game;");
 }
 
 

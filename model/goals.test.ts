@@ -53,7 +53,7 @@ function setupGame(setupOptions?:{
 	let sendMessage = game.onMessage(game, fakeSocket);
 
 	let fakePlayer = {
-		disconnected: false,
+		disconnected: 0,
 		name: "Test",
 		socket: fakeSocket,
 		team: "",
@@ -216,7 +216,7 @@ export default function(){
 
 		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 
-		expect(game.turnstate!.brokenShips.length).toBe(0);
+		expect(game.model.turnstate!.brokenShips.length).toBe(0);
 
 	});
 
@@ -264,8 +264,8 @@ export default function(){
 
 			// last ship is slide between p2 (Bon Bon) and changeling
 
-			expect(game.turnstate!.brokenShips.length).toBe(1);
-			hasShipPair(game.turnstate!.brokenShips, startCard, changeling + ":1");
+			expect(game.model.turnstate!.brokenShips.length).toBe(1);
+			hasShipPair(game.model.turnstate!.brokenShips, startCard, changeling + ":1");
 
 		});
 
@@ -276,14 +276,14 @@ export default function(){
 			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 
 
-			expect(game.turnstate!.playedPonies.length).toBe(1);
-			expect(game.turnstate!.playedPonies[0]).toBe(changeling + ":1");
+			expect(game.model.turnstate!.playedPonies.length).toBe(1);
+			expect(game.model.turnstate!.playedPonies[0]).toBe(changeling + ":1");
 
 			player.move(ship4, "hand", "sd,1,0");
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
-			expect(game.turnstate!.playedPonies.length).toBe(1);
-			expect(game.turnstate!.playedPonies[0]).toBe(changeling + ":1");
+			expect(game.model.turnstate!.playedPonies.length).toBe(1);
+			expect(game.model.turnstate!.playedPonies[0]).toBe(changeling + ":1");
 		});
 
 		test("changeling redisguise counts played cards correctly", () =>{
@@ -293,14 +293,14 @@ export default function(){
 			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 			player.move(ship4, "hand", "sd,1,0");
 
-			let playedShips = game.turnstate!.playedShips;
+			let playedShips = game.model.turnstate!.playedShips;
 			expect(playedShips.length).toBe(2);
 			hasShipPair(playedShips, changeling+":1", p2)
-			hasShipPair(game.turnstate!.playedShips, changeling+":1", startCard)
+			hasShipPair(game.model.turnstate!.playedShips, changeling+":1", startCard)
 
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
-			playedShips = game.turnstate!.playedShips;
+			playedShips = game.model.turnstate!.playedShips;
 			expect(playedShips.length).toBe(2);
 			hasShipPair(playedShips, changeling+":1", startCard)
 			hasShipPair(playedShips, changeling+":2", p2)
@@ -342,7 +342,7 @@ export default function(){
 
 		test("love poison changeling breaks 1 ship", () =>{
 
-			let brokenShips = game.turnstate!.brokenShips;
+			let brokenShips = game.model.turnstate!.brokenShips;
 			expect(brokenShips.length).toBe(0);
 
 			player.move(lovePoison, "hand", "sd,1,0");
@@ -350,14 +350,14 @@ export default function(){
 
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
-			brokenShips = game.turnstate!.brokenShips;
+			brokenShips = game.model.turnstate!.brokenShips;
 			expect(brokenShips.length).toBe(1);
 			hasShipPair(brokenShips, changeling+":1", pony)
 		});
 
 		test("love poison changeling counts as 2 played ships", () =>{
 
-			let playedShips = game.turnstate!.playedShips;
+			let playedShips = game.model.turnstate!.playedShips;
 			expect(playedShips.length).toBe(1);
 			hasShipPair(playedShips, changeling+":1", pony)
 
@@ -365,7 +365,7 @@ export default function(){
 			player.move(changeling, "p,2,0", "p,1,1");
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
-			playedShips = game.turnstate!.playedShips;
+			playedShips = game.model.turnstate!.playedShips;
 
 			expect(playedShips.length).toBe(2);
 			hasShipPair(playedShips, changeling+":1", pony)
@@ -425,7 +425,7 @@ export default function(){
 
 		test("changeling swap breaks changeling ships", () =>{
 
-			let brokenShips = game.turnstate!.brokenShips;
+			let brokenShips = game.model.turnstate!.brokenShips;
 
 			expect(brokenShips.length).toBe(4);
 			hasShipPair(brokenShips, changeling+":0", start);
@@ -437,7 +437,7 @@ export default function(){
 
 		test("changeling swap played ships", () =>{
 
-			let playedShips = game.turnstate!.playedShips;
+			let playedShips = game.model.turnstate!.playedShips;
 
 			expect(playedShips.length).toBe(1);
 			hasShipPair(playedShips, ponyC, ponyA);
@@ -445,11 +445,11 @@ export default function(){
 		});
 
 		test("changeling swap played ponies", () =>{
-			expect(game.turnstate!.playedPonies.length).toBe(0);		
+			expect(game.model.turnstate!.playedPonies.length).toBe(0);		
 		});
 
 		test("changeling swap played ship cards", () =>{
-			expect(game.turnstate!.playedShipCards.length).toBe(1);		
+			expect(game.model.turnstate!.playedShipCards.length).toBe(1);		
 		});
 
 	});
@@ -506,22 +506,22 @@ export default function(){
 		player.move(pony1, "p,1,0", "offset,1,0");
 		player.move(changeling, "hand", "p,1,0");
 
-		expect(game.turnstate!.brokenShips.length).toBe(2);
-		hasShipPair(game.turnstate!.brokenShips, start, pony1)
-		hasShipPair(game.turnstate!.brokenShips, pony2, pony1)
+		expect(game.model.turnstate!.brokenShips.length).toBe(2);
+		hasShipPair(game.model.turnstate!.brokenShips, start, pony1)
+		hasShipPair(game.model.turnstate!.brokenShips, pony2, pony1)
 
 		player.setEffect(changeling, "disguise", "Core.Pony.VinylScratch");
 
-		expect(game.turnstate!.brokenShips.length).toBe(2);
-		hasShipPair(game.turnstate!.brokenShips, start, pony1)
-		hasShipPair(game.turnstate!.brokenShips, pony2, pony1)
+		expect(game.model.turnstate!.brokenShips.length).toBe(2);
+		hasShipPair(game.model.turnstate!.brokenShips, start, pony1)
+		hasShipPair(game.model.turnstate!.brokenShips, pony2, pony1)
 
 
-		expect(game.turnstate!.playedShips.length).toBe(4);
-		hasShipPair(game.turnstate!.playedShips, pony1, start)
-		hasShipPair(game.turnstate!.playedShips, pony1, pony2)
-		hasShipPair(game.turnstate!.playedShips, start, changeling+":1")
-		hasShipPair(game.turnstate!.playedShips, pony2, changeling+":1")
+		expect(game.model.turnstate!.playedShips.length).toBe(4);
+		hasShipPair(game.model.turnstate!.playedShips, pony1, start)
+		hasShipPair(game.model.turnstate!.playedShips, pony1, pony2)
+		hasShipPair(game.model.turnstate!.playedShips, start, changeling+":1")
+		hasShipPair(game.model.turnstate!.playedShips, pony2, changeling+":1")
 	});
 
 	test("genderSwapped + CharityAuction", () => {

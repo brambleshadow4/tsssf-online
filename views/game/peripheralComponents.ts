@@ -13,9 +13,10 @@ import {
 	isBlank,
 	isAnon,
 	isPonyOrStart,
-	GameModelPlayer as GameModel,
 	Card, Location, CardProps, GameOptions
 } from "../../model/lib.js";
+
+import GameModel from "../../model/GameModel.js";
 
 import * as cm from "../../model/cardManager.js";
 
@@ -371,29 +372,34 @@ export function updateWinnings()
 	arrow.src = "/img/return.svg";
 	arrow.className = 'returnArrow';
 
-	let model = win.model as GameModel & {winnings: any[]};
 
-	if(model.winnings.length)
+	let model = win.model as GameModel;
+
+	let winnings = model.me().winnings;
+
+	if(winnings.length)
+	{
 		element.appendChild(arrow);
+	}
 
 	var cardOffset = 2;
-	var offset = model.winnings.length * cardOffset;
+	var offset = winnings.length * cardOffset;
 
-	for(var i=0; i < model.winnings.length; i++)
+	for(var i=0; i < winnings.length; i++)
 	{
-		win.cardLocations[model.winnings[i].card] = "winnings";
+		win.cardLocations[winnings[i].card] = "winnings";
 
 		offset -= cardOffset;
-		var card = makeCardElement(model.winnings[i].card, "winnings");
+		var card = makeCardElement(winnings[i].card, "winnings");
 		card.style.position = "absolute";
 		card.style.bottom = offset + "vh";
 		card.style.right = "0vh"
 		element.appendChild(card)
 	}
 
-	var points = model.winnings.reduce((a,b) => a + b.value, 0);
+	var points = winnings.reduce((a,b) => a + b.value, 0);
 
-	if(model.winnings.length)
+	if(winnings.length)
 	{
 		var scoreElement = document.createElement('span');
 		scoreElement.className = 'score';
@@ -429,17 +435,19 @@ export function updateWinnings()
 
 		lastArrowClick = newTime;
 
+		let winnings = model.me().winnings;
+
 		var goalSlot = model.currentGoals.indexOf("blank:goal");
 		if(goalSlot > -1)
 		{
-			if(model.winnings.length == 1)
+			if(winnings.length == 1)
 			{
 				arrow.parentNode!.removeChild(arrow)
 			}
 
 
-			broadcastMove(model.winnings[model.winnings.length-1].card, "winnings","goal," + goalSlot)
-			moveCard(model.winnings[model.winnings.length-1].card, "winnings","goal," + goalSlot);
+			broadcastMove(winnings[winnings.length-1].card, "winnings","goal," + goalSlot)
+			moveCard(winnings[winnings.length-1].card, "winnings","goal," + goalSlot);
 		}
 	}
 
@@ -454,13 +462,24 @@ export function updatePlayerList()
 	var playerList = document.getElementById('playerList')!;
 	playerList.innerHTML = "";
 	let model = win.model;
-	for(let player of model.players as any)
+
+	if(!model.playerName){ return; }
+
+	let adjPlayers = model.players.slice();
+
+	while(adjPlayers[0].name != model.playerName)
+	{
+		adjPlayers.push(adjPlayers.shift()!);
+	}
+
+	adjPlayers.shift();
+
+	for(let player of adjPlayers)
 	{
 		var div = document.createElement('div');
 		div.className = "player";
 
 		var className = player.disconnected ? "disconnected" : "";
-
 
 		if(model.turnstate && model.turnstate.currentPlayer == player.name)
 		{
@@ -482,10 +501,10 @@ export function updatePlayerList()
 		div.onclick = function()
 		{
 			let winnings = player.winnings.map((x: Winning) => x.card);
-			let playersCards = [];
+			let playersCards: Card[] = [];
 			let title = s.PopupTextWonGoals;
 
-			if(player.hand)
+			if(player.hand.length)
 			{
 				playersCards = player.hand;
 				title = s.PopupTextPlayersCards;
@@ -549,24 +568,26 @@ export function updateHand(updateInfo?: string)
 
 	var ponyHand = document.getElementById('hand-pony')!;
 	var shipHand = document.getElementById('hand-ship')!;
-	let model = win.model as GameModel & {hand: Card[]};
+	let model = win.model;
 
 	if(updateInfo == undefined)
 	{
 		var oldCards = handDiv.getElementsByClassName('card');
+
+		let hand = model.me().hand;
 
 		while(oldCards.length)
 		{
 			oldCards[0].parentNode!.removeChild(oldCards[0]);
 		}
 
-		for(var i=0; i<model.hand.length; i++)
+		for(var i=0; i<hand.length; i++)
 		{
-			var cardEl = makeCardElement(model.hand[i], "hand", true);
+			var cardEl = makeCardElement(hand[i], "hand", true);
 
-			win.cardLocations[model.hand[i]] = "hand";
+			win.cardLocations[hand[i]] = "hand";
 
-			if(isPony(model.hand[i]))
+			if(isPony(hand[i]))
 			{
 				ponyHand.appendChild(cardEl);
 			}
@@ -740,8 +761,6 @@ function updateLangSelector()
 		{
 			if(lang != s.Lang)
 			{
-				console.log(lang);
-
 				let newImg = document.createElement('img');
 				newImg.src = getLangImg(lang);
 				newImg.onclick = () => switchLang(lang);

@@ -1,10 +1,11 @@
 import {
-	GameModel, Card, Player, randomizeOrder, Location, isPony, isShip, isGoal, getNeighborKeys,
-	isBlank, PackListPack, CardProps, isCardIncluded, isBoardLoc, isOffsetLoc, isGoalLoc, isDiscardLoc
+	GameModel as GM, Card, Player, randomizeOrder, Location, isPony, isShip, isGoal, getNeighborKeys,
+	isBlank, PackListPack, CardProps, isCardIncluded, isBoardLoc, isOffsetLoc, isGoalLoc, isDiscardLoc,
+	GameOptions, CardElement
 } from "./lib.js";
 
 
-import {getConnectedPonies, evalGoalCard} from "./goalCriteria"
+import {getConnectedPonies, evalGoalCard} from "./goalCriteria.js"
 
 import * as cm from "./cardManager.js";
 
@@ -32,10 +33,10 @@ var PROP_VALUES = {
 
 
 
-export default class GameModelServer implements GameModel
+export default class GameModel implements GM
 {
 	public board: {
-		[key:string]: {card: Card}
+		[key:string]: {card: Card, element?: CardElement}
 	} = {};
 
 	public cardLocations: {
@@ -52,6 +53,8 @@ export default class GameModelServer implements GameModel
 		cards: {},
 		currentSize: 0
 	};
+
+	public playerName: string = "";
 
 	public ponyDiscardPile: Card[] = [];
 	public shipDiscardPile: Card[] = [];
@@ -72,9 +75,7 @@ export default class GameModelServer implements GameModel
 
 	public turnstate? = new Turnstate();
 
-	public startCard: Card = "Core.Start.FanficAuthorTwilight";
-
-	public ruleset: "sandbox" | "turnsOnly" = "turnsOnly";
+	private startCard: Card = "";
 
 
 	public debug = false;
@@ -237,7 +238,18 @@ export default class GameModelServer implements GameModel
 	}
 
 
+	public me(): Player
+	{
+		for(let i=0; i<this.players.length; i++)
+		{
+			if(this.players[i].name == this.playerName)
+			{
+				return this.players[i];
+			}
+		}
 
+		throw new Error("me() called from a server instance");
+	}
 
 
 	public removePlayer(playerName: string)
@@ -246,7 +258,6 @@ export default class GameModelServer implements GameModel
 
 		if(!player) { return; }
 
-		
 
 		var ponies = player.hand.filter(x => isPony(x));
 		var ships = player.hand.filter(x => isShip(x));
@@ -409,8 +420,6 @@ export default class GameModelServer implements GameModel
 		}
 
 		return [false, 0, "", ""];
-
-
 	}
 
 	public swapShuffle(typ: "pony" | "ship" | "goal")
@@ -439,10 +448,8 @@ export default class GameModelServer implements GameModel
 
 			var topCard = pileArr[pileArr.length-1];
 			model2.cardLocations[topCard] = typ+"DiscardPile,top";
-		}		
+		}
 	}
-
-
 	
 
 	public getPlayerModel(playerName: string)
@@ -451,6 +458,8 @@ export default class GameModelServer implements GameModel
 
 		model.board = this.board;
 		model.cardDecks = this.cardDecks;
+
+		model.playerName = playerName;
 
 		model.ponyDiscardPile = this.ponyDiscardPile;
 		model.shipDiscardPile = this.shipDiscardPile;
@@ -511,7 +520,7 @@ export default class GameModelServer implements GameModel
 					socket: undefined
 				}
 			}
-			else if (x.team == player.team)
+			else if (player.team && player.team == x.team)
 			{
 				return {
 					id: x.id,
@@ -601,16 +610,12 @@ export default class GameModelServer implements GameModel
 		return card2 + "/" + card1;
 	}
 
-	
-
-
-
-	public clearBoard(): void
+	public clearGameForStart(gameOptions: GameOptions): void
 	{	
 		this.cardLocations = {};
 		this.board = {
 			"p,0,0":{
-				card: this.startCard
+				card: gameOptions.startCard
 			}
 		};
 
@@ -644,12 +649,10 @@ export default class GameModelServer implements GameModel
 		this.ponyDrawPile = [];
 		this.shipDrawPile = [];
 
-
-
 		for(var cardName in cm.inPlay())
 		{
-			if(!isCardIncluded(cardName, this))
-				continue;
+			//if(!isCardIncluded(cardName, gameOptions))
+			//	continue;
 
 			if(isGoal(cardName))
 			{
@@ -673,15 +676,28 @@ export default class GameModelServer implements GameModel
 		randomizeOrder(this.ponyDrawPile);
 		randomizeOrder(this.shipDrawPile);
 
+		// draw cards
 
-		if(this.ruleset == "turnsOnly")
+		if(this.goalDrawPile.length > 3)
+		{
+			this.currentGoals[0] = this.goalDrawPile.pop()!;
+			this.currentGoals[1] = this.goalDrawPile.pop()!;
+			this.currentGoals[2] = this.goalDrawPile.pop()!;
+
+			this.cardLocations[this.currentGoals[0]] = "goal,0";
+			this.cardLocations[this.currentGoals[1]] = "goal,1";
+			this.cardLocations[this.currentGoals[2]] = "goal,2";
+		}
+		
+
+		if(gameOptions.ruleset == "turnsOnly")
 		{
 			this.turnstate = new Turnstate();
 			this.turnstate.init(this, this.players[0] ? this.players[0].name : "")
 		}
 		else
 		{
-			delete this.turnstate;
+			delete this.turnstate
 		}
 		
 		/*if(preset)
@@ -895,9 +911,6 @@ export default class GameModelServer implements GameModel
 		// TODO move this logic
 		// if the player has an incorrect position for a card, move it to where it actually should be.
 		
-
-		
-
 		let serverEndLoc = endLocation;
 		if(serverEndLoc == "hand" || serverEndLoc == "winnings")
 			serverEndLoc = "player," + player.name;
@@ -934,6 +947,7 @@ export default class GameModelServer implements GameModel
 		{
 			let model = this as any;
 			var [pile,slot] = startLocation.split(",");
+
 			let i = model[pile].indexOf(card);
 			model[pile].splice(i,1);
 
@@ -1199,5 +1213,75 @@ export default class GameModelServer implements GameModel
 				}
 			}
 		}
+	}
+}
+
+
+export function playerGameModelFromObj(parsedModel: any)
+{
+	let newModel = new GameModel();
+
+	try
+	{
+		newModel.board = parsedModel.board || newModel.board;
+
+		// need to do something w/ card locations.
+
+		newModel.playerName = parsedModel.playerName || "";
+
+
+		newModel.ponyDiscardPile = parsedModel.ponyDiscardPile || [];
+		newModel.shipDiscardPile = parsedModel.shipDiscardPile || [];
+		newModel.goalDiscardPile = parsedModel.goalDiscardPile || [];
+
+		newModel.currentGoals = parsedModel.currentGoals || [];
+
+		newModel.achievedGoals = new Set(parsedModel.achievedGoals as Card[]);
+
+		newModel.tempGoals = parsedModel.tempGoals || [];
+
+		newModel.removed = parsedModel.removed || [];
+		newModel.players = parsedModel.players || [];
+
+		newModel.turnstate = parsedModel.turnstate || new Turnstate();
+
+		if(newModel.turnstate)
+		{
+			newModel.turnstate.playedThisTurn = new Set(parsedModel.turnstate.playedThisTurn);
+		}
+
+		// recalucaltate cardLocations;
+		for(var card of newModel.ponyDiscardPile)
+		{
+			newModel.cardLocations[card] = "ponyDiscardPile,stack";
+		}
+
+		for(var card of newModel.shipDiscardPile)
+		{
+			newModel.cardLocations[card] = "shipDiscardPile,stack";
+		}
+
+		for(var card of newModel.goalDiscardPile)
+		{
+			newModel.cardLocations[card] = "goalDiscardPile,stack";
+		}
+
+		for(var card of newModel.tempGoals)
+		{
+			newModel.cardLocations[card] = "tempGoals";
+		}
+
+		for(var card of newModel.removed)
+		{
+			newModel.cardLocations[card] = "removed";
+		}
+
+		newModel.cardLocations[newModel.ponyDiscardPile[newModel.ponyDiscardPile.length-1]] = "ponyDiscardPile,top";
+		newModel.cardLocations[newModel.shipDiscardPile[newModel.shipDiscardPile.length-1]] = "shipDiscardPile,top";
+		newModel.cardLocations[newModel.goalDiscardPile[newModel.goalDiscardPile.length-1]] = "goalDiscardPile,top";
+	}
+	finally
+	{
+		return newModel;
 	}
 }

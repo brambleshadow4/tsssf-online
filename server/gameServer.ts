@@ -103,7 +103,7 @@ export class TsssfGameServer
 				var anyPlayersAlive = false;
 				for(var i=0; i < games[key].model.players.length; i++)
 				{
-					if(games[key].model.players[i].socket.isAlive)
+					if(!games[key].model.players[i].disconnected)
 					{
 						anyPlayersAlive = true;
 						break;
@@ -177,7 +177,7 @@ export class TsssfGameServer
 			if(this.games[key].isInGame)
 			{
 				stats.games++;
-				stats.players += this.games[key].model.players.filter(x => x.socket.isAlive).length;
+				stats.players += this.games[key].model.players.filter(x => !x.disconnected).length;
 
 				let thisStartTime = this.games[key].startTime; 
 				if(thisStartTime !== undefined)
@@ -196,7 +196,7 @@ export class TsssfGameServer
 	//startGame("dev");
 	//games["dev"].allowInGameRegistration = true;
 
-	private onConnection(socket: ws & {isAlive: boolean, isDead:boolean}, request:any, client:any)
+	private onConnection(socket: ws, request:any, client:any)
 	{
 		let key = request.url.substring(2).toUpperCase();
 
@@ -247,12 +247,10 @@ export class GameInstance
 	public keepLobbyOpen = false;
 	public deathCount = 0;
 
+	private newConnections: ws[] = [];
+
 	public gameOptions: GameOptions = defaultGameOptions();
-
 	public lastMessageTimestamp: number;
-
-	public turnstate? = new Turnstate();
-
 
 	private host?: ws;
 
@@ -265,21 +263,20 @@ export class GameInstance
 		this.lastMessageTimestamp = new Date().getTime();
 	}
 
-	public onConnection(socket: ws & {isAlive: boolean, isDead:boolean}, request:any, client:any)
-	{
-		socket.isAlive = true;
-		socket.isDead = false;
-		
+	public onConnection(socket: ws, request:any, client:any)
+	{		
 		socket.on('message', handleCrash(this.onMessage(this, socket)));
-		socket.on('close', handleCrash(this.onClose(this, socket)));
+		socket.on('close', handleCrash(this.onClose(this, socket as any)));
 
-		this.sendLobbyList();		
+		//this.updateLobby();		
 	}
 
 	public onMessage(game: GameInstance, socket: ws)
 	{
 		return function(message: string)
 		{
+			console.log(message);
+
 			if(!game) // not quite sure how this happens, but this crashed one time.
 				return;
 
@@ -288,23 +285,19 @@ export class GameInstance
 			game.messageHistory.push(logPlayerName + ";" + message);
 			game.lastMessageTimestamp = new Date().getTime();
 
+			if(message.startsWith("handshake;"))
+			{
+				game.onHandshakeMessage(message, socket); return; 
+			}
+			
 			if(message == "debug") game.onDebugMessage(socket);
-			
-
-			if(message.startsWith("handshake;")) { game.onHandshakeMessage(message, socket); return; }
-			
-
 
 			if(game.isLobbyOpen)
 			{
-				if(message.startsWith("ishost;"))
+				
+				if(game.host == socket)
 				{
-					game.sendHostMessage( socket, game.host == socket);		
-				}
-
-				if(message.startsWith("setLobbyOptions;"))
-				{
-					if(game.host == socket)
+					if(message.startsWith("setLobbyOptions;"))
 					{
 						var options: GameOptions = {
 							cardDecks:["Core.*"],
@@ -327,102 +320,84 @@ export class GameInstance
 
 						game.setLobbyOptions(options);
 
-						return;
-					}	
-				}
-
-				if(message.startsWith("startgame;"))
-				{
-
-					if(game.host == socket)
-					{
-						game.startGame();					
-						game.toEveryone("startgame;");
-						game.sendHostMessage(game.host, true)
-
-						return;
-					}		
-				}
-
-				if(message.startsWith("uploadCards;") && game.host == socket)
-				{
-					let customCards = game.model.customCards;
-
-					if(customCards.currentSize > UPLOAD_LIMIT || message.length > UPLOAD_LIMIT)
-					{
-						socket.send("uploadCardsError;Upload limit reached for this lobby.");
-						return;
-					}	
-
-					var json = message.substring("uploadCards;".length);
-					var newCards;
-					try{
-						newCards = JSON.parse(json);
-					}
-					catch(e)
-					{
-						socket.send("uploadCardsError;Bad JSON file");
-						return;
+						return;	
 					}
 
-					var errors = validatePack(newCards, "", "", "any");
-
-					if(errors.length)
+					if(message.startsWith("game;"))
 					{
-						socket.send("uploadCardsError;Errors in card pack");
-						return;
+						game.startGame();
+
+						for(let player of game.model.players)
+						{
+							let model = game.model.getPlayerModel(player.name);
+							player.socket.send("game;" + JSON.stringify([game.gameOptions, model]))
+						}				
+
+						return;			
 					}
 
-					
-					if (!fs.existsSync("uploads"))
+					if(message.startsWith("uploadCards;") && game.host == socket)
 					{
-						fs.mkdirSync("uploads");
-					}
+						let customCards = game.model.customCards;
 
-					fs.writeFileSync("uploads/" + getFileName() + ".json", json)
+						if(customCards.currentSize > UPLOAD_LIMIT || message.length > UPLOAD_LIMIT)
+						{
+							socket.send("uploadCardsError;Upload limit reached for this lobby.");
+							return;
+						}	
 
-					var cards = flattenPack(newCards, true);
-					var description = {
-						name: newCards.name, 
-						pack: "X." + newCards.namespace,
-						box: false, 
-						startCards: Object.keys(cards).filter( x => isStart(x))
-					};
+						var json = message.substring("uploadCards;".length);
+						var newCards;
+						try{
+							newCards = JSON.parse(json);
+						}
+						catch(e)
+						{
+							socket.send("uploadCardsError;Bad JSON file");
+							return;
+						}
 
-					if(customCards.descriptions.filter(x => x.pack == description.pack).length == 0)
-					{
-						customCards.descriptions.push(description);
-					}
+						var errors = validatePack(newCards, "", "", "any");
 
-					customCards.cards = mergePacks(customCards.cards, cards);
+						if(errors.length)
+						{
+							socket.send("uploadCardsError;Errors in card pack");
+							return;
+						}
 
-					customCards.currentSize = JSON.stringify(customCards.cards).length + JSON.stringify(customCards.descriptions).length;
+						
+						if (!fs.existsSync("uploads"))
+						{
+							fs.mkdirSync("uploads");
+						}
 
-					if(game.host)
-					{
-						game.sendHostMessage(game.host, true);
-					}
-				}
+						fs.writeFileSync("uploads/" + getFileName() + ".json", json)
 
+						var cards = flattenPack(newCards, true);
+						var description = {
+							name: newCards.name, 
+							pack: "X." + newCards.namespace,
+							box: false, 
+							startCards: Object.keys(cards).filter( x => isStart(x))
+						};
 
-				if(message.startsWith("register;"))
-				{
-					var [_,id,name] = message.split(";");
-					name = (name || "").replace(/[^A-Za-z0-9 _]/g,"");
-					
-					game.registerPlayerName(socket, name);
-					
-					if(game.isInGame)
-					{
-						socket.send("startgame;");
-						logPlayerJoined();
-						game.sendPlayerlistsToEachPlayer();
-					}
-					else
-					{
-						game.sendLobbyList();
+						if(customCards.descriptions.filter(x => x.pack == description.pack).length == 0)
+						{
+							customCards.descriptions.push(description);
+						}
+
+						customCards.cards = mergePacks(customCards.cards, cards);
+
+						customCards.currentSize = JSON.stringify(customCards.cards).length + JSON.stringify(customCards.descriptions).length;
+
+						if(game.host)
+						{
+							game.sendHostMessage(game.host, true);
+						}
 					}
 				}
+
+				
 			}
 
 			if(game.isInGame && message.startsWith("startlobby") && socket == game.host)
@@ -431,12 +406,11 @@ export class GameInstance
 				game.isInGame = false;
 				game.isLobbyOpen = true;
 				game.toEveryone("startlobby;");
-				game.sendLobbyList();
+				game.updateLobby();
 
 				for(let player of game.model.players)
 				{
-					if(game.isRegistered(player))
-						player.socket.send("registered;" + player.id);
+					player.socket.send("registered;" + player.id);
 				}
 			}
 
@@ -463,20 +437,23 @@ export class GameInstance
 				game.onKickMessage(message, socket);
 			}
 
-			if(message.startsWith("requestmodel;"))
+			/*if(message.startsWith("requestmodel;"))
 			{	
+				console.log('requesting model');
 				// If a new player joins + there's no one else connected (rejoining a dead game), make sure it's their turn.
-				if(game.model.players.filter(x => x.socket.isAlive).length == 1)
+				if(game.model.players.filter(x => x.disconnected != 2).length == 1)
 				{
 					game.host = socket;
 					game.sendHostMessage(game.host, true)
 				}
 
 				game.sendCurrentState(player.name);
-				return;
-			}
 
-			if(message.startsWith("effects;") && game.turnstate)
+				console.log('requesting model complete');
+				return;
+			}*/
+
+			if(message.startsWith("effects;") && game.model.turnstate)
 			{	
 				// effects;<card>;prop;value
 
@@ -496,9 +473,7 @@ export class GameInstance
 				try{
 					
 					game.model.addEffect(card, prop, value);
-					
-					game.toEveryoneElse(player.name, "effects;" + JSON.stringify(game.turnstate.overrides));
-					
+					game.toEveryoneElse(player.name, "effects;" + JSON.stringify(game.model.turnstate.overrides));
 					game.checkIfGoalsWereAchieved();
 				}
 				catch(e)
@@ -563,9 +538,9 @@ export class GameInstance
 
 			if(message == "endturn")
 			{
-				if(!game.turnstate) return;
+				if(!game.model.turnstate) return;
 
-				if(player.name == game.turnstate.currentPlayer)
+				if(player.name == game.model.turnstate.currentPlayer)
 				{
 					game.changeTurnToNextPlayer();	
 				}
@@ -576,49 +551,80 @@ export class GameInstance
 
 	public onHandshakeMessage(message:string, socket:ws)
 	{
-		let id = Number(message.split(";")[1]);
+		let pieces = message.split(";");
 
-		var player = this.getPlayerBySocket(socket)
-
-		if(!player)
-		{
-			player = this.getPlayerByID(id)
-
-			if(player)
-			{
-				player.socket = socket;
-			}
-			else
-			{
-				player = this.addPlayerConnection(socket);
-			}
-		}
-
-	
-		if(this.isRegistered(player) && this.isInGame)
-		{
-			socket.send("handshake;game");
-			this.sendPlayerlistsToEachPlayer();
-
-			if(this.model.players.filter(x => !x.socket.isDead).length == 1)
-				this.changeTurnToNextPlayer(); // only one alive player. Make sure it's their turn.
-		}
-		else if(this.isLobbyOpen)
-		{
-			socket.send("handshake;lobby");
-			this.sendLobbyList();
-		}
-		else
-		{
-			socket.send("handshake;closed");
-		}
+		let id = Number(pieces[1]);
+		let name = pieces[2];
 
 		if(!this.host)
 		{
-			var players = this.model.players
-			this.host = players[0].socket;
-			this.sendHostMessage( players[0].socket, true);
+			this.host = socket;
 		}
+
+		// recover disconnected players
+		var player = this.getPlayerBySocket(socket);
+		if(!player)
+		{
+			player = this.getPlayerByID(id);
+
+			if(player)
+			{
+				if(player.socket == this.host)
+				{
+					this.host = socket;
+				}
+
+				player.socket = socket;
+				player.disconnected = 0;
+			}
+		}
+
+
+		// register name
+		if(!player && name && this.isLobbyOpen)
+		{
+			player = this.registerPlayerName(socket, name);
+		}
+
+		// keep track of new connections
+		if(!player && this.isLobbyOpen)
+		{
+			if(this.newConnections.indexOf(socket) == -1)
+			{
+				this.newConnections.push(socket);
+			}
+		}
+
+		// redirect to lobby/game
+		if(player && this.isInGame)
+		{
+			let model = this.model.getPlayerModel(player.name);
+			socket.send("game;" + JSON.stringify([this.gameOptions, model]))
+		}
+		else 
+		{
+		}
+
+		this.updateLobby();
+	}
+
+	private makeLobbyMessage(socket: ws)
+	{
+		let player = this.getPlayerBySocket(socket);
+
+		let isHost = this.host == socket;
+
+		return "lobby;" + JSON.stringify({
+
+			id: player?.id || 0,
+			name: player?.name || "",
+
+			isClosed: !player && !this.isLobbyOpen,
+			players: this.model.players.map(x => x.name).concat(this.newConnections.map(x => "")),
+
+			isHost,
+			gameOptions: isHost ? this.gameOptions : {},
+		})
 	}
 
 	public onKickMessage(message:string, socket:ws)
@@ -638,13 +644,6 @@ export class GameInstance
 
 		this.model.removePlayer(playerName);
 
-
-
-
-		
-
-
-		
 		// request game
 
 		for(let player of this.model.players)
@@ -661,9 +660,9 @@ export class GameInstance
 		gameCopy.messageHistory = this.messageHistory;
 		gameCopy.board = this.model.board;
 
-		if(this.turnstate)
+		if(this.model.turnstate)
 		{
-			let ts = this.turnstate;
+			let ts = this.model.turnstate;
 			let cts = gameCopy.turnstate = {} as any;
 
 			cts.currentPlayer = ts.currentPlayer;
@@ -696,7 +695,7 @@ export class GameInstance
 		if(type == "exchangeCardsBetweenHands")
 		{
 			// TODO check this
-			let playersInGame = this.model.players.filter(x => this.isRegistered(x));
+			let playersInGame = this.model.players;
 			let playerCount = playersInGame.length;
 
 			let playersShifted = [...playersInGame.slice(1), playersInGame[0]];
@@ -742,85 +741,104 @@ export class GameInstance
 
 	}
 
-	private onClose(game: GameInstance, socket: ws & {isAlive: boolean, isDead: boolean})
+	private onClose(game: GameInstance, socket: ws & {disconnectAt: number})
 	{
 		return function()
 		{
-			socket.isAlive = false;
-
-			let player = game.getPlayerBySocket(socket)
-			let deadName = player ? player.name : "";
-
-			// mark the socket as dead after 15 s. 
-			setTimeout(() => {
-
-				socket.isDead = true;
-				let player = game.getPlayerByName(deadName);
-
-				if(player == undefined || (player && player.socket == socket))
-				{
-					let curPlayerName = game.turnstate?.currentPlayer;
-
-					if(curPlayerName == deadName)
-					{
-						game.changeTurnToNextPlayer();
-					}
-				}
-
-			}, TEMP_DISCONNECT_TIME); 
-
-			if(game.host == socket)
+			let i = game.newConnections.indexOf(socket);
+			if(i > -1)
 			{
-				var connectedPlayers = game.model.players.filter(x => x.socket.isAlive);
+				game.newConnections.splice(i,1);
 
-				if(game.isInGame)
-					connectedPlayers = connectedPlayers.filter(x => game.isRegistered(x));
-
-				// if host changes when lobby, deslect any uploaded cards.
-				// 
-				if(!game.isInGame)
+				if(game.host == socket)
 				{
-					game.model.cardDecks = game.model.cardDecks.filter( (x: Card)=> !x.startsWith("X."))
-				}
 
-				if(connectedPlayers.length)
-				{
-					game.host = connectedPlayers[0].socket;
-
-					game.sendHostMessage(game.host!, true)
-				}
-				else
-				{
-					delete game.host;
+					game.reassignHost();
 				}
 			}
 
+			let player = game.getPlayerBySocket(socket);
 
-			// TODO rewrite this. Should use connecting var
-			if(game.isLobbyOpen && !game.isInGame)
+			if(!player) { return; }
+
+			player.disconnected = 1;
+
+			if(!game.isInGame && socket != game.host)
 			{
-				for(var i=0; i < game.model.players.length; i++)
-				{
-					if(socket == game.model.players[i].socket)
-					{
-						game.model.players.splice(i, 1);
-						break;
-					}
-				}
+				let i = game.model.players.indexOf(player);
+				game.model.players.splice(i,1);
 
-				game.sendLobbyList();
+				game.updateLobby();
 			}
 
 			if(game.isInGame)
 			{
 				game.sendPlayerlistsToEachPlayer();
 			}
+			
+			let deadName = player.name;
+
+			// mark the socket as dead after 15 s. 
+			setTimeout(() => {
+
+				let player = game.getPlayerByName(deadName);
+
+				if(!player) { return; }
+				if(player.socket != socket) { return; }
+
+				player.disconnected = 2;
+
+				if(!game.isInGame)
+				{
+					let i = game.model.players.indexOf(player);
+					game.model.players.splice(i,1);
+				}
+
+				if(player.socket == game.host)
+				{
+					game.reassignHost();
+				}
+
+				if(game.model.turnstate?.currentPlayer == deadName)
+				{
+					game.changeTurnToNextPlayer();
+				}
+
+				if(game.isLobbyOpen)
+				{
+					game.updateLobby();
+				}
+
+
+			}, TEMP_DISCONNECT_TIME); 
+
+			
 		}
 	}	
 
-	private isRegistered(player?: Player)
+	private reassignHost()
 	{
-		return player != undefined && player.name != "";
+		if(!this.isInGame)
+		{
+			this.gameOptions.cardDecks = this.gameOptions.cardDecks.filter( (x: Card)=> !x.startsWith("X."))
+		}
+
+		let alivePlayers = this.model.players.filter(x => x.disconnected == 0)
+
+		if(alivePlayers.length)
+		{
+			this.setHost(alivePlayers[0].socket);
+		}
+		else if(this.newConnections.length)
+		{
+			this.setHost(this.newConnections[0]);
+		}
+		else
+		{
+			delete this.host;
+		}
+
+		this.updateLobby();
 	}
 
 	private checkNameIsUnique(name: string)
@@ -836,71 +854,60 @@ export class GameInstance
 		return true;
 	}
 
-	// TODO rework this
-	private addPlayerConnection(socket: ws): Player
+	private registerPlayerName(socket: ws, baseName: string)
 	{
 		var player = this.getPlayerBySocket(socket)
+		if(player){ return; }
 
-		if(!player)
+		var count = 0;
+
+		baseName = baseName.replace(/[^A-Za-z0-9 _]/g, "").trim();
+		baseName = baseName || "Player";
+
+		let finalName = baseName;
+
+		while(!this.checkNameIsUnique(finalName))
 		{
-			let x = {
-				socket: socket,
-				hand: [],
-				team: "",
-				winnings: [],
-				id: 0,
-				disconnected: true,
-				ponies: 0,
-				ships: 0,
-				name: ""
-			};
-			this.model.players.push(x);
-			return x;
+			count++;
+			finalName = baseName + count;
+		}
+
+		player = {
+			id: Math.floor(Math.random()*10**16)+1,
+			name: finalName,
+			socket,
+
+			hand: [],
+			disconnected: 0,
+			team: "",
+			winnings: [],
+			ponies: 0,
+			ships: 0,
+		}
+
+		this.model.players.push(player);
+
+		let i = this.newConnections.indexOf(socket);
+		if(i > -1){
+			this.newConnections.splice(i,1);
 		}
 
 		return player;
 	}
 
-	private registerPlayerName(socket: ws, name: string)
+	public updateLobby()
 	{
-		var count = 0;
-		var newName = name;
-
-		var player = this.getPlayerBySocket(socket)
-
-		if(!player)
+		if(!this.isInGame)
 		{
-			player = this.addPlayerConnection(socket);
+			for(let player of this.model.players)
+			{
+				player.socket.send(this.makeLobbyMessage(player.socket));
+			}
 		}
-
-		name = name || "Player";
-		while(!this.checkNameIsUnique(newName))
-		{
-			count++;
-			newName = name + count;
-		}
-
 		
-		player.id = Math.floor(Math.random()*10**16)+1;
-
-
-		//if(player.name == "")
-		//	logPlayerJoined();
-
-		player.name = newName;
-
-		socket.send("registered;" + player.id)
-		return;
-	}
-
-	public sendLobbyList()
-	{
-		var allPlayers = this.model.players.filter(x => x.socket.isAlive)
-			.map(x => x.name).join(",");
-
-		for(var player of this.model.players)
+		for(let conn of this.newConnections)
 		{
-			player.socket.send("lobbylist;" + player.name + ";" + allPlayers);
+			conn.send(this.makeLobbyMessage(conn));
 		}
 	}
 
@@ -981,7 +988,7 @@ export class GameInstance
 	{
 		for(var player of this.model.players)
 		{
-			if(player.socket.isAlive && player.name != "")
+			if(!player.disconnected && player.name != "")
 			{
 				var playerlist = this.model.getPlayerListForPlayer(player.name);
 				player.socket.send("playerlist;" + JSON.stringify(playerlist));
@@ -989,6 +996,12 @@ export class GameInstance
 				// TODO update recieving end.
 			}
 		}
+	}
+
+	private setHost(socket:ws)
+	{
+		this.host = socket;
+		this.sendHostMessage(socket, true);
 	}
 
 	private sendHostMessage(socket:ws, isHost: boolean)
@@ -1017,7 +1030,7 @@ export class GameInstance
 	{
 		let player = this.getPlayerByName(playerName)!;
 		var model = this.model.getPlayerModel(playerName);
-		player.socket.send("model;" + JSON.stringify(model));
+		player.socket.send("model;" + JSON.stringify([this.gameOptions, model]));
 	}
 
 	private checkIfGoalsWereAchieved()
@@ -1095,15 +1108,12 @@ export class GameInstance
 		}*/
 
 		this.startTime = new Date().getTime();
-
-	
-
+		this.model.clearGameForStart(this.gameOptions);
 		this.isInGame = true;
 		
-
 		logGameHosted();
 
-		for(let i of this.model.players.filter(x => this.isRegistered(x)))
+		for(let i of this.model.players)
 		{
 			logPlayerJoined();
 		}
@@ -1129,7 +1139,7 @@ export class GameInstance
 	// TODO
 	/*private loadPreset(hand: Card[])
 	{
-		console.log("Loading Preset Game");
+		//console.log("Loading Preset Game");
 
 		let player =  {
 			name: "Dev",
@@ -1190,9 +1200,7 @@ export class GameInstance
 	private changeTurnToNextPlayer()
 	{
 		this.model.changeTurnToNextPlayer();
-
-		this.toEveryone("turnstate;" + JSON.stringify(this.turnstate!.clientProps()));
-
+		this.toEveryone("turnstate;" + JSON.stringify(this.model.turnstate!.clientProps()));
 		this.checkIfGoalsWereAchieved();
 	}
 
@@ -1207,14 +1215,14 @@ export class GameInstance
 		if(startLocation == "hand" || startLocation == "winnings")
 			serverStartLoc = "player," + player.name;
 
-
 		let actualLocation = this.model.isInvalidMoveOnClient(playerName, card, startLocation, endLocation);
+		
+		console.log(actualLocation);
 		if(actualLocation)
 		{
 			player.socket.send("move;" + card + ";limbo;" + actualLocation);
 			return;
 		}
-
 
 		this.model.moveCard(playerName, card, startLocation, endLocation, extraArg);
 
@@ -1240,7 +1248,8 @@ export class GameInstance
 		if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
 		{
 			var [pile,slot] = startLocation.split(",");
-			let model2 = this as any;
+			let model2 = this.model as any;
+
 			if(model2[pile].length)
 			{
 				var topCard = model2[pile][model2[pile].length-1]

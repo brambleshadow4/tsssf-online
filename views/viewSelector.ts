@@ -11,6 +11,8 @@ var protocol;
 
 var port = window.location.port || 80;
 
+var currentView = "";
+
 switch(window.location.protocol)
 {
 	case "http:": protocol = "ws:"; break;
@@ -29,13 +31,14 @@ if(liveGames.has(window.location.pathname))
 	socket.addEventListener("open", function()
 	{
 		socket.send("handshake;" + (localStorage["playerID"] || 0));
-		//socket.send("requestmodel;" + (localStorage["playerID"] || 0))
 	});
 
 	socket.addEventListener('message', function (event)
 	{
 		if(socket.onMessageHandler)
+		{
 			socket.onMessageHandler(event);
+		}
 	});
 
 	socket.addEventListener('close', function (event)
@@ -46,33 +49,22 @@ if(liveGames.has(window.location.pathname))
 
 	socket.addEventListener('message', function (event)
 	{
-		if(event.data.startsWith("handshake;"))
+		if(event.data.startsWith("lobby;") && currentView != "lobby")
 		{
-			var [_, view] = event.data.split(";");
-
-			if(view == "game") 
-			{
-				Game.loadView();
-			}
-			else if(view == "lobby")
-			{
-				Lobby.loadView(true);
-			}
-			else if(view == "closed")
-			{
-				Lobby.loadView(false);
-			}
+			currentView = "lobby";
+			Lobby.loadView(event.data);
 		}
 
-		if(event.data.startsWith("startgame"))
+		if(event.data.startsWith("game;") && currentView != "game")
 		{
+			currentView = "game"
 			Game.loadView();
 		}
 
-		if(event.data.startsWith("startlobby"))
+		/*if(event.data.startsWith("startlobby"))
 		{
 			Lobby.loadView(true);
-		}
+		}*/
 	});
 }
 else if(window.location.pathname == "/tutorial")
