@@ -217,7 +217,7 @@ function loadCardPages(options: GameOptions)
 			cardEl.classList.add('selected');
 
 			var infoText = "";
-			switch(cardEl.getAttribute('card'))
+			switch(cardEl.getAttribute('cardID'))
 			{	
 				case "HorriblePeople.2015ConExclusives.Start.FanficAuthorDiscord":
 					infoText = texts.LobbyDiscordStartWarning;
@@ -307,7 +307,7 @@ function onMessage(event: MessageEvent)
 				var cardDivs = document.getElementsByClassName('card') as HTMLCollectionOf<HTMLElement>;
 				for(var el of cardDivs)
 				{
-					var card = el.getAttribute('card') as string;
+					var card = el.getAttribute('cardID') as string;
 					if(s.has(card))
 					{
 						el.classList.add('selected');
@@ -331,7 +331,7 @@ function onMessage(event: MessageEvent)
 
 				for(var el of cardDivs)
 				{
-					if(el.getAttribute('card') == payload.gameOptions.startCard)
+					if(el.getAttribute('cardID') == payload.gameOptions.startCard)
 					{
 						el.click();
 					}
@@ -427,7 +427,7 @@ function setLobbyOptions()
 	options.cardDecks = Object.keys(globals.decks).map(x => [...globals.decks[x]]).reduce((a,b) => a.concat(b), []);
 
 	var startCard = document.getElementById('startCards')!.getElementsByClassName('selected')[0];
-	options.startCard = startCard.getAttribute('card') || "Core.Start.FanficAuthorTwilight";
+	options.startCard = startCard.getAttribute('cardID') || "Core.Start.FanficAuthorTwilight";
 
 	if(input('sandbox').checked)
 		options.ruleset = "sandbox";

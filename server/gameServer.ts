@@ -329,8 +329,7 @@ export class GameInstance
 
 						for(let player of game.model.players)
 						{
-							let model = game.model.getPlayerModel(player.name);
-							player.socket.send("game;" + JSON.stringify([game.gameOptions, model]))
+							game.sendCurrentState(player.name);
 						}				
 
 						return;			
@@ -395,9 +394,7 @@ export class GameInstance
 							game.sendHostMessage(game.host, true);
 						}
 					}
-				}
-
-				
+				}	
 			}
 
 			if(game.isInGame && message.startsWith("startlobby") && socket == game.host)
@@ -405,7 +402,6 @@ export class GameInstance
 				// TODO rework lobbying system.
 				game.isInGame = false;
 				game.isLobbyOpen = true;
-				game.toEveryone("startlobby;");
 				game.updateLobby();
 
 				for(let player of game.model.players)
@@ -431,27 +427,11 @@ export class GameInstance
 				return;
 			}
 
-
 			if(message.startsWith("kick;"))
 			{
 				game.onKickMessage(message, socket);
 			}
 
-			/*if(message.startsWith("requestmodel;"))
-			{	
-				console.log('requesting model');
-				// If a new player joins + there's no one else connected (rejoining a dead game), make sure it's their turn.
-				if(game.model.players.filter(x => x.disconnected != 2).length == 1)
-				{
-					game.host = socket;
-					game.sendHostMessage(game.host, true)
-				}
-
-				game.sendCurrentState(player.name);
-
-				console.log('requesting model complete');
-				return;
-			}*/
 
 			if(message.startsWith("effects;") && game.model.turnstate)
 			{	
@@ -554,11 +534,11 @@ export class GameInstance
 		let pieces = message.split(";");
 
 		let id = Number(pieces[1]);
-		let name = pieces[2];
+		let name = pieces[2]; // name is intentionally undefined on a normal handshake;<ID> message
 
 		if(!this.host)
 		{
-			this.host = socket;
+			this.reassignHost();
 		}
 
 		// recover disconnected players
@@ -572,6 +552,7 @@ export class GameInstance
 				if(player.socket == this.host)
 				{
 					this.host = socket;
+					player.isHost = true;
 				}
 
 				player.socket = socket;
@@ -580,32 +561,43 @@ export class GameInstance
 		}
 
 
-		// register name
-		if(!player && name && this.isLobbyOpen)
+		// register name. 
+		if(!player && name !== undefined && this.isLobbyOpen)
 		{
+			console.log('registering name');
 			player = this.registerPlayerName(socket, name);
 		}
 
 		// keep track of new connections
-		if(!player && this.isLobbyOpen)
+		if(!player)
 		{
-			if(this.newConnections.indexOf(socket) == -1)
+			if(this.isLobbyOpen && this.newConnections.indexOf(socket) == -1)
 			{
+				console.log('adding connection');
 				this.newConnections.push(socket);
 			}
 		}
 
+
 		// redirect to lobby/game
 		if(player && this.isInGame)
 		{
-			let model = this.model.getPlayerModel(player.name);
-			socket.send("game;" + JSON.stringify([this.gameOptions, model]))
+			console.log('redirect to game');
+
+			this.sendCurrentState(player.name);
+			this.sendPlayerlistsToEachPlayer();
 		}
-		else 
+		
+		if(this.isLobbyOpen)
 		{
+			this.updateLobby();
+		}
+		else if(!player)
+		{
+			// send lobby closed
+			socket.send(this.makeLobbyMessage(socket));
 		}
 
-		this.updateLobby();
 	}
 
 	private makeLobbyMessage(socket: ws)
@@ -644,11 +636,13 @@ export class GameInstance
 
 		this.model.removePlayer(playerName);
 
+
+		console.log("kicked, now turn " + this.model.turnstate?.currentPlayer);
 		// request game
 
 		for(let player of this.model.players)
 		{
-			this.sendCurrentState(player.socket);
+			this.sendCurrentState(player.name);
 		}
 
 	}
@@ -752,7 +746,6 @@ export class GameInstance
 
 				if(game.host == socket)
 				{
-
 					game.reassignHost();
 				}
 			}
@@ -808,6 +801,11 @@ export class GameInstance
 				{
 					game.updateLobby();
 				}
+				if(game.isInGame)
+				{
+					console.log("playerlists updated")
+					game.sendPlayerlistsToEachPlayer();
+				}
 
 
 			}, TEMP_DISCONNECT_TIME); 
@@ -816,8 +814,18 @@ export class GameInstance
 		}
 	}	
 
+	// sets host state, doesn't send updates
 	private reassignHost()
 	{
+		if(this.host)
+		{
+			let oldHostPlayer = this.getPlayerBySocket(this.host);
+			if(oldHostPlayer)
+			{
+				oldHostPlayer.isHost = false;
+			}
+		}
+
 		if(!this.isInGame)
 		{
 			this.gameOptions.cardDecks = this.gameOptions.cardDecks.filter( (x: Card)=> !x.startsWith("X."))
@@ -827,18 +835,17 @@ export class GameInstance
 
 		if(alivePlayers.length)
 		{
-			this.setHost(alivePlayers[0].socket);
+			this.host = alivePlayers[0].socket;
+			alivePlayers[0].isHost = true;
 		}
 		else if(this.newConnections.length)
 		{
-			this.setHost(this.newConnections[0]);
+			this.host = this.newConnections[0];
 		}
 		else
 		{
 			delete this.host;
 		}
-
-		this.updateLobby();
 	}
 
 	private checkNameIsUnique(name: string)
@@ -876,6 +883,7 @@ export class GameInstance
 			id: Math.floor(Math.random()*10**16)+1,
 			name: finalName,
 			socket,
+			isHost: socket == this.host,
 
 			hand: [],
 			disconnected: 0,
@@ -998,12 +1006,6 @@ export class GameInstance
 		}
 	}
 
-	private setHost(socket:ws)
-	{
-		this.host = socket;
-		this.sendHostMessage(socket, true);
-	}
-
 	private sendHostMessage(socket:ws, isHost: boolean)
 	{
 		var payload = "0";
@@ -1030,7 +1032,7 @@ export class GameInstance
 	{
 		let player = this.getPlayerByName(playerName)!;
 		var model = this.model.getPlayerModel(playerName);
-		player.socket.send("model;" + JSON.stringify([this.gameOptions, model]));
+		player.socket.send("game;" + JSON.stringify([this.gameOptions, model]));
 	}
 
 	private checkIfGoalsWereAchieved()
@@ -1052,8 +1054,6 @@ export class GameInstance
 
 		return card2 + "/" + card1;
 	}
-
-	
 
 	public setLobbyOptions(options: GameOptions)
 	{

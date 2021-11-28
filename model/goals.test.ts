@@ -54,6 +54,7 @@ function setupGame(setupOptions?:{
 
 	let fakePlayer = {
 		disconnected: 0,
+		isHost: false,
 		name: "Test",
 		socket: fakeSocket,
 		team: "",

@@ -465,6 +465,20 @@ export function updatePlayerList()
 
 	if(!model.playerName){ return; }
 
+	// update hosting abilities
+
+	console.log("this should be running + updating host");
+	let hostButton = document.getElementById('hostButton')!;
+	if(model.me().isHost)
+	{
+		hostButton.style.display = "inline-block";
+	}
+	else 
+	{
+		hostButton.style.display = "none";
+	}
+
+	// update players
 	let adjPlayers = model.players.slice();
 
 	while(adjPlayers[0].name != model.playerName)

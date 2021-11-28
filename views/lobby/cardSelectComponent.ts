@@ -109,7 +109,7 @@ export function cardSelectComponent(decks: {[key:string]: Set<string>}, name: st
 		{
 			if(el.classList.contains('selected'))
 			{
-				newSet.add(el.getAttribute('card')!);
+				newSet.add(el.getAttribute('cardID')!);
 			}	
 		}
 

@@ -75,6 +75,8 @@ export default class Turnstate
 	
 	public clientProps()
 	{
+		console.log("currentPlayer: " + this.currentPlayer)
+
 		return {
 			playedThisTurn: [...this.playedThisTurn],
 			overrides: this.overrides,

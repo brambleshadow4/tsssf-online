@@ -56,205 +56,15 @@ var heldDebugResolve: undefined | ((obj: any) => void) ;
 
 
 
+var kicked = false;
+
 export function attachToSocket(socket: WebSocketPlus)
 {
-	var kicked = false;
-	socket.onMessageHandler = function(event: MessageEvent)
-	{
-		var model = win.model;
-
-		if(event.data.startsWith('kick'))
-		{
-			document.getElementById('playingArea')!.style.backgroundColor = "#FFCCCC";
-			alert("The game's host kicked you from the game");
-			kicked = true;
-
-		}
-
-		if(event.data.startsWith("effects;") && model.turnstate)
-		{
-			var data = event.data.substring(8)
-			try
-			{
-				data = JSON.parse(data);
-				model.turnstate.overrides = data;
-				updateTurnstate();
-			}
-			catch(e){}
-		}
-
-		if(event.data.startsWith('turnstate;') && model.turnstate)
-		{
-			model.turnstate = JSON.parse(event.data.substring(10));	
-			model.turnstate!.playedThisTurn = new Set();
-
-			//console.log(model.turnstate);
-			updateTurnstate();
-		}
-
-		if(event.data.startsWith("debug;"))
-		{
-			if(heldDebugResolve)
-			{
-				heldDebugResolve(JSON.parse(event.data.substring("debug;".length)));
-				heldDebugResolve = undefined;
-			}
-			
-		}
-
-		if(event.data.startsWith('keepLobbyOpen;'))
-		{
-			// TODO
-			// model.keepLobbyOpen = !!Number(event.data.split(";")[1]);
-		}
-
-		if(event.data.startsWith('closed;'))
-		{
-			window.location.href = location.protocol + "//" + window.location.host;
-		}
-
-		if(event.data.startsWith('ishost;'))
-		{
-			var val = JSON.parse(event.data.split(";")[1])
-
-			if(val)
-				document.getElementById('hostButton')!.style.display = "inline-block";
-		}
-
-		if(event.data.startsWith('registered;'))
-		{
-			var [_,id] = event.data.split(";");
-			localStorage["playerID"] = id;
-		}
-
-		if(event.data.startsWith("playerlist;"))
-		{
-			model.players = JSON.parse(event.data.substring(11));
-			updatePlayerList();
-			updateTurnstate();
-		}
-
-		if(event.data.startsWith("model;"))
-		{
-			let modelPreviouslyLoaded = model;
-
-			let gameOptions: GameOptions;
-			let newModel: GameModel;
-
-			[gameOptions, newModel] = JSON.parse(event.data.substring(6))
-
-
-			let newerModel = playerGameModelFromObj(newModel);
-			win.gameOptions = gameOptions;
-
-			updateGame(newerModel);
-
-			if(!modelPreviouslyLoaded)
-			{
-				win.moveToStartCard();
-			}
-			
-		}
-
-		if(event.data.startsWith("move;"))
-		{
-			var [_, card, startLocation, endLocation] = event.data.split(";");
-			moveCard(card, startLocation, endLocation, {forceCardToMove: true});
-		}
-
-		if(event.data.startsWith("draw;"))
-		{
-			var [_, typ, count] = event.data.split(";");
-
-			(model as any)[typ+ "DrawPileLength"] = count;
-
-			var funs ={
-				"pony": updatePonyDiscard,
-				"ship": updateShipDiscard,
-				"goal": updateGoalDiscard
-			};
-			(funs as any)[typ]();
-		}
-
-		if(event.data.startsWith("swapshuffle;"))
-		{
-			var [_, type, count, ...cards] = event.data.split(";");
-
-			for(var card of (model as any)[type + "DiscardPile"])
-			{
-				delete win.cardLocations[card];
-			}
-
-			(model as any)[type+"DrawPileLength"] = count;
-			(model as any)[type+"DiscardPile"] = cards;
-
-			for(var card of cards)
-			{
-				win.cardLocations[card] = type + "DiscardPile,stack";
-			}
-
-			if(cards.length)
-				win.cardLocations[cards[cards.length-1]] = type + "DiscardPile,top";
-
-			var funs ={
-				"pony": updatePonyDiscard,
-				"ship": updateShipDiscard,
-				"goal": updateGoalDiscard
-			};
-			(funs as any)[type]();
-		}
-
-		if(event.data.startsWith("counts;"))
-		{
-
-			let _, name:string, ponies, ships;
-			let winnings: string[];
-
-			[_, name, ponies, ships, ...winnings] = event.data.split(";");
-
-			var player = model.players.filter(x => x.name == name)[0];
-
-			if(player)
-			{
-				player.ponies = ponies;
-				player.ships = ships;
-				player.winnings = winnings.map(x =>{
-					var s = x.split(",")
-					return {
-						card: s[0],
-						value: Number(s[1])
-					}
-				});
-			}
-			else
-			{
-				console.error("player " + name + " doesn't exist");
-			}
-
-			updatePlayerList();
-		}
-
-		if(event.data.startsWith("goalachieved;"))
-		{
-			let _, achievedCards: Card[];
-			[_, ...achievedCards] = (event.data as string).split(";");
-
-			if(achievedCards[0] == "")
-				achievedCards = [];
-
-			model.achievedGoals = new Set(achievedCards);
-
-			updateGoals(undefined, true);
-			if(model.tempGoals)
-			{
-				updateTableOffside();
-			}
-		}
-	};
+	kicked = false;
+	socket.onMessageHandler = messageHandler;
 
 	socket.onCloseHandler = function(event: MessageEvent)
 	{
-
 		setTimeout(function(){
 			if(!kicked)
 			{
@@ -263,13 +73,190 @@ export function attachToSocket(socket: WebSocketPlus)
 			}
 		}, 300);
 	}
-
-	socket.send("requestmodel;" + (localStorage["playerID"] || 0))
 }
 
-export function doLoad()
+function messageHandler(event: MessageEvent)
 {
+	var model = win.model;
 
+	if(event.data.startsWith('kick'))
+	{
+		document.getElementById('playingArea')!.style.backgroundColor = "#FFCCCC";
+		alert("The game's host kicked you from the game");
+		kicked = true;
+
+	}
+
+	if(event.data.startsWith("effects;") && model.turnstate)
+	{
+		var data = event.data.substring(8)
+		try
+		{
+			data = JSON.parse(data);
+			model.turnstate.overrides = data;
+			updateTurnstate();
+		}
+		catch(e){}
+	}
+
+	if(event.data.startsWith('turnstate;') && model.turnstate)
+	{
+		model.turnstate = JSON.parse(event.data.substring(10));	
+		model.turnstate!.playedThisTurn = new Set();
+
+		//console.log(model.turnstate);
+		updateTurnstate();
+	}
+
+	if(event.data.startsWith("debug;"))
+	{
+		if(heldDebugResolve)
+		{
+			heldDebugResolve(JSON.parse(event.data.substring("debug;".length)));
+			heldDebugResolve = undefined;
+		}
+		
+	}
+
+	if(event.data.startsWith('keepLobbyOpen;'))
+	{
+		// TODO
+		// model.keepLobbyOpen = !!Number(event.data.split(";")[1]);
+	}
+
+	if(event.data.startsWith('closed;'))
+	{
+		window.location.href = location.protocol + "//" + window.location.host;
+	}
+
+	if(event.data.startsWith("playerlist;"))
+	{
+		model.players = JSON.parse(event.data.substring(11));
+		updatePlayerList();
+		updateTurnstate();
+	}
+
+	if(event.data.startsWith("game;"))
+	{
+		let modelPreviouslyLoaded = model;
+
+		let gameOptions: GameOptions;
+		let newModel: GameModel;
+
+		[gameOptions, newModel] = JSON.parse(event.data.substring("game;".length))
+
+
+		let newerModel = playerGameModelFromObj(newModel);
+		win.gameOptions = gameOptions;
+
+		updateGame(newerModel);
+
+		if(!modelPreviouslyLoaded)
+		{
+			win.moveToStartCard();
+		}
+		
+	}
+
+	if(event.data.startsWith("move;"))
+	{
+		var [_, card, startLocation, endLocation] = event.data.split(";");
+		moveCard(card, startLocation, endLocation, {forceCardToMove: true});
+	}
+
+	if(event.data.startsWith("draw;"))
+	{
+		var [_, typ, count] = event.data.split(";");
+
+		(model as any)[typ+ "DrawPileLength"] = count;
+
+		var funs ={
+			"pony": updatePonyDiscard,
+			"ship": updateShipDiscard,
+			"goal": updateGoalDiscard
+		};
+		(funs as any)[typ]();
+	}
+
+	if(event.data.startsWith("swapshuffle;"))
+	{
+		var [_, type, count, ...cards] = event.data.split(";");
+
+		for(var card of (model as any)[type + "DiscardPile"])
+		{
+			delete win.cardLocations[card];
+		}
+
+		(model as any)[type+"DrawPileLength"] = count;
+		(model as any)[type+"DiscardPile"] = cards;
+
+		for(var card of cards)
+		{
+			win.cardLocations[card] = type + "DiscardPile,stack";
+		}
+
+		if(cards.length)
+			win.cardLocations[cards[cards.length-1]] = type + "DiscardPile,top";
+
+		var funs ={
+			"pony": updatePonyDiscard,
+			"ship": updateShipDiscard,
+			"goal": updateGoalDiscard
+		};
+		(funs as any)[type]();
+	}
+
+	if(event.data.startsWith("counts;"))
+	{
+
+		let _, name:string, ponies, ships;
+		let winnings: string[];
+
+		[_, name, ponies, ships, ...winnings] = event.data.split(";");
+
+		var player = model.players.filter(x => x.name == name)[0];
+
+		if(player)
+		{
+			player.ponies = ponies;
+			player.ships = ships;
+			player.winnings = winnings.map(x =>{
+				var s = x.split(",")
+				return {
+					card: s[0],
+					value: Number(s[1])
+				}
+			});
+		}
+		else
+		{
+			console.error("player " + name + " doesn't exist");
+		}
+
+		updatePlayerList();
+	}
+
+	if(event.data.startsWith("goalachieved;"))
+	{
+		let _, achievedCards: Card[];
+		[_, ...achievedCards] = (event.data as string).split(";");
+
+		if(achievedCards[0] == "")
+			achievedCards = [];
+
+		model.achievedGoals = new Set(achievedCards);
+
+		updateGoals(undefined, true);
+		if(model.tempGoals)
+		{
+			updateTableOffside();
+		}
+	}
+}
+
+export function networkInitLoad(handshakeMessage: string)
+{
+	messageHandler({data: handshakeMessage} as MessageEvent);
 }
 
 

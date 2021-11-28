@@ -297,13 +297,12 @@ export default class GameModel implements GM
 			}
 		}
 
-		this.players.splice(i,1);
-
 		if(this.turnstate && this.turnstate.currentPlayer == playerName)
 		{
 			this.changeTurnToNextPlayer();
 		}
 
+		this.players.splice(i,1);
 	}
 	
 	public changeTurnToNextPlayer()
@@ -312,7 +311,8 @@ export default class GameModel implements GM
 		if(!ts)
 			return;
 
-		var rotation = this.players.filter(x => !x.disconnected && x.name != "");
+		// should connect someone unless 15s+ disconnect
+		var rotation = this.players.filter(x => x.disconnected != 2);
 
 		if(rotation.length == 0)
 			return;
@@ -322,6 +322,8 @@ export default class GameModel implements GM
 
 		this.turnstate = new Turnstate();
 		this.turnstate.init(this, rotation[k].name);
+
+		console.log("turn: " + rotation[k].name);
 
 		return; 
 	}
@@ -351,16 +353,16 @@ export default class GameModel implements GM
 	/**
 
 	if(game.turnstate)
-					{
-						if(prop == "shipWithEverypony")
-						{
-							game.turnstate.specialEffects.shipWithEverypony.add(card);
-						}
+	{
+		if(prop == "shipWithEverypony")
+		{
+			game.turnstate.specialEffects.shipWithEverypony.add(card);
+		}
 
-						game.updateCountsFromBoardState(false);
-					}
+		game.updateCountsFromBoardState(false);
+	}
 
-					game.checkIfGoalsWereAchieved();
+	game.checkIfGoalsWereAchieved();
 		*/
 	// game.onSpecialMessage
 
@@ -517,7 +519,8 @@ export default class GameModel implements GM
 					winnings: x.winnings,
 					ponies: 0,
 					ships: 0,
-					socket: undefined
+					socket: undefined,
+					isHost: x.isHost
 				}
 			}
 			else if (player.team && player.team == x.team)
@@ -532,7 +535,8 @@ export default class GameModel implements GM
 					winnings: x.winnings,
 					ponies: 0,
 					ships: 0,
-					socket: undefined
+					socket: undefined,
+					isHost: x.isHost
 				}
 			}
 			else 
@@ -546,6 +550,7 @@ export default class GameModel implements GM
 					winnings: x.winnings,
 					ponies: x.hand.filter(isPony).length,
 					ships: x.hand.filter(isShip).length,
+					isHost: x.isHost,
 
 					socket: undefined
 				};

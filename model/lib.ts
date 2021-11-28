@@ -77,6 +77,7 @@ export interface Player
 	winnings: any[],
 	ponies: number,
 	ships: number,
+	isHost: boolean,
 	
 	socket: any,
 }

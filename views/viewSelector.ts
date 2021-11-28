@@ -35,6 +35,8 @@ if(liveGames.has(window.location.pathname))
 
 	socket.addEventListener('message', function (event)
 	{
+		console.log(event.data);
+
 		if(socket.onMessageHandler)
 		{
 			socket.onMessageHandler(event);
@@ -58,7 +60,7 @@ if(liveGames.has(window.location.pathname))
 		if(event.data.startsWith("game;") && currentView != "game")
 		{
 			currentView = "game"
-			Game.loadView();
+			Game.loadView(event.data);
 		}
 
 		/*if(event.data.startsWith("startlobby"))
@@ -69,5 +71,5 @@ if(liveGames.has(window.location.pathname))
 }
 else if(window.location.pathname == "/tutorial")
 {
-	Game.loadView();
+	Game.loadView("");
 }

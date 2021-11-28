@@ -95,6 +95,7 @@ import {
 	broadcastMove,
 	broadcast,
 	attachToSocket,
+	networkInitLoad
 	//broadcastEffects
 } from "./network.js";
 
@@ -145,7 +146,7 @@ function toggleFullScreen()
 
 win.toggleFullScreen = toggleFullScreen;
 
-export function loadView()
+export function loadView(handshakeMessage: string)
 {
 	switch(window.location.pathname)
 	{
@@ -200,6 +201,7 @@ export function loadView()
 		
 	}
 
+	networkInitLoad(handshakeMessage);
 }
 
 
@@ -339,8 +341,6 @@ export function updateTurnstate()
 		document.body.classList.remove("nomove");
 		return;
 	}
-
-
 
 	var div = document.getElementById('turnInfo')!;
 	if(isItMyTurn())
@@ -527,7 +527,7 @@ function updateEffects()
 	var toRemove = []
 	for(var el of cardsWithJustPlayed)
 	{
-		if(!playedThisTurn.has(el.getAttribute('card') as string))
+		if(!playedThisTurn.has(el.getAttribute('cardID') as string))
 		{
 			toRemove.push(el);
 		}
