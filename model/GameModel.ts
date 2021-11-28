@@ -311,19 +311,33 @@ export default class GameModel implements GM
 		if(!ts)
 			return;
 
-		// should connect someone unless 15s+ disconnect
 		var rotation = this.players.filter(x => x.disconnected != 2);
 
-		if(rotation.length == 0)
+		if(!ts.currentPlayer)
+		{
+			if(rotation.length)
+			{
+				this.turnstate = new Turnstate();
+				this.turnstate.init(this, rotation[0].name);
+			}
+
 			return;
+		}
+
+		// should connect someone unless 15s+ disconnect
+
+		if(rotation.length == 0)
+		{
+			this.turnstate = new Turnstate();
+			this.turnstate.init(this, "");
+			return;
+		}
 
 		var k = rotation.map(x=> x.name).indexOf(ts.currentPlayer);
 		k = (k+1)%rotation.length;
 
 		this.turnstate = new Turnstate();
 		this.turnstate.init(this, rotation[k].name);
-
-		console.log("turn: " + rotation[k].name);
 
 		return; 
 	}
@@ -1054,16 +1068,16 @@ export default class GameModel implements GM
 		if(endLocation == "hand" || endLocation == "winnings")
 			endLocation = "player,"+player.name;
 
-		this.toEveryoneElse(socket, "move;" + card + ";" + startLocation + ";" + endLocation);
+		this.toEveryoneElse(socket, "move;" + card + ";" + startLocation + ";" + endLocation);*/
 
 
-		if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
+		/*if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
 		{
 			this.sendPlayerCounts(player);
-		}
+		}*/
 
 
-		if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
+		/*if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
 		{
 			var [pile,slot] = startLocation.split(",");
 			let model2 = this as any;

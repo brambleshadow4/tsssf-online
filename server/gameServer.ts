@@ -244,7 +244,6 @@ export class GameInstance
 	public startTime?: number = 0;
 	public isInGame = false;
 	public isLobbyOpen = true; 
-	public keepLobbyOpen = false;
 	public deathCount = 0;
 
 	private newConnections: ws[] = [];
@@ -397,17 +396,12 @@ export class GameInstance
 				}	
 			}
 
-			if(game.isInGame && message.startsWith("startlobby") && socket == game.host)
+			if(game.isInGame && message.startsWith("lobby") && socket == game.host)
 			{
 				// TODO rework lobbying system.
 				game.isInGame = false;
 				game.isLobbyOpen = true;
 				game.updateLobby();
-
-				for(let player of game.model.players)
-				{
-					player.socket.send("registered;" + player.id);
-				}
 			}
 
 			if(game.isInGame && socket == game.host && message.startsWith("keepLobbyOpen;"))
@@ -415,7 +409,7 @@ export class GameInstance
 				var [_, keepLobbyOpenSTR] = message.split(";");
 				let keepLobbyOpen = !!Number(keepLobbyOpenSTR);
 				game.isLobbyOpen = keepLobbyOpen;
-				game.keepLobbyOpen = keepLobbyOpen;
+				game.gameOptions.keepLobbyOpen = keepLobbyOpen;
 
 				game.toEveryone("keepLobbyOpen;" + (keepLobbyOpen ? 1 : 0));
 			}
@@ -528,19 +522,13 @@ export class GameInstance
 		}
 	}
 
-
 	public onHandshakeMessage(message:string, socket:ws)
 	{
 		let pieces = message.split(";");
 
 		let id = Number(pieces[1]);
 		let name = pieces[2]; // name is intentionally undefined on a normal handshake;<ID> message
-
-		if(!this.host)
-		{
-			this.reassignHost();
-		}
-
+		
 		// recover disconnected players
 		var player = this.getPlayerBySocket(socket);
 		if(!player)
@@ -578,10 +566,21 @@ export class GameInstance
 			}
 		}
 
+		// update host
+		if(!this.host)
+		{
+			this.reassignHost();
+		}
+
 
 		// redirect to lobby/game
 		if(player && this.isInGame)
 		{
+			if(this.model.turnstate && !this.model.turnstate.currentPlayer)
+			{
+				this.changeTurnToNextPlayer();
+			}
+
 			console.log('redirect to game');
 
 			this.sendCurrentState(player.name);
@@ -628,7 +627,7 @@ export class GameInstance
 
 		
 		let player = this.model.getPlayerByName(playerName);
-		if(!player) {return;}
+		if(!player || player.isHost) {return;}
 
 
 		player.socket.send("kick");
@@ -637,14 +636,10 @@ export class GameInstance
 		this.model.removePlayer(playerName);
 
 
-		console.log("kicked, now turn " + this.model.turnstate?.currentPlayer);
-		// request game
-
 		for(let player of this.model.players)
 		{
 			this.sendCurrentState(player.name);
 		}
-
 	}
 
 	public onDebugMessage(socket:ws)
@@ -1088,7 +1083,7 @@ export class GameInstance
 
 	public startGame(preset?: any)
 	{	
-		this.isLobbyOpen = this.keepLobbyOpen;
+		this.isLobbyOpen = this.gameOptions.keepLobbyOpen;
 
 		// TODO
 		/*if(!preset)

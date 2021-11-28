@@ -893,7 +893,8 @@ export async function moveCard(
 
 		var playerName = endLocation.split(",")[1];
 		var player = model.players.filter(x => x.name == playerName)[0];
-		if(!isGoal(card) && player.hand)
+		
+		if(!isGoal(card) && player.team != "" && player.team == model.me().team)
 		{
 			player.hand.push(card);
 		}

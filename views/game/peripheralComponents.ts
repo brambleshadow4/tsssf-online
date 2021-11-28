@@ -961,7 +961,7 @@ win.openSettings = function()
 		`
 
 
-		for(let player of win.model.players)
+		for(let player of win.model.players.filter(x => !x.isHost))
 		{
 			var button = document.createElement('button');
 			button.innerHTML = s.HostSettingKickPlayerButton.replace("{0}", player.name);

@@ -58,7 +58,7 @@ globals.decks =  {
 
 export function loadView(handshakeMessage: string)
 {
-	console.log(handshakeMessage);
+	ishost = false; // reset this between games
 
 	if(window.location.pathname != "/lobby")
 	{
@@ -70,29 +70,20 @@ export function loadView(handshakeMessage: string)
 	document.body.innerHTML = LobbyView.HTML;
 	document.head.innerHTML = LobbyView.HEAD;
 
-	var isClosed: boolean = JSON.parse(handshakeMessage.substring("lobby;".length)).isClosed;
+	(document.getElementById('inviteURL') as HTMLInputElement).value = window.location.href;
+	let socket = globals.socket;
 
-	if(!isClosed)
-	{
-		(document.getElementById('inviteURL') as HTMLInputElement).value = window.location.href;
-		let socket = globals.socket;
+	socket.onMessageHandler = onMessage;
 
-		socket.onMessageHandler = onMessage;
+	globals.register = register;
+	globals.startGame = startGame;
 
-		globals.register = register;
-		globals.startGame = startGame;
+	document.getElementById('packUpload')!.addEventListener('change', handleFileSelect, false);
 
-		document.getElementById('packUpload')!.addEventListener('change', handleFileSelect, false);
-
-		onMessage({data: handshakeMessage} as MessageEvent);
-	}
-	else
-	{
-		changePage(undefined, "pageClosed");
-	}
-
+	onMessage({data: handshakeMessage} as MessageEvent);
 	
 }
+
 
 function loadCardPages(options: GameOptions)
 {
@@ -105,10 +96,7 @@ function loadCardPages(options: GameOptions)
 
 	document.getElementById('expansions')!.innerHTML = "";
 
-
 	var deckElementList: HTMLElement[] = [];
-
-
 	var allPacks = packs.slice();
 
 	if(options.customCards.descriptions.length)
@@ -152,9 +140,6 @@ function loadCardPages(options: GameOptions)
 		cardSelectorElements[info.pack] = el;
 		cardSelectors.appendChild(el);
 	}
-
-
-
 
 	for(let i=0; i < cardBoxes.length; i++)
 	{
@@ -276,6 +261,13 @@ function onMessage(event: MessageEvent)
 	if(event.data.startsWith("lobby;"))
 	{
 		let payload = JSON.parse(event.data.substring("lobby;".length))
+
+		if(payload.isClosed)
+		{
+			changePage(undefined, "pageClosed");
+			globals.socket.close();
+			return;
+		}
 
 		if(!ishost && payload.isHost)
 		{
@@ -451,6 +443,8 @@ function setLobbyOptions()
 	options.keepLobbyOpen = !!input('keepLobbyOpen').checked;
 
 	currentOptions = options;
+
+	console.log(options);
 
 	globals.socket.send("setLobbyOptions;" +  JSON.stringify(options));
 }

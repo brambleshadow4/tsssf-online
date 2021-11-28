@@ -143,11 +143,12 @@ function messageHandler(event: MessageEvent)
 		let gameOptions: GameOptions;
 		let newModel: GameModel;
 
-		[gameOptions, newModel] = JSON.parse(event.data.substring("game;".length))
-
+		[gameOptions, newModel] = JSON.parse(event.data.substring("game;".length));
 
 		let newerModel = playerGameModelFromObj(newModel);
 		win.gameOptions = gameOptions;
+
+		localStorage["playerID"] = newerModel.me().id; // register here too in case lobby page is skipped
 
 		updateGame(newerModel);
 
@@ -155,7 +156,6 @@ function messageHandler(event: MessageEvent)
 		{
 			win.moveToStartCard();
 		}
-		
 	}
 
 	if(event.data.startsWith("move;"))
