@@ -84,14 +84,6 @@ export interface Player
 
 export interface GameModel
 {
-
-	// Game properties
-	cardDecks: string[],
-	customCards: {
-		descriptions: PackListPack[],
-		cards: {[key: string]: CardProps}
-	},
-
 	//keepLobbyOpen: boolean,
 	//ruleset: string,
 
@@ -155,7 +147,47 @@ export interface GameOptions
 	keepLobbyOpen: boolean,
 	teams: {[key: string]: string},
 	ruleset: "turnsOnly" | "sandbox",
-	customCards: {cards: {[key: string]: CardProps}, descriptions: PackListItem[]}	
+	customCards: {
+		cards: {[key: string]: CardProps},
+		descriptions: PackListItem[],
+		currentSize: number
+	}	
+}
+
+export function defaultGameOptions(): GameOptions
+{
+	return {
+		cardDecks: ["Core.*"],
+		customCards: {
+			descriptions: [],
+			cards: {},
+			currentSize: 0
+		},
+		startCard: "Core.Start.FanficAuthorTwilight",
+		keepLobbyOpen: false,
+		teams: {},
+		ruleset: "turnsOnly"
+	};
+}
+
+export function allCardsGameOptions(customCards?: {
+	cards: {[key: string]: CardProps},
+	descriptions: PackListItem[],
+	currentSize: number
+}): GameOptions
+{
+	return {
+		cardDecks: ["*"],
+		customCards: customCards || {
+			descriptions: [],
+			cards: {},
+			currentSize: 0
+		},
+		startCard: "Core.Start.FanficAuthorTwilight",
+		keepLobbyOpen: false,
+		teams: {},
+		ruleset: "turnsOnly"
+	};
 }
 
 export interface ChangelingContextList

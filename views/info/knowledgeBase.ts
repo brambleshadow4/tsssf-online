@@ -44,13 +44,13 @@ function buildPage()
 				console.log("here");
 			}
 
-			cm.init(["*"], {});
+			cm.init(lib.allCardsGameOptions());
 			main.appendChild(cardReference(cm.all(), false));
 
 			break;
 
 		case "/info/card":
-			cm.init(["*"], {});
+			cm.init(lib.allCardsGameOptions());
 
 
 

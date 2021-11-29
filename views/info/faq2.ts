@@ -1,4 +1,5 @@
 import faq from "./faq.js";
+import {allCardsGameOptions} from "../../model/lib.js";
 import * as cm from "../../model/cardManager.js";
 import "./knowledgeBase.js";
 
@@ -7,7 +8,7 @@ var cardsTOC = document.getElementById('target-toc-cards')!
 var mechanicsDiv = document.getElementById('target-mechanics')!
 var cardsDiv = document.getElementById('target-cards')!
 
-cm.init(["*"], {});
+cm.init(allCardsGameOptions());
 
 function tocDiv(name:string, id:string)
 {

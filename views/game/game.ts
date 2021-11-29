@@ -228,7 +228,7 @@ function LoadCards(): void
 
 	let model = win.model;
 
-	cm.init(win.gameOptions.cardDecks.concat([win.gameOptions.startCard]), win.gameOptions.customCards.cards);
+	cm.init(win.gameOptions);
 
 	let cards = cm.inPlay();
 

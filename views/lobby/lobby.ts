@@ -2,7 +2,10 @@ import * as LobbyView from "./lobbyView.js";
 
 import {cardSelectComponent, cardBoxSelectComponent} from "./cardSelectComponent.js";
 import {makeCardElement} from "../game/cardComponent.js";
-import {isStart, Card, CardProps} from "../../model/lib.js";
+import {
+	isStart, Card, CardProps,
+	defaultGameOptions, allCardsGameOptions
+} from "../../model/lib.js";
 import {validatePack} from "../../model/packLib.js";
 
 import {
@@ -65,7 +68,7 @@ export function loadView(handshakeMessage: string)
 		history.replaceState(null, "", "/lobby" + window.location.search)
 	}
 
-	cm.init(["*"], {});
+	cm.init(allCardsGameOptions());
 
 	document.body.innerHTML = LobbyView.HTML;
 	document.head.innerHTML = LobbyView.HEAD;
@@ -105,7 +108,8 @@ function loadCardPages(options: GameOptions)
 		allPacks = allPacks.concat(options.customCards.descriptions);
 	}
 
-	cm.init(["*"], options.customCards.cards);
+
+	cm.init(allCardsGameOptions(options.customCards));
 
 	var uploadHeader: HTMLElement | undefined;
 
@@ -269,7 +273,7 @@ function onMessage(event: MessageEvent)
 			return;
 		}
 
-		if(!ishost && payload.isHost)
+		if(payload.isHost)
 		{
 			currentOptions = payload.gameOptions;
 
@@ -404,19 +408,14 @@ function register()
 function setLobbyOptions()
 {
 	var cardDecks = document.getElementsByClassName('cardbox');
-	var options: GameOptions = {
-		cardDecks:[],
-		startCard: "Core.Start.FanficAuthorTwilight",
-		ruleset: "turnsOnly",
-		customCards: {cards: {}, descriptions: []},
-		keepLobbyOpen: false,
-		teams: {},
-	};
+	var options: GameOptions = defaultGameOptions();
 
 
 	// skip 0 because it's core
 
 	options.cardDecks = Object.keys(globals.decks).map(x => [...globals.decks[x]]).reduce((a,b) => a.concat(b), []);
+
+	console.log(options.cardDecks);
 
 	var startCard = document.getElementById('startCards')!.getElementsByClassName('selected')[0];
 	options.startCard = startCard.getAttribute('cardID') || "Core.Start.FanficAuthorTwilight";

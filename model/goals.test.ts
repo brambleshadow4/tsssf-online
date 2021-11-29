@@ -6,7 +6,8 @@ import {
 	isShip,
 	isGoal,
 	Card,
-	Location, GameOptions, Player, GameModel
+	Location, GameOptions, Player, GameModel,
+	allCardsGameOptions
 } from "./lib.js";
 
 import {typecheckGoal} from "./goalCriteria.js";
@@ -35,7 +36,6 @@ function expectGoalAchieved(game: GameModel, goal: Card)
 	expect(game.achievedGoals.has(goal)).toBe(true);
 }
 
-
 function setupGame(setupOptions?:{
 	cardDecks?: string[],
 	startCard?: string
@@ -44,7 +44,7 @@ function setupGame(setupOptions?:{
 {	
 	let game = new GameInstance();
 
-	cm.init(["*"], {});
+	cm.init(allCardsGameOptions());
 
 	let fakeSocket = {
 		isAlive: true,

@@ -20,7 +20,7 @@ import {
 	CardProps,
 	ChangelingContextList,
 	PackListPack,
-	GameOptions,
+	GameOptions, defaultGameOptions,
 	Player
 } from "../model/lib.js";
 
@@ -216,21 +216,6 @@ export class TsssfGameServer
 const UPLOAD_LIMIT = 1024*1024;
 //const UPLOAD_LIMIT = 2000;
 
-function defaultGameOptions(): GameOptions
-{
-	return {
-		cardDecks: ["Core.*"],
-		customCards: {
-			descriptions: [],
-			cards: {}
-		},
-		startCard: "Core.Start.FanficAuthorTwilight",
-		keepLobbyOpen: false,
-		teams: {},
-		ruleset: "turnsOnly"
-	};
-}
-
 
 
 
@@ -274,8 +259,6 @@ export class GameInstance
 	{
 		return function(message: string)
 		{
-			console.log(message);
-
 			if(!game) // not quite sure how this happens, but this crashed one time.
 				return;
 
@@ -298,17 +281,7 @@ export class GameInstance
 				{
 					if(message.startsWith("setLobbyOptions;"))
 					{
-						var options: GameOptions = {
-							cardDecks:["Core.*"],
-							ruleset: "turnsOnly",
-							startCard: "Core.Start.FanficAuthorTwilight",
-							keepLobbyOpen: false,
-							teams: {},
-							customCards: {
-								cards: {},
-								descriptions: []
-							},
-						};
+						var options = defaultGameOptions();
 
 						try 
 						{
@@ -336,7 +309,7 @@ export class GameInstance
 
 					if(message.startsWith("uploadCards;") && game.host == socket)
 					{
-						let customCards = game.model.customCards;
+						let customCards = game.gameOptions.customCards;
 
 						if(customCards.currentSize > UPLOAD_LIMIT || message.length > UPLOAD_LIMIT)
 						{
@@ -379,24 +352,24 @@ export class GameInstance
 							startCards: Object.keys(cards).filter( x => isStart(x))
 						};
 
-						if(customCards.descriptions.filter(x => x.pack == description.pack).length == 0)
+						if(customCards.descriptions.filter(x => (x as PackListPack).pack == description.pack).length == 0)
 						{
 							customCards.descriptions.push(description);
 						}
 
 						customCards.cards = mergePacks(customCards.cards, cards);
-
 						customCards.currentSize = JSON.stringify(customCards.cards).length + JSON.stringify(customCards.descriptions).length;
 
 						if(game.host)
 						{
-							game.sendHostMessage(game.host, true);
+							game.host.send(game.makeLobbyMessage(game.host));
+							console.log("upload successful");
 						}
 					}
 				}	
 			}
 
-			if(game.isInGame && message.startsWith("lobby") && socket == game.host)
+			if(game.isInGame && message.startsWith("lobby;") && socket == game.host)
 			{
 				// TODO rework lobbying system.
 				game.isInGame = false;
@@ -552,7 +525,6 @@ export class GameInstance
 		// register name. 
 		if(!player && name !== undefined && this.isLobbyOpen)
 		{
-			console.log('registering name');
 			player = this.registerPlayerName(socket, name);
 		}
 
@@ -561,7 +533,6 @@ export class GameInstance
 		{
 			if(this.isLobbyOpen && this.newConnections.indexOf(socket) == -1)
 			{
-				console.log('adding connection');
 				this.newConnections.push(socket);
 			}
 		}
@@ -580,8 +551,6 @@ export class GameInstance
 			{
 				this.changeTurnToNextPlayer();
 			}
-
-			console.log('redirect to game');
 
 			this.sendCurrentState(player.name);
 			this.sendPlayerlistsToEachPlayer();
@@ -798,7 +767,6 @@ export class GameInstance
 				}
 				if(game.isInGame)
 				{
-					console.log("playerlists updated")
 					game.sendPlayerlistsToEachPlayer();
 				}
 
@@ -1001,28 +969,6 @@ export class GameInstance
 		}
 	}
 
-	private sendHostMessage(socket:ws, isHost: boolean)
-	{
-		var payload = "0";
-
-		if(isHost)
-		{
-			let teams: {[key: string]: string} = {};
-			for(let player of this.model.players)
-			{
-				if(player.team !== undefined)
-				{
-					teams[player.name] = player.team;
-				}
-			}
-
-			var payload = JSON.stringify(this.gameOptions);
-		}
-			
-
-		socket.send("ishost;" + payload)
-	}
-
 	private sendCurrentState(playerName: string)
 	{
 		let player = this.getPlayerByName(playerName)!;
@@ -1065,18 +1011,15 @@ export class GameInstance
 			if(player)
 			{
 				player.team = options.teams[playerName];
+				newOptions.teams[playerName] = player.team;
 			}
 		}
 
-		var decks = ["Core.*"];
-		if(options.cardDecks)
-		{
-			decks = options.cardDecks;
-		}
+		newOptions.cardDecks = options.cardDecks || newOptions.cardDecks;
+		newOptions.customCards = options.customCards || newOptions.customCards;
 
-		cm.init(decks.concat([newOptions.startCard]), newOptions.customCards.cards);
-
-		this.model.cardDecks = decks;
+		console.log(newOptions.customCards);
+		cm.init(newOptions);
 
 		this.gameOptions = newOptions;
 	}
@@ -1212,7 +1155,6 @@ export class GameInstance
 
 		let actualLocation = this.model.isInvalidMoveOnClient(playerName, card, startLocation, endLocation);
 		
-		console.log(actualLocation);
 		if(actualLocation)
 		{
 			player.socket.send("move;" + card + ";limbo;" + actualLocation);

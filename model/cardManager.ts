@@ -1,5 +1,5 @@
 import cards from "./cards.js";
-import {CardProps, isStart} from "./lib.js";
+import {CardProps, isStart, GameOptions} from "./lib.js";
 
 var allCards: {[key:string]: CardProps} = {};
 var gameCards: {[key:string]: CardProps} = {};
@@ -15,8 +15,10 @@ function slashStringToSet(s: string | undefined): Set<string>
 }
 
 
-export function init(filter: string[], customCards: {[key:string]: CardProps})
+export function init(gameOptions: GameOptions)
 {
+	let filter = gameOptions.cardDecks.concat(gameOptions.startCard);
+	let customCards = gameOptions.customCards.cards;
 	let newAllCards: {[key: string]: any} = {};
 
 	// convert base cards

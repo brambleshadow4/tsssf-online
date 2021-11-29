@@ -62,11 +62,6 @@ if(liveGames.has(window.location.pathname))
 			currentView = "game"
 			Game.loadView(event.data);
 		}
-
-		/*if(event.data.startsWith("startlobby"))
-		{
-			Lobby.loadView(true);
-		}*/
 	});
 }
 else if(window.location.pathname == "/tutorial")

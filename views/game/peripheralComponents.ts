@@ -981,7 +981,7 @@ win.openSettings = function()
 		newGameButton.onclick = function()
 		{
 			closeFn();
-			broadcast("startlobby;");
+			broadcast("lobby;");
 		}
 
 		let keepLobbyOpen = div.querySelector("#keepLobbyOpen") as HTMLInputElement;

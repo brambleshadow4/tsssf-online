@@ -43,17 +43,6 @@ export default class GameModel implements GM
 		[card:string]: Location
 	} = {};
 
-	public cardDecks: string[] = ["Core.*"];
-	public customCards: {
-		descriptions: PackListPack[], 
-		cards: {[key:string]: CardProps},
-		currentSize: number
-	} = {
-		descriptions: [],
-		cards: {},
-		currentSize: 0
-	};
-
 	public playerName: string = "";
 
 	public ponyDiscardPile: Card[] = [];
@@ -403,8 +392,6 @@ export default class GameModel implements GM
 					return [true, len-1, card, "tempGoals"];
 
 				}
-
-
 			}
 			else
 			{
@@ -473,15 +460,11 @@ export default class GameModel implements GM
 		var model = {} as any;
 
 		model.board = this.board;
-		model.cardDecks = this.cardDecks;
-
 		model.playerName = playerName;
 
 		model.ponyDiscardPile = this.ponyDiscardPile;
 		model.shipDiscardPile = this.shipDiscardPile;
 		model.goalDiscardPile = this.goalDiscardPile;
-
-		model.customCards = this.customCards;
 
 		model.currentGoals = this.currentGoals;
 		model.achievedGoals = [...this.achievedGoals] as any;
@@ -547,8 +530,8 @@ export default class GameModel implements GM
 					disconnected: false,
 					team: x.team,
 					winnings: x.winnings,
-					ponies: 0,
-					ships: 0,
+					ponies: x.hand.filter(isPony).length,
+					ships: x.hand.filter(isShip).length,
 					socket: undefined,
 					isHost: x.isHost
 				}
@@ -726,7 +709,7 @@ export default class GameModel implements GM
 	// TODO
 	/*private loadPreset(hand: Card[])
 	{
-		console.log("Loading Preset Game");
+		//console.log("Loading Preset Game");
 
 		let player =  {
 			name: "Dev",
@@ -1262,11 +1245,19 @@ export function playerGameModelFromObj(parsedModel: any)
 		newModel.removed = parsedModel.removed || [];
 		newModel.players = parsedModel.players || [];
 
-		newModel.turnstate = parsedModel.turnstate || new Turnstate();
 
-		if(newModel.turnstate)
+		if(parsedModel.turnstate)
 		{
-			newModel.turnstate.playedThisTurn = new Set(parsedModel.turnstate.playedThisTurn);
+			newModel.turnstate = parsedModel.turnstate || new Turnstate();
+
+			if(newModel.turnstate)
+			{
+				newModel.turnstate.playedThisTurn = new Set(parsedModel.turnstate.playedThisTurn);
+			}
+		}
+		else
+		{
+			delete newModel.turnstate;
 		}
 
 		// recalucaltate cardLocations;
