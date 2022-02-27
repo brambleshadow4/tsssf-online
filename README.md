@@ -48,8 +48,10 @@ If instead you'd like to run the severver on port 8000, use
 
 ### Adding HTTPS ###
 
-To run the web server over SSL, create a settings.txt file in the server
+To run the web server over SSL, create a .env file in the project
 directory with the following items set:
+
+	PORT 443
 
 	CERT=path/to/server.crt
 	KEY=path/to/private.key
@@ -61,3 +63,48 @@ The unit tests can all at the same time, or individually by specifying the numbe
 
 	npm run test
 	npm run test 10
+
+### NGINX ###
+
+The tsssf-online server runs on a single port and is intended to be used with an NGINX proxy server which handles
+HTTP -> HTTPS upgrades. This also allows you host the website on on its own port alongside other servers or web services.
+
+A sample config is below.
+
+	events {}
+	http {
+	    keepalive_timeout  65;
+	    map $http_upgrade $connection_upgrade {
+	        default upgrade;
+	        '' close;
+	    }
+        
+	    server {
+	        listen 80;
+	        server_name  tsssf.net;
+	        return 301 https://$host$request_uri;
+	    }
+	    
+	    server {
+	        listen 443 ssl;
+	        server_name  tsssf.net;
+	 
+	        ssl_certificate <path-to-certificate>;
+	        ssl_certificate_key <path-to-key>;
+	 
+	        location / {
+	            proxy_pass https://127.0.0.1:8000;
+	 
+	            # Setup for websockets
+	            proxy_http_version 1.1;
+	            proxy_set_header Upgrade $http_upgrade;
+	            proxy_set_header Connection $connection_upgrade;
+	 
+	            proxy_connect_timeout 7d;
+	            proxy_send_timeout 7d;
+	            proxy_read_timeout 7d;
+	        }
+	    }
+	}
+
+
