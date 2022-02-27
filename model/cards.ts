@@ -2420,7 +2420,10 @@ var cards: {[key: string]: any} = {
 		"name": "Radiant Hope",
 		"gender": "female",
 		"race": "unicorn",
-		"keywords": []
+		"keywords": [
+			"Elder",
+			"Crystal Pony"
+		]
 	},
 	"NovelIdea.PanelOfPonies.Pony.SonataDusk": {
 		"title": "Sonata Dusk, the Joker",

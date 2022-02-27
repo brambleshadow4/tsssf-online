@@ -8,6 +8,9 @@ import {TsssfGameServer} from "./gameServer.js";
 import {getStats} from "./stats.js";
 import {GameOptions} from "../model/lib.js";
 import fetch from "node-fetch";
+
+import dotenv from "dotenv";
+
 // @ts-ignore
 import {buildTemplate, buildTemplateHTML} from "../build/md.js";
 
@@ -15,7 +18,9 @@ import en_US from "../views/tokens.js";
 import es_ES from "../i18n/es-ES/views/tokens.js";
 import zz_ZZ from "../i18n/zz-ZZ/views/tokens.js";
 
+dotenv.config();
 
+const PORT = process.env.PORT || (process.env.KEY ? 443 : 80);
 
 // compile translations
 const defaultLocale = "en-US";
@@ -82,35 +87,12 @@ for(let lang in translations)
 }
 
 
-
-
 const app = express()
 app.use(cookieParser());
-let PORT = 80;
 
 var argSet = new Set(process.argv);
 
-if(argSet.has("dev"))
-	PORT = 8000;
 
-var settings: {[key:string]: string } = {}
-
-try
-{
-	var settingsRaw = fs.readFileSync("server/settings.txt");
-	var settingsList = settingsRaw.toString().split(/\r?\n/g);
-
-	for (var line of settingsList)
-	{
-		var eq = line.indexOf('=');
-		if(eq != -1)
-		{	
-			var key = line.substring(0,eq);
-			settings[key] = line.substring(eq+1);
-		}
-	}
-}
-catch(e){}
 
 
 
@@ -290,28 +272,19 @@ function getLangFromReq(req: any)
 }
 
 
-
-
 var server;
-if(settings.KEY && !argSet.has("nossl"))
+if(process.env.KEY)
 {
+	console.log()
+
 	server = https.createServer({
-			key: fs.readFileSync(settings.KEY as string),
-			cert: fs.readFileSync(settings.CERT as string),
-			passphrase: settings.PASSPHRASE as string
-		}, app)
-		.listen(443, function () {
-			console.log('TSSSF web server listening on port 443!')
-		});
-
-	var app2 = express();
-	app2.get("/*", function(req,res){
-
-		var hostname = req.headers.host!.split(":")[0];
-		res.redirect("https://" + hostname + req.url); 
+		key: fs.readFileSync(process.env.KEY as string),
+		cert: fs.readFileSync(process.env.CERT as string),
+		passphrase: process.env.PASSPHRASE
+	}, app)
+	.listen(PORT, function () {
+		console.log(`TSSSF secure web server listening on port ${PORT}!`)
 	});
-
-	app2.listen(PORT);
 }
 else
 {
