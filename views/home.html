@@ -29,6 +29,35 @@
 		</nav>
 		<div class='split'>
 			<div id="left">
+				<div id="potential-players-header">
+					<div>People looking to play</div>
+					<div class='subtitle'>Send 'em a message!</div>
+				</div>
+				
+				<div id='potential-players'>
+					{{potentialPlayers}}
+				</div>
+				<div id='add-form' style="display:none;">
+					<div>Choose how many days you want your name to be up <br>(90 day max)</div>
+
+					<div>Days: <input id='days' type="number" value="30" max="90" min="1"/></div>
+					<br>
+					<div>Choose which profile to display</div>
+					<div id='addDiscord' class='profile-option' onclick="updateRequest({type:'add', platform:'discord'})">
+						<span>Discord</span> <img src='/img/discord.svg' class='profile-icon' />
+					</div>
+
+					<div><button onclick="displayPotentialPlayers()">Cancel</button></div>
+
+				</div>
+				<div id='remove-form'></div>
+				
+				<div id='potential-players-buttons' class='bottom'>
+					<button onclick="displayAddForm()">Add me</button>
+					<button onclick="updateRequest({type:'remove', platform:'discord'})">Remove me</button>
+				</div>
+			</div>
+			<div id="center">
 				<h1>Twilight Sparkle's<br>Secret Shipfic Folder<br><span class='gameFont'>Online</span></h1>
 				<h2>Beta {{Version}}</h2>
 				<div>
@@ -92,6 +121,26 @@
 				window.location.href = "/join"
 			}
 
+			function displayAddForm()
+			{
+				document.getElementById('add-form').style.display = "block";
+
+				document.getElementById('potential-players-header').style.display = "none";
+				document.getElementById('potential-players-buttons').style.display = "none";
+				document.getElementById('potential-players').style.display = "none";
+				document.getElementById('potential-players-header').style.display = "none";
+			}
+
+			function displayPotentialPlayers()
+			{
+				document.getElementById('add-form').style.display = "none";
+
+				document.getElementById('potential-players-header').style.display = "block";
+				document.getElementById('potential-players-buttons').style.display = "block";
+				document.getElementById('potential-players').style.display = "block";
+				document.getElementById('potential-players-header').style.display = "block";
+			}
+
 			window.onkeypress = function(e)
 			{
 				if(e.key == "`")
@@ -99,6 +148,26 @@
 					localStorage.playerID=  "1";
 					window.location = "/game?DEV";
 				}
+			}
+
+			function updateRequest(params)
+			{
+				if(params.type == "add")
+				{
+					params.days = document.getElementById('days').value;
+					params.timezone = new Date().getTimezoneOffset();	
+				}
+
+				let paramStr = "&";
+
+				for(var key in params)
+				{
+					paramStr += encodeURIComponent(key) + "=" + encodeURIComponent(params[key]) + "&";
+				}
+
+				paramStr = paramStr.substring(0, paramStr.length-1);
+
+				window.location = "/updatePotentialPlayers?" + paramStr;
 			}
 		</script>
 	</body>

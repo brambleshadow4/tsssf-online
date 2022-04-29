@@ -33,9 +33,24 @@ function setup()
 	ON PlayersJoined(timestamp)`;
 
 	db.all(sql, [], (err, rows) => {});
+
+
+	sql = `
+	CREATE TABLE IF NOT EXISTS PotentialPlayers (
+		id VARCHAR(255),
+		platform VARCHAR(255),
+		name VARCHAR(255),
+		avatarURL VARCHAR(255),
+		timezone VARCHAR(255),
+		expireAt INTEGER
+	)`;
+	db.all(sql, [], (err, rows) => {});
 }
 
 setup();
+
+
+
 
 
 export function logGameHosted()
@@ -194,4 +209,35 @@ function pad(num: number)
 	if (num < 10)
 		return "0" + num;
 	return num;
+}
+
+
+export async function getPotentialPlayers()
+{
+	return new Promise((resolve, reject) =>
+	{
+		var db = new sqlite3.Database('./server/stats.db');
+		let now = new Date().getTime();
+
+		let sql = `SELECT * FROM PotentialPlayers WHERE expireAt > ` + now;
+		db.all(sql, [], (err, rows) => {
+
+			resolve(rows);
+
+		});
+
+		sql = `DELETE FROM PotentialPlayers WHERE expireAt <= ` + now;
+
+		db.all(sql, [], (err, rows) => {});
+	});
+}
+
+export function addPotentialPlayer(id: string, platform: "discord", name: string, avatarURL: string, timezone: string, expireDays: number)
+{
+
+}
+
+export function removePotentialPlayer()
+{
+
 }

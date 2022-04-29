@@ -5,9 +5,10 @@ import ws from 'ws';
 import https from "https";
 import cards from "../model/cards.js"
 import {TsssfGameServer} from "./gameServer.js";
-import {getStats} from "./stats.js";
+import {getStats, getPotentialPlayers} from "./stats.js";
 import {GameOptions} from "../model/lib.js";
 import fetch from "node-fetch";
+import crypto from "crypto";
 
 import dotenv from "dotenv";
 
@@ -245,6 +246,63 @@ app.get("/host", function(req, res){
 })
 
 
+let potentialPlayerRequests: {[k:string]: {days:number, timezone:string, platform: "discord", expireTime: number}} = {};
+
+
+
+app.get("/updatePotentialPlayers", async function(req,res) {
+
+
+	if(req.query?.type == "add")
+	{
+		let days = Number(req.query?.days || 30);
+		if (!days)
+		{
+			days = 30;
+		}
+
+		if(days < 1)
+		{
+			days = 1
+		} 
+
+		if(days>90)
+		{
+			days = 90;
+		}
+
+		let timezone = Number(req.query?.timezone || 0);
+		timezone = timezone/60;
+
+		let timezoneStr = "";
+		if(timezone > 0)
+			timezoneStr = "UTC-" + timezone
+		else
+			timezoneStr = "UTC+" + timezone;
+
+		console.log(timezoneStr);
+
+		let reqNo = await crypto.randomInt(1, 999999999);
+
+		potentialPlayerRequests[reqNo] = {
+			days,
+			timezone: timezoneStr,
+			platform: "discord",
+			expireTime: new Date().getTime() + 60*1000
+		}
+
+		if(req.query?.platform == "discord")
+		{
+			res.redirect("https://discord.com?state=" + reqNo);
+		}
+	}
+
+	console.log(req.query);
+	res.redirect("/");
+})
+
+
+
 app.get('/**', fmap("/**", "./views/**"));
 
 function getLang(req: any)
@@ -334,11 +392,13 @@ function fmap(routeUri: string, fileUrl: string): any
 	}
 }
 
-function sendIfExists(url:string, lang: string, res: any)
+async function sendIfExists(url:string, lang: string, res: any)
 {
 
 	let lang2 = lang || "";
 	let translatedUrl = "./i18n/" + lang2 + url.replace("./", "/");
+
+	console.log(url);
 
 
 	if(fs.existsSync(translatedUrl))
@@ -350,6 +410,23 @@ function sendIfExists(url:string, lang: string, res: any)
 		if(url.endsWith(".html") || url.endsWith("packs.js") || url.endsWith("View.js"))
 		{
 			let fileText = fs.readFileSync(url, "utf8");
+
+
+			if(url == "./views/home.html")
+			{
+				let rows = await getPotentialPlayers() as any[];
+
+				let rowHTML = rows.map((x:any) => 
+					`<div>
+						<img class='avatar' src="${x.avatarURL}" />${x.name.replace(/</g, "&lt;")} (${x.timezone}) <img class='platform-logo' src='/img/discord.svg' />
+					</div>`
+				)
+
+				console.log(rows);
+
+				fileText = fileText.replace("{{potentialPlayers}}", rowHTML.join("\n"));
+			}
+
 
 			fileText = addTranslatedTokens(fileText, lang);
 
