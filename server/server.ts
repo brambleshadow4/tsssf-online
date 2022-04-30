@@ -378,7 +378,7 @@ async function getDiscordCredentials(code: string): Promise<[boolean, string, st
 
 		const tokenParams = {
 			code,
-			redirect_uri: '/callbackPotentialPlayers',
+			redirect_uri: 'https://tsssf.net/callbackPotentialPlayers',
 			scope: 'identify', // see discord documentation https://discord.com/developers/docs/topics/oauth2#oauth2
 		};
 
