@@ -25,8 +25,12 @@
 		"https": "^1.0.0",
 		"node-fetch": "^2.6.1",
 		"sharp": "^0.27.2",
+		"simple-oauth2": "^4.3.0",
 		"sqlite3": "^5.0.0",
 		"typescript": "^4.2.2",
 		"ws": "^7.5.0"
+	},
+	"devDependencies": {
+		"@types/simple-oauth2": "^4.1.1"
 	}
 }

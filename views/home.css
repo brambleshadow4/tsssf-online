@@ -268,6 +268,10 @@ footer
 	cursor: pointer;
 }
 
+.profile-option:hover
+{
+	background-color: #666;
+}
 .profile-option img, .profile-option span{
 	vertical-align: middle;
 	cursor: pointer;

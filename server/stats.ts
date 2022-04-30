@@ -137,7 +137,6 @@ export async function getStats(): Promise<GameStats>
 	var day = dte.getDate();
 	var month = dte
 
-	
 	var hr24 = now - 24*60*60*1000;
 
 	var utc = utcDay(dte);
@@ -232,12 +231,33 @@ export async function getPotentialPlayers()
 	});
 }
 
-export function addPotentialPlayer(id: string, platform: "discord", name: string, avatarURL: string, timezone: string, expireDays: number)
+export async function addPotentialPlayer(id: string, platform: "discord", name: string, avatarURL: string, timezone: string, expireAt: number)
 {
+	console.log(arguments)
 
+	return new Promise((resolve, reject) =>
+	{
+		var db = new sqlite3.Database('./server/stats.db');
+
+		db.all(`INSERT INTO PotentialPlayers (id, platform, name, avatarURL, timezone, expireAt) VALUES (?, ?, ?, ?, ?, ?)`, [id, platform, name, avatarURL, timezone, expireAt], (err, rows) => {
+
+			resolve(rows);
+		});
+
+	});
 }
 
-export function removePotentialPlayer()
+export async function removePotentialPlayer(id: string, platform: "discord")
 {
+	console.log(id);
+	return new Promise((resolve, reject) =>
+	{
+		var db = new sqlite3.Database('./server/stats.db');
 
+		db.all(`DELETE FROM PotentialPlayers WHERE id = ? AND platform = ?`, [id, platform], (err, rows) => {
+
+			resolve(rows);
+		});
+
+	});
 }
