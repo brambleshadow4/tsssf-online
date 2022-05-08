@@ -438,9 +438,11 @@ function getLang(req: any)
 	return req.cookies.lang || getLangFromReq(req) || defaultLocale;
 }
 
-function getLangFromReq(req: any)
+function getLangFromReq(req: any): string
 {
-	let langs = req.headers["accept-language"].split(";")[0].split(",");
+	if(!req.headers["accept-language"]) {return ""; }
+
+	let langs = req.headers["accept-language"].split(";")[0]?.split(",");
 
 	for(let lang of langs)
 	{
