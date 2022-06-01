@@ -9,14 +9,20 @@ export type WebSocketPlus = WebSocket & {
 var host = window.location.hostname;
 var protocol;
 
-var port = window.location.port || 80;
+var port = window.location.port || 0;
 
 var currentView = "";
 
 switch(window.location.protocol)
 {
-	case "http:": protocol = "ws:"; break;
-	case "https:": protocol = "wss:"; port=443; break;
+	case "http:": 
+		protocol = "ws:";
+		port = port || 80;
+		break;
+	case "https:":
+		protocol = "wss:";
+		port = port || 443;
+		break;
 }
 
 var host = window.location.host.replace(/:.*/,"");

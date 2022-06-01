@@ -5,9 +5,14 @@ import ws from 'ws';
 import https from "https";
 import cards from "../model/cards.js"
 import {TsssfGameServer} from "./gameServer.js";
-import {getStats} from "./stats.js";
+import {getStats, getPotentialPlayers, removePotentialPlayer, addPotentialPlayer} from "./stats.js";
 import {GameOptions} from "../model/lib.js";
 import fetch from "node-fetch";
+import crypto from "crypto";
+import {AuthorizationCode} from 'simple-oauth2';
+
+import dotenv from "dotenv";
+
 // @ts-ignore
 import {buildTemplate, buildTemplateHTML} from "../build/md.js";
 
@@ -15,7 +20,9 @@ import en_US from "../views/tokens.js";
 import es_ES from "../i18n/es-ES/views/tokens.js";
 import zz_ZZ from "../i18n/zz-ZZ/views/tokens.js";
 
+dotenv.config();
 
+const PORT = process.env.PORT || (process.env.KEY ? 443 : 80);
 
 // compile translations
 const defaultLocale = "en-US";
@@ -82,37 +89,10 @@ for(let lang in translations)
 }
 
 
-
-
 const app = express()
 app.use(cookieParser());
-let PORT = 80;
 
 var argSet = new Set(process.argv);
-
-if(argSet.has("dev"))
-	PORT = 8000;
-
-var settings: {[key:string]: string } = {}
-
-try
-{
-	var settingsRaw = fs.readFileSync("server/settings.txt");
-	var settingsList = settingsRaw.toString().split(/\r?\n/g);
-
-	for (var line of settingsList)
-	{
-		var eq = line.indexOf('=');
-		if(eq != -1)
-		{	
-			var key = line.substring(0,eq);
-			settings[key] = line.substring(eq+1);
-		}
-	}
-}
-catch(e){}
-
-
 
 app.get('/', function(req:any,res:any, next:any){
 
@@ -265,6 +245,194 @@ app.get("/host", function(req, res){
 })
 
 
+let potentialPlayerRequests: {[k:string]: {type: "add" | "remove", timezone?:string, platform: "discord", expireTime?: number}} = {};
+
+
+
+app.get("/updatePotentialPlayers", async function(req,res) {
+
+
+	if(req.query?.type == "add")
+	{
+		let days = Number(req.query?.days || 30);
+		if (!days)
+		{
+			days = 30;
+		}
+
+		if(days < 1)
+		{
+			days = 1
+		} 
+
+		if(days>90)
+		{
+			days = 90;
+		}
+
+		let timezone = Number(req.query?.timezone || 0);
+		timezone = timezone/60;
+
+		let timezoneStr = "";
+		if(timezone > 0)
+			timezoneStr = "UTC-" + timezone
+		else
+			timezoneStr = "UTC+" + timezone;
+
+		let reqNo = await crypto.randomInt(1, 999999999);
+
+		potentialPlayerRequests[reqNo] = {
+			type: "add",
+			timezone: timezoneStr,
+			platform: "discord",
+			expireTime: new Date().getTime() + 24*3600*1000*days
+		}
+
+		if(req.query?.platform == "discord")
+		{
+			res.redirect("https://discord.com/api/oauth2/authorize?client_id=969750697308463115&redirect_uri=https%3A%2F%2Ftsssf.net%2FcallbackPotentialPlayers&response_type=code&scope=identify&state=" + reqNo);
+			//res.redirect("/callbackPotentialPlayers?state=" + reqNo);
+		}
+
+		return;
+	}
+
+	if(req.query?.type == "remove")
+	{
+		let reqNo = await crypto.randomInt(1, 999999999);
+
+		potentialPlayerRequests[reqNo] = {
+			type: "remove",
+			platform: "discord"
+		}
+
+		if(req.query?.platform == "discord")
+		{
+			res.redirect("https://discord.com/api/oauth2/authorize?client_id=969750697308463115&redirect_uri=https%3A%2F%2Ftsssf.net%2FcallbackPotentialPlayers&response_type=code&scope=identify&state=" + reqNo);
+			//res.redirect("/callbackPotentialPlayers?state=" + reqNo);
+		}
+
+		return;
+	}
+
+	res.redirect("/");
+});
+
+
+app.get("/callbackPotentialPlayers", async function(req,res)
+{
+
+	let playerReq = potentialPlayerRequests[(req.query.state || "") as string]
+
+	if(!playerReq)
+	{
+		res.redirect("/");
+		return;
+	}
+
+	var playerName = "";
+	var playerAvatar = "";
+	var playerID = "";
+	var success = false;
+
+	if(playerReq.platform == "discord"){
+		[success, playerID, playerName, playerAvatar] = await getDiscordCredentials((req.query.code || "") as any);
+		//[success, playerID, playerName, playerAvatar] = await getTestCredentials()
+	}
+
+	if(!success)
+	{
+		res.redirect("/");
+		return;
+	}
+
+
+	if(playerReq.type == "add")
+	{
+		await addPotentialPlayer(playerID, playerReq.platform, playerName, playerAvatar, playerReq.timezone || "UTC+0", playerReq.expireTime as number)
+	}
+
+	if(playerReq.type == "remove")
+	{
+		await removePotentialPlayer(playerID, playerReq.platform);
+	}
+
+	res.redirect("/");
+})
+
+async function getDiscordCredentials(code: string): Promise<[boolean, string, string, string]>
+{
+	return new Promise(async (resolve, reject) => 
+	{
+
+		const client: any = new AuthorizationCode({
+
+			client: {
+				id: process.env.DISCORD_APP_ID || "",
+				secret: process.env.DISCORD_APP_SECRET || "",
+			},
+			auth: {
+				tokenHost: 'https://discord.com/api/',
+				tokenPath: 'oauth2/token',
+				authorizePath: 'oauth2/authorize'
+			}
+		});
+
+		const tokenParams = {
+			code,
+			redirect_uri: 'https://tsssf.net/callbackPotentialPlayers',
+			scope: 'identify', // see discord documentation https://discord.com/developers/docs/topics/oauth2#oauth2
+		};
+
+		let accessToken = {} as any;
+
+		try {
+			accessToken = await client.getToken(tokenParams);
+		}
+		catch (error)
+		{	
+			console.log('Access Token Error', error.message);
+			resolve([false, "", "", ""]);
+			return;
+		}
+
+		let options = {
+			headers:{
+				"Authorization": accessToken.token.token_type + " " + accessToken.token.access_token
+			}
+		} as any;
+
+		https.get("https://discord.com/api/users/@me", options, function(response: any)
+		{
+			let rawData = "";
+			response.setEncoding('utf8');
+			response.on("data", (chunk: any) => {rawData += chunk});
+
+			response.on('end', async function()
+			{
+				let data = {} as any;
+				try{
+					data = JSON.parse(rawData);
+				}
+				catch(e){
+
+					resolve([false,"","",""])
+					return;
+				}
+
+				resolve([true, data.id, `${data.username}#${data.discriminator}`, `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png`]);
+			})
+		});
+	});
+}
+
+async function getTestCredentials(): Promise<[boolean, string, string, string]>
+{
+	return [true, "test", "brambleshadow4", "https://cdn.discordapp.com/avatars/184770914557231104/3e4d01736d2f6f2f3d663ba85ee99a44.png"];
+}
+
+
+
 app.get('/**', fmap("/**", "./views/**"));
 
 function getLang(req: any)
@@ -272,9 +440,11 @@ function getLang(req: any)
 	return req.cookies.lang || getLangFromReq(req) || defaultLocale;
 }
 
-function getLangFromReq(req: any)
+function getLangFromReq(req: any): string
 {
-	let langs = req.headers["accept-language"].split(";")[0].split(",");
+	if(!req.headers["accept-language"]) {return ""; }
+
+	let langs = req.headers["accept-language"].split(";")[0]?.split(",");
 
 	for(let lang of langs)
 	{
@@ -292,28 +462,17 @@ function getLangFromReq(req: any)
 }
 
 
-
-
 var server;
-if(settings.KEY && !argSet.has("nossl"))
+if(process.env.KEY)
 {
 	server = https.createServer({
-			key: fs.readFileSync(settings.KEY as string),
-			cert: fs.readFileSync(settings.CERT as string),
-			passphrase: settings.PASSPHRASE as string
-		}, app)
-		.listen(443, function () {
-			console.log('TSSSF web server listening on port 443!')
-		});
-
-	var app2 = express();
-	app2.get("/*", function(req,res){
-
-		var hostname = req.headers.host!.split(":")[0];
-		res.redirect("https://" + hostname + req.url); 
+		key: fs.readFileSync(process.env.KEY as string),
+		cert: fs.readFileSync(process.env.CERT as string),
+		passphrase: process.env.PASSPHRASE
+	}, app)
+	.listen(PORT, function () {
+		console.log(`TSSSF secure web server listening on port ${PORT}!`)
 	});
-
-	app2.listen(PORT);
 }
 else
 {
@@ -363,12 +522,11 @@ function fmap(routeUri: string, fileUrl: string): any
 	}
 }
 
-function sendIfExists(url:string, lang: string, res: any)
+async function sendIfExists(url:string, lang: string, res: any)
 {
 
 	let lang2 = lang || "";
 	let translatedUrl = "./i18n/" + lang2 + url.replace("./", "/");
-
 
 	if(fs.existsSync(translatedUrl))
 	{
@@ -379,6 +537,21 @@ function sendIfExists(url:string, lang: string, res: any)
 		if(url.endsWith(".html") || url.endsWith("packs.js") || url.endsWith("View.js"))
 		{
 			let fileText = fs.readFileSync(url, "utf8");
+
+
+			if(url == "./views/home.html")
+			{
+				let rows = await getPotentialPlayers() as any[];
+
+				let rowHTML = rows.map((x:any) => 
+					`<div>
+						<img class='avatar' src="${x.avatarURL}" />${x.name.replace(/</g, "&lt;")} (${x.timezone}) <img class='platform-logo' src='/img/discord.svg' />
+					</div>`
+				)
+
+				fileText = fileText.replace("{{potentialPlayers}}", rowHTML.join("\n"));
+			}
+
 
 			fileText = addTranslatedTokens(fileText, lang);
 

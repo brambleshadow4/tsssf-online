@@ -5,7 +5,7 @@
 
 nav
 {
-	max-width: 800px;
+	max-width: 900px;
 	height: 30px;
 	background-color: #E880B4;
 	color: white;
@@ -135,16 +135,79 @@ body
 
 	justify-content: center;
 	vertical-align: middle;
+	background-color: white;
+	max-width: 900px;
+	margin: auto;
 }
 
-#left{
-	width: 500px;
+#left {
+	width: 200px;
+	background: rgb(57,29,85);
+	background: linear-gradient(0deg, rgba(57,29,85,1) 0%, rgba(93,35,102,1) 100%);
+
+	display: flex;
+	flex-direction: column;
+	color: white;
+
+	max-height: 361px;
+	overflow: hidden;
+}
+
+.subtitle
+{
+	font-size: 8pt;
+}
+
+#center{
+	width: 400px;
 	background-color: white;
 }
 #right
 {
 	/*width: 500px;*/
 	background-color: white;
+}
+
+#potential-players, #add-form
+{
+	flex-grow: 1;
+	overflow-y: auto;
+	overflow-wrap: break-word;
+}
+
+#potential-players
+{
+	font-size: 10pt;
+}
+
+
+#potential-players > div 
+{
+	margin: 10px 0px;
+}
+
+#potential-players > div > *
+{
+	vertical-align: middle;
+
+}
+
+.avatar {
+	width: 20px;
+	height: 20px;
+	border-radius: 15px;
+	margin: 0px 3px;
+}
+.platform-logo{
+	width: 20px;
+	height: 20px;
+}
+
+#add-form
+{
+	display: flex;
+	flex-direction: column;
+
 }
 
 .gameFont {font-family: "Press Start 2P";}
@@ -155,7 +218,7 @@ img
 	width: 300px;
 }
 
-button
+#center button
 {
 	font-size: 15pt;
 	margin: 10px;
@@ -166,7 +229,7 @@ footer
 {
 	margin: auto;
 	padding: 20px 0px;
-	max-width: 800px;
+	max-width: 900px;
 	background-color: white;
 }
 
@@ -200,6 +263,25 @@ footer
 	margin: 0px 20px;
 }
 
+.profile-option
+{
+	cursor: pointer;
+}
+
+.profile-option:hover
+{
+	background-color: #666;
+}
+.profile-option img, .profile-option span{
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+.profile-icon
+{
+	height: 30px;
+	width: 30px;
+}
 
 
 @media screen and (max-width: 600px)
@@ -209,12 +291,17 @@ footer
 		display: block;
 	}
 
-	#left,#right,footer
+	#center,#right,footer
 	{
 		background-color: rgba(255,255,255,.5);
 	}
 
-	#left
+	#left 
+	{
+		display: none;
+	}
+
+	#center
 	{
 		width: 100%;
 	}
@@ -229,7 +316,7 @@ footer
 		display: block;
 	}
 
-	#left h1
+	#center h1
 	{
 		margin-top: 30px;
 	}

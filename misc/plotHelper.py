@@ -4,7 +4,11 @@ from datetime import datetime,timedelta
 
 def getMonthLabel(month, year):
 
-	return ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][month] + " '" + str(year - 2000)
+	if (month - 1) % 3 == 0:
+
+		return ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][month] + " '" + str(year - 2000)
+	else:
+		return ""
 
 def getDataGroupedIntoMonths(tableName):
 

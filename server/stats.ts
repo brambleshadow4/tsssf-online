@@ -33,9 +33,24 @@ function setup()
 	ON PlayersJoined(timestamp)`;
 
 	db.all(sql, [], (err, rows) => {});
+
+
+	sql = `
+	CREATE TABLE IF NOT EXISTS PotentialPlayers (
+		id VARCHAR(255),
+		platform VARCHAR(255),
+		name VARCHAR(255),
+		avatarURL VARCHAR(255),
+		timezone VARCHAR(255),
+		expireAt INTEGER
+	)`;
+	db.all(sql, [], (err, rows) => {});
 }
 
 setup();
+
+
+
 
 
 export function logGameHosted()
@@ -122,7 +137,6 @@ export async function getStats(): Promise<GameStats>
 	var day = dte.getDate();
 	var month = dte
 
-	
 	var hr24 = now - 24*60*60*1000;
 
 	var utc = utcDay(dte);
@@ -194,4 +208,56 @@ function pad(num: number)
 	if (num < 10)
 		return "0" + num;
 	return num;
+}
+
+
+export async function getPotentialPlayers()
+{
+	return new Promise((resolve, reject) =>
+	{
+		var db = new sqlite3.Database('./server/stats.db');
+		let now = new Date().getTime();
+
+		let sql = `SELECT * FROM PotentialPlayers WHERE expireAt > ` + now;
+		db.all(sql, [], (err, rows) => {
+
+			resolve(rows);
+
+		});
+
+		sql = `DELETE FROM PotentialPlayers WHERE expireAt <= ` + now;
+
+		db.all(sql, [], (err, rows) => {});
+	});
+}
+
+export async function addPotentialPlayer(id: string, platform: "discord", name: string, avatarURL: string, timezone: string, expireAt: number)
+{
+	console.log(arguments)
+
+	return new Promise((resolve, reject) =>
+	{
+		var db = new sqlite3.Database('./server/stats.db');
+
+		db.all(`INSERT INTO PotentialPlayers (id, platform, name, avatarURL, timezone, expireAt) VALUES (?, ?, ?, ?, ?, ?)`, [id, platform, name, avatarURL, timezone, expireAt], (err, rows) => {
+
+			resolve(rows);
+		});
+
+	});
+}
+
+export async function removePotentialPlayer(id: string, platform: "discord")
+{
+	console.log(id);
+	return new Promise((resolve, reject) =>
+	{
+		var db = new sqlite3.Database('./server/stats.db');
+
+		db.all(`DELETE FROM PotentialPlayers WHERE id = ? AND platform = ?`, [id, platform], (err, rows) => {
+
+			resolve(rows);
+		});
+
+	});
 }
