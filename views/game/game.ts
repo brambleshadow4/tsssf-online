@@ -155,7 +155,6 @@ export function loadView(handshakeMessage: string)
 			attachToSocket(win.socket);
 			break;
 		case "/tutorial":
-			TutorialManager.boot();
 			break;
 		case "/game":
 			attachToSocket(win.socket);
@@ -181,7 +180,6 @@ export function loadView(handshakeMessage: string)
 		showingHelpPopup = true;
 	}
 
-
 	win.updateGame = updateGame;
 
 	window.onresize = function(e: Event)
@@ -197,11 +195,13 @@ export function loadView(handshakeMessage: string)
 			{
 				fullscreenButton.src = "/img/fullscreen.svg";
 			}
-		}
-		
+		}	
 	}
 
 	networkInitLoad(handshakeMessage);
+
+	if(window.location.pathname == "/tutorial")
+		TutorialManager.boot();
 }
 
 
@@ -209,21 +209,15 @@ export function loadView(handshakeMessage: string)
 var allKeywords: string[] = [];
 
 // Preloading all the cards makes everything feel instant.
-
-
 function LoadCards(): void
 {
 	if(haveCardsLoaded)
 		return;
+	haveCardsLoaded = true;
 
 	document.body.classList.add("cardsUnapproved");
 
-
 	var keywordSet: Set<string> = new Set();
-
-	haveCardsLoaded = true;
-
-
 	var preloadedImages = document.getElementById('preloadedImages')!;
 
 	let model = win.model;

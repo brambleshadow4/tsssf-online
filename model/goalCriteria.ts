@@ -1,11 +1,6 @@
-
 import * as cm from "./cardManager.js";
-
 import {slashStringToSet, isBlank, Card, CardProps, CardSetProps, OverrideProps, Location} from "./lib.js";
 import GameModel from "./GameModel.js";
-
-
-
 
 function toSetProps(props: CardProps ): CardSetProps
 {
@@ -532,7 +527,6 @@ function ExistsShip(selector1: string, selector2: string, count?: number)
 
 		return 0;
 	}
-
 
 	return ExistsShipGeneric(checkTwoSelectors, count)
 }

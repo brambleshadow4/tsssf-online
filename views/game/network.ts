@@ -270,30 +270,74 @@ export function broadcastMove(card: Card, startLocation: Location, endLocation: 
 export function broadcast(message: string)
 {
 	//setTimeout(function(){
-	win.socket.send(message);
+		win.socket?.send(message);
 	//},3000);
 }
 
 export function requestDrawPony()
 {
 	if(isItMyTurn())
+	{
 		broadcast("draw;pony");
+			
+		if(win.model.mode != "client")
+		{
+			let card = win.model.ponyDrawPile.pop();
+			if(card)
+				moveCard(card, "ponyDrawPile", "hand", {})
+		}
+	}
 }
 
 export function requestDrawShip()
 {
 	if(isItMyTurn())
+	{
 		broadcast("draw;ship");
+		if(win.model.mode != "client")
+		{
+			let card = win.model.shipDrawPile.pop();
+			if(card)
+				moveCard(card, "shipDrawPile", "hand", {})
+		}
+	}
 }
 
 export function requestDrawGoal(specialLocation?: string)
 {
 	if(isItMyTurn())
 	{
+		console.log('request draw goal');
+		let model = win.model;
 		if(specialLocation)
 			broadcast("draw;goal;" + specialLocation);
 		else
 			broadcast("draw;goal");
+
+		if(model.mode != "client")
+		{
+			let goalNo = 0;
+
+			while(goalNo < 3)
+			{
+				if(model.currentGoals[goalNo] == undefined || model.currentGoals[goalNo] == "blank:goal")
+					break;
+				goalNo++;
+			}
+
+			console.log(goalNo);
+
+			if(goalNo == 3 && !specialLocation)
+				return;
+
+			let location = specialLocation || "goal," + goalNo
+
+			let card = win.model.goalDrawPile.pop();
+			if(card)
+			{
+				moveCard(card, "goalDrawPile", location, {})
+			}
+		}
 	}
 }
 

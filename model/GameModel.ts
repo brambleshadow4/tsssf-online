@@ -57,14 +57,12 @@ export default class GameModel implements GM
 	public achievedGoals: Set<Card> = new Set();
 	public tempGoals: Card[] = [];
 	public removed: Card[] = [];
-
+	public mode: "server" | "client" | "both" = "client";
 	public players: Player[] = [];
-
 	public runGoalLogic = true;
-
 	public turnstate? = new Turnstate();
-
 	private startCard: Card = "";
+
 
 
 	public debug = false;
@@ -563,7 +561,7 @@ export default class GameModel implements GM
 
 	public wereGoalsAchieved()
 	{
-		if(!this.runGoalLogic)
+		if(!this.runGoalLogic)  
 			return false;
 
 		var sendUpdate = false;
@@ -574,7 +572,9 @@ export default class GameModel implements GM
 			var achieved = false;
 
 			if(!isBlank(goal))
+			{
 				achieved = evalGoalCard(goal, this)
+			}
 
 			if(achieved != this.achievedGoals.has(goal))
 			{

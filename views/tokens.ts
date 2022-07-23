@@ -10,6 +10,7 @@ export default {
 	"HomepageSourceCode": "Source code",
 	"HomepageSubmitBug": "Submit a bug",
 	"HomepageFindPlayers": "Find Players",
+	"HomepageTutorial": "Tutorial",
 	"HomepageTranslatedBy": "", // e.g. "Translated by brambleshadow4" English version doesn't need this message, but other translations should have this
 
 

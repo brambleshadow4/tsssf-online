@@ -466,8 +466,6 @@ export function updatePlayerList()
 	if(!model.playerName){ return; }
 
 	// update hosting abilities
-
-	console.log("this should be running + updating host");
 	let hostButton = document.getElementById('hostButton')!;
 	if(model.me().isHost)
 	{
@@ -559,7 +557,8 @@ export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 
 		let element = updateCardElement(
 			goalDiv.getElementsByClassName('card')[i] as HTMLElement,
-			model.currentGoals[i], "goal," + i, true, true);
+			model.currentGoals[i] || "blank:goal",
+			"goal," + i, true, true);
 
 		win.cardLocations[model.currentGoals[i]] = "goal," + i;
 
