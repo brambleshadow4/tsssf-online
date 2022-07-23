@@ -11,11 +11,13 @@ import {
 	isAnon,
 	isPonyOrStart,
 	getNeighborKeys,
-	GameModelPlayer as GameModel, GameOptions,
+	GameOptions,
 	Location,
 	Card,
 	CardElement
 } from "../../model/lib.js";
+
+import GameModel from "../../model/GameModel.js";
 
 import
 {
@@ -37,8 +39,7 @@ const gridWidth = 22;
 let win = window as unknown as {
 	moveToStartCard: Function,
 	model: GameModel,
-	gameOptions: GameOptions,
-	cardLocations: {[key: string]: Location}
+	gameOptions: GameOptions
 }
 
 
@@ -150,7 +151,7 @@ export async function initBoard()
 		refPoint.style.transform = "scale(1,1)";
 		zoomScale = 1;
 
-		var loc = win.cardLocations[win.gameOptions.startCard];
+		var loc = win.model.cardLocations[win.gameOptions.startCard];
 
 		var [_, xs, ys] = loc.split(",");
 
@@ -362,7 +363,7 @@ export function updateBoard()
 		y = Number(y);
 
 		var card = model.board[key].card;
-		win.cardLocations[card] = key;
+		model.cardLocations[card] = key;
 
 
 		if(isOffsetLoc(key))

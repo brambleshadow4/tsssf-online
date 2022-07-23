@@ -12,10 +12,11 @@ import {
 	CardProps,
 	ShipProps,
 	GoalProps,
-	GameModel,
 	Location,
 	CardElement
 } from "../../model/lib.js";
+
+import GameModel from "../../model/GameModel.js";
 
 import * as cm from "../../model/cardManager.js";
 
@@ -166,7 +167,7 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 				if(value == undefined)
 					return;
 
-				moveCard(card, location, "winnings", {extraArg: value})
+				moveCard(card, location, "player,"+model.playerName, {extraArg: value})
 			}
 		}
 
@@ -202,7 +203,7 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 				}
 			}
 
-			if(isDiscardLoc(location) || location == "winnings"){
+			if(isDiscardLoc(location) || (isGoal(card) && location=="player,"+globals.model.playerName)){
 				return;
 			}
 
@@ -233,7 +234,7 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 
 		if(isHoverTouch)
 		{
-			//endMoveShared();
+			//enddShared();
 			return;
 		}
 
@@ -326,8 +327,7 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 				var [_,x,y] = location.split(",");
 				offsetLoc = "offset," + x + "," + y;
 
-
-				if(startLoc == "hand")
+				if(startLoc == "player,"+model.playerName)
 				{
 					moveCard(offsetCard, location, "ponyDiscardPile,top");
 				}
@@ -359,7 +359,7 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 
 	if(isDraggable && location && !isBlank(card))
 	{
-		var isInterruptCard = cm.inPlay()[card].action == "interrupt" && location == "hand";
+		var isInterruptCard = cm.inPlay()[card].action == "interrupt" && location == "player,"+globals.model.playerName;
 
 		if(isInterruptCard)
 		{
@@ -495,7 +495,7 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 
 			if(isValidMove(draggedCard, card, location))
 			{
-				if (isBlank(card) || srcLocation == "hand" || srcLocation == "ponyDiscardPile,top")
+				if (isBlank(card) || (!isGoal(card) && srcLocation == "player,"+globals.model.playerName) || srcLocation == "ponyDiscardPile,top")
 				{
 					setCardBackground(imgElement, draggedCard)
 				}

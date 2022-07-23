@@ -74,7 +74,7 @@ export interface Player
 	hand: Card[],
 	disconnected: number,
 	team: string,
-	winnings: any[],
+	winnings: {card: Card, value: number}[],
 	ponies: number,
 	ships: number,
 	isHost: boolean,
@@ -109,21 +109,6 @@ export interface GameModel
 
 
 	//messageHistory: string[],
-}
-
-export interface GameModelPlayer extends GameModel
-{
-	hand: Card[],
-	winnings: {card: Card, value: number}[],
-	
-
-	// this state is maintained by the client
-	
-	turnstate?: TurnstateBase & {
-		
-		
-		
-	};
 }
 
 /*export interface GameModelServer extends GameModel

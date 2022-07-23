@@ -1,7 +1,7 @@
 import {
 	GameModel as GM, Card, Player, randomizeOrder, Location, isPony, isShip, isGoal, getNeighborKeys,
 	isBlank, PackListPack, CardProps, isCardIncluded, isBoardLoc, isOffsetLoc, isGoalLoc, isDiscardLoc,
-	GameOptions, CardElement
+	GameOptions, CardElement, isPlayerLoc
 } from "./lib.js";
 
 
@@ -9,7 +9,7 @@ import {getConnectedPonies, evalGoalCard} from "./goalCriteria.js"
 
 import * as cm from "./cardManager.js";
 
-import Turnstate from "./turnstate.js";
+import Turnstate, { fromClientTurnstate } from "./turnstate.js";
 
 var PROP_VALUES = {
 
@@ -430,6 +430,8 @@ export default class GameModel implements GM
 		model2[typ+"DrawPile"] = model2[typ+"DiscardPile"];
 		model2[typ+"DiscardPile"] = swap;
 
+		model2[typ+"DrawPileLength"] = model2[typ+"DrawPile"].length;
+
 		randomizeOrder(model2[typ+"DrawPile"]);
 
 		for(let card of model2[typ+"DrawPile"])
@@ -479,14 +481,8 @@ export default class GameModel implements GM
 		model.winnings = player.winnings;
 		model.playerName = player.name;
 
-
 		model.players = this.getPlayerListForPlayer(player.name);
-
-		let ts = this.turnstate;
-		if(ts)
-		{
-			model.turnstate = ts.clientProps();
-		}
+		model.turnstate = this.turnstate?.toClientTurnstate();
 
 		//model.keepLobbyOpen = this.isLobbyOpen;
 
@@ -872,22 +868,15 @@ export default class GameModel implements GM
 	{
 		var player = this.getPlayerByName(playerName)!;
 
-		let serverStartLoc = startLocation;
-		if(startLocation == "hand" || startLocation == "winnings")
-			serverStartLoc = "player," + player.name;
-
-
-		if(this.cardLocations[card] != serverStartLoc || this.isLocOccupied(endLocation))
+		if(this.cardLocations[card] != startLocation || this.isLocOccupied(endLocation))
 		{						
 			var whereTheCardActuallyIs = this.cardLocations[card];
-			if(whereTheCardActuallyIs == "player," + player.name)
-			{
-				if(isGoal(card))
-					whereTheCardActuallyIs = "winnings";
-				else
-					whereTheCardActuallyIs = "hand";
-			}
 
+			if(isPlayerLoc(whereTheCardActuallyIs) && whereTheCardActuallyIs != "player," + player.name)
+				return "unknown";
+			if(whereTheCardActuallyIs.indexOf("DrawPile") > 0)
+				return "unknown";
+	
 			return whereTheCardActuallyIs;
 		}
 
@@ -896,45 +885,45 @@ export default class GameModel implements GM
 
 
 	public moveCard(
-		playerName: string,
 		card: Card,
 		startLocation: Location,
 		endLocation:Location,
 		extraArg: string)
 	{
 
-		var player = this.getPlayerByName(playerName)!;
-
-		let serverStartLoc = startLocation;
-		if(startLocation == "hand" || startLocation == "winnings")
-			serverStartLoc = "player," + player.name;
-
+		if(startLocation == "hand" || startLocation == "winnings" || endLocation == "hand" || endLocation=="winnings")
+		{
+			throw new Error("bad location");
+		}
 
 		// TODO move this logic
 		// if the player has an incorrect position for a card, move it to where it actually should be.
 		
-		let serverEndLoc = endLocation;
-		if(serverEndLoc == "hand" || serverEndLoc == "winnings")
-			serverEndLoc = "player," + player.name;
-
-		this.cardLocations[card] = serverEndLoc;
+		this.cardLocations[card] = endLocation;
 
 
 		this.updateTurnstatePreMove(card, startLocation, endLocation);
 
-
-		// remove from old location
-		if(startLocation == "hand")
+		if(["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) >= 0)
 		{
-			var i = player.hand.indexOf(card);
-			player.hand.splice(i, 1);
+			let i = (this as any)[startLocation].indexOf(card);
+			(this as any)[startLocation].splice(i,1);
 		}
 
-	
-		if(startLocation == "winnings")
+		// remove from old location
+		if(startLocation.startsWith("player,"))
 		{
-			var i = player.winnings.map(x => x.card).indexOf(card);
-			player.winnings.splice(i, 1);
+			var player = this.getPlayerByName(startLocation.substring("player,".length))!;
+			if(isGoal(card))
+			{
+				var i = player.winnings.map(x => x.card).indexOf(card);
+				player.winnings.splice(i, 1);
+			}
+			else
+			{
+				var i = player.hand.indexOf(card);
+				player.hand.splice(i, 1);
+			}
 		}
 
 		if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
@@ -983,9 +972,17 @@ export default class GameModel implements GM
 
 		// move to end location
 
-		if(endLocation == "hand")
-		{
-			player.hand.push(card)
+		if(endLocation.startsWith("player,"))
+		{	
+			var player = this.getPlayerByName(endLocation.substring("player,".length))!;
+			if(isGoal(card))
+			{
+				player.winnings.push({card, value: Number(extraArg) || 0});
+			}
+			else
+			{
+				player.hand.push(card)
+			}
 		}
 
 		if(isBoardLoc(endLocation) || isOffsetLoc(endLocation))
@@ -1004,11 +1001,6 @@ export default class GameModel implements GM
 			let goalNo = Number(goalNoStr);
 			this.currentGoals[goalNo] = card;
 			this.cardLocations[card] = "goal," + goalNo;
-		}
-
-		if(endLocation == "winnings")
-		{
-			player.winnings.push({card, value: Number(extraArg) || 0});
 		}
 
 		if(isDiscardLoc(endLocation))
@@ -1247,14 +1239,7 @@ export function playerGameModelFromObj(parsedModel: any)
 
 
 		if(parsedModel.turnstate)
-		{
-			newModel.turnstate = parsedModel.turnstate || new Turnstate();
-
-			if(newModel.turnstate)
-			{
-				newModel.turnstate.playedThisTurn = new Set(parsedModel.turnstate.playedThisTurn);
-			}
-		}
+			newModel.turnstate = fromClientTurnstate(parsedModel.turnstate);
 		else
 		{
 			delete newModel.turnstate;

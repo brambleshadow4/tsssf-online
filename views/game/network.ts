@@ -3,10 +3,13 @@ import {
 	updateTurnstate
 } from "./game.js";
 
+
+
 import {
 	Location,
 	Card,
-	GameOptions
+	GameOptions,
+	randomizeOrder
 } from "../../model/lib.js";
 
 import {
@@ -21,12 +24,12 @@ import {
 import {WebSocketPlus} from "../viewSelector.js";
 
 import GameModel, {playerGameModelFromObj} from "../../model/GameModel.js";
+import {fromClientTurnstate} from "../../model/turnstate.js";
 
 
 let win = window as unknown as {
 	model: GameModel,
 	gameOptions: GameOptions,
-	cardLocations: {[key: string]: Location},
 	moveToStartCard: () => any;
 	socket: WebSocketPlus;
 }
@@ -94,6 +97,7 @@ function messageHandler(event: MessageEvent)
 		{
 			data = JSON.parse(data);
 			model.turnstate.overrides = data;
+			
 			updateTurnstate();
 		}
 		catch(e){}
@@ -101,10 +105,7 @@ function messageHandler(event: MessageEvent)
 
 	if(event.data.startsWith('turnstate;') && model.turnstate)
 	{
-		model.turnstate = JSON.parse(event.data.substring(10));	
-		model.turnstate!.playedThisTurn = new Set();
-
-		//console.log(model.turnstate);
+		model.turnstate = fromClientTurnstate(JSON.parse(event.data.substring("turnstate;".length)));
 		updateTurnstate();
 	}
 
@@ -184,19 +185,17 @@ function messageHandler(event: MessageEvent)
 
 		for(var card of (model as any)[type + "DiscardPile"])
 		{
-			delete win.cardLocations[card];
+			delete model.cardLocations[card];
 		}
 
 		(model as any)[type+"DrawPileLength"] = count;
 		(model as any)[type+"DiscardPile"] = cards;
 
 		for(var card of cards)
-		{
-			win.cardLocations[card] = type + "DiscardPile,stack";
-		}
+			model.cardLocations[card] = type + "DiscardPile,stack";
 
 		if(cards.length)
-			win.cardLocations[cards[cards.length-1]] = type + "DiscardPile,top";
+		model.cardLocations[cards[cards.length-1]] = type + "DiscardPile,top";
 
 		var funs ={
 			"pony": updatePonyDiscard,
@@ -282,9 +281,9 @@ export function requestDrawPony()
 			
 		if(win.model.mode != "client")
 		{
-			let card = win.model.ponyDrawPile.pop();
+			let card = win.model.ponyDrawPile[0]
 			if(card)
-				moveCard(card, "ponyDrawPile", "hand", {})
+				moveCard(card, "ponyDrawPile", "player," + win.model.playerName, {})
 		}
 	}
 }
@@ -298,7 +297,7 @@ export function requestDrawShip()
 		{
 			let card = win.model.shipDrawPile.pop();
 			if(card)
-				moveCard(card, "shipDrawPile", "hand", {})
+				moveCard(card, "shipDrawPile", "player," + win.model.playerName, {})
 		}
 	}
 }
@@ -345,7 +344,22 @@ export function requestDrawGoal(specialLocation?: string)
 export function requestSwapShuffle(typ: "pony" | "ship" | "goal")
 {
 	if(isItMyTurn())
+	{
+		
 		broadcast("swapshuffle;" + typ);
+		let model = win.model;
+		if(model.mode != "client")
+		{
+			model.swapShuffle(typ as any);
+			var funs ={
+				"pony": updatePonyDiscard,
+				"ship": updateShipDiscard,
+				"goal": updateGoalDiscard
+			};
+			(funs as any)[typ]();
+		}
+	}
+		
 }
 
 

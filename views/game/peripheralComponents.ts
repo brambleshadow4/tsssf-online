@@ -64,7 +64,6 @@ let win = window as unknown as {
 	model: GameModel,
 	gameOptions: GameOptions,
 	openSettings: () => void;
-	cardLocations: {[key:string]: Location};
 	createHelpPopup: () => void;
 }
 
@@ -120,23 +119,25 @@ export function initPeripherals()
 		var draggedCard = data[0];
 		var location = data[1];
 
-		if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
+		if(location != "player,"+win.model.playerName && (isPony(draggedCard) || isShip(draggedCard)))
 		{
 			e.preventDefault();
 		}
 	}
 
 
-
+	
 
 	var inDragZone = false;
 	hand.ondragenter = function(e)
 	{
+		var myCards = "player,"+win.model.playerName;
 		var data = getDataTransfer().split(";")
 		var draggedCard = data[0];
 		var location = data[1];
+		
 
-		if(location != "hand" && (isPony(draggedCard) || isShip(draggedCard)))
+		if(location != myCards && (isPony(draggedCard) || isShip(draggedCard)))
 		{
 			if(!document.getElementById('handDropzone'))
 			{
@@ -164,8 +165,8 @@ export function initPeripherals()
 						div.parentNode.removeChild(div);
 					var [card, startLoc] = getDataTransfer().split(";")
 
-					moveCard(card, startLoc, "hand", {noAnimation: true});
-					broadcastMove(card, startLoc, "hand");
+					moveCard(card, startLoc, myCards, {noAnimation: true});
+					broadcastMove(card, startLoc, myCards);
 				}
 
 				hand.appendChild(div);
@@ -175,14 +176,15 @@ export function initPeripherals()
 
 	hand.ontouchstart = function(e)
 	{
+		var myCards = "player,"+win.model.playerName;
 		var data = getDataTransfer().split(";")
 		var card = data[0];
 		var location = data[1];
 
-		if(location != "hand" && (isPony(card) || isShip(card)))
+		if(location != myCards && (isPony(card) || isShip(card)))
 		{
-			moveCard(card, location, "hand");
-			broadcastMove(card, location, "hand");
+			moveCard(card, location, myCards);
+			broadcastMove(card, location, myCards);
 			endMoveShared();
 		}
 	}
@@ -264,6 +266,7 @@ export function updatePonyDiscard(cardOnTop?: Card)
 		
 		if(model.ponyDiscardPile.length)
 		{
+			let myCards = "player,"+model.playerName;
 			var card = await openSearchCardSelect(s.PopupTitleDiscardedPonies, "", model.ponyDiscardPile, true);
 
 			if(card && isItMyTurn())
@@ -271,8 +274,8 @@ export function updatePonyDiscard(cardOnTop?: Card)
 				var i = model.ponyDiscardPile.indexOf(card);
 				var area = (i+1 == model.ponyDiscardPile.length ? "top" : "stack");
 				var loc = "ponyDiscardPile," + area
-				moveCard(card, loc, "hand");
-				broadcastMove(card, loc, "hand");
+				moveCard(card, loc, myCards);
+				broadcastMove(card, loc, myCards);
 			}
 		}
 	});
@@ -303,6 +306,7 @@ export function updateShipDiscard(tempCard?: Card)
 		
 		if(model.shipDiscardPile.length)
 		{
+			let myCards = "player,"+model.playerName;
 			var card = await openSearchCardSelect(s.PopupTitleDiscardedShips, "",  model.shipDiscardPile, true);
 
 			if(card && isItMyTurn())
@@ -310,8 +314,8 @@ export function updateShipDiscard(tempCard?: Card)
 				var i = model.shipDiscardPile.indexOf(card);
 				var area = (i+1 == model.shipDiscardPile.length ? "top" : "stack");
 				var loc = "shipDiscardPile," + area
-				moveCard(card, loc, "hand");
-				broadcastMove(card, loc, "hand");
+				moveCard(card, loc, myCards);
+				broadcastMove(card, loc, myCards);
 			}
 		}
 
@@ -387,10 +391,8 @@ export function updateWinnings()
 
 	for(var i=0; i < winnings.length; i++)
 	{
-		win.cardLocations[winnings[i].card] = "winnings";
-
 		offset -= cardOffset;
-		var card = makeCardElement(winnings[i].card, "winnings");
+		var card = makeCardElement(winnings[i].card, "player,"+model.playerName);
 		card.style.position = "absolute";
 		card.style.bottom = offset + "vh";
 		card.style.right = "0vh"
@@ -445,9 +447,10 @@ export function updateWinnings()
 				arrow.parentNode!.removeChild(arrow)
 			}
 
+			let myCards = "player,"+model.playerName;
 
-			broadcastMove(winnings[winnings.length-1].card, "winnings","goal," + goalSlot)
-			moveCard(winnings[winnings.length-1].card, "winnings","goal," + goalSlot);
+			broadcastMove(winnings[winnings.length-1].card, myCards, "goal," + goalSlot)
+			moveCard(winnings[winnings.length-1].card, myCards, "goal," + goalSlot);
 		}
 	}
 
@@ -560,7 +563,7 @@ export function updateGoals(goalNo?: number, isSoftUpdate?: boolean)
 			model.currentGoals[i] || "blank:goal",
 			"goal," + i, true, true);
 
-		win.cardLocations[model.currentGoals[i]] = "goal," + i;
+		model.cardLocations[model.currentGoals[i]] = "goal," + i;
 
 		if(model.achievedGoals.has(model.currentGoals[i]))
 		{
@@ -596,9 +599,7 @@ export function updateHand(updateInfo?: string)
 
 		for(var i=0; i<hand.length; i++)
 		{
-			var cardEl = makeCardElement(hand[i], "hand", true);
-
-			win.cardLocations[hand[i]] = "hand";
+			var cardEl = makeCardElement(hand[i], "player,"+model.playerName, true);
 
 			if(isPony(hand[i]))
 			{
@@ -634,7 +635,7 @@ export function updateHand(updateInfo?: string)
 	else if(updateInfo.startsWith("+"))
 	{
 		let card = updateInfo.substring(1);
-		var cardEl = makeCardElement(card, "hand", true);
+		var cardEl = makeCardElement(card, "player,"+model.playerName, true);
 
 		if(isPony(card))
 		{
@@ -853,8 +854,8 @@ export function updateCardRowHeight()
 
 export function openCardSelect(title: string, heading: string, cards: Card[], miniMode?: boolean)
 {
-	function renderFun(closePopupWithVal: any){
-
+	function renderFun(closePopupWithVal: any)
+	{
 		var div = document.createElement('div');
 		div.classList.add("popupPage")
 

@@ -103,9 +103,9 @@ import {
 
 
 import {createPopup} from "./popupComponent.js";
+import { start } from "repl";
 
 let win = window as unknown as {
-	cardLocations: {[key:string]: Location};
 	model: GameModel,
 	gameOptions: GameOptions,
 	toggleFullScreen: Function,
@@ -115,8 +115,6 @@ let win = window as unknown as {
 }
 
 win.model = {} as GameModel;
-
-win.cardLocations = {};
 
 var offsetId = 0;
 
@@ -163,8 +161,6 @@ export function loadView(handshakeMessage: string)
 
 	turnStateChangelings = {};
 	haveCardsLoaded = false;
-
-	win.cardLocations = {};
 
 	document.body.innerHTML = "";
 	document.head.innerHTML = GameView.HEAD;
@@ -349,6 +345,13 @@ export function updateTurnstate()
 		button.onclick = function()
 		{
 			broadcast("endturn");
+			if(model.mode != "client")
+			{
+				model.changeTurnToNextPlayer();
+				checkIfGoalsWereAchieved();
+				updateTurnstate();
+			}
+				
 		}
 	}
 	else
@@ -376,9 +379,6 @@ function updateEffects()
 	let model = win.model;
 
 	if(!model.turnstate) return;
-
-
-	let cardLocations = win.cardLocations;
 
 	for(var key in model.board)
 	{
@@ -411,14 +411,14 @@ function updateEffects()
 			newDisguise = larsonEffect;
 		}
 
-		if(!isBoardLoc(cardLocations[card]))
+		if(!isBoardLoc(model.cardLocations[card]))
 		{
 			delete turnStateChangelings[card];
 		}
 
-		if(isBoardLoc(cardLocations[card]) && newDisguise != turnStateChangelings[card])
+		if(isBoardLoc(model.cardLocations[card]) && newDisguise != turnStateChangelings[card])
 		{	
-			var element = model.board[cardLocations[card]].element!;
+			var element = model.board[model.cardLocations[card]].element!;
 			var div = element.getElementsByClassName('changeling')[0];
 			if(div)
 				div.parentNode!.removeChild(div);
@@ -450,9 +450,9 @@ function updateEffects()
 	for(var card in cardsToApplyEffectsTo)
 	{	
 
-		if(isBoardLoc(cardLocations[card]))
+		if(isBoardLoc(model.cardLocations[card]))
 		{
-			var element = model.board[cardLocations[card]].element!;
+			var element = model.board[model.cardLocations[card]].element!;
 			var decs = getCardProp(card, "*");
 
 			if(larsonEffect && card != larsonEffect)
@@ -561,8 +561,6 @@ export async function updateGame(newModel?: GameModel)
 	updateShipDiscard();
 	updateGoalDiscard();
 
-	let cardLocations = win.cardLocations;
-
 	updateWinnings();
 	updateTableOffside();
 	updatePlayerList();
@@ -596,7 +594,7 @@ export function isValidMove(cardDragged: Card, dropZone: Card, endLocation: Loca
 	let model = win.model;
 	if(cardDragged == dropZone) return false;
 
-	if(win.cardLocations[cardDragged] == endLocation) return false;
+	if(model.cardLocations[cardDragged] == endLocation) return false;
 	
 
 	if((isGoalLoc(endLocation) || endLocation =="tempGoals") && isBlank(dropZone) && isGoal(cardDragged))
@@ -604,7 +602,7 @@ export function isValidMove(cardDragged: Card, dropZone: Card, endLocation: Loca
 		return true;
 	}
 
-	if(isStart(dropZone) && !isBoardLoc(win.cardLocations[cardDragged] ))
+	if(isStart(dropZone) && !isBoardLoc(model.cardLocations[cardDragged] ))
 	{
 		return false;
 	}
@@ -650,14 +648,19 @@ export async function moveCard(
 	endLocation: Location, 
 	options?:{
 		forceCardToMove?: boolean,
-		extraArg?: any,
+		extraArg?: any, // this is typically the goal points
 		noAnimation?: boolean
 	}
 ){
 	var startPos = {};
 	const vh = window.innerHeight/100;
 	let model = win.model;
-	let cardLocations = win.cardLocations;
+	let cardLocations = model.cardLocations;
+
+	let updateStartLocationFun: Function = () => {};
+	let updateStartLocationArgs: any[] = [];
+
+	let toMe = "player," + win.model.me().name;
 
 	options = options || {};
 
@@ -666,6 +669,7 @@ export async function moveCard(
 		return;
 	}
 
+	// TODO make sure this crap works
 	if(startLocation != cardLocations[card])
 	{
 		// if another player moves card A to a goal/board location L at the same time as you move card B,
@@ -691,12 +695,9 @@ export async function moveCard(
 		return;
 	}
 
-	if(startLocation == "winnings")
+	if(isGoal(card) && startLocation == toMe)
 	{
-		let winnings = model.me().winnings;
-		let i = winnings.map(x => x.card).indexOf(card);
-		winnings.splice(i,1);
-		updateWinnings();
+		updateStartLocationFun = updateWinnings;
 
 		var enddiv = document.getElementById("winnings")!;
 		rect = enddiv.getBoundingClientRect();
@@ -705,8 +706,7 @@ export async function moveCard(
 			left: rect.right - 13*vh + "px"
 		}
 	}
-
-	else if(startLocation == "hand")
+	else if(startLocation == toMe)
 	{
 		let hand = model.me().hand;
 		let orderedHand = hand.filter(x => isPony(x)).concat(hand.filter(x => isShip(x)));
@@ -716,27 +716,19 @@ export async function moveCard(
 		startPos = getPosFromId("hand" + displayPos);
 
 		if(i == -1) { return };
-		hand.splice(i,1);
 
-		updateHand("-" + card);
+		updateStartLocationFun = updateHand;
+		updateStartLocationArgs = ["-" + card];
 	}
 	else if(isDiscardLoc(startLocation))
 	{
-		
 		var [pile,slot] = startLocation.split(",");
-		let i = (model as any)[pile].indexOf(card);
-		(model as any)[pile].splice(i,1);
-
-
-		var newTopCard = (model as any)[pile][(model as any)[pile].length-1];
-		cardLocations[newTopCard] = pile + ",top";
-
 		startPos = getPosFromId(pile);
 
 		var typ = startLocation.substring(0,4)
-		if(typ == "pony") updatePonyDiscard();
-		if(typ == "ship") updateShipDiscard();
-		if(typ == "goal") updateGoalDiscard();
+		if(typ == "pony") updateStartLocationFun = updatePonyDiscard;
+		if(typ == "ship") updateStartLocationFun = updateShipDiscard;
+		if(typ == "goal") updateStartLocationFun = updateGoalDiscard;
 	}
 	else if(["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1)
 	{
@@ -745,14 +737,6 @@ export async function moveCard(
 	else if(isPlayerLoc(startLocation))
 	{
 		startPos = {top: "-18vh", left: "50vh"};
-
-		var playerName = startLocation.split(",")[1];
-		var player = model.players.filter(x => x.name == playerName)[0];
-		if(player.hand) 
-		{
-			let i = player.hand.indexOf(card);
-			player.hand.splice(i, 1);
-		}
 	}
 	else if(isBoardLoc(startLocation) || isOffsetLoc(startLocation))
 	{
@@ -761,13 +745,12 @@ export async function moveCard(
 		var removedCard = model.board[startLocation].card;
 
 		removeCardFromBoard(startLocation);
-		updateBoard();
+		updateStartLocationFun = updateBoard;
 
 		if(model.turnstate)
 		{
 			model.turnstate.removedFrom = [startLocation, removedCard];
 		}
-
 	}
 	else if(isGoalLoc(startLocation))
 	{
@@ -776,9 +759,7 @@ export async function moveCard(
 
 		startPos = getPosFromElement(document.getElementById('currentGoals')!.getElementsByClassName('card')[i] as HTMLElement);
 
-		model.currentGoals[i] = "blank:goal";
-
-		updateGoals();
+		updateStartLocationFun = updateGoals;
 	}
 	else if(startLocation.startsWith("removed"))
 	{
@@ -787,17 +768,13 @@ export async function moveCard(
 		let cardDivs = document.getElementById('removedCards')!.getElementsByClassName('card');
 
 		if(cardDivs[i])
-		{
 			startPos = getPosFromElement(cardDivs[i] as HTMLElement);
-		}
 
-		model.removed.splice(i,1);
-		updateTableOffside();
+		updateStartLocationFun = updateTableOffside;
 	}
 	else if(startLocation == "tempGoals")
 	{
 		let i = model.tempGoals.indexOf(card);
-
 		let cardDivs = document.getElementById('tempGoals')!.getElementsByClassName('card');
 
 		if(cardDivs[i])
@@ -805,26 +782,23 @@ export async function moveCard(
 			startPos = getPosFromElement(cardDivs[i] as HTMLElement);
 		}
 
-		model.tempGoals.splice(i,1);
-		updateTableOffside();
+		updateStartLocationFun = updateTableOffside;
 	}
 
 	/// removing
 
-	var updateFun = function(){};
+	var updateEndLocationFun = function(){};
 	var endPos = {};
 	
-	if(endLocation == "hand")
+	if((isPony(card) || isShip(card)) && endLocation == toMe)
 	{
 		let hand = model.me().hand;
-		hand.push(card);
-
 		var enddiv = document.getElementById('hand-pony')!;
 		var rect = enddiv.getBoundingClientRect();
 
 		var cardCount = isPony(card) ? hand.filter(x => isPony(x)).length : hand.length;
 
-		var offset = ((cardCount-1) * (13 + 1) + 1) * vh;
+		var offset = ((cardCount) * (13 + 1) + 1) * vh;
 		
 		endPos = {
 			top: (rect.top + vh) + "px",
@@ -833,33 +807,18 @@ export async function moveCard(
 
 		let x = hand.length - 1;
 
-		updateFun = () => updateHand("+" + card);
+		updateEndLocationFun = () => updateHand("+" + card);
 	}
 	else if(isDiscardLoc(endLocation))
 	{
 		var [pile,slot] = endLocation.split(",");
-
-		let discardArr = (model as any)[pile] as Card[];
-
-		if (slot=="top")
-		{
-			if(discardArr.length)
-				cardLocations[discardArr[discardArr.length-1]] = pile + ",stack";
-
-			discardArr.push(card);
-		}
-		else
-		{
-			discardArr.splice(Math.max(0,discardArr.length-2), 0, card);
-		}
-
 		var updateFun2 = {
 			"pony": updatePonyDiscard,
 			"ship": updateShipDiscard,
 			"goal": updateGoalDiscard
 		}[endLocation.substring(0,4)] as Function;
 
-		updateFun = () => {
+		updateEndLocationFun = () => {
 			if(slot=="top")
 				updateFun2(card);
 			else
@@ -868,11 +827,9 @@ export async function moveCard(
 
 		endPos = getPosFromId(pile);
 	}
-	else if(endLocation == "winnings")
+	else if(isGoal(card) && endLocation == toMe)
 	{
-
-		model.me().winnings.push({card, value: Number(options.extraArg) || 0});
-		updateFun = updateWinnings;
+		updateEndLocationFun = updateWinnings;
 
 		var enddiv = document.getElementById("winnings")!;
 		rect = enddiv.getBoundingClientRect();
@@ -911,16 +868,7 @@ export async function moveCard(
 			removeCardFromBoard(endLocation);
 		}
 
-		if(model.turnstate)
-		{
-			model.turnstate.playedThisTurn.add(card);
-		}
-
-		model.board[endLocation] = {
-			card: card
-		}
-
-		updateFun = updateBoard;	
+		updateEndLocationFun = updateBoard;	
 	}
 	else if(isGoalLoc(endLocation))
 	{
@@ -929,33 +877,30 @@ export async function moveCard(
 
 		endPos = getPosFromElement(document.getElementById('currentGoals')!.getElementsByClassName('card')[i] as HTMLElement);
 
-		model.currentGoals[i] = card;
-		updateFun = () => updateGoals(i)
+		updateEndLocationFun = () => updateGoals(i)
 	}
 	else if(endLocation.startsWith("removed"))
 	{
 		var removedCards = document.getElementById("removedCards")!.getElementsByClassName('card');
 		endPos = getPosFromElement(removedCards[removedCards.length-1] as HTMLElement);
-		model.removed.push(card);
-		updateFun = () => updateTableOffside("+"+card);
+		updateEndLocationFun = () => updateTableOffside("+"+card);
 	}
 	else if(endLocation.startsWith("tempGoals"))
 	{
 		var tempGoals = document.getElementById("tempGoals")!.getElementsByClassName('card');
 		endPos = getPosFromElement(tempGoals[tempGoals.length-1] as HTMLElement);
-		model.tempGoals.push(card);
-		updateFun = () => updateTableOffside("+"+card);
+		updateEndLocationFun = () => updateTableOffside("+"+card);
 	}
 
-
-	cardLocations[card] = endLocation;
-	
+	/*
 	if(isPlayerLoc(endLocation))
 	{
 		delete cardLocations[card];
-	}
+	}*/
 
 
+	model.moveCard(card, startLocation, endLocation, options.extraArg)
+	updateStartLocationFun(...updateStartLocationArgs);
 
 	if(!options.forceCardToMove)
 	{
@@ -963,12 +908,6 @@ export async function moveCard(
 	}
 
 	// run animation (if applicable)
-
-	function isOffside(location: string)
-	{
-		return location == "removed" || location == "tempGoals";
-	}
-	
 
 	var doAnimation = true;
 
@@ -987,8 +926,7 @@ export async function moveCard(
 	if(isDiscardLoc(startLocation)) slAnim = true; 
 	if(isPlayerLoc(startLocation)) slAnim = true; 
 	if(isGoalLoc(startLocation)) slAnim = true;
-	if(startLocation == "winnings") slAnim = true;
-	if(startLocation == "hand") slAnim = true;
+	if(startLocation == toMe) slAnim = true;
 	if(isTableOffsideLoc(startLocation)) slAnim = document.getElementById('tableOffside')!.classList.contains('open');
 	if(isBoardLoc(startLocation)) slAnim = true;
 	if(isOffsetLoc(startLocation)) slAnim = true;
@@ -998,8 +936,7 @@ export async function moveCard(
 	if(isDiscardLoc(endLocation)) elAnim = true; 
 	if(isPlayerLoc(endLocation)) elAnim = true; 
 	if(isGoalLoc(endLocation)) elAnim = true;
-	if(endLocation == "winnings") elAnim = true;
-	if(endLocation == "hand") elAnim = true;
+	if(endLocation == toMe) elAnim = true;
 	if(isTableOffsideLoc(endLocation)) elAnim = document.getElementById('tableOffside')!.classList.contains('open');
 	// board + offset not here
 
@@ -1007,15 +944,13 @@ export async function moveCard(
 	if(!(elAnim && slAnim))
 		doAnimation = false;
 
-
-
 	if(doAnimation)
 	{
-		animateCardMove(card, startPos || {}, endPos || {}, updateFun);
+		animateCardMove(card, startPos || {}, endPos || {}, updateEndLocationFun);
 	}
 	else
 	{
-		updateFun();
+		updateEndLocationFun();
 	}
 
 	clearActionButtons();
@@ -1027,9 +962,25 @@ export async function moveCard(
 
 	updateTurnstate();
 	updateRemoveUnconnectedCardsButton();
+	checkIfGoalsWereAchieved();
 
 }
 
+function checkIfGoalsWereAchieved()
+{
+	let model = win.model;
+	if(model.mode == "client")
+		return;
+	
+	if (model.wereGoalsAchieved())
+	{
+		updateGoals(undefined, true);
+		if(model.tempGoals)
+		{
+			updateTableOffside();
+		}
+	}
+}
 
 function updateRemoveUnconnectedCardsButton()
 {
@@ -1037,7 +988,7 @@ function updateRemoveUnconnectedCardsButton()
 
 	let unconnected = new Set(Object.keys(model.board).filter(x => !x.startsWith("offset") && model.board[x].card && !isBlank(model.board[x].card)));
 
-	let startLocation = win.cardLocations[win.gameOptions.startCard];
+	let startLocation = model.cardLocations[win.gameOptions.startCard];
 
 	let button = document.getElementById('removeUnconnectedCards') as HTMLElement;
 
@@ -1120,7 +1071,7 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 {
 	var cardInfo = cm.inPlay()[e.card];
 	let model = win.model;
-	let cardLocations = win.cardLocations;
+	let cardLocations = model.cardLocations;
 
 	var isImmediatePlay = (e.startLocation == "hand" || e.startLocation == "ponyDiscardPile,top" || e.startLocation == "shipDiscardPile,top")
 
@@ -1246,7 +1197,7 @@ function isShipClosed(shipCard: Card)
 function getNeighborCards(shipCard: Card)
 {
 	let model = win.model;
-	var loc = win.cardLocations[shipCard];
+	var loc = model.cardLocations[shipCard];
 
 	var neighbors = getNeighborKeys(loc);
 
@@ -1334,7 +1285,7 @@ function doActionOnSwap(card: Card)
 function changelingAction(type: string)
 {
 	let model = win.model;
-	let cardLocations = win.cardLocations;
+	let cardLocations = model.cardLocations;
 	return async function(card: Card)
 	{
 		let cards = cm.inPlay();

@@ -34,6 +34,7 @@ export function boot(): void
 	model.board = {
 		"p,0,0": {card: "Core.Start.FanficAuthorTwilight"}
 	}
+	model.currentGoals = ["blank:goal","blank:goal","blank:goal"];
 
 	cm.init(win.gameOptions);
 	let cards = cm.inPlay();

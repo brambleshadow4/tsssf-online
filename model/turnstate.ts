@@ -1,5 +1,6 @@
 import {Card, ChangelingContextList, Location} from "./lib.js";
 import GameModel from "./GameModel.js"
+import { cursorTo } from "readline";
 
 
 export default class Turnstate
@@ -73,14 +74,23 @@ export default class Turnstate
 		return this.changelingContexts[card];
 	}
 	
-	public clientProps()
+	public toClientTurnstate()
 	{
-		console.log("currentPlayer: " + this.currentPlayer)
-
 		return {
 			playedThisTurn: [...this.playedThisTurn],
 			overrides: this.overrides,
 			currentPlayer: this.currentPlayer
 		}
 	}
+
+	
+}
+
+export function fromClientTurnstate(clientTurnstate: {playedThisTurn: string[], overrides: {[key:string]: string}, currentPlayer:string})
+{
+	let newTurnstate = new Turnstate();
+	newTurnstate.playedThisTurn = new Set(clientTurnstate.playedThisTurn);
+	newTurnstate.overrides = clientTurnstate.overrides;
+	newTurnstate.currentPlayer = clientTurnstate.currentPlayer;
+	return newTurnstate;
 }

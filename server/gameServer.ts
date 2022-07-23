@@ -1,24 +1,13 @@
 import ws from "ws";
 import * as util from 'util'
 import fs from "fs";
-import {
-	randomizeOrder, 
-	isGoal, 
+import { 
 	isPony, 
 	isShip,
 	isStart,
-	isBoardLoc,
-	isOffsetLoc,
-	isGoalLoc,
 	isDiscardLoc,
 	isPlayerLoc,
-	isBlank,
-	isCardIncluded,
-	getNeighborKeys,
 	Card,
-	Location,
-	CardProps,
-	ChangelingContextList,
 	PackListPack,
 	GameOptions, defaultGameOptions,
 	Player
@@ -26,12 +15,9 @@ import {
 
 import GameModel from "../model/GameModel.js";
 
-import Turnstate from "../model/turnstate.js";
-
 import * as cm from "../model/cardManager.js";
 import {validatePack, flattenPack, mergePacks} from "../model/packLib.js";
 
-import {evalGoalCard, getConnectedPonies} from "../model/goalCriteria.js"
 import {logGameHosted, logPlayerJoined} from "./stats.js";
 
 
@@ -55,15 +41,6 @@ var PROP_VALUES = {
 	}
 } as any;
 
-/*export interface TsssfGameServer extends ws.Server
-{
-	openLobby: (key?:string) => void,
-
-
-	players: Player[],
-}*/
-
-
 const TEMP_DISCONNECT_TIME = 15*1000;
 const NO_MOVE_EXPIRE_TIME = 60*60*1000; // 1 hour
 export class TsssfGameServer
@@ -81,7 +58,6 @@ export class TsssfGameServer
 
 		const interval = setInterval(function ping()
 		{
-
 			for(var key in games)
 			{
 				// no move expiration
@@ -458,10 +434,10 @@ export class GameInstance
 				{
 					var msg = "draw;" + typ + ";" + newLen;
 					game.toEveryone(msg);
-					socket.send("move;" + card + ";" + typ + "DrawPile;hand");
-
-					game.toTeamMembers(player.name, "move;" + card + ";" + typ + "DrawPile;player," + player.name)
-					game.toNonTeamMembers(player.name, "move;anon:" + typ + ";" + typ + "DrawPile;player," + player.name);
+					let location = typ + "DrawPile;player," + player.name;
+					socket.send("move;" + card + ";" + location);
+					game.toTeamMembers(player.name, "move;" + card + ";" + location)
+					game.toNonTeamMembers(player.name, "move;anon:" + typ + ";" + location);
 					game.sendPlayerCounts(player);
 				}
 			}
@@ -1138,7 +1114,7 @@ export class GameInstance
 	private changeTurnToNextPlayer()
 	{
 		this.model.changeTurnToNextPlayer();
-		this.toEveryone("turnstate;" + JSON.stringify(this.model.turnstate!.clientProps()));
+		this.toEveryone("turnstate;" + JSON.stringify(this.model.turnstate!.toClientTurnstate()));
 		this.checkIfGoalsWereAchieved();
 	}
 
@@ -1148,10 +1124,12 @@ export class GameInstance
 		var player = this.model.getPlayerByName(playerName);
 
 		if(!player) { return; }
-
-		let serverStartLoc = startLocation;
-		if(startLocation == "hand" || startLocation == "winnings")
-			serverStartLoc = "player," + player.name;
+		if((isPlayerLoc(startLocation) && startLocation != "player,"+playerName) 
+			|| (isPlayerLoc(endLocation) && endLocation != "player,"+playerName))
+		{
+			// player is trying to move cards to another player, illegal.
+			return;
+		}
 
 		let actualLocation = this.model.isInvalidMoveOnClient(playerName, card, startLocation, endLocation);
 		
@@ -1161,26 +1139,15 @@ export class GameInstance
 			return;
 		}
 
-		this.model.moveCard(playerName, card, startLocation, endLocation, extraArg);
+		this.model.moveCard(card, startLocation, endLocation, extraArg);
 
-		// cant move to a goal location yet
-
-		player.socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
-
-		if(startLocation == "hand" || startLocation == "winnings")
-			startLocation = "player,"+player.name;
-
-		if(endLocation == "hand" || endLocation == "winnings")
-			endLocation = "player,"+player.name;
-
-		this.toEveryoneElse(playerName, "move;" + card + ";" + startLocation + ";" + endLocation);
+		this.toEveryone("move;" + card + ";" + startLocation + ";" + endLocation);
 
 
 		if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
 		{
 			this.sendPlayerCounts(player);
 		}
-
 
 		if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
 		{
