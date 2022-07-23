@@ -1140,9 +1140,7 @@ export class GameInstance
 		}
 
 		this.model.moveCard(card, startLocation, endLocation, extraArg);
-
 		this.toEveryone("move;" + card + ";" + startLocation + ";" + endLocation);
-
 
 		if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
 		{

@@ -16,6 +16,7 @@ export default class Turnstate
 	public playedPonies: Card[] = [];
 	public playedShips: [Card, Card][] = [];
 	public playedShipCards: Card[] = [];
+	public playedShipsCommitted: [Card, Card][] = [];
 
 
 	public brokenShipsCommitted: [Card,Card][] = [];

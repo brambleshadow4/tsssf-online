@@ -351,7 +351,7 @@ function ExistsPony(selector: string, count?: number)
 
 		for(var key in model.board)
 		{
-			if(key.startsWith("p,"))
+			if(key.startsWith("p,") && !isBlank(model.board[key].card))
 			{
 				//console.log("checking card " + model.board[key].card);
 				//console.log("does match " + selector + " " + model.board[key].card + " " + doesCardMatchSelector(model, model.board[key].card, selector));
@@ -380,7 +380,7 @@ function ExistsPonyGeneric(selectFun: (m:GameModel, p:Card)=>number, count?:numb
 
 		for(var key in model.board)
 		{
-			if(key.startsWith("p,"))
+			if(key.startsWith("p,") && !isBlank(model.board[key].card))
 			{
 				//console.log("checking card " + model.board[key].card);
 				boardCount += selectFun(model, model.board[key].card)

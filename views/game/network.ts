@@ -306,7 +306,6 @@ export function requestDrawGoal(specialLocation?: string)
 {
 	if(isItMyTurn())
 	{
-		console.log('request draw goal');
 		let model = win.model;
 		if(specialLocation)
 			broadcast("draw;goal;" + specialLocation);
@@ -323,8 +322,6 @@ export function requestDrawGoal(specialLocation?: string)
 					break;
 				goalNo++;
 			}
-
-			console.log(goalNo);
 
 			if(goalNo == 3 && !specialLocation)
 				return;

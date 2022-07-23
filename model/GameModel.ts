@@ -385,10 +385,7 @@ export default class GameModel implements GM
 
 					this.tempGoals.push(card);
 					this.cardLocations[card] = "tempGoals";
-
-
 					return [true, len-1, card, "tempGoals"];
-
 				}
 			}
 			else
@@ -416,7 +413,7 @@ export default class GameModel implements GM
 				player.hand.push(card);
 				this.cardLocations[card] = "player," + player.name;
 
-				return [true, len-1, card, "hand"];
+				return [true, len-1, card, "player," + player.name];
 			}
 		}
 
@@ -436,7 +433,7 @@ export default class GameModel implements GM
 
 		for(let card of model2[typ+"DrawPile"])
 		{
-			model2.cardLocations[card] = typ + "DrawPile,stack";
+			model2.cardLocations[card] = typ + "DrawPile";
 		}
 
 
@@ -1092,9 +1089,14 @@ export default class GameModel implements GM
 		}
 	}
 
-	public updateCountsFromBoardState(commit: boolean)
+	/**
+	 * 
+	 * @param commit - Wheter or not to commit all transitive counts for the turn.
+	 */
+	public updateCountsFromBoardState(commit: boolean): void
 	{
-		if(!this.turnstate) {return;}
+		if(this.mode == "client" || !this.turnstate) 
+			return;
 
 		var newSet = this.getCurrentShipSet();
 
@@ -1109,7 +1111,7 @@ export default class GameModel implements GM
 		if(commit)
 		{
 			this.turnstate.brokenShipsCommitted = this.turnstate.brokenShips;
-			//this.turnstate.playedShipsCommitted = this.turnstate.playedShips;
+			this.turnstate.playedShipsCommitted = this.turnstate.playedShips;
 			this.turnstate.swapsCommitted = this.turnstate.swaps;
 			this.turnstate.shipSet = newSet;
 			this.turnstate.positionMap = curPositionMap;
@@ -1119,16 +1121,18 @@ export default class GameModel implements GM
 
 	private updateTurnstatePostMove(card: Card, startLocation: Location, endLocation: Location)
 	{
-		if(!this.turnstate) { return }
+		if(!this.turnstate || this.mode == "client") { return }
+
+		let curPlayerLoc = "player," + this.turnstate.currentPlayer
 
 		if(isPony(card) 
-			&& (this.turnstate.openPonyLocations.has(endLocation) || startLocation == "hand" || startLocation == "ponyDiscardPile,top") // need both because replace powers aren't open.
+			&& (this.turnstate.openPonyLocations.has(endLocation) || startLocation == curPlayerLoc || startLocation == "ponyDiscardPile,top") // need both because replace powers aren't open.
 			&& isBoardLoc(endLocation))
 		{
 	
 			let cardContext = this.appendChangelingContext(card);
 
-			if(startLocation == "hand" || startLocation == "ponyDiscardPile,top") // this will be false for love poisons
+			if(startLocation == curPlayerLoc || startLocation == "ponyDiscardPile,top") // this will be false for love poisons
 			{
 				this.turnstate.playedPonies.push(cardContext);
 			}
@@ -1145,7 +1149,7 @@ export default class GameModel implements GM
 		}
 
 		if(isShip(card) 
-			&& (startLocation == "hand" || startLocation == "shipDiscardPile,top")
+			&& (startLocation == curPlayerLoc || startLocation == "shipDiscardPile,top")
 			&& isBoardLoc(endLocation))
 		{
 			this.turnstate.playedShipCards.push(card);
@@ -1164,16 +1168,13 @@ export default class GameModel implements GM
 			}
 		}
 
-		
-
-
 		if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
 		{
 			this.turnstate.updateSpecialEffects(this.board);
 		}
 
 
-		let commitCounts = (startLocation == "hand" || 
+		let commitCounts = (startLocation == curPlayerLoc || 
 			startLocation == "shipDiscardPile,top" || startLocation == "ponyDiscardPile,top"
 			|| endLocation == "shipDiscardPile,top" || endLocation == "ponyDiscardPile,top");
 
@@ -1181,7 +1182,7 @@ export default class GameModel implements GM
 
 
 		if(isShip(card)
-			&& (startLocation == "hand" || startLocation == "shipDiscardPile,top")
+			&& (startLocation == curPlayerLoc || startLocation == "shipDiscardPile,top")
 			&& isBoardLoc(endLocation))
 		{
 

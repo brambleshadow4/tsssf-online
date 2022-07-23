@@ -41,8 +41,6 @@ if(liveGames.has(window.location.pathname))
 
 	socket.addEventListener('message', function (event)
 	{
-		console.log(event.data);
-
 		if(socket.onMessageHandler)
 		{
 			socket.onMessageHandler(event);
