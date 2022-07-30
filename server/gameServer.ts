@@ -46,7 +46,6 @@ const NO_MOVE_EXPIRE_TIME = 60*60*1000; // 1 hour
 export class TsssfGameServer
 {
 	public games: {[key:string] : GameInstance};
-
 	private wsServer: ws.Server;
 
 	constructor()
@@ -339,7 +338,6 @@ export class GameInstance
 						if(game.host)
 						{
 							game.host.send(game.makeLobbyMessage(game.host));
-							console.log("upload successful");
 						}
 					}
 				}	
@@ -993,8 +991,6 @@ export class GameInstance
 
 		newOptions.cardDecks = options.cardDecks || newOptions.cardDecks;
 		newOptions.customCards = options.customCards || newOptions.customCards;
-
-		console.log(newOptions.customCards);
 		cm.init(newOptions);
 
 		this.gameOptions = newOptions;
@@ -1023,6 +1019,7 @@ export class GameInstance
 
 		this.startTime = new Date().getTime();
 		this.model.clearGameForStart(this.gameOptions);
+		this.model.mode = "server";
 		this.isInGame = true;
 		
 		logGameHosted();
@@ -1093,23 +1090,6 @@ export class GameInstance
 		var args = ["counts", player.name, ponies, ships, ...player.winnings.map(x=>x.card + "," + x.value)]
 		this.toEveryoneElse(player.socket, args.join(";"));
 	}
-
-
-
-	private getSwappedCount(startPositions: {[loc: string]: Card}, endPositions: {[loc: string]: Card})
-	{
-		var count = 0;
-		for(var key in startPositions)
-		{
-			if(endPositions[key] && endPositions[key] != startPositions[key])
-			{
-				count++;
-			}
-		}
-
-		return count;
-	}
-
 
 	private changeTurnToNextPlayer()
 	{

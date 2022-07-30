@@ -1,0 +1,29 @@
+kick player
+kick player w/ ship, pony + goals
+kick player w/ it's their turn
+
+player returning to game w/ all players disconnected is host + it's their turn
+
+
+Ships: 
+
+
+Goal types:
+	AllOf -> NoHoldsBarred ThisShipIsDelicious
+	BreakShip -> ItsNotEvil
+	ExistsChain -> SelfInsertion
+	ExistsPony -> PrettyPrettyPrincess
+	ExistsPonyGeneric -> unused
+	ExistsPonyShippedto -> JustExperimenting
+	ExistsShip -> Pomf
+	ExistsShipGeneric -> BuddingCuriosity
+	PlayPonies -> HehPeasants
+	PlayShips -> Quite
+	PlayShipCards -> Epidemic
+	ShippedWithOppositeGenderedSelf -> BuddingCuriosity
+	ShippedWith2Versions -> ItsNotExactlyCheating
+	SwapCount -> HoldOnINeedToMakeAFlowChart
+
+
+Normal Goals:
+

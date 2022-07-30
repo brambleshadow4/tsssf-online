@@ -401,7 +401,7 @@ function ExistsChain(selector: string, count: number)
 		throw new Error("Arg 2 of ExistsChain needs to be a number");
 
 	return function(model: GameModel)
-	{
+	{ 
 		function buildChain(key: Location)
 		{
 			var workList = [key];
@@ -423,7 +423,7 @@ function ExistsChain(selector: string, count: number)
 				chained.add(thisKey);	
 
 
-				var ponyKeys = getConnectedPonies(model, thisKey, true).map( x => model.cardLocations[x])
+				var ponyKeys = getConnectedPonies(model, thisKey, true).map( x => model.cardLocations[x]);
 				workList = workList.concat(ponyKeys);
 			}
 

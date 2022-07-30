@@ -1,6 +1,6 @@
 import {
 	GameModel as GM, Card, Player, randomizeOrder, Location, isPony, isShip, isGoal, getNeighborKeys,
-	isBlank, PackListPack, CardProps, isCardIncluded, isBoardLoc, isOffsetLoc, isGoalLoc, isDiscardLoc,
+	isBlank, isBoardLoc, isOffsetLoc, isGoalLoc, isDiscardLoc,
 	GameOptions, CardElement, isPlayerLoc
 } from "./lib.js";
 
@@ -61,11 +61,9 @@ export default class GameModel implements GM
 	public players: Player[] = [];
 	public runGoalLogic = true;
 	public turnstate? = new Turnstate();
-	private startCard: Card = "";
-
-
-
 	public debug = false;
+
+	private startCard: Card = "";
 
 	constructor(){}
 
@@ -77,13 +75,12 @@ export default class GameModel implements GM
 
 		let cards = cm.inPlay();
 
-
 		if(!cards[card]) return;
-
 
 		if(prop == "disguise")
 		{
-			if(!cards[value]) return;
+			if(!cards[value])
+				return;
 		}
 		else if(prop == "keywords")
 		{
@@ -92,15 +89,18 @@ export default class GameModel implements GM
 		else if(prop == "count")
 		{
 			value = Number(value);
-			if(isNaN(value)) return;
+			if(isNaN(value))
+				return;
 		}
 		else if(prop == "fullCopy")
 		{
-			if(!cards[value]) return;
+			if(!cards[value])
+				return;
 		}
 		else
 		{
-			if(!PROP_VALUES[prop] || !PROP_VALUES[prop][value]) return;
+			if(!PROP_VALUES[prop] || !PROP_VALUES[prop][value])
+				return;
 		}
 
 		if(value == "true") 
@@ -609,10 +609,12 @@ export default class GameModel implements GM
 	{	
 		this.cardLocations = {};
 		this.board = {
-			"p,0,0":{
+			"p,0,0": {
 				card: gameOptions.startCard
 			}
 		};
+
+
 
 		for(var player of this.players)
 		{
@@ -620,7 +622,7 @@ export default class GameModel implements GM
 			player.winnings = [];
 		}
 
-		this.cardLocations[this.startCard] = "p,0,0";
+		this.cardLocations[gameOptions.startCard] = "p,0,0";
 
 		this.goalDiscardPile = [];
 		this.ponyDiscardPile = [];
@@ -898,7 +900,6 @@ export default class GameModel implements GM
 		
 		this.cardLocations[card] = endLocation;
 
-
 		this.updateTurnstatePreMove(card, startLocation, endLocation);
 
 		if(["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) >= 0)
@@ -1129,7 +1130,6 @@ export default class GameModel implements GM
 			&& (this.turnstate.openPonyLocations.has(endLocation) || startLocation == curPlayerLoc || startLocation == "ponyDiscardPile,top") // need both because replace powers aren't open.
 			&& isBoardLoc(endLocation))
 		{
-	
 			let cardContext = this.appendChangelingContext(card);
 
 			if(startLocation == curPlayerLoc || startLocation == "ponyDiscardPile,top") // this will be false for love poisons
@@ -1163,7 +1163,7 @@ export default class GameModel implements GM
 			else
 			{
 				var slots = getNeighborKeys(endLocation);
-				slots = slots.filter(x => !this.board[x]?.card);
+				slots = slots.filter(x => this.board[x]?.card && !isBlank(this.board[x]?.card));
 				slots.forEach(x => this.turnstate!.openPonyLocations.add(x));
 			}
 		}
