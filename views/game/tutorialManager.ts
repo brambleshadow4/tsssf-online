@@ -2,12 +2,10 @@ import {
 	GameOptions, defaultGameOptions, isGoal, isStart, isShip, isPony
 } from "../../model/lib.js";
 
+import {setHoverBubble} from "./peripheralComponents.js";
 import * as cm from "../../model/cardManager.js";
-
 import GameModel from "../../model/GameModel.js";
-
 import {updateGame} from "./game.js";
-
 import Turnstate from "../../model/turnstate.js";
 
 let ST = {
@@ -81,6 +79,11 @@ export function boot(): void
 
 	
 	updateGame(model);
+
+	setTimeout(() => {
+		setHoverBubble("hand","above","This is the hover bubble", () => {});
+	},200)
+	
 
 }
 

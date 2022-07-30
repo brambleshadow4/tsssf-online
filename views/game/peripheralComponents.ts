@@ -57,6 +57,7 @@ import s from "../tokens.js";
 import {doesCardMatchFilters, cardSearchBar} from "./cardSearchBarComponent.js";
 
 import {cardReference} from "../info/knowledgeBase.js";
+import { match } from "assert";
 
 
 
@@ -1135,5 +1136,35 @@ function quickStartPage()
 
 	return div;
 }
+
+export function setHoverBubble(elementID:string, position:"left"|"right"|"above"|"below", text:string, next:Function)
+{
+	let div = document.createElement('div');
+	div.className = "hoverbubble";
+	div.innerHTML = text;
+
+	document.body.appendChild(div);
+
+	let bubbleWidth = div.clientWidth;
+	let bubbleHeight = div.clientHeight;
+
+	var target = document.getElementById(elementID);
+	var box = target!.getBoundingClientRect();
+
+	console.log(box);
+
+	var x,y;
+	switch(position)
+	{
+		case "above":
+			x = box.left + box.width/2 - bubbleWidth/2;
+			y = box.top - bubbleHeight;
+			break;
+	}
+
+	div.style.left = x + "px";
+	div.style.top = y + "px";
+}
+
 
 win.createHelpPopup = createHelpPopup;

@@ -2,7 +2,7 @@
 	Z indexes
 	
 	6: giant card, search results
-	5: card select popup
+	5: card select popup, hoverbubble
 	4: animated card moving
 	3: shuffle buttons, hand drop zone, offset pony cards, help buttons
 	2: pony + goal cards
@@ -1008,4 +1008,16 @@ iframe
 		padding: 0px;
 		font-size: 3vh;
 	}
+}
+
+.hoverbubble
+{
+	background-color: blue;
+	border: solid 1px black;
+
+	font-size: 12pt;
+	color:black;
+	z-index: var(--popupZLevel);
+	position: absolute;
+	display: inline-block;
 }
