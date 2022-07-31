@@ -238,7 +238,7 @@ function preRequestDrawGoal()
 export function updatePonyDiscard(cardOnTop?: Card)
 {
 	let model = win.model as GameModel & {ponyDrawPileLength: number}
-	if(model.ponyDrawPileLength == 0 || (model.ponyDrawPile && model.ponyDrawPile.length == 0))
+	if(model.mode == "client" ? model.ponyDrawPileLength == 0 : model.ponyDrawPile.length == 0)
 		document.getElementById("ponyDrawPile")!.classList.add('blank');
 	else
 		document.getElementById("ponyDrawPile")!.classList.remove('blank');
@@ -278,7 +278,7 @@ export function updateShipDiscard(tempCard?: Card)
 {
 	let model = win.model as GameModel & {ponyDrawPileLength: number, shipDrawPileLength: number};
 
-	if(model.shipDrawPileLength == 0 || (model.shipDrawPile && model.shipDrawPile.length == 0))
+	if(model.mode == "client" ? model.shipDrawPileLength == 0 : model.shipDrawPile.length == 0)
 		document.getElementById("shipDrawPile")!.classList.add('blank');
 	else
 		document.getElementById("shipDrawPile")!.classList.remove('blank');
@@ -320,7 +320,7 @@ export function updateGoalDiscard(tempCard?: Card)
 	var element = document.getElementById("goalDrawPile")!;
 	let model = win.model as GameModel & {goalDrawPileLength: number, shipDrawPileLength: number};
 
-	if(model.goalDrawPileLength == 0 || (model.goalDrawPile && model.goalDrawPile.length == 0))
+	if(model.mode == "client" ? model.goalDrawPileLength == 0 : model.goalDrawPile.length == 0)
 		element.classList.add('blank');
 	else
 		element.classList.remove('blank');

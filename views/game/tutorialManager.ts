@@ -91,7 +91,6 @@ export function boot(): void
 		hand: [],
 		disconnected: 0,
 		socket: {} as any,
-		
 	});
 
 	model.turnstate = new Turnstate();

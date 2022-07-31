@@ -127,6 +127,11 @@ body
 	text-align: center;
 }
 
+h1, h2 
+{
+	margin: 10px 0px;
+}
+
 .split
 {
 	
@@ -218,17 +223,21 @@ img
 	width: 300px;
 }
 
-#center button
+.buttons div + div
 {
-	font-size: 15pt;
-	margin: 10px;
-	padding: 10px 20px
+	margin-top: 3px;
 }
 
+.buttons button
+{
+	font-size: 15pt;
+	padding: 8px 20px;
+	cursor: pointer;
+}
 footer
 {
 	margin: auto;
-	padding: 20px 0px;
+	padding: 0px 0px;
 	max-width: 900px;
 	background-color: white;
 }
@@ -258,9 +267,16 @@ footer
 
 .footerLinks a
 {
+	display: inline-block;
 	text-decoration: none;
 	color: black;
-	margin: 0px 20px;
+	padding: 15px 15px;
+	transition: background .2s;
+}
+
+.footerLinks a:hover
+{
+	background-color: rgba(128,128,128,.3)
 }
 
 .profile-option

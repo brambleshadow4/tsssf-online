@@ -169,7 +169,7 @@ export function loadView(handshakeMessage: string)
 	initBoard();
 	initPeripherals();
 
-	if(!sessionStorage["shownHelp"])
+	if(!sessionStorage["shownHelp"] && window.location.pathname != "/tutorial")
 	{
 		sessionStorage["shownHelp"] = "true";
 		win.createHelpPopup();
