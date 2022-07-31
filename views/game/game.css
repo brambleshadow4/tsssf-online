@@ -192,7 +192,7 @@ body.cardsUnapproved .card.custom
 .card
 {
 	/*filter: grayscale(100%);*/
-	user-drag: element;
+	/*user-drag: element;*/
 	-khtml-user-drag: element;
 }
 
@@ -1012,12 +1012,24 @@ iframe
 
 .hoverbubble
 {
-	background-color: blue;
-	border: solid 1px black;
+	background-color: white;
+	border: solid 2px black;
+	border-radius: 10px;
+	padding: 10px;
 
 	font-size: 12pt;
 	color:black;
 	z-index: var(--popupZLevel);
 	position: absolute;
 	display: inline-block;
+}
+
+.hoverbubble-buttons
+{
+	text-align: right;
+}
+
+.hoverbubble-buttons button
+{
+	margin:0px;
 }

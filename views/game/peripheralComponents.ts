@@ -3,17 +3,9 @@
 
 import {
 	isPony, 
-	isGoal, 
 	isShip, 
-	isGoalLoc, 
-	isBoardLoc,
-	isOffsetLoc,
-	isPlayerLoc,
-	isDiscardLoc,
 	isBlank,
-	isAnon,
-	isPonyOrStart,
-	Card, Location, CardProps, GameOptions
+	Card, CardProps, GameOptions
 } from "../../model/lib.js";
 
 import GameModel from "../../model/GameModel.js";
@@ -246,7 +238,7 @@ function preRequestDrawGoal()
 export function updatePonyDiscard(cardOnTop?: Card)
 {
 	let model = win.model as GameModel & {ponyDrawPileLength: number}
-	if(model.ponyDrawPileLength == 0)
+	if(model.ponyDrawPileLength == 0 || (model.ponyDrawPile && model.ponyDrawPile.length == 0))
 		document.getElementById("ponyDrawPile")!.classList.add('blank');
 	else
 		document.getElementById("ponyDrawPile")!.classList.remove('blank');
@@ -286,7 +278,7 @@ export function updateShipDiscard(tempCard?: Card)
 {
 	let model = win.model as GameModel & {ponyDrawPileLength: number, shipDrawPileLength: number};
 
-	if(model.shipDrawPileLength == 0)
+	if(model.shipDrawPileLength == 0 || (model.shipDrawPile && model.shipDrawPile.length == 0))
 		document.getElementById("shipDrawPile")!.classList.add('blank');
 	else
 		document.getElementById("shipDrawPile")!.classList.remove('blank');
@@ -328,7 +320,7 @@ export function updateGoalDiscard(tempCard?: Card)
 	var element = document.getElementById("goalDrawPile")!;
 	let model = win.model as GameModel & {goalDrawPileLength: number, shipDrawPileLength: number};
 
-	if(model.goalDrawPileLength == 0)
+	if(model.goalDrawPileLength == 0 || (model.goalDrawPile && model.goalDrawPile.length == 0))
 		element.classList.add('blank');
 	else
 		element.classList.remove('blank');
@@ -1136,12 +1128,41 @@ function quickStartPage()
 
 	return div;
 }
-
-export function setHoverBubble(elementID:string, position:"left"|"right"|"above"|"below", text:string, next:Function)
+export function clearHoverBubble(): void
 {
+	let oldBubbles = document.getElementsByClassName('hoverbubble');
+	while(oldBubbles.length)
+	{
+		oldBubbles[0].parentNode!.removeChild(oldBubbles[0])
+	}
+}
+
+export function setHoverBubble(elementID:string, position:"left"|"right"|"above"|"below", text:string, next?:Function)
+{
+	clearHoverBubble();
+
+	let PADDING = 20;
 	let div = document.createElement('div');
 	div.className = "hoverbubble";
-	div.innerHTML = text;
+
+	for(let line of text.split("\n"))
+	{
+		let lineDiv = document.createElement('div');
+		lineDiv.innerHTML = line;
+		div.appendChild(lineDiv);
+	}
+
+	if(next)
+	{
+		let buttonDiv = document.createElement('div');
+		buttonDiv.className = "hoverbubble-buttons";
+
+		let button = document.createElement('button');
+		button.innerHTML = s.TutorialNext;
+		button.onclick = next as any;
+		buttonDiv.appendChild(button)
+		div.appendChild(buttonDiv);
+	}
 
 	document.body.appendChild(div);
 
@@ -1158,7 +1179,15 @@ export function setHoverBubble(elementID:string, position:"left"|"right"|"above"
 	{
 		case "above":
 			x = box.left + box.width/2 - bubbleWidth/2;
-			y = box.top - bubbleHeight;
+			y = box.top - bubbleHeight - PADDING;
+			break;
+		case "left":
+			x = box.left - PADDING - bubbleWidth;
+			y = box.top + box.height/2 - bubbleHeight/2;
+			break;
+		case "right":
+			x = box.right + PADDING;
+			y = box.top + box.height/2 - bubbleHeight/2;
 			break;
 	}
 

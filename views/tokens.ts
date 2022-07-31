@@ -145,4 +145,25 @@ export default {
 	"AhcyknntHint2": "The secret key for the cipher is \"Aeterna\"",
 	"AhcyknntHint3": "Adjutant. Changeling, OC. Revisionist history (special). Choose one pony and one ship card currently on the shipping grid except for Changelings and Love Potions. You may copy the powers of those cards. This power cannot be copied. If you can read this, you're trying way too hard",
 
+	"TutorialNext": "Next", // next button for tutorial popup
+	"Tutorial1": "Welcome to the Twilight Sparkle's Secret Shipfic Folder (TSSSF) tutorial!\nThis tutorial will teach you the basics of playing the game.",
+	"Tutorial2": "In TSSSF, you start with a hand of 4 pony (purple) cards and 3 ship (pink) cards.",
+	"Tutorial3": "Click the pony (purple) deck 4 times to draw 4 ponies.",
+	"Tutorial4": "Click the ship (pink) deck 3 times to draw 3 ponies.",
+	"Tutorial5": "Now that you have some cards, this is the shipping grid.\nThis is where you'll play cards from your hand.",
+	"Tutorial6": "Right now, it only has a single card:\nFanfic Author Twilight.",
+	"Tutorial7": "During your turn, you'll play pony and ship cards on the grid\nto pair them with each other. This is called \"shipping.\"",
+	"Tutorial8": "Try dragging a ship (pink) card from your hand\nso that it connects off of Twilight",
+	"Tutorial9": "Now, drag a pony (purple) card from your hand\nto the other side of the ship card you just played.",
+	"Tutorial10": "Congrats! You've just made your first ship between Twilight and {0}",
+	"Tutorial11": "The objective of the game is to create ships on the grid to achieve specific goals",
+	"Tutorial12": "At the start of your turn, you'll draw goals until there's 3 available.",
+	"Tutorial13": "Click the goal deck 3 times to draw 3 goals.",
+	"Tutorial14": "Read the text on the goals by holding down Shift and hovering over them\n(you can also use Shift on any card to do this)",
+	"Tutorial15": "It looks like you can achieve the Rainbow Dash goal this turn.\nPlay cards from your hand like you did before unitl you've shipped two Rainbow Dashes together.",
+	"Tutorial16": "A goal will light up green when it's been achieved.\nHover over the card and click the checkmark to take the goal.",
+	"Tutorial17": "You've just scored your first two points!\nIn a real game, you'll play until one player reaches 9-11 points, depending on the number of players",
+	"Tutorial18": "You can keep playing cards until you run out of them in your hand,\nor you can stop after playing at least one card.\nFinish your turn by drawing cards until you have seven in your hand.",
+	"Tutorial19": "Then push end turn.",
+
 }	

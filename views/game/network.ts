@@ -195,7 +195,7 @@ function messageHandler(event: MessageEvent)
 			model.cardLocations[card] = type + "DiscardPile,stack";
 
 		if(cards.length)
-		model.cardLocations[cards[cards.length-1]] = type + "DiscardPile,top";
+			model.cardLocations[cards[cards.length-1]] = type + "DiscardPile,top";
 
 		var funs ={
 			"pony": updatePonyDiscard,
@@ -295,7 +295,7 @@ export function requestDrawShip()
 		broadcast("draw;ship");
 		if(win.model.mode != "client")
 		{
-			let card = win.model.shipDrawPile.pop();
+			let card = win.model.shipDrawPile[0];
 			if(card)
 				moveCard(card, "shipDrawPile", "player," + win.model.playerName, {})
 		}
@@ -328,7 +328,7 @@ export function requestDrawGoal(specialLocation?: string)
 
 			let location = specialLocation || "goal," + goalNo
 
-			let card = win.model.goalDrawPile.pop();
+			let card = win.model.goalDrawPile[0];
 			if(card)
 			{
 				moveCard(card, "goalDrawPile", location, {})

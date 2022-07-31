@@ -63,6 +63,8 @@ export default class GameModel implements GM
 	public turnstate? = new Turnstate();
 	public debug = false;
 
+	public onCardMove?: Function;
+
 	private startCard: Card = "";
 
 	constructor(){}
@@ -1028,7 +1030,6 @@ export default class GameModel implements GM
 		//postmove
 
 		this.updateTurnstatePostMove(card, startLocation, endLocation);
-
 
 		// cant move to a goal location yet
 

@@ -732,7 +732,17 @@ export async function moveCard(
 	}
 	else if(["ponyDrawPile","shipDrawPile","goalDrawPile"].indexOf(startLocation) > -1)
 	{
-		startPos = getPosFromId(startLocation)
+		startPos = getPosFromId(startLocation);
+		if(model.mode != "client")
+		{
+			let funs = {
+				"pony": updatePonyDiscard,
+				"ship": updateShipDiscard,
+				"goal": updateGoalDiscard
+			}
+			updateStartLocationFun = funs[startLocation.substring(0,4) as "pony"|"ship"|"goal"];
+		}
+			
 	}
 	else if(isPlayerLoc(startLocation))
 	{
@@ -964,6 +974,9 @@ export async function moveCard(
 	updateRemoveUnconnectedCardsButton();
 	checkIfGoalsWereAchieved();
 
+	// used for the tutorial to listen to events.
+	if(model.onCardMove)
+		model.onCardMove();
 }
 
 function checkIfGoalsWereAchieved()
