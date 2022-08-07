@@ -453,18 +453,15 @@ export class GameInstance
 			}
 
 			if(message.startsWith("move;"))
-			{
 				game.moveCard(message, player.name);
-			}
 
 			if(message == "endturn")
 			{
-				if(!game.model.turnstate) return;
+				if(!game.model.turnstate)
+					return;
 
 				if(player.name == game.model.turnstate.currentPlayer)
-				{
 					game.changeTurnToNextPlayer();	
-				}
 			}
 		}
 	}
@@ -498,42 +495,32 @@ export class GameInstance
 
 		// register name. 
 		if(!player && name !== undefined && this.isLobbyOpen)
-		{
 			player = this.registerPlayerName(socket, name);
-		}
 
 		// keep track of new connections
 		if(!player)
 		{
 			if(this.isLobbyOpen && this.newConnections.indexOf(socket) == -1)
-			{
 				this.newConnections.push(socket);
-			}
 		}
 
 		// update host
 		if(!this.host)
-		{
 			this.reassignHost();
-		}
 
 
 		// redirect to lobby/game
 		if(player && this.isInGame)
 		{
 			if(this.model.turnstate && !this.model.turnstate.currentPlayer)
-			{
 				this.changeTurnToNextPlayer();
-			}
 
 			this.sendCurrentState(player.name);
 			this.sendPlayerlistsToEachPlayer();
 		}
 		
 		if(this.isLobbyOpen)
-		{
 			this.updateLobby();
-		}
 		else if(!player)
 		{
 			// send lobby closed
@@ -1138,7 +1125,6 @@ export class GameInstance
 				this.toEveryone( "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
 			}
 		}
-	
 		this.checkIfGoalsWereAchieved();
 	}
 }

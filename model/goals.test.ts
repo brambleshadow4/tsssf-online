@@ -43,6 +43,7 @@ function setupGame(setupOptions?:{
 }):[GameInstance, MockPlayer]
 {	
 	let game = new GameInstance();
+	
 
 	cm.init(allCardsGameOptions());
 
@@ -108,6 +109,7 @@ function setupGame(setupOptions?:{
 	} as MockPlayer;
 
 	game.model.players.push(fakePlayer);
+	game.model.mode = "server";
 	game.setLobbyOptions({
 		cardDecks: setupOptions?.cardDecks || ["Core.*"],
 		ruleset: "turnsOnly",
@@ -167,8 +169,8 @@ export default function(){
 		player.grab(ship);
 		player.grab(twi2);
 
-		player.move(ship, "hand", "sr,0,0");
-		player.move(twi2, "hand", "p,1,0");
+		player.move(ship, "player,Test", "sr,0,0");
+		player.move(twi2, "player,Test", "p,1,0");
 
 		player.setEffect(twi2, "gender", "male");
 
@@ -187,16 +189,16 @@ export default function(){
 		ships.forEach(x => player.grab(x));
 		ponies.forEach(x => player.grab(x));
 
-		player.move(ships[0], "hand", "sr,0,0");
-		player.move(ponies[0], "hand", "p,1,0");
+		player.move(ships[0], "player,Test", "sr,0,0");
+		player.move(ponies[0], "player,Test", "p,1,0");
 
-		player.move(ships[1], "hand", "sb,1,0");
-		player.move(ponies[1], "hand", "p,1,1");
+		player.move(ships[1], "player,Test", "sb,1,0");
+		player.move(ponies[1], "player,Test", "p,1,1");
 
 		expectGoalUnachieved(game.model, goal);
 
-		player.move(ships[2], "hand", "sr,0,1");
-		player.move(ponies[2], "hand", "p,0,1");
+		player.move(ships[2], "player,Test", "sr,0,1");
+		player.move(ponies[2], "player,Test", "p,0,1");
 
 		expectGoalAchieved(game.model, goal);
 
@@ -212,8 +214,8 @@ export default function(){
 		player.grab(ship);
 
 
-		player.move(ship, "hand", "sr,0,0");
-		player.move(changeling, "hand", "p,1,0");
+		player.move(ship, "player,Test", "sr,0,0");
+		player.move(changeling, "player,Test", "p,1,0");
 
 		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 
@@ -245,22 +247,22 @@ export default function(){
 			
 			[ship1, ship2, ship3, ship4, p1, p2, changeling].forEach(x => player.grab(x));
 
-			player.move(ship2, "hand", "sd,0,0");
-			player.move(p1, "hand", "p,0,1");
+			player.move(ship2, "player,Test", "sd,0,0");
+			player.move(p1, "player,Test", "p,0,1");
 
-			player.move(ship3, "hand", "sr,0,1");
-			player.move(p2, "hand", "p,1,1");
+			player.move(ship3, "player,Test", "sr,0,1");
+			player.move(p2, "player,Test", "p,1,1");
 
 			player.endTurn();
 		});
 
 		test("changeling redisguising breaks up existing ships", () =>{
 
-			player.move(ship1, "hand", "sr,0,0");
-			player.move(changeling, "hand", "p,1,0");
+			player.move(ship1, "player,Test", "sr,0,0");
+			player.move(changeling, "player,Test", "p,1,0");
 			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 
-			player.move(ship4, "hand", "sd,1,0");
+			player.move(ship4, "player,Test", "sd,1,0");
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
 			// last ship is slide between p2 (Bon Bon) and changeling
@@ -272,15 +274,15 @@ export default function(){
 
 		test("changeling redisguise doesn't change what pony was played", () =>{
 
-			player.move(ship1, "hand", "sr,0,0");
-			player.move(changeling, "hand", "p,1,0");
+			player.move(ship1, "player,Test", "sr,0,0");
+			player.move(changeling, "player,Test", "p,1,0");
 			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 
 
 			expect(game.model.turnstate!.playedPonies.length).toBe(1);
 			expect(game.model.turnstate!.playedPonies[0]).toBe(changeling + ":1");
 
-			player.move(ship4, "hand", "sd,1,0");
+			player.move(ship4, "player,Test", "sd,1,0");
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
 			expect(game.model.turnstate!.playedPonies.length).toBe(1);
@@ -289,10 +291,10 @@ export default function(){
 
 		test("changeling redisguise counts played cards correctly", () =>{
 
-			player.move(ship1, "hand", "sr,0,0");
-			player.move(changeling, "hand", "p,1,0");
+			player.move(ship1, "player,Test", "sr,0,0");
+			player.move(changeling, "player,Test", "p,1,0");
 			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
-			player.move(ship4, "hand", "sd,1,0");
+			player.move(ship4, "player,Test", "sd,1,0");
 
 			let playedShips = game.model.turnstate!.playedShips;
 			expect(playedShips.length).toBe(2);
@@ -331,12 +333,12 @@ export default function(){
 			[ship1, ship2, lovePoison, pony, changeling].forEach(x => player.grab(x));
 
 
-			player.move(ship1, "hand", "sr,0,0");
-			player.move(pony, "hand", "p,1,0");
+			player.move(ship1, "player,Test", "sr,0,0");
+			player.move(pony, "player,Test", "p,1,0");
 			player.endTurn();
 
-			player.move(ship2, "hand", "sr,1,0");
-			player.move(changeling, "hand", "p,2,0");
+			player.move(ship2, "player,Test", "sr,1,0");
+			player.move(changeling, "player,Test", "p,2,0");
 			player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 		});
 
@@ -346,7 +348,7 @@ export default function(){
 			let brokenShips = game.model.turnstate!.brokenShips;
 			expect(brokenShips.length).toBe(0);
 
-			player.move(lovePoison, "hand", "sd,1,0");
+			player.move(lovePoison, "player,Test", "sd,1,0");
 			player.move(changeling, "p,2,0", "p,1,1");
 
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
@@ -362,7 +364,7 @@ export default function(){
 			expect(playedShips.length).toBe(1);
 			hasShipPair(playedShips, changeling+":1", pony)
 
-			player.move(lovePoison, "hand", "sd,1,0");
+			player.move(lovePoison, "player,Test", "sd,1,0");
 			player.move(changeling, "p,2,0", "p,1,1");
 			player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
@@ -403,20 +405,20 @@ export default function(){
 			[game, player] = setupGame();
 			player.grab(ponyA, ponyB, ponyC, ponyD, changeling, ship1, ship2, ship3, ship4, ship5, ship6);
 
-			player.move(ship1, "hand", "sr,0,0");
-			player.move(changeling, "hand", "p,1,0");
-			player.move(ship2, "hand", "sr,1,0");
-			player.move(ponyA, "hand", "p,2,0");
-			player.move(ship3, "hand", "sd,1,-1");
-			player.move(ponyB, "hand", "p,1,-1");
-			player.move(ship4, "hand", "sr,1,-1");
-			player.move(ponyC, "hand", "p,2,-1");
-			player.move(ship5, "hand", "sr,2,-1");
-			player.move(ponyD, "hand", "p,3,-1");
+			player.move(ship1, "player,Test", "sr,0,0");
+			player.move(changeling, "player,Test", "p,1,0");
+			player.move(ship2, "player,Test", "sr,1,0");
+			player.move(ponyA, "player,Test", "p,2,0");
+			player.move(ship3, "player,Test", "sd,1,-1");
+			player.move(ponyB, "player,Test", "p,1,-1");
+			player.move(ship4, "player,Test", "sr,1,-1");
+			player.move(ponyC, "player,Test", "p,2,-1");
+			player.move(ship5, "player,Test", "sr,2,-1");
+			player.move(ponyD, "player,Test", "p,3,-1");
 
 			player.endTurn();
 
-			player.move(ship6, "hand", "sd,2,-1"); // activate a swap ability
+			player.move(ship6, "player,Test", "sd,2,-1"); // activate a swap ability
 
 			player.move(ponyC, "p,2,-1", "offset,2,-1");
 			player.move(changeling, "p,1,0", "p,2,-1");
@@ -472,14 +474,14 @@ export default function(){
 		player.drawGoal(goal);
 		player.grab(ship1, ship2, lovePoison, pony, changeling);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(pony, "hand", "p,1,0");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(pony, "player,Test", "p,1,0");
 
-		player.move(ship2, "hand", "sr,1,0");
-		player.move(changeling, "hand", "p,2,0");
+		player.move(ship2, "player,Test", "sr,1,0");
+		player.move(changeling, "player,Test", "p,2,0");
 		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 
-		player.move(lovePoison, "hand", "sd,1,0");
+		player.move(lovePoison, "player,Test", "sd,1,0");
 		player.move(changeling, "p,2,0", "p,1,1");
 		player.setEffect(changeling, "disguise", "Core.Pony.StarswirlTheBearded");
 
@@ -499,13 +501,13 @@ export default function(){
 
 		player.grab(ship1, ship2, pony1, pony2, changeling);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(pony1, "hand", "p,1,0");
-		player.move(ship2, "hand", "sr,1,0");
-		player.move(pony2, "hand", "p,2,0");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(pony1, "player,Test", "p,1,0");
+		player.move(ship2, "player,Test", "sr,1,0");
+		player.move(pony2, "player,Test", "p,2,0");
 
 		player.move(pony1, "p,1,0", "offset,1,0");
-		player.move(changeling, "hand", "p,1,0");
+		player.move(changeling, "player,Test", "p,1,0");
 
 		expect(game.model.turnstate!.brokenShips.length).toBe(2);
 		hasShipPair(game.model.turnstate!.brokenShips, start, pony1)
@@ -538,13 +540,13 @@ export default function(){
 
 		player.grab(ship1, ship2, pony1, pony2);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(pony1, "hand", "p,1,0");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(pony1, "player,Test", "p,1,0");
 
 		player.setEffect(pony1, "gender", "male");
 
-		player.move(ship2, "hand", "sd,1,0");
-		player.move(pony2, "hand", "p,1,1");
+		player.move(ship2, "player,Test", "sd,1,0");
+		player.move(pony2, "player,Test", "p,1,1");
 		player.setEffect(pony2, "gender", "female");
 
 		expectGoalAchieved(game.model, goal);
@@ -562,12 +564,12 @@ export default function(){
 
 		player.grab(pony, lovePoison1, lovePoison2);
 
-		player.move(lovePoison1, "hand", "sr,0,0");
-		player.move(pony, "hand", "p,1,0");
+		player.move(lovePoison1, "player,Test", "sr,0,0");
+		player.move(pony, "player,Test", "p,1,0");
 
 		expectGoalUnachieved(game.model, goal);
 
-		player.move(lovePoison2, "hand", "sd,0,0");
+		player.move(lovePoison2, "player,Test", "sd,0,0");
 		player.move(pony, "p,1,0", "p,0,1");
 
 
@@ -586,13 +588,13 @@ export default function(){
 		let unicorn = "Core.Pony.HeartlessDictatorRarity";
 		player.grab(ship1, ship2, flimFlam, unicorn);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(unicorn, "hand", "p,1,0");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(unicorn, "player,Test", "p,1,0");
 
 		expectGoalUnachieved(game.model, goal);
 
-		player.move(ship1, "hand", "sr,1,0");
-		player.move(flimFlam, "hand", "p,2,0");
+		player.move(ship1, "player,Test", "sr,1,0");
+		player.move(flimFlam, "player,Test", "p,2,0");
 
 		expectGoalAchieved(game.model, goal);
 	});
@@ -614,13 +616,13 @@ export default function(){
 
 		player.grab(ship1, ship2, twi, bigmac);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(bigmac, "hand", "p,1,0");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(bigmac, "player,Test", "p,1,0");
 
 		expectGoalUnachieved(game.model, goal);
 
-		player.move(ship2, "hand", "sr,1,0");
-		player.move(twi, "hand", "p,2,0");
+		player.move(ship2, "player,Test", "sr,1,0");
+		player.move(twi, "player,Test", "p,2,0");
 
 		expectGoalAchieved(game.model, goal);
 	});
@@ -642,11 +644,11 @@ export default function(){
 
 		player.grab(ship1, ship2, twi, bigmac);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(bigmac, "hand", "p,1,0");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(bigmac, "player,Test", "p,1,0");
 
-		player.move(ship2, "hand", "sr,1,0");
-		player.move(twi, "hand", "p,2,0");
+		player.move(ship2, "player,Test", "sr,1,0");
+		player.move(twi, "player,Test", "p,2,0");
 
 		expectGoalAchieved(game.model, goal);
 
@@ -672,11 +674,11 @@ export default function(){
 
 		player.grab(ship1, ship2, changeling, bigmac);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(bigmac, "hand", "p,1,0");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(bigmac, "player,Test", "p,1,0");
 
-		player.move(ship2, "hand", "sr,-1,0");
-		player.move(changeling, "hand", "p,-1,0");
+		player.move(ship2, "player,Test", "sr,-1,0");
+		player.move(changeling, "player,Test", "p,-1,0");
 
 		expectGoalAchieved(game.model, goal);
 		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
@@ -697,10 +699,10 @@ export default function(){
 
 		player.grab(pixelPrism, ship1, male, ship2);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(male, "hand", "p,1,0");
-		player.move(ship2, "hand", "sd,0,0");
-		player.move(pixelPrism, "hand", "p,0,1");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(male, "player,Test", "p,1,0");
+		player.move(ship2, "player,Test", "sd,0,0");
+		player.move(pixelPrism, "player,Test", "p,0,1");
 
 		expect(evalGoalLogic(game.model, "ExistsShip(gender=male, gender=female, 2)")).toBe(false);
 
@@ -723,10 +725,10 @@ export default function(){
 
 		player.grab(pixelPrism, ship1, male, ship2);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(male, "hand", "p,1,0");
-		player.move(ship2, "hand", "sd,0,0");
-		player.move(pixelPrism, "hand", "p,0,1");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(male, "player,Test", "p,1,0");
+		player.move(ship2, "player,Test", "sd,0,0");
+		player.move(pixelPrism, "player,Test", "p,0,1");
 
 		expect(evalGoalLogic(game.model, "ExistsPony(race=earth, 2)")).toBe(false);
 		expect(evalGoalLogic(game.model, "ExistsPony(race=unicorn, 2)")).toBe(true);
@@ -750,10 +752,10 @@ export default function(){
 
 		player.grab(pixelPrism, ship1, male, ship2);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(male, "hand", "p,1,0");
-		player.move(ship2, "hand", "sd,0,0");
-		player.move(pixelPrism, "hand", "p,0,1");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(male, "player,Test", "p,1,0");
+		player.move(ship2, "player,Test", "sd,0,0");
+		player.move(pixelPrism, "player,Test", "p,0,1");
 
 		player.setEffect(pixelPrism, "fullCopy", male);
 		
@@ -775,14 +777,14 @@ export default function(){
 
 		player.grab(aloelotus, malePony, femalePony, ship1, ship2);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(malePony, "hand", "p,1,0");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(malePony, "player,Test", "p,1,0");
 
 		player.endTurn();
 		expect(evalGoalLogic(game.model, "PlayShips(gender=male, gender=female, 2)")).toBe(false);
 
-		player.move(ship2, "hand", "sr,1,0");
-		player.move(aloelotus, "hand", "p,2,0");
+		player.move(ship2, "player,Test", "sr,1,0");
+		player.move(aloelotus, "player,Test", "p,2,0");
 
 		expect(evalGoalLogic(game.model, "PlayShips(gender=male, gender=female, 2)")).toBe(true);
 	})
@@ -805,10 +807,10 @@ export default function(){
 		
 		expectGoalUnachieved(game.model, goal);
 
-		player.move(ship1, "hand", "sr,0,0");
-		player.move(pony1, "hand", "p,1,0");
-		player.move(ship2, "hand", "sr,1,0");
-		player.move(pony2, "hand", "p,2,0");
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(pony1, "player,Test", "p,1,0");
+		player.move(ship2, "player,Test", "sr,1,0");
+		player.move(pony2, "player,Test", "p,2,0");
 
 		expectGoalAchieved(game.model, goal);
 	});
