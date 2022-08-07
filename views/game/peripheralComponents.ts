@@ -1169,10 +1169,8 @@ export function setHoverBubble(elementID:string, position:"left"|"right"|"above"
 	let bubbleWidth = div.clientWidth;
 	let bubbleHeight = div.clientHeight;
 
-	var target = document.getElementById(elementID);
+	var target = elementID == "tutorialTarget" ? document.getElementsByClassName(elementID)[0] : document.getElementById(elementID);
 	var box = target!.getBoundingClientRect();
-
-	console.log(box);
 
 	var x,y;
 	switch(position)

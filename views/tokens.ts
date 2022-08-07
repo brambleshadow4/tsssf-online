@@ -146,6 +146,7 @@ export default {
 	"AhcyknntHint3": "Adjutant. Changeling, OC. Revisionist history (special). Choose one pony and one ship card currently on the shipping grid except for Changelings and Love Potions. You may copy the powers of those cards. This power cannot be copied. If you can read this, you're trying way too hard",
 
 	"TutorialNext": "Next", // next button for tutorial popup
+	"TutorialDone": "Nicely done!",
 	"Tutorial1": "Welcome to the Twilight Sparkle's Secret Shipfic Folder (TSSSF) tutorial!\nThis tutorial will teach you the basics of playing the game.",
 	"Tutorial2": "In TSSSF, you start with a hand of 4 pony (purple) cards and 3 ship (pink) cards.",
 	"Tutorial3": "Click the pony (purple) deck 4 times to draw 4 ponies.",
@@ -165,5 +166,18 @@ export default {
 	"Tutorial17": "You've just scored your first two points!\nIn a real game, you'll play until one player reaches 9-11 points, depending on the number of players",
 	"Tutorial18": "You can keep playing cards until you run out of them in your hand,\nor you can stop after playing at least one card.\nFinish your turn by drawing cards until you have seven in your hand.",
 	"Tutorial19": "Then push end turn.",
-
+	"Tutorial20": "Those are all the basics of the game!\nIf you ever want to access the full rull book, you can click the (?) button in the top right.",
+	"Tutorial21": "Next, we'll go over some of the special abilities certain cards have!",
+	"Tutorial22": "Pony cards have abilities that activate when you play them on the grid\nSome cards like Tsundere Rainbow Dash can be as basic as\ndrawing an extra ship or pony card.",
+	"Tutorial23": "Some cards like Bulk Biceps let you swap ponies around the grid. ",
+	"Tutorial24": "Try swapping Fluttershy and Rainbow Dash by dragging Rainbow Dash on top of Fluttershy.",
+	"Tutorial25": "Then drag Fluttershy to where Rainbow Dash was previously.",
+	"Tutorial26": "Some cards like Nightmare Moon let you replace a pony on the grid rather than needing a ship card to play.",
+	"Tutorial27": "Try replacing Rainbow Dash by dragging Nightmare Moon on top of her.",
+	"Tutorial28": "Some cards like Gilda let you discard goals. You can discard any card in the game by\nholding down 'D' and clicking it, or dragging it to the discard pile. ",
+	"Tutorial29": "Try discarding one of these goals and drawing a new one.",
+	"Tutorial30": "Some cards like Princess Celestia let you search the discard piles and take a card.",
+	"Tutorial31": "Try taking a card from the pony discard pile by clicking on it, then choosing a card.",
+	"Tutorial32": "Some cards are changelings. These cards can disguise as any card in the game of the same race.",
+	"Tutorial33": "Try disgusing the earth pony changeling by connecting it to the grid with a ship card."
 }	

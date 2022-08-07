@@ -1,8 +1,8 @@
 import {
-	GameOptions, defaultGameOptions, isGoal, isStart, isShip, isPony, isBlank, Card, isBoardLoc, isGoalLoc
+	GameOptions, defaultGameOptions, isGoal, isStart, isShip, isPony, isBlank, Card, isBoardLoc, isGoalLoc, isOffsetLoc, isDiscardLoc
 } from "../../model/lib.js";
 
-import {setHoverBubble, clearHoverBubble} from "./peripheralComponents.js";
+import {setHoverBubble, clearHoverBubble, updateHand} from "./peripheralComponents.js";
 import * as cm from "../../model/cardManager.js";
 import GameModel from "../../model/GameModel.js";
 import {updateGame} from "./game.js";
@@ -18,12 +18,19 @@ let state = ST.INITIAL_LOAD;
 
 let win = window as unknown as {
 	gameOptions: GameOptions,
+	
 }
 
 let tutorialState = 0;
 let model: GameModel;
 
-export function boot(): void
+function setupBoard(options:{
+	drawPile: Card[],
+	discardPile: Card[],
+	board?: {[k:string]: Card},
+	currentGoals?: string[],
+	hand?: Card[],
+}): void
 {
 	let bubble = document.createElement('div');
 
@@ -36,30 +43,31 @@ export function boot(): void
 	model.board = {
 		"p,0,0": {card: "Core.Start.FanficAuthorTwilight"}
 	}
+
+	if(options.board)
+	{
+		for(let key in options.board)
+		{
+			model.board[key] = model.board[key] || {};
+			model.board[key].card = options.board[key];
+			model.cardLocations[options.board[key]] = key;
+		}
+	}
+
+	
 	model.currentGoals = ["blank:goal","blank:goal","blank:goal"];
 
-	cm.init(win.gameOptions);
-	let cards = cm.inPlay();
+	if(options.currentGoals)
+	{
+		model.currentGoals = options.currentGoals;
+		model.cardLocations[model.currentGoals[0]] = "goal,0";
+		model.cardLocations[model.currentGoals[1]] = "goal,1";
+		model.cardLocations[model.currentGoals[2]] = "goal,2";
+	}
 
-	for(let card of [
-		"Core.Pony.TsundereRainbowDash",
-		"Core.Pony.CiderSeasonApplejack",
-		"Core.Pony.PrincessCelestia",
-		"Core.Pony.BrokenWingRainbowDash",
-		"Core.Pony.DramaticallyWoundedRarity",
-		"Core.Pony.GypsyWitchPinkiePie",
-		"Core.Pony.RoyalGuardShiningArmor",
-		"Core.Pony.SuperSpyTwilight",
-		// SHIPS
-		"Core.Ship.BoredOnASundayAfternoon",
-		"Core.Ship.TheOtherMare",
-		"Core.Ship.UnexpectedPregnancy",
-		"Core.Ship.WhatDidIDoLastNight",
-		"Core.Ship.PutARingOnIt",
-		"Core.Ship.ThereAreNoBrakesOnTheLoveTrain",
-		"Core.Ship.NowKiss",
-		"Core.Ship.LeavingOnAPersonalCrusade"
-	])
+	cm.init(win.gameOptions);
+
+	for(let card of options.drawPile)
 	{
 		if(isPony(card))
 		{
@@ -71,16 +79,33 @@ export function boot(): void
 			model.shipDrawPile.push(card);
 			model.cardLocations[card] = "shipDrawPile";
 		}
+		if(isGoal(card))
+		{
+			model.goalDrawPile.push(card);
+			model.cardLocations[card] = "goalDrawPile";
+		}
 	}
 
-	for(let card of ["Core.Goal.PrettyPrettyPrincess","Core.Goal.HehPeasants","Core.Goal.RainbowDashFanClub"])
+	for(let card of options.discardPile)
 	{
-		model.goalDrawPile.push(card);
-		model.cardLocations[card] = "goalDrawPile";
+		if(isPony(card))
+		{
+			model.ponyDiscardPile.push(card);
+			model.cardLocations[card] = "ponyDiscardPile,stack";
+		}
+		if(isShip(card))
+		{
+			model.shipDiscardPile.push(card);
+			model.cardLocations[card] = "shipDiscardPile,stack";
+		}
+		if(isGoal(card))
+		{
+			model.goalDiscardPile.push(card);
+			model.cardLocations[card] = "goalDiscardPile,stack";
+		}
 	}
 
 	model.players.push({
-
 		id: 1,
 		isHost: false,
 		name: "tutorial",
@@ -88,18 +113,54 @@ export function boot(): void
 		ships: 0,
 		team: "",
 		winnings: [],
-		hand: [],
+		hand: options.hand || [],
 		disconnected: 0,
 		socket: {} as any,
 	});
+
+	if(options.hand)
+	{
+		for(let key in options.hand)
+		{
+			model.cardLocations[options.hand[key]] = "player,tutorial";
+		}
+	}
 
 	model.turnstate = new Turnstate();
 	model.turnstate.init(model, "tutorial");
 
 	model.playerName="tutorial";
 	updateGame(model);
+}
 
-	setTimeout(() => setupState(0), 200);
+export function boot(): void
+{
+	setupBoard({
+		discardPile:[],
+		drawPile: [
+			"Core.Pony.TsundereRainbowDash",
+			"Core.Pony.CiderSeasonApplejack",
+			"Core.Pony.PrincessCelestia",
+			"Core.Pony.BrokenWingRainbowDash",
+			"Core.Pony.DramaticallyWoundedRarity",
+			"Core.Pony.GypsyWitchPinkiePie",
+			"Core.Pony.RoyalGuardShiningArmor",
+			"Core.Pony.SuperSpyTwilight",
+			// SHIPS
+			"Core.Ship.BoredOnASundayAfternoon",
+			"Core.Ship.TheOtherMare",
+			"Core.Ship.UnexpectedPregnancy",
+			"Core.Ship.WhatDidIDoLastNight",
+			"Core.Ship.PutARingOnIt",
+			"Core.Ship.ThereAreNoBrakesOnTheLoveTrain",
+			"Core.Ship.NowKiss",
+			"Core.Ship.LeavingOnAPersonalCrusade",
+			// GOALS
+			"Core.Goal.PrettyPrettyPrincess","Core.Goal.HehPeasants","Core.Goal.RainbowDashFanClub"
+		]
+	});
+
+	setTimeout(() => setupState(33), 200);
 }
 
 function setTutorialTarget(card: Card)
@@ -121,10 +182,10 @@ function setTutorialTarget(card: Card)
 		}
 	}
 
-	let oldTarget = document.getElementById("tutorialTarget");
+	let oldTarget = document.getElementsByClassName("tutorialTarget")[0];
 	if(oldTarget)
-		oldTarget.id = "";
-	element!.id = "tutorialTarget";
+		oldTarget.classList.remove("tutorialTarget");
+	element!.classList.add("tutorialTarget");
 }
 
 function setupState(stateNo: number): void
@@ -213,8 +274,6 @@ function setupState(stateNo: number): void
 		case 16:
 			setHoverBubble("hand","above", s.Tutorial15);
 			model.onCardMove = () => {
-				console.log("checking goals");
-				console.log(model.achievedGoals);
 				if(model.achievedGoals.has("Core.Goal.RainbowDashFanClub"))
 					setupState(17);
 			}
@@ -242,7 +301,124 @@ function setupState(stateNo: number): void
 			model.turnstate!.overrides["fakeOverride"] = {};
 			waitForFreshTurnstate();
 			break;
+		case 21:
+			setHoverBubble("hand","above", s.Tutorial20, () => {setupState(22)});
+			break;
+		case 22:
+			setupBoard({
+				drawPile: ['Core.Goal.GoodEnough'],
+				discardPile:[],
+				currentGoals: ["Core.Goal.PrettyPrettyPrincess","Core.Goal.HehPeasants","Core.Goal.RainbowDashFanClub"],
+				board:{
+				"p,-1,0": "Core.Pony.BulkBiceps",
+				"sr,-1,0": "Core.Ship.BoredOnASundayAfternoon",
+				"p,0,0": "Core.Start.FanficAuthorTwilight",
+				"sr,0,0": "Core.Ship.BoredOnASundayAfternoon",
+				"p,1,0": "Core.Pony.TsundereRainbowDash",
+				"sr,1,0": "Core.Ship.TheOtherMare",
+				"p,2,0": "Core.Pony.MoeFluttershy",
+			}});
+			setHoverBubble("hand","above", s.Tutorial21, () => {setupState(23)});
+			break;
+		case 23:
+			setTutorialTarget("Core.Pony.TsundereRainbowDash")
+			setHoverBubble("tutorialTarget","above", s.Tutorial22, () => {setupState(24)});
+			break;
+		case 24:
+			setTutorialTarget("Core.Pony.BulkBiceps")
+			setHoverBubble("tutorialTarget","above", s.Tutorial23, () => {setupState(25)});
+			break;
+		case 25:
+			setTutorialTarget("Core.Pony.TsundereRainbowDash")
+			setHoverBubble("tutorialTarget","above", s.Tutorial24);
+			model.onCardMove = () => {
+				if(isOffsetLoc(model.cardLocations["Core.Pony.MoeFluttershy"]))
+					setupState(26);
+			}
+			break;
+		case 26:
+			setTutorialTarget("Core.Pony.TsundereRainbowDash")
+			setHoverBubble("tutorialTarget","above", s.Tutorial25);
+			model.onCardMove = () => {
+				if(isBoardLoc(model.cardLocations["Core.Pony.MoeFluttershy"]))
+					setupState(27);
+			}
+			break;
+		case 27:
+			setHoverBubble("hand","above", s.TutorialDone, () => {setupState(28)});
+			break;
+		case 28:
+			model.me().hand.push("Core.Pony.NightmareMoon");
+			model.cardLocations["Core.Pony.NightmareMoon"] = "player,"+model.me().name;
+			updateHand();
+			setTutorialTarget("Core.Pony.NightmareMoon")
+			setHoverBubble("tutorialTarget","above", s.Tutorial26, () => {setupState(29)});
+			break;
+		case 29:
+
+			setTutorialTarget("Core.Pony.TsundereRainbowDash")
+			setHoverBubble("tutorialTarget","above", s.Tutorial27);
+			model.onCardMove = () => {
+				if(isBoardLoc(model.cardLocations["Core.Pony.NightmareMoon"]) && isDiscardLoc(model.cardLocations["Core.Pony.TsundereRainbowDash"]))
+					setupState(30);
+			}
+			break;
+		case 30:
+			setHoverBubble("hand","above", s.TutorialDone, () => {setupState(31)});
+			break;
+		case 31:
+			model.me().hand.push("Core.Pony.Gilda");
+			model.cardLocations["Core.Pony.Gilda"] = "player,"+model.me().name;
+			updateHand();
+			setHoverBubble("hand","above", s.Tutorial28, () => {setupState(32)});
+			break;
+		case 32:
+			setHoverBubble("currentGoals","right", s.Tutorial29, () => {setupState(33)});
+			model.onCardMove = () => {
+				if(model.goalDiscardPile.length && model.currentGoals.filter(x => !isBlank(x)).length == 3)
+					setupState(33);
+			}
+			break;
+		case 33:
+			setHoverBubble("hand","above", s.TutorialDone, () => {setupState(34)});
+			break;
+		case 34:
+			setupBoard({
+				drawPile:[],
+				discardPile: ["Core.Pony.BulkBiceps","Core.Pony.TsundereRainbowDash", "Core.Pony.MoeFluttershy"],
+				hand: ['Core.Pony.PrincessCelestia'],
+				});
+			setHoverBubble("hand","above", s.Tutorial30, () => {setupState(35)});
+			break;
+		case 35:
+			setHoverBubble("ponyDiscardPile","right", s.Tutorial31);
+			model.onCardMove = () => {
+				if(model.me().hand.length >= 2)
+					setupState(36);
+			}
+			break;
+		case 36:
+			setHoverBubble("hand","above", s.TutorialDone, () => {setupState(37)});
+			break;
+		case 37:
+			model.me().hand.splice(0,0,"Core.Pony.EarthChangeling","Core.Ship.BoredOnASundayAfternoon");
+			model.cardLocations["Core.Pony.EarthChangeling"] = "player,tutorial";
+			model.cardLocations["Core.Ship.BoredOnASundayAfternoon"] = "player,tutorial";
+			updateHand();
+			setHoverBubble("hand","above", s.Tutorial32, () => {setupState(38)});
+			break;
+		case 38:
+			setHoverBubble("hand","above", s.Tutorial33);
+			model.onCardMove = () => {
+				if(model.turnstate!.overrides["Core.Pony.EarthChangeling"]?.disguise)
+					setupState(39);
+			}
+			break;
+		case 39:
+			setHoverBubble("hand","above", s.TutorialDone, () => {setupState(40)});
+			break;
 		default:
+
 			clearHoverBubble();
 	}
 }
