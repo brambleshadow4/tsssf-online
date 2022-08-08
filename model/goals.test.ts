@@ -11,6 +11,7 @@ import {
 } from "./lib.js";
 
 import {typecheckGoal} from "./goalCriteria.js";
+import Turnstate from "./turnstate.js";
 
 interface MockPlayer extends Player
 {

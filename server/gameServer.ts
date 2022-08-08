@@ -392,7 +392,6 @@ export class GameInstance
 				if(!cards[card]) return;
 
 				try{
-					
 					game.model.addEffect(card, prop, value);
 					game.toEveryoneElse(player.name, "effects;" + JSON.stringify(game.model.turnstate.overrides));
 					game.checkIfGoalsWereAchieved();

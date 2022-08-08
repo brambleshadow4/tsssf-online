@@ -891,7 +891,6 @@ export default class GameModel implements GM
 		endLocation:Location,
 		extraArg: string)
 	{
-
 		if(startLocation == "hand" || startLocation == "winnings" || endLocation == "hand" || endLocation=="winnings")
 		{
 			throw new Error("bad location");
@@ -1080,9 +1079,7 @@ export default class GameModel implements GM
 				cc.preSwapShippedTo = getConnectedPonies(this, startLocation).map( x => this.appendChangelingContext(x));
 
 				if(this.turnstate.openPonyLocations.has(endLocation))
-				{
 					cc.method = "lovePoison";
-				}
 			}
 			else
 			{
@@ -1163,9 +1160,9 @@ export default class GameModel implements GM
 			}
 			else
 			{
-				var slots = getNeighborKeys(endLocation);
-				slots = slots.filter(x => this.board[x]?.card && !isBlank(this.board[x]?.card));
-				slots.forEach(x => this.turnstate!.openPonyLocations.add(x));
+				var blankPonySlots = getNeighborKeys(endLocation);
+				blankPonySlots = blankPonySlots.filter(x => this.board[x]?.card == undefined || isBlank(this.board[x].card));
+				blankPonySlots.forEach(x => this.turnstate!.openPonyLocations.add(x));
 			}
 		}
 
