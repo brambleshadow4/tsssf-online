@@ -272,7 +272,6 @@ export class GameInstance
 					if(message.startsWith("game;"))
 					{
 						game.startGame();
-
 						for(let player of game.model.players)
 						{
 							game.sendCurrentState(player.name);
@@ -994,7 +993,7 @@ export class GameInstance
 			// remove players which disconnected before the games started
 			for(var i=0; i< this.model.players.length; i++)
 			{
-				if(this.model.players[i].name == "" || !this.model.players[i].socket.isAlive)
+				if(this.model.players[i].name == "" || this.model.players[i].socket.disconnected)
 				{
 					this.model.players.splice(i,1);
 					i--;
@@ -1017,19 +1016,12 @@ export class GameInstance
 			logPlayerJoined();
 		}
 
-		
-		// TODO test rulesets
-		
-		// TODO
 		if(preset)
 			this.loadPreset(preset);
 	}
 
-	// TODO
 	private loadPreset(hand: Card[])
 	{
-		//console.log("Loading Preset Game");
-
 		let player =  {
 			name: "Dev",
 			id: 1,
