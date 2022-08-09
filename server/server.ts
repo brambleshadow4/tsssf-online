@@ -675,7 +675,8 @@ if(options.preset)
 			tsssfServer.openLobby("DEV");
 			tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
 			tsssfServer.games.DEV.startGame([
-				"HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh"
+				"HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh",
+				"HorriblePeople.GraciousGivers.Pony.PrincessCelestAI",
 			]);
 
 			break;

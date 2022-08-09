@@ -9,9 +9,7 @@
 		"ponyDrawPile" 
 		"goalDrawPile" 
 		"shipDrawPile"
-		"winnings"  - this client's winnings (completed goals)
-		"hand" - this client's hands
-		"player" - an opponent
+		"player,<name>" - this player, or an opponent based on the name
 		"<placement>,<x>,<y>" is a board location where 
 			<placement> is "p" for pony or "sr" for ship right or "sd" for ship down
 			<x> is the x coordinate of the card on the board
@@ -1086,7 +1084,7 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 	let model = win.model;
 	let cardLocations = model.cardLocations;
 
-	var isImmediatePlay = (e.startLocation == "hand" || e.startLocation == "ponyDiscardPile,top" || e.startLocation == "shipDiscardPile,top")
+	var isImmediatePlay = (e.startLocation == "player,"+model.me().name || e.startLocation == "ponyDiscardPile,top" || e.startLocation == "shipDiscardPile,top")
 
 
 	if(isPonyOrStart(e.card) && isBoardLoc(e.endLocation))
@@ -1106,6 +1104,7 @@ async function doPlayEvent(e: {card: Card, startLocation: Location, endLocation:
 		}
 
 		var fn = getCardAction(e.card);
+
 		if(fn && (isImmediatePlay || doActionOnSwap(e.card) || e.endLocation == shipTarget))
 		{
 			await fn(e.card);
@@ -1252,14 +1251,13 @@ function getCardAction(card: Card, skipValidation?: boolean)
 	{
 		if(actionName == "fullCopy")
 		{
-			if(win.model.turnstate?.overrides[card]?.fullCopy) { return; }
+			if(win.model.turnstate?.overrides[card]?.fullCopy)
+				return;
 		}
 		if(actionName == "ChangelingNoRedisguise")
 		{
-			let cards = cm.inPlay();
-			let cardInfo = cards[card] as PonyProps;
-
-			if(win.model.turnstate?.overrides[card]?.disguise) { return; }
+			if(win.model.turnstate?.overrides[card]?.disguise)
+				return;
 		}
 	}
 
@@ -1302,9 +1300,6 @@ function changelingAction(type: string)
 	return async function(card: Card)
 	{
 		let cards = cm.inPlay();
-		let cardInfo = cards[card] as PonyProps;
-		let allowRedisguise = (cardInfo.action && cardInfo.action.startsWith("Changeling("))
-
 
 		if(model.turnstate)
 		{			
@@ -1378,8 +1373,8 @@ async function fullCopyAction(card: Card)
 
 		copyOptions = copyOptions.filter(x => x != card);
 
-		if(!copyOptions.length) { return; }
-
+		if(!copyOptions.length)
+			return;
 
 		var cardToCopy = await openCardSelect(s.PopupTitleCopy, s.PopupChoosePonyToCopy, copyOptions);
 

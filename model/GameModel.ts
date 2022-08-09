@@ -698,46 +698,7 @@ export default class GameModel implements GM
 		{
 			delete this.turnstate
 		}
-		
-		/*if(preset)
-			this.loadPreset(preset);*/
 	}
-
-	// TODO
-	/*private loadPreset(hand: Card[])
-	{
-		//console.log("Loading Preset Game");
-
-		let player =  {
-			name: "Dev",
-			id: 1,
-			socket: {
-				replace: true,
-				send: () => {}},
-			hand: [],
-			winnings: [],
-		} as Player;
-
-		this.players.push(player);
-
-		for(let card of hand)
-		{
-			if(isPony(card))
-			{
-				player.hand.push(card);
-				this.cardLocations[card] = "player,Dev";
-				this.ponyDrawPile.splice(this.ponyDrawPile.indexOf(card), 1);
-			}
-			if(isShip(card))
-			{
-				player.hand.push(card);
-				this.cardLocations[card] = "player,Dev";
-				this.shipDrawPile.splice(this.shipDrawPile.indexOf(card), 1);
-			}
-		}
-	}*/
-
-
 
 	private isLocOccupied(loc: Location)
 	{

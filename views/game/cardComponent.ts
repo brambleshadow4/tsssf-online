@@ -320,21 +320,22 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 		if(location && isBoardLoc(location))
 		{
 			var model = globals.model;
-			if(model.board[location] && model.board[location].card && isPonyOrStart(model.board[location].card))
+			if(model.board[location]?.card && isPonyOrStart(model.board[location].card))
 			{
 				offsetCard = model.board[location].card;
 
 				var [_,x,y] = location.split(",");
 				offsetLoc = "offset," + x + "," + y;
 
+				// hand to board replace
 				if(startLoc == "player,"+model.playerName)
 				{
 					moveCard(offsetCard, location, "ponyDiscardPile,top");
 				}
-				else if(startLoc ==  "ponyDiscardPile,top")
+				// discard to board replace
+				else if(startLoc == "ponyDiscardPile,top")
 				{
 					moveCard(offsetCard, location, offsetLoc);
-
 					doReactiveMoveBack = true;
 				}
 				else
