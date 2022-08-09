@@ -181,7 +181,6 @@ export class TsssfGameServer
 			socket.terminate();
 			return;
 		}
-
 		this.games[key].onConnection(socket, request, client);
 	}
 	
@@ -986,22 +985,21 @@ export class GameInstance
 	{	
 		this.isLobbyOpen = this.gameOptions.keepLobbyOpen;
 
-		// TODO
-		/*if(!preset)
+		if(!preset)
 		{
 			// remove players which disconnected before the games started
-			for(var i=0; i<this.players.length; i++)
+			for(var i=0; i< this.model.players.length; i++)
 			{
-				if(this.players[i].name == "" || !this.players[i].socket.isAlive)
+				if(this.model.players[i].name == "" || !this.model.players[i].socket.isAlive)
 				{
-					this.players.splice(i,1);
+					this.model.players.splice(i,1);
 					i--;
 				}
 			}
 
-			if(this.players.length == 0)
+			if(this.model.players.length == 0)
 				return false;
-		}*/
+		}
 
 		this.startTime = new Date().getTime();
 		this.model.clearGameForStart(this.gameOptions);
@@ -1017,55 +1015,48 @@ export class GameInstance
 
 		
 		// TODO test rulesets
-
-		/*if(this.ruleset == "turnsOnly")
-		{
-			this.turnstate = new Turnstate();
-			this.turnstate.init(this, this.players[0] ? this.players[0].name : "")
-		}
-		else
-		{
-			delete this.turnstate;
-		}*/
 		
 		// TODO
-		//if(preset)
-		//	this.loadPreset(preset);
+		if(preset)
+			this.loadPreset(preset);
 	}
 
 	// TODO
-	/*private loadPreset(hand: Card[])
+	private loadPreset(hand: Card[])
 	{
 		//console.log("Loading Preset Game");
 
 		let player =  {
 			name: "Dev",
 			id: 1,
-			socket: {
-				replace: true,
-				send: () => {}},
+			socket: undefined,
 			hand: [],
 			winnings: [],
+			team: "",
+			disconnected: 0,
+			ponies: 0,
+			ships:0,
+			isHost: true,
 		} as Player;
 
-		this.players.push(player);
+		this.model.players.push(player);
 
 		for(let card of hand)
 		{
 			if(isPony(card))
 			{
 				player.hand.push(card);
-				this.cardLocations[card] = "player,Dev";
-				this.ponyDrawPile.splice(this.ponyDrawPile.indexOf(card), 1);
+				this.model.cardLocations[card] = "player,Dev";
+				this.model.ponyDrawPile.splice(this.model.ponyDrawPile.indexOf(card), 1);
 			}
 			if(isShip(card))
 			{
 				player.hand.push(card);
-				this.cardLocations[card] = "player,Dev";
-				this.shipDrawPile.splice(this.shipDrawPile.indexOf(card), 1);
+				this.model.cardLocations[card] = "player,Dev";
+				this.model.shipDrawPile.splice(this.model.shipDrawPile.indexOf(card), 1);
 			}
 		}
-	}*/
+	}
 
 
 	private sendPlayerCounts(player:Player)

@@ -389,7 +389,7 @@ async function getDiscordCredentials(code: string): Promise<[boolean, string, st
 		try {
 			accessToken = await client.getToken(tokenParams);
 		}
-		catch (error)
+		catch (error: any)
 		{	
 			console.log('Access Token Error', error.message);
 			resolve([false, "", "", ""]);
@@ -598,7 +598,19 @@ server.on('upgrade', (request, socket, head) => {
 	});
 });
 
-if(process.argv[3])
+let args = process.argv.slice(2);
+
+let options: {preset?:string} = {};
+
+for(let i=0; i<args.length; i++)
+{
+	if(args[i] == "--preset" && args[i+1])
+	{
+		options.preset = args[i+1];
+	}
+}
+
+if(options.preset)
 {
 	let baseRules = {
 		cardDecks:["Core.*"],
@@ -626,9 +638,9 @@ if(process.argv[3])
 		ruleset: "turnsOnly",
 		keepLobbyOpen: true
 	};
-	switch(process.argv[3])
+	switch(options.preset)
 	{
-		case "1":
+		case "ships":
 			tsssfServer.openLobby("DEV");
 			tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
 			tsssfServer.games.DEV.startGame([
@@ -644,19 +656,28 @@ if(process.argv[3])
 			]);
 			break;
 	
-		case "2":
-				tsssfServer.openLobby("DEV");
-				tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
-				tsssfServer.games.DEV.startGame([
-					"NoHoldsBarred.Pony.Sleight",
-					"NoHoldsBarred.Pony.Plushling",
-					"NoHoldsBarred.Pony.KingVespid",
-					"Core.Pony.EarthChangeling",
-					"Core.Pony.UnicornChangeling",
-					"Core.Pony.PegasusChangeling",
-					"Core.Pony.QueenChrysalis",
-					"NoHoldsBarred.Pony.PixelPrism"
-				]);
-				break;
-		}
+		case "changelings":
+			tsssfServer.openLobby("DEV");
+			tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
+			tsssfServer.games.DEV.startGame([
+				"NoHoldsBarred.Pony.Sleight",
+				"NoHoldsBarred.Pony.Plushling",
+				"NoHoldsBarred.Pony.KingVespid",
+				"Core.Pony.EarthChangeling",
+				"Core.Pony.UnicornChangeling",
+				"Core.Pony.PegasusChangeling",
+				"Core.Pony.QueenChrysalis",
+				"NoHoldsBarred.Pony.PixelPrism"
+			]);
+
+			break;
+		case "special1":
+			tsssfServer.openLobby("DEV");
+			tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
+			tsssfServer.games.DEV.startGame([
+				"HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh"
+			]);
+
+			break;
+	}
 }

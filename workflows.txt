@@ -10,20 +10,46 @@ Ships:
 
 Goal types:
 	AllOf -> NoHoldsBarred ThisShipIsDelicious
-	BreakShip -> ItsNotEvil
-	ExistsChain -> SelfInsertion
-	ExistsPony -> PrettyPrettyPrincess
+	BreakShip -> Core.Goal.ItsNotEvil
+	ExistsChain -> Core.Goal.SelfInsertion
+	ExistsPony -> Core.Goal.PrettyPrettyPrincess
 	ExistsPonyGeneric -> unused
-	ExistsPonyShippedto -> JustExperimenting
-	ExistsShip -> Pomf
-	ExistsShipGeneric -> BuddingCuriosity
-	PlayPonies -> HehPeasants
-	PlayShips -> Quite
-	PlayShipCards -> Epidemic
-	ShippedWithOppositeGenderedSelf -> BuddingCuriosity
-	ShippedWith2Versions -> ItsNotExactlyCheating
-	SwapCount -> HoldOnINeedToMakeAFlowChart
+	ExistsPonyShippedto -> Core.Goal.JustExperimenting
+	ExistsShip -> Core.Goal.Pomf
+	ExistsShipGeneric -> Core.Goal.BuddingCuriosity
+	PlayPonies -> Core.Goal.HehPeasants
+	PlayShips -> Core.Goal.Quite
+	PlayShipCards -> Core.Goal.Epidemic
+	ShippedWithOppositeGenderedSelf -> Core.Goal.BuddingCuriosity
+	ShippedWith2Versions -> Core.Goal.ItsNotExactlyCheating
+	SwapCount -> Core.Goal.HoldOnINeedToMakeAFlowChart
+
+Speical Ship Actions
+	genderChange -> Core.Ship.CanITellYouASecret
+	raceChange -> Core.Ship.CultMeeting
+	timelineChange -> Core.Ship.DoYouThinkLoveCanBloomEvenOnABattlefield
+	makePrincess -> Core.Ship.YerAPrincessHarry
+	keywordChange -> EC.Ship.BlindDate
+	clone -> EC.Ship.BodyDouble
+	raceGenderChange -> HorriblePeople.GraciousGivers.Ship.DunkedInTheDatingPool
+	addKeywords(Object) -> HorriblePeople.2015ConExclusives.Ship.ObjectofAdoration
+
+Special Pony Actions
+	exchangeCardsBetweenHands -> NoHoldsBarred.Pony.Abarenbou
+	ChangelingNoRedisguise(replace) -> NoHoldsBarred.Pony.KingVespid
+	ChangelingNoRedisguise(plushling) -> NoHoldsBarred.Pony.Plushling
+	Changeling(nonAlicornFemale) -> NoHoldsBarred.Pony.Sleight
+	ship -> NoHoldsBarred.Pony.ImpyThree
+	fullCopy -> NoHoldsBarred.Pony.PixelPrism
+	*hardcoded* -> HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh
+	interrupt -> HorriblePeople.2015Workshop.Pony.ShiaLeBeouffalo
+	shipWithEverypony -> HorriblePeople.GraciousGivers.Pony.PrincessCelestAI
+Other Special
+	changeGoalPointValues true -> HorriblePeople.2015ConExclusives.Pony.MistressOfEqualityStarlightGlimmer
+
+Normal abilities, but ridiculous
+	count 10 -> HorriblePeople.2015ConExclusives.Pony.AnEntireSwarmOfBreezies
+	race earth/unicorn -> NoHoldsBarred.Pony.RubyBlossom
 
 
-Normal Goals:
 
