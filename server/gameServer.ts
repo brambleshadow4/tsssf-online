@@ -642,7 +642,9 @@ export class GameInstance
 				{
 					playersShifted[i].hand.push(card);
 					this.model.cardLocations[card] = "player," + playersShifted[i].name;
-					playersInGame[i].socket.send("move;" + card + ";hand;player," + playersShifted[i].name); // take all the cards first
+					let fromLoc = "player,"+ playersInGame[i].name;
+					let toLoc = "player," + playersShifted[i].name
+					playersInGame[i].socket.send("move;" + card + ";" + fromLoc + ";" + toLoc); // take all the cards first
 				}
 			}
 
@@ -651,7 +653,9 @@ export class GameInstance
 				let card = cards[i];
 				if(card)
 				{
-					playersShifted[i].socket.send("move;" + card + ";player," + playersInGame[i].name + ";hand"); // then move all the cards
+					let fromLoc = "player,"+ playersInGame[i].name;
+					let toLoc = "player," + playersShifted[i].name
+					playersShifted[i].socket.send("move;" + card + ";" + fromLoc + ";" + toLoc); // then move all the cards
 				}
 			}
 		}

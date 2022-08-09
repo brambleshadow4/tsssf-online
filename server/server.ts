@@ -677,6 +677,7 @@ if(options.preset)
 			tsssfServer.games.DEV.startGame([
 				"HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh",
 				"HorriblePeople.GraciousGivers.Pony.PrincessCelestAI",
+				"NoHoldsBarred.Pony.Abarenbou",
 			]);
 
 			break;
