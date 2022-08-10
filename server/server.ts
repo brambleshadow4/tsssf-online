@@ -275,9 +275,9 @@ app.get("/updatePotentialPlayers", async function(req,res) {
 
 		let timezoneStr = "";
 		if(timezone > 0)
-			timezoneStr = "UTC-" + timezone
+			timezoneStr = "UTC-" + Math.abs(timezone)
 		else
-			timezoneStr = "UTC+" + timezone;
+			timezoneStr = "UTC+" + Math.abs(timezone);
 
 		let reqNo = await crypto.randomInt(1, 999999999);
 
