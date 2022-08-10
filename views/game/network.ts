@@ -342,7 +342,9 @@ export function requestSwapShuffle(typ: "pony" | "ship" | "goal")
 {
 	if(isItMyTurn())
 	{
-		
+		if(window.location.pathname.indexOf("/tutorial") >= 0)
+			return;
+
 		broadcast("swapshuffle;" + typ);
 		let model = win.model;
 		if(model.mode != "client")

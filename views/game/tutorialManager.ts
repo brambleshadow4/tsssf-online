@@ -2,19 +2,13 @@ import {
 	GameOptions, defaultGameOptions, isGoal, isStart, isShip, isPony, isBlank, Card, isBoardLoc, isGoalLoc, isOffsetLoc, isDiscardLoc
 } from "../../model/lib.js";
 
-import {setHoverBubble, clearHoverBubble, updateHand} from "./peripheralComponents.js";
+import {setHoverBubbleFull, clearHoverBubble, updateHand, updateShipDiscard, updatePonyDiscard} from "./peripheralComponents.js";
 import * as cm from "../../model/cardManager.js";
 import GameModel from "../../model/GameModel.js";
 import {updateGame} from "./game.js";
 import Turnstate from "../../model/turnstate.js";
 import s from "../tokens.js";
-import { cardBoxSelectComponent } from "../lobby/cardSelectComponent.js";
 
-let ST = {
-	INITIAL_LOAD: 0
-}
-
-let state = ST.INITIAL_LOAD;
 
 let win = window as unknown as {
 	gameOptions: GameOptions,
@@ -160,7 +154,7 @@ export function boot(): void
 		]
 	});
 
-	setTimeout(() => setupState(33), 200);
+	setTimeout(() => setupState(0), 200); // 33 is a good state if you want to test mid-tutorial;
 }
 
 function setTutorialTarget(card: Card)
@@ -195,10 +189,10 @@ function setupState(stateNo: number): void
 	switch(tutorialState)
 	{
 		case 0:
-			setHoverBubble("hand","above", s.Tutorial1, () => {setupState(1)});
+			setHoverBubble("hand","above", s.Tutorial1, 1);
 			break;
 		case 1:
-			setHoverBubble("hand","above", s.Tutorial2, () => {setupState(2)});
+			setHoverBubble("hand","above", s.Tutorial2, 2);
 			break;
 		case 2:
 			setHoverBubble("ponyDrawPile","right", s.Tutorial3);
@@ -216,15 +210,15 @@ function setupState(stateNo: number): void
 			break;
 		case 4:
 			setTutorialTarget("Core.Start.FanficAuthorTwilight");
-			setHoverBubble("tutorialTarget","left", s.Tutorial5, () => {setupState(5)});
+			setHoverBubble("tutorialTarget","left", s.Tutorial5, 5);
 			break;
 		case 5:
 			setTutorialTarget("Core.Start.FanficAuthorTwilight");
-			setHoverBubble("tutorialTarget","left", s.Tutorial6, () => {setupState(6)});
+			setHoverBubble("tutorialTarget","left", s.Tutorial6, 6);
 			break;
 		case 6:
 			setTutorialTarget("Core.Start.FanficAuthorTwilight");
-			setHoverBubble("tutorialTarget","left", s.Tutorial7, () => {setupState(7)});
+			setHoverBubble("tutorialTarget","left", s.Tutorial7, 7);
 			
 			break;
 		case 7:
@@ -252,13 +246,13 @@ function setupState(stateNo: number): void
 			break;
 		case 9:
 			let ponyCardName = cm.inPlay()[model.turnstate!.playedPonies[0]].name;
-			setHoverBubble("hand","above", s.Tutorial10.replace("{0}", ponyCardName), () => {setupState(10)});
+			setHoverBubble("hand","above", s.Tutorial10.replace("{0}", ponyCardName), 10);
 			break;
 		case 10:
-			setHoverBubble("hand","above", s.Tutorial11, () => {setupState(11)});
+			setHoverBubble("hand","above", s.Tutorial11, 11);
 			break;
 		case 11:
-			setHoverBubble("hand","above", s.Tutorial12, () => {setupState(12)});
+			setHoverBubble("hand","above", s.Tutorial12, 12);
 			break;
 		case 12:
 			setHoverBubble("goalDrawPile","right", s.Tutorial13);
@@ -287,7 +281,7 @@ function setupState(stateNo: number): void
 			}
 			break;
 		case 18:
-			setHoverBubble("hand","above", s.Tutorial17, () => {setupState(19)});
+			setHoverBubble("hand","above", s.Tutorial17, 19);
 			break;
 		case 19:
 			setHoverBubble("hand","above", s.Tutorial18);
@@ -301,13 +295,16 @@ function setupState(stateNo: number): void
 			model.turnstate!.overrides["fakeOverride"] = {};
 			waitForFreshTurnstate();
 			break;
+		case 2050:
+			setHoverBubble("shipShuffle","right", s.Tutorial1950, 21);
+			break;
 		case 21:
-			setHoverBubble("hand","above", s.Tutorial20, () => {setupState(22)});
+			setHoverBubble("hand","above", s.Tutorial20, 22);
 			break;
 		case 22:
 			setupBoard({
 				drawPile: ['Core.Goal.GoodEnough'],
-				discardPile:[],
+				discardPile:["Core.Pony.TheWonderbolts","Core.Pony.Lyra"],
 				currentGoals: ["Core.Goal.PrettyPrettyPrincess","Core.Goal.HehPeasants","Core.Goal.RainbowDashFanClub"],
 				board:{
 				"p,-1,0": "Core.Pony.BulkBiceps",
@@ -318,15 +315,15 @@ function setupState(stateNo: number): void
 				"sr,1,0": "Core.Ship.TheOtherMare",
 				"p,2,0": "Core.Pony.MoeFluttershy",
 			}});
-			setHoverBubble("hand","above", s.Tutorial21, () => {setupState(23)});
+			setHoverBubble("hand","above", s.Tutorial21, 23);
 			break;
 		case 23:
 			setTutorialTarget("Core.Pony.TsundereRainbowDash")
-			setHoverBubble("tutorialTarget","above", s.Tutorial22, () => {setupState(24)});
+			setHoverBubble("tutorialTarget","above", s.Tutorial22, 24);
 			break;
 		case 24:
 			setTutorialTarget("Core.Pony.BulkBiceps")
-			setHoverBubble("tutorialTarget","above", s.Tutorial23, () => {setupState(25)});
+			setHoverBubble("tutorialTarget","above", s.Tutorial23, 25);
 			break;
 		case 25:
 			setTutorialTarget("Core.Pony.TsundereRainbowDash")
@@ -345,17 +342,16 @@ function setupState(stateNo: number): void
 			}
 			break;
 		case 27:
-			setHoverBubble("hand","above", s.TutorialDone, () => {setupState(28)});
+			setHoverBubble("hand","above", s.TutorialDone, 28);
 			break;
 		case 28:
 			model.me().hand.push("Core.Pony.NightmareMoon");
 			model.cardLocations["Core.Pony.NightmareMoon"] = "player,"+model.me().name;
 			updateHand();
 			setTutorialTarget("Core.Pony.NightmareMoon")
-			setHoverBubble("tutorialTarget","above", s.Tutorial26, () => {setupState(29)});
+			setHoverBubble("tutorialTarget","above", s.Tutorial26, 29);
 			break;
 		case 29:
-
 			setTutorialTarget("Core.Pony.TsundereRainbowDash")
 			setHoverBubble("tutorialTarget","above", s.Tutorial27);
 			model.onCardMove = () => {
@@ -364,31 +360,28 @@ function setupState(stateNo: number): void
 			}
 			break;
 		case 30:
-			setHoverBubble("hand","above", s.TutorialDone, () => {setupState(31)});
+			setHoverBubble("hand","above", s.TutorialDone, 31);
 			break;
 		case 31:
 			model.me().hand.push("Core.Pony.Gilda");
 			model.cardLocations["Core.Pony.Gilda"] = "player,"+model.me().name;
 			updateHand();
-			setHoverBubble("hand","above", s.Tutorial28, () => {setupState(32)});
+			setHoverBubble("hand","above", s.Tutorial28, 32);
 			break;
 		case 32:
-			setHoverBubble("currentGoals","right", s.Tutorial29, () => {setupState(33)});
+			setHoverBubble("currentGoals","right", s.Tutorial29, 33);
 			model.onCardMove = () => {
 				if(model.goalDiscardPile.length && model.currentGoals.filter(x => !isBlank(x)).length == 3)
 					setupState(33);
 			}
 			break;
 		case 33:
-			setHoverBubble("hand","above", s.TutorialDone, () => {setupState(34)});
+			setHoverBubble("hand","above", s.TutorialDone, 34);
 			break;
 		case 34:
-			setupBoard({
-				drawPile:[],
-				discardPile: ["Core.Pony.BulkBiceps","Core.Pony.TsundereRainbowDash", "Core.Pony.MoeFluttershy"],
-				hand: ['Core.Pony.PrincessCelestia'],
-				});
-			setHoverBubble("hand","above", s.Tutorial30, () => {setupState(35)});
+			dumpHand();
+			addToHand('Core.Pony.PrincessCelestia');
+			setHoverBubble("hand","above", s.Tutorial30, 35);
 			break;
 		case 35:
 			setHoverBubble("ponyDiscardPile","right", s.Tutorial31);
@@ -398,14 +391,12 @@ function setupState(stateNo: number): void
 			}
 			break;
 		case 36:
-			setHoverBubble("hand","above", s.TutorialDone, () => {setupState(37)});
+			setHoverBubble("hand","above", s.TutorialDone, 37);
 			break;
 		case 37:
-			model.me().hand.splice(0,0,"Core.Pony.EarthChangeling","Core.Ship.BoredOnASundayAfternoon");
-			model.cardLocations["Core.Pony.EarthChangeling"] = "player,tutorial";
-			model.cardLocations["Core.Ship.BoredOnASundayAfternoon"] = "player,tutorial";
-			updateHand();
-			setHoverBubble("hand","above", s.Tutorial32, () => {setupState(38)});
+			dumpHand()
+			addToHand("Core.Pony.EarthChangeling","Core.Ship.BoredOnASundayAfternoon")
+			setHoverBubble("hand","above", s.Tutorial32, 38);
 			break;
 		case 38:
 			setHoverBubble("hand","above", s.Tutorial33);
@@ -415,10 +406,37 @@ function setupState(stateNo: number): void
 			}
 			break;
 		case 39:
-			setHoverBubble("hand","above", s.TutorialDone, () => {setupState(40)});
+			setHoverBubble("hand","above", s.TutorialDone, 40);
+			break;
+		case 40:
+			dumpHand();
+			addToHand("Core.Pony.TsundereRainbowDash", "Core.Pony.Cheerilee", "Core.Ship.TimeForAnExperiment")
+			setHoverBubble("hand","above", s.Tutorial34, 41);
+			break;
+		case 41:
+			setTutorialTarget("Core.Ship.TimeForAnExperiment")
+			setHoverBubble("tutorialTarget", "above", s.Tutorial35)
+			model.onCardMove = () => {
+				for(let key in model.turnstate!.overrides)
+				{
+					if(model.turnstate!.overrides[key].race)
+						setupState(42)
+				}
+			}
+			break;
+		case 42:
+			setHoverBubble("hand","above", s.TutorialDone, 43);
+			break;
+		case 43:
+			setHoverBubble("hand","above", s.Tutorial36, 44);
+			break;
+		case 44:
+			setHoverBubbleFull("hand","above", s.Tutorial37, s.TutorialEndTutorial, ()=>{setupState(45)})
+			break;
+		case 45:
+			window.location.href = "/";
 			break;
 		default:
-
 			clearHoverBubble();
 	}
 }
@@ -466,5 +484,58 @@ function waitForFreshTurnstate()
 		return;
 	requestAnimationFrame(waitForFreshTurnstate);
 	if(model.turnstate!.overrides["fakeOverride"] == undefined)
-		setupState(21);
+		setupState(2050);
+}
+
+function dumpHand()
+{
+	let hand = model.me().hand;
+
+	for(let card of hand)
+	{
+		if(isShip(card))
+		{
+			if(model.shipDiscardPile.length)
+			{
+				let topCard = model.shipDiscardPile[model.shipDiscardPile.length-1];
+				model.cardLocations[topCard] = "shipDiscardPile,stack";
+			}
+
+			model.shipDiscardPile.push(card);
+			model.cardLocations[card] = "shipDiscardPile,top";
+		}
+		if(isPony(card))
+		{
+			if(model.ponyDiscardPile.length)
+			{
+				let topCard = model.ponyDiscardPile[model.ponyDiscardPile.length-1];
+				model.cardLocations[topCard] = "ponyDiscardPile,stack";
+			}
+
+			model.ponyDiscardPile.push(card);
+			model.cardLocations[card] = "ponyDiscardPile,top";
+		}
+		
+	}
+
+	model.me().hand = [];
+	updateShipDiscard();
+	updatePonyDiscard();
+	updateHand();
+}
+
+function addToHand(...cards:string[])
+{	
+	model.me().hand.splice(0,0,...cards);
+	for(let card of cards)
+	{
+		model.cardLocations[card] = "player,tutorial";
+	}
+	updateHand();
+}
+
+function setHoverBubble(elementID:string, position:"left"|"right"|"above"|"below", text:string, nextState?: number)
+{
+	let fun = nextState == undefined ? undefined : ()=>{setupState(nextState)}
+	setHoverBubbleFull(elementID, position, text, s.TutorialNext, fun);
 }

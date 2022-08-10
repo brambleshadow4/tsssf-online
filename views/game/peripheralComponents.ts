@@ -1137,7 +1137,7 @@ export function clearHoverBubble(): void
 	}
 }
 
-export function setHoverBubble(elementID:string, position:"left"|"right"|"above"|"below", text:string, next?:Function)
+export function setHoverBubbleFull(elementID:string, position:"left"|"right"|"above"|"below", text:string, buttonText:string, next?:Function)
 {
 	clearHoverBubble();
 
@@ -1158,7 +1158,7 @@ export function setHoverBubble(elementID:string, position:"left"|"right"|"above"
 		buttonDiv.className = "hoverbubble-buttons";
 
 		let button = document.createElement('button');
-		button.innerHTML = s.TutorialNext;
+		button.innerHTML = buttonText;
 		button.onclick = next as any;
 		buttonDiv.appendChild(button)
 		div.appendChild(buttonDiv);
@@ -1192,6 +1192,8 @@ export function setHoverBubble(elementID:string, position:"left"|"right"|"above"
 	div.style.left = x + "px";
 	div.style.top = y + "px";
 }
+
+
 
 
 win.createHelpPopup = createHelpPopup;

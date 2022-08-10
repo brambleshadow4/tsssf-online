@@ -146,6 +146,7 @@ export default {
 	"AhcyknntHint3": "Adjutant. Changeling, OC. Revisionist history (special). Choose one pony and one ship card currently on the shipping grid except for Changelings and Love Potions. You may copy the powers of those cards. This power cannot be copied. If you can read this, you're trying way too hard",
 
 	"TutorialNext": "Next", // next button for tutorial popup
+	"TutorialEndTutorial": "End Tutorial",
 	"TutorialDone": "Nicely done!",
 	"Tutorial1": "Welcome to the Twilight Sparkle's Secret Shipfic Folder (TSSSF) tutorial!\nThis tutorial will teach you the basics of playing the game.",
 	"Tutorial2": "In TSSSF, you start with a hand of 4 pony (purple) cards and 3 ship (pink) cards.",
@@ -161,12 +162,13 @@ export default {
 	"Tutorial12": "At the start of your turn, you'll draw goals until there's 3 available.",
 	"Tutorial13": "Click the goal deck 3 times to draw 3 goals.",
 	"Tutorial14": "Read the text on the goals by holding down Shift and hovering over them\n(you can also use Shift on any card to do this)",
-	"Tutorial15": "It looks like you can achieve the Rainbow Dash goal this turn.\nPlay cards from your hand like you did before unitl you've shipped two Rainbow Dashes together.",
-	"Tutorial16": "A goal will light up green when it's been achieved.\nHover over the card and click the checkmark to take the goal.",
+	"Tutorial15": "It looks like you can achieve the Rainbow Dash goal this turn.\nPlay cards from your hand like you did before until you've shipped two Rainbow Dashes together.",
+	"Tutorial16": "A goal will light up green when it's been achieved.\nHover over the card and click the check mark to take the goal.",
 	"Tutorial17": "You've just scored your first two points!\nIn a real game, you'll play until one player reaches 9-11 points, depending on the number of players",
 	"Tutorial18": "You can keep playing cards until you run out of them in your hand,\nor you can stop after playing at least one card.\nFinish your turn by drawing cards until you have seven in your hand.",
 	"Tutorial19": "Then push end turn.",
-	"Tutorial20": "Those are all the basics of the game!\nIf you ever want to access the full rull book, you can click the (?) button in the top right.",
+	"Tutorial1950": "If you ever run out cards in the draw piles, click the swap + shuffle button to restore the deck.\nIf it's also empty, discard cards from the board to form a discard pile.",
+	"Tutorial20": "Those are all the basics of the game!\nIf you ever want to access the full rule book, you can click the (?) button in the top right.",
 	"Tutorial21": "Next, we'll go over some of the special abilities certain cards have!",
 	"Tutorial22": "Pony cards have abilities that activate when you play them on the grid\nSome cards like Tsundere Rainbow Dash can be as basic as\ndrawing an extra ship or pony card.",
 	"Tutorial23": "Some cards like Bulk Biceps let you swap ponies around the grid. ",
@@ -179,5 +181,9 @@ export default {
 	"Tutorial30": "Some cards like Princess Celestia let you search the discard piles and take a card.",
 	"Tutorial31": "Try taking a card from the pony discard pile by clicking on it, then choosing a card.",
 	"Tutorial32": "Some cards are changelings. These cards can disguise as any card in the game of the same race.",
-	"Tutorial33": "Try disgusing the earth pony changeling by connecting it to the grid with a ship card."
+	"Tutorial33": "Try disguising the earth pony changeling by connecting it to the grid with a ship card.",
+	"Tutorial34": "Ship cards can also have abilities! They often modify one of the ponies they are attached to.",
+	"Tutorial35": "Try playing 'Time For an Experiment!' to change one of the ponies' race.",
+	"Tutorial36": "As you can see, the cards provide many different abilities to help you achieve goals.\nFiguring out how to use them optimally is part of the strategy of the game",
+	"Tutorial37": "Anyways, that's it for the tutorial. Happy shipping!"
 }	
