@@ -410,7 +410,7 @@ function setupState(stateNo: number): void
 			break;
 		case 40:
 			dumpHand();
-			addToHand("Core.Pony.TsundereRainbowDash", "Core.Pony.Cheerilee", "Core.Ship.TimeForAnExperiment")
+			addToHand("Core.Pony.MahouShoujoDerpy", "Core.Pony.Cheerilee", "Core.Ship.TimeForAnExperiment")
 			setHoverBubble("hand","above", s.Tutorial34, 41);
 			break;
 		case 41:
