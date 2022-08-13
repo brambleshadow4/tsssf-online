@@ -1,7 +1,7 @@
 import {
 	GameModel as GM, Card, Player, randomizeOrder, Location, isPony, isShip, isGoal, getNeighborKeys,
 	isBlank, isBoardLoc, isOffsetLoc, isGoalLoc, isDiscardLoc,
-	GameOptions, CardElement, isPlayerLoc
+	GameOptions, CardElement, isPlayerLoc, isAnon
 } from "./lib.js";
 
 
@@ -843,22 +843,31 @@ export default class GameModel implements GM
 		return "";
 	}
 
+	/**
+	 * Returns true if the location is only available when the model is in server/both mode.
+	 */
+	private isLocationServerOnly(location: Location): boolean
+	{
+		let isDrawPile = location.indexOf("DrawPile") >=0;
+		let isOtherPlayer = isPlayerLoc(location) && location != "player," + this.me().name;
+		return isDrawPile || isOtherPlayer;
+	}
+
 
 	public moveCard(
 		card: Card,
 		startLocation: Location,
 		endLocation:Location,
 		extraArg: string)
-	{
-		if(startLocation == "hand" || startLocation == "winnings" || endLocation == "hand" || endLocation=="winnings")
-		{
-			throw new Error("bad location");
-		}
+	{	
+		if(isAnon(card))
+			return;
 
-		// TODO move this logic
-		// if the player has an incorrect position for a card, move it to where it actually should be.
-		
-		this.cardLocations[card] = endLocation;
+		// Client model shouldn't handle certain scenarios.
+		if(this.mode == "client" && this.isLocationServerOnly(endLocation))
+			delete this.cardLocations[card];
+		else
+			this.cardLocations[card] = endLocation;
 
 		this.updateTurnstatePreMove(card, startLocation, endLocation);
 
@@ -872,15 +881,19 @@ export default class GameModel implements GM
 		if(startLocation.startsWith("player,"))
 		{
 			var player = this.getPlayerByName(startLocation.substring("player,".length))!;
-			if(isGoal(card))
+
+			if(this.mode != "client" || this.me().name == player.name)
 			{
-				var i = player.winnings.map(x => x.card).indexOf(card);
-				player.winnings.splice(i, 1);
-			}
-			else
-			{
-				var i = player.hand.indexOf(card);
-				player.hand.splice(i, 1);
+				if(isGoal(card))
+				{
+					var i = player.winnings.map(x => x.card).indexOf(card);
+					player.winnings.splice(i, 1);
+				}
+				else
+				{
+					var i = player.hand.indexOf(card);
+					player.hand.splice(i, 1);
+				}
 			}
 		}
 
@@ -933,13 +946,17 @@ export default class GameModel implements GM
 		if(endLocation.startsWith("player,"))
 		{	
 			var player = this.getPlayerByName(endLocation.substring("player,".length))!;
-			if(isGoal(card))
+
+			if(this.mode != "client" || this.me().name == player.name)
 			{
-				player.winnings.push({card, value: Number(extraArg) || 0});
-			}
-			else
-			{
-				player.hand.push(card)
+				if(isGoal(card))
+				{
+					player.winnings.push({card, value: Number(extraArg) || 0});
+				}
+				else
+				{
+					player.hand.push(card)
+				}
 			}
 		}
 

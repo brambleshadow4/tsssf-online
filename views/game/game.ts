@@ -948,7 +948,6 @@ export async function moveCard(
 	if(isTableOffsideLoc(endLocation)) elAnim = document.getElementById('tableOffside')!.classList.contains('open');
 	// board + offset not here
 
-
 	if(!(elAnim && slAnim))
 		doAnimation = false;
 
