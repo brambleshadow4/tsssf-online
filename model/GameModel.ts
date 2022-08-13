@@ -616,8 +616,6 @@ export default class GameModel implements GM
 			}
 		};
 
-
-
 		for(var player of this.players)
 		{
 			player.hand = [];

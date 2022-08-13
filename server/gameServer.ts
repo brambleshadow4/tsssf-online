@@ -263,7 +263,7 @@ export class GameInstance
 						}
 						catch(e){ }
 
-
+						options.customCards = game.gameOptions.customCards; // keep the previously loaded custom cards
 						game.setLobbyOptions(options);
 
 						return;	
