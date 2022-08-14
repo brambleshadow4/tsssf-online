@@ -505,7 +505,8 @@ function updateEffects()
 
 			if(decs.fullCopy)
 			{
-				let caption = s.GameEffectCopying.replace("{0}", decs.fullCopy.substring(decs.fullCopy.lastIndexOf(".")+1));
+				let cardTitle = cm.inPlay()[decs.fullCopy].title || decs.fullCopy.substring(decs.fullCopy.lastIndexOf(".")+1)
+				let caption = s.GameEffectCopying.replace("{0}", cardTitle);
 				addTempSymbol(element, "star", caption);
 			}
 		}	

@@ -415,8 +415,6 @@ function setLobbyOptions()
 
 	options.cardDecks = Object.keys(globals.decks).map(x => [...globals.decks[x]]).reduce((a,b) => a.concat(b), []);
 
-	console.log(options.cardDecks);
-
 	var startCard = document.getElementById('startCards')!.getElementsByClassName('selected')[0];
 	options.startCard = startCard.getAttribute('cardID') || "Core.Start.FanficAuthorTwilight";
 
@@ -442,8 +440,6 @@ function setLobbyOptions()
 	options.keepLobbyOpen = !!input('keepLobbyOpen').checked;
 
 	currentOptions = options;
-
-	console.log(options);
 
 	globals.socket.send("setLobbyOptions;" +  JSON.stringify(options));
 }
