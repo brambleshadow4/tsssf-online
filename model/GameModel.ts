@@ -805,8 +805,11 @@ export default class GameModel implements GM
 		return broken;
 	}
 
-	private getSwappedCount(startPositions: {[loc: string]: Card}, endPositions: {[loc: string]: Card})
+	private getSwappedCount(startPositions: {[loc: string]: Card} | null, endPositions: {[loc: string]: Card})
 	{
+		if(!startPositions)
+			return 0;
+
 		var count = 0;
 		for(var key in startPositions)
 		{
@@ -1045,6 +1048,10 @@ export default class GameModel implements GM
 	{
 		if(!this.turnstate) { return; }
 
+		// Moving a card for a love poison doesnn't count as a swap. 
+		if(this.turnstate.positionMap == null && isBoardLoc(startLocation) && isOffsetLoc(endLocation))
+			this.turnstate.positionMap = this.getCurrentPositionMap();
+
 		if(this.isChangeling(card))
 		{
 			let cc = this.turnstate.getChangeContext(card);
@@ -1089,7 +1096,7 @@ export default class GameModel implements GM
 			this.turnstate.playedShipsCommitted = this.turnstate.playedShips;
 			this.turnstate.swapsCommitted = this.turnstate.swaps;
 			this.turnstate.shipSet = newSet;
-			this.turnstate.positionMap = curPositionMap;
+			this.turnstate.positionMap = null;
 		}
 	}
 

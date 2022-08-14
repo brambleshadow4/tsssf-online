@@ -832,6 +832,99 @@ export default function(){
 
 	// swap counts
 
+	test("SwapCount - swapping two cards increases the swap count", () =>{
+
+		let [game, player] = setupGame();
+
+		let pony1 = "Core.Pony.BigMacintosh";
+		let pony2 = "Core.Pony.Caramel"
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+		let ship3 = "Core.Ship.ItWasYouAllAlong";
+
+		player.grab(pony1, pony2, ship1, ship2, ship3);
+
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(pony1, "player,Test", "p,1,0");
+		player.move(ship2, "player,Test", "sr,1,0");
+		player.move(pony2, "player,Test", "p,2,0");
+
+		expect(evalGoalLogic(game.model, "SwapCount(2)")).toBe(false);
+
+		player.move(pony2, "p,2,0","offset,2,0");
+		player.move(pony1, "p,1,0", "p,2,0");
+		player.move(pony2,"offset,2,0", "p,1,0");
+
+		expect(evalGoalLogic(game.model, "SwapCount(2)")).toBe(true);
+	});
+
+	test("SwapCount - swapping two cards, then back, does not increase swap count", () =>{
+
+		let [game, player] = setupGame();
+
+		let pony1 = "Core.Pony.BigMacintosh";
+		let pony2 = "Core.Pony.Caramel"
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+		let ship3 = "Core.Ship.ItWasYouAllAlong";
+
+		player.grab(pony1, pony2, ship1, ship2, ship3);
+
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(pony1, "player,Test", "p,1,0");
+		player.move(ship2, "player,Test", "sr,1,0");
+		player.move(pony2, "player,Test", "p,2,0");
+
+		expect(evalGoalLogic(game.model, "SwapCount(2)")).toBe(false);
+
+		player.move(pony2, "p,2,0","offset,2,0");
+		player.move(pony1, "p,1,0", "p,2,0");
+		player.move(pony2, "offset,2,0", "p,1,0");
+
+		player.move(pony2, "p,1,0", "offset,1,0");
+		player.move(pony1, "p,2,0","p,1,0")
+		player.move(pony2, "offset,1,0", "p,2,0");
+
+		expect(evalGoalLogic(game.model, "SwapCount(2)")).toBe(false);
+	});
+
+	test("SwapCount - love poison does not increase swap", () =>{
+
+		let [game, player] = setupGame();
+
+		let pony1 = "Core.Pony.BigMacintosh";
+		let pony2 = "Core.Pony.Bloomberg";
+		let pony3 = "Core.Pony.Caramel";
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+		let ship3 = "Core.Ship.ItWasYouAllAlong";
+		let lovePoison = "Core.Ship.LovePoisonIsNoJoke";
+
+		player.grab(pony1, pony2, pony3, ship1, ship2, ship3, lovePoison);
+
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(pony1, "player,Test", "p,1,0");
+		player.move(ship2, "player,Test", "sr,1,0");
+		player.move(pony2, "player,Test", "p,2,0");
+		player.move(ship3, "player,Test", "sr,2,0");
+		player.move(pony3, "player,Test", "p,3,0");
+		player.endTurn();
+
+		// love poison Caramel
+		player.move(lovePoison,"player,Test", "sd,0,0");
+		player.move(pony3,"p,3,0", "p,0,1");
+
+		// Then do swap
+		player.move(pony2, "p,2,0","offset,2,0");
+		player.move(pony1, "p,1,0", "p,2,0");
+		player.move(pony2, "offset,2,0", "p,1,0");
+
+		expect(evalGoalLogic(game.model, "SwapCount(2)")).toBe(true);
+		expect(evalGoalLogic(game.model, "SwapCount(3)")).toBe(false);
+	});
+
+
+
 	// Allof EC.Goal.Swinging
 
 	// Recolor

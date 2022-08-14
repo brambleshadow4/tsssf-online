@@ -26,7 +26,7 @@ export default class Turnstate
 	public swaps = 0;
 
 	public shipSet: Set<string> = new Set();
-	public positionMap: {[key: string]: string} = {};
+	public positionMap: {[key: string]: string} | null = null; // null indicates that no swapping is occuring yet
 	
 	public changelingContexts: {[key:string] : ChangelingContextList} = {};
 
@@ -48,7 +48,7 @@ export default class Turnstate
 	{
 		this.currentPlayer = currentPlayerName;
 		this.shipSet = model.getCurrentShipSet();
-		this.positionMap = model.getCurrentPositionMap();
+		this.positionMap = null;
 
 		this.updateSpecialEffects(model.board);	
 	}
