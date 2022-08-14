@@ -545,7 +545,7 @@ async function sendIfExists(url:string, lang: string, res: any)
 
 				let rowHTML = rows.map((x:any) => 
 					`<div>
-						<img class='avatar' src="${x.avatarURL}" />${x.name.replace(/</g, "&lt;")} (${x.timezone}) <img class='platform-logo' src='/img/discord.svg' />
+						<img class='avatar' src="${x.avatarURL}" onerror="this.onerror=null; this.src='/img/avatar.png'"/>${x.name.replace(/</g, "&lt;")} (${x.timezone}) <img class='platform-logo' src='/img/discord.svg' />
 					</div>`
 				)
 
