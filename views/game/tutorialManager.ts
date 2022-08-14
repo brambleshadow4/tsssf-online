@@ -9,10 +9,8 @@ import {updateGame} from "./game.js";
 import Turnstate from "../../model/turnstate.js";
 import s from "../tokens.js";
 
-
 let win = window as unknown as {
-	gameOptions: GameOptions,
-	
+	gameOptions: GameOptions
 }
 
 let tutorialState = 0;

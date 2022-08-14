@@ -1,7 +1,5 @@
 import {Card, ChangelingContextList, Location} from "./lib.js";
 import GameModel from "./GameModel.js"
-import { cursorTo } from "readline";
-
 
 export default class Turnstate
 {	
@@ -83,8 +81,6 @@ export default class Turnstate
 			currentPlayer: this.currentPlayer
 		}
 	}
-
-	
 }
 
 export function fromClientTurnstate(clientTurnstate: {playedThisTurn: string[], overrides: {[key:string]: string}, currentPlayer:string})

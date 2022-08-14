@@ -1,4 +1,3 @@
-
 import fs from 'fs';
 import sharp from "sharp";
 
@@ -28,7 +27,7 @@ function findPacks(topFolder:any, path:any, packs:any)
 	return packs;
 };
 
-export function pack()
+export async function pack()
 {
 	let packsSet = findPacks("./packs/", "./packs", new Set());
 	let packs: any = {};
@@ -77,11 +76,25 @@ export function pack()
 						// generate thumbnail
 						let imageName = "./packs/" + cardName.split(".").join("/");
 						let pngImage = imageName + ".png";
+						let pngImage2 = imageName + "-2.png";
 						let thumbImage = imageName + ".thumb.jpg";
 
-						if(fs.existsSync(pngImage) && !fs.existsSync(thumbImage))
+						if(fs.existsSync(pngImage))
 						{
-							sharp(pngImage).resize(197, 272).toFile(thumbImage);
+							let image = sharp(pngImage);
+							if (!fs.existsSync(thumbImage))
+							{
+								image.resize(197, 272).toFile(thumbImage);
+							}
+
+							if(!((await image.metadata()).isProgressive))
+							{	
+								console.log("interlacing " + key)
+
+								await image.png({progressive: true}).toFile(pngImage2)
+								fs.copyFileSync(pngImage2, pngImage);
+								fs.unlinkSync(pngImage2);
+							}
 						}
 
 						if(typeKey == "start")
