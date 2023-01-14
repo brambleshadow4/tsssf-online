@@ -187,12 +187,20 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 	imgElement.oncontextmenu = function(e)
 	{
 		e.preventDefault();
-		window.open(cardRefURL(card, cards[card]));
+		console.log(isHoverTouch);
+		
+		if(!inTouchEvent && !isHoverTouch)
+		{
+			window.open(cardRefURL(card, cards[card]));
+		}
 	}
 
 
 	imgElement.onclick = function(e)
 	{	
+		console.log(e);
+
+
 		if(isDkeyPressed && isItMyTurn())
 		{
 			if(location.startsWith("p,"))
@@ -226,11 +234,13 @@ export function makeCardElement(card: Card, locationOpt?: Location, isDraggable?
 	{
 		isHoverTouch = false;
 		inTouchEvent = true;
+		console.log("touch event started")
 	}
 	
 	imgElement.ontouchend = function(e)
 	{
 		inTouchEvent = false;
+		console.log("touch event ended")
 
 		if(isHoverTouch)
 		{
