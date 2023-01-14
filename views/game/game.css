@@ -524,7 +524,10 @@ input[type="number"]
 	vertical-align: middle;
 }
 
-
+.turnchecks 
+{
+	font-size: 8pt;
+}
 
 #turnInfo
 {
@@ -997,10 +1000,30 @@ iframe
 
 @media only screen and (max-height: 400px)
 {
+	.turnchecks 
+	{
+		font-size: 2vh;
+	}
+}
+
+@media only screen and (max-height: 500px)
+{
 	#turnInfo
 	{
 		font-size: 3vh;
 		margin-top: 0;
+	}
+
+	#turnInfo label
+	{
+		/*display:inline-block;*/
+		line-height: 2vh;
+	}
+
+	#turnInfo input 
+	{
+		height: 3vh;
+		margin-bottom: 0px;
 	}
 
 	#turnInfo button

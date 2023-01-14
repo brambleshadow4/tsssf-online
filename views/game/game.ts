@@ -335,10 +335,37 @@ export function updateTurnstate()
 	{
 		document.body.classList.remove("nomove");
 
-		div.innerHTML = "<div>" + s.GameYourTurn + "</div>";
+		div.innerHTML = `
+			<div>${s.GameYourTurn}</div>
+			<div class='turnchecks'>${s.GameTurnChecks}</div>	
+		`;
+		
+		let drawCheck = model.me().hand.length >= 7;
+
+		let turnCheck = document.createElement('div');
+		turnCheck.className = "turnchecks";
+		let checkbox = document.createElement('input');
+		checkbox.type = "checkbox";
+		checkbox.id = "7-card-check";
+		turnCheck.appendChild(checkbox);
+
+		if(drawCheck)
+			checkbox.checked = true;
+
+		let label = document.createElement('label');
+		label.innerHTML = s.GameDraw7Cards;
+		label.setAttribute('for', '7-card-check');
+
+		turnCheck.appendChild(label);
+
+		div.appendChild(turnCheck);
+
 		var button = document.createElement('button');
 		button.innerHTML = s.GameEndMyTurnButton;
 		div.appendChild(button);
+
+		if(!drawCheck)
+			button.setAttribute('disabled', "true");
 
 		button.onclick = function()
 		{
@@ -348,8 +375,15 @@ export function updateTurnstate()
 				model.changeTurnToNextPlayer();
 				checkIfGoalsWereAchieved();
 				updateTurnstate();
-			}
-				
+			}	
+		}
+
+		checkbox.onchange = function()
+		{
+			if(checkbox.checked)
+				button.removeAttribute("disabled");
+			else
+				button.setAttribute("disabled","true");
 		}
 	}
 	else
@@ -357,7 +391,6 @@ export function updateTurnstate()
 		document.body.classList.add("nomove");
 
 		div.innerHTML = `<div>`+ s.GamePlayerTurn.replace("{0}", turnstate.currentPlayer) + `</div>`;
-
 
 		var thisPlayer = model.players.filter(x => x.name == turnstate.currentPlayer)[0];
 

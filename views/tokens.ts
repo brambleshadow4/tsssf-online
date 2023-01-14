@@ -47,6 +47,8 @@ export default {
 
 
 	"GameYourTurn": "It is currently your turn",
+	"GameTurnChecks": "Before you end it, make sure to",
+	"GameDraw7Cards": "Draw back up to 7 cards",
 	"GamePlayerTurn": "It is currently {0}'s turn ", // {0} is the player's name
 	"GameDisconnectTimeout": "Their turn will end if they do not reconnect in < 15s",
 	"GameEndMyTurnButton": "End My Turn",

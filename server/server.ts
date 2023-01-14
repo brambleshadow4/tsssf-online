@@ -575,13 +575,7 @@ async function sendIfExists(url:string, lang: string, res: any)
 	}
 }
 
-
-
-
-
 ///--------------------------------------------------------------------------------------
-
-
 
 // Set up a headless websocket server that prints any
 // events that come in.
