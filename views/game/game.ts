@@ -363,10 +363,13 @@ export function updateTurnstate()
 		let label = document.createElement('label');
 		label.innerHTML = s.GameDraw7Cards;
 		label.setAttribute('for', '7-card-check');
+		let allCheckboxesChecked = true;
 
 		if(drawCheck)
 			checkbox.checked = true;
-
+		else
+			allCheckboxesChecked = false;
+			
 		turnCheck.appendChild(checkbox);
 		checkboxes.push(checkbox);
 		turnCheck.appendChild(label);
@@ -381,16 +384,11 @@ export function updateTurnstate()
 			if(!cardOnBoard || !isPony(cardOnBoard) || isBlank(cardOnBoard))
 				continue;
 
-			
-			
 			if(cards[cardOnBoard].action?.startsWith("Reminder("))
 			{
 				reminders.push(cardOnBoard);
 			}
 		}
-
-		console.log(reminders);
-
 
 		for(let i=0; i < reminders.length; i++)
 		{
@@ -399,6 +397,13 @@ export function updateTurnstate()
 			let checkbox = document.createElement('input');
 			checkbox.type = "checkbox";
 			checkbox.id = "dyn-turncheck-" + i;
+			checkbox.setAttribute('card', reminders[i]);
+
+			if(turnstate.reminderCache.has(reminders[i]))
+				checkbox.checked = true;
+			else
+				allCheckboxesChecked = false;
+
 			checkContainer.appendChild(checkbox);
 
 			let label = document.createElement('label');
@@ -416,7 +421,7 @@ export function updateTurnstate()
 		button.innerHTML = s.GameEndMyTurnButton;
 		div.appendChild(button);
 
-		if(!drawCheck)
+		if(!allCheckboxesChecked)
 			button.setAttribute('disabled', "true");
 
 		button.onclick = function()
@@ -434,12 +439,19 @@ export function updateTurnstate()
 		{
 			box.onchange = function()
 			{
+				if(box.hasAttribute('card'))
+				{
+					if(box.checked)
+					turnstate.reminderCache.add(box.getAttribute('card') || "");
+					else
+						turnstate.reminderCache.delete(box.getAttribute('card') || "");
+				}
+
 				let allChecked = checkboxes.map(x => x.checked).reduce((acc, val) => acc && val, true)
 				if(allChecked)
 					button.removeAttribute("disabled");
 				else
 					button.setAttribute("disabled","true");
-				
 			}
 		}
 

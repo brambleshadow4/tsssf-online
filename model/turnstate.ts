@@ -41,6 +41,7 @@ export default class Turnstate
 	public openShips: {[card: string]: true} = {};
 	public shipTarget?: Location
 	public removedFrom?: [Location, Card]; 
+	public reminderCache: Set<Card> = new Set();
 
 	public constructor(){}
 
