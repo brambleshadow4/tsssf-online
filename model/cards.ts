@@ -1354,6 +1354,7 @@ var cards: {[key: string]: any} = {
 	},
 	"HorriblePeople.2015ConExclusives.Pony.TheTantabus": {
 		"name": "The Tantabus",
+		"action": "Reminder(Tantabus-Discard a pony)",
 		"keywords": [
 			"Villain"
 		]
@@ -1615,6 +1616,7 @@ var cards: {[key: string]: any} = {
 	},
 	"HorriblePeople.GraciousGivers.Pony.TheSmooze": {
 		"name": "The Smooze",
+		"action": "Reminder(Move Smooze)",
 		"keywords": [
 			"Elder",
 			"Object",

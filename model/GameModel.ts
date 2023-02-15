@@ -10,6 +10,7 @@ import {getConnectedPonies, evalGoalCard} from "./goalCriteria.js"
 import * as cm from "./cardManager.js";
 
 import Turnstate, { fromClientTurnstate } from "./turnstate.js";
+import { isArrowFunction } from "typescript";
 
 var PROP_VALUES = {
 
@@ -58,9 +59,11 @@ export default class GameModel implements GM
 	public tempGoals: Card[] = [];
 	public removed: Card[] = [];
 	public mode: "server" | "client" | "both" = "client";
+
 	public players: Player[] = [];
 	public runGoalLogic = true;
 	public turnstate? = new Turnstate();
+	public reminders: string[] = [];
 	public debug = false;
 
 	public onCardMove?: Function;
@@ -1149,10 +1152,14 @@ export default class GameModel implements GM
 			}
 		}
 
-		if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh")
-		{
+
+		let cards = cm.inPlay();
+
+		console.log(cards[card].action)
+
+		if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh" || cards[card].action?.startsWith("Reminder("))
 			this.turnstate.updateSpecialEffects(this.board);
-		}
+
 
 
 		let commitCounts = (startLocation == curPlayerLoc || 

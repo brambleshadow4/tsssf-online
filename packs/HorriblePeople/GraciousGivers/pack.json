@@ -89,6 +89,7 @@
 			},
 			"TheSmooze": {
 				"name": "The Smooze",
+				"action": "Reminder(Move Smooze)",
 				"keywords": [
 					"Elder",
 					"Object",

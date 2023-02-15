@@ -98,10 +98,8 @@ import {
 } from "./network.js";
 
 
-
-
 import {createPopup} from "./popupComponent.js";
-import { start } from "repl";
+import cards from "../../model/cards.js";
 
 let win = window as unknown as {
 	model: GameModel,
@@ -220,15 +218,15 @@ function LoadCards(): void
 
 	let cards = cm.inPlay();
 
-	let customCardsInUse = false
+	let customCardsInUse = false;
+
+	let reminders = [];
 
 	for(var key in cards)
 	{
-		
 		if(key.startsWith("X.") && !customCardsInUse)
 		{
 			customCardsInUse = true;
-
 			document.body.classList.add("cardsUnapproved");
 
 			(async function(){
@@ -268,7 +266,18 @@ function LoadCards(): void
 				keywordSet.add(keyword);
 			}
 		}
+
+		if(cards[key].action?.startsWith("Reminder("))
+		{
+			console.log(key);
+			let match = /Reminder\((.*)\)/.exec(cards[key].action!);
+			if(match)
+				reminders.push(match[1].replace(/</g,"&lt;"));
+		}
 	}
+
+	model.reminders = reminders;
+	console.log(reminders);
 
 	allKeywords = [...keywordSet.keys()].sort();
 
@@ -323,6 +332,7 @@ function animateCardMove(card: Card, startPos: {[key:string]: string}, endPos: {
 export function updateTurnstate()
 {
 	let model = win.model;
+
 	var turnstate = model.turnstate!;
 
 	if(!turnstate){
@@ -340,6 +350,8 @@ export function updateTurnstate()
 			<div class='turnchecks'>${s.GameTurnChecks}</div>	
 		`;
 		
+		let checkboxes: HTMLInputElement[] = [];
+
 		let drawCheck = model.me().hand.length >= 7;
 
 		let turnCheck = document.createElement('div');
@@ -347,18 +359,58 @@ export function updateTurnstate()
 		let checkbox = document.createElement('input');
 		checkbox.type = "checkbox";
 		checkbox.id = "7-card-check";
-		turnCheck.appendChild(checkbox);
-
-		if(drawCheck)
-			checkbox.checked = true;
 
 		let label = document.createElement('label');
 		label.innerHTML = s.GameDraw7Cards;
 		label.setAttribute('for', '7-card-check');
 
-		turnCheck.appendChild(label);
+		if(drawCheck)
+			checkbox.checked = true;
 
+		turnCheck.appendChild(checkbox);
+		checkboxes.push(checkbox);
+		turnCheck.appendChild(label);
 		div.appendChild(turnCheck);
+
+		let cards = cm.inPlay();
+		let reminders: string[] = [];
+		for(let loc in model.board)
+		{
+			let cardOnBoard = model.board[loc].card;
+
+			if(!cardOnBoard || !isPony(cardOnBoard) || isBlank(cardOnBoard))
+				continue;
+
+			
+			
+			if(cards[cardOnBoard].action?.startsWith("Reminder("))
+			{
+				reminders.push(cardOnBoard);
+			}
+		}
+
+		console.log(reminders);
+
+
+		for(let i=0; i < reminders.length; i++)
+		{
+			let checkContainer = document.createElement('div');
+			checkContainer.className = "turnchecks";
+			let checkbox = document.createElement('input');
+			checkbox.type = "checkbox";
+			checkbox.id = "dyn-turncheck-" + i;
+			checkContainer.appendChild(checkbox);
+
+			let label = document.createElement('label');
+			
+			let reminderText = /Reminder\((.*)\)/.exec(cards[reminders[i]].action || "")
+			label.innerHTML = reminderText ? reminderText[1] : "reminder";
+			label.setAttribute('for', "dyn-turncheck-" + i);
+
+			checkContainer.appendChild(label);
+			div.appendChild(checkContainer);
+			checkboxes.push(checkbox);
+		}
 
 		var button = document.createElement('button');
 		button.innerHTML = s.GameEndMyTurnButton;
@@ -378,13 +430,20 @@ export function updateTurnstate()
 			}	
 		}
 
-		checkbox.onchange = function()
+		for(let box of checkboxes)
 		{
-			if(checkbox.checked)
-				button.removeAttribute("disabled");
-			else
-				button.setAttribute("disabled","true");
+			box.onchange = function()
+			{
+				let allChecked = checkboxes.map(x => x.checked).reduce((acc, val) => acc && val, true)
+				if(allChecked)
+					button.removeAttribute("disabled");
+				else
+					button.setAttribute("disabled","true");
+				
+			}
 		}
+
+		
 	}
 	else
 	{

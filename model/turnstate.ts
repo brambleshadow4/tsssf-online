@@ -1,5 +1,6 @@
-import {Card, ChangelingContextList, Location} from "./lib.js";
+import {Card, ChangelingContextList, Location, isPony, isBlank} from "./lib.js";
 import GameModel from "./GameModel.js"
+import * as cm from "./cardManager.js";
 
 export default class Turnstate
 {	
@@ -30,7 +31,8 @@ export default class Turnstate
 
 	public specialEffects: {
 		shipWithEverypony: Set<string>,
-		larsonEffect?: boolean
+		larsonEffect?: boolean,
+		reminders?: string[],
 	} = {
 		shipWithEverypony: new Set()
 	};

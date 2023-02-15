@@ -50,6 +50,7 @@
 			},
 			"TheTantabus": {
 				"name": "The Tantabus",
+				"action": "Reminder(Tantabus-Discard a pony)",
 				"keywords": [
 					"Villain"
 				]
