@@ -11,10 +11,7 @@ export function cardSearchBar(
 	onFilterChange?: (newfilters: [string, any][]) => any
 ): [HTMLElement, (newfilters: [string, any][]) => void]
 {
-
 	let filters: [string, any][] = [];
-
-	let onFilderChangeHandler = onFilterChange || (() => {});
 
 	var bar = document.createElement('div');
 	bar.className = "cardSearchBar"
@@ -403,13 +400,11 @@ function propValueOverrides(prop: string, value: string | undefined): [string, s
 	if(prop == "action")
 	{
 		if(value.startsWith("Changeling"))
-		{
 			return ["action", "Changeling"];
-		}
 		if(value.startsWith("addKeywords"))
-		{
 			return ["action", "Add Keywords"];
-		}
+			if(value.startsWith("Reminder"))
+			return ["action","Special"];
 	}
 
 	if(prop == "goalLogic" )

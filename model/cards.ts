@@ -124,7 +124,7 @@ var cards: {[key: string]: any} = {
 		"name": "Bulk Biceps",
 		"race": "pegasus",
 		"gender": "male",
-		"action": "swap",
+		"action": "Reminder(<h1>This is big</h1>)",
 		"keywords": []
 	},
 	"Core.Pony.Caramel": {

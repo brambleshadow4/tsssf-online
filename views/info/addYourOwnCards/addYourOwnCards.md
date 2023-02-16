@@ -298,7 +298,7 @@ tsssf.net.
 		<tr><td>altTimeline</td><td>true</td><td>Gives a card the altTimeline/apocalypse/hour glass symbol</td></tr>
 		<tr class='alt'><td>changeGoalPointValues</td><td>true</td><td>When this card is on the grid, prevents goal cards from being worth their normal amount of points</td></tr>
 		<tr><td>count</td><td>any number</td><td>Changes how many ponies this card counts as, e.g. 2 for Aloe & Lotus</td></tr>
-		<tr class='alt'><td rowspan="15">action</td><td>"swap"</td><td></td></tr>
+		<tr class='alt'><td rowspan="16">action</td><td>"swap"</td><td></td></tr>
 		<tr class='alt'><td>"3swap"</td><td></td></tr>
 		<tr class='alt'><td>"replace"</td><td></td></tr>
 		<tr class='alt'><td>"search"</td><td></td></tr>
@@ -328,6 +328,7 @@ tsssf.net.
 		<tr class='alt'>
 			<td>"exchangeCardsBetweenHands"</td><td>Causes players to randomly trade one card with the player next to them</td>
 		</tr>
+		<tr class='alt'><td>"Reminder(&lt;message&gt;)"</td><td>Adds a checkbox to remind the player to do something before the end of their turn. &lt;message&gt; is the text that's displayed next to the checkbox</td></tr>
 	</table>
 </div>
 
