@@ -76,6 +76,7 @@ export class TsssfGameServer
 				// no player alive expiration
 
 				var anyPlayersAlive = false;
+
 				for(var i=0; i < games[key].model.players.length; i++)
 				{
 					if(!games[key].model.players[i].disconnected)
@@ -85,6 +86,16 @@ export class TsssfGameServer
 					}
 				}
 
+				if(games[key].isLobbyOpen && !anyPlayersAlive)
+				{
+					for(let socket of games[key].newConnections)
+					{
+						if(socket.readyState == socket.OPEN)
+						{
+							anyPlayersAlive = true;
+						}
+					}
+				}
 
 				if(!anyPlayersAlive)
 				{
@@ -205,7 +216,8 @@ export class GameInstance
 	public isLobbyOpen = true; 
 	public deathCount = 0;
 
-	private newConnections: ws[] = [];
+
+	public newConnections: ws[] = [];
 
 	public gameOptions: GameOptions = defaultGameOptions();
 	public lastMessageTimestamp: number;
@@ -222,7 +234,7 @@ export class GameInstance
 	}
 
 	public onConnection(socket: ws, request:any, client:any)
-	{		
+	{
 		socket.on('message', handleCrash(this.onMessage(this, socket)));
 		socket.on('close', handleCrash(this.onClose(this, socket as any)));
 
