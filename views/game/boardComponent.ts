@@ -97,6 +97,9 @@ export async function initBoard()
 			zoomScale = Math.min(zoomScale, 2);
 			refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
 
+			//playingArea.style.backgroundPositionX = curX-difX + "px";
+			//playingArea.style.backgroundPositionY = curY-difY + "px";
+
 
 			dist = newDist;
 		}
@@ -127,6 +130,9 @@ export async function initBoard()
 
 		var curX = Number(refPoint.style.left.substring(0, refPoint.style.left.length-2));
 		var curY = Number(refPoint.style.top.substring(0, refPoint.style.top.length-2));
+
+		playingArea.style.backgroundPositionX = curX-difX + "px";
+		playingArea.style.backgroundPositionY = curY-difY + "px";
 
 		refPoint.style.left = curX - difX + "px";
 		refPoint.style.top = curY - difY + "px";
@@ -175,6 +181,9 @@ export async function initBoard()
 
 		refPoint.style.left = x + "px";
 		refPoint.style.top = y + "px";
+
+		playingArea.style.backgroundPositionX = x + "px";
+		playingArea.style.backgroundPositionY = y + "px";
 	}
 
 	var instances = 60;
@@ -219,6 +228,7 @@ export async function initBoard()
 			zoomScale = Math.max(zoomScale-.1, .2);
 
 			refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
+			playingArea.style.backgroundSize = (zoomScale*100) + "%";
 		}
 
 		if(Math.sign(e.deltaY) < 0)
@@ -226,6 +236,7 @@ export async function initBoard()
 			zoomScale = Math.min(zoomScale+.1, 2);
 
 			refPoint.style.transform = "scale(" + zoomScale + ", " + zoomScale  + ")";
+			playingArea.style.backgroundSize = (zoomScale*100) + "%";
 		}
 
 		curX *= zoomScale;
@@ -236,6 +247,8 @@ export async function initBoard()
 
 		refPoint.style.left = curX + "px";
 		refPoint.style.top = curY + "px";
+		playingArea.style.backgroundPositionX = curX + "px";
+		playingArea.style.backgroundPositionY = curY + "px";
 	};
 }
 
