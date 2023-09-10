@@ -501,6 +501,11 @@ input[type="number"]
 	filter: grayscale(75%);
 }
 
+.nomove #playingArea {
+	border-color: #706d69
+}
+
+
 .nomove .shuffle, .nomove .card.grab, .nomove .card{
 	cursor: not-allowed;
 }
