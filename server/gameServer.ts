@@ -258,7 +258,8 @@ export class GameInstance
 				game.onHandshakeMessage(message, socket); return; 
 			}
 			
-			if(message == "debug") game.onDebugMessage(socket);
+			if(message == "debug") 
+				game.onDebugMessage(socket);
 
 			if(game.isLobbyOpen)
 			{
@@ -304,7 +305,8 @@ export class GameInstance
 
 						var json = message.substring("uploadCards;".length);
 						var newCards;
-						try{
+						try
+						{
 							newCards = JSON.parse(json);
 						}
 						catch(e)
@@ -1085,7 +1087,7 @@ export class GameInstance
 
 	private moveCard(message: string, playerName: string)
 	{
-		var [_,card, startLocation, endLocation, extraArg] = message.split(";");
+		var [_, card, startLocation, endLocation, extraArg] = message.split(";");
 		var player = this.model.getPlayerByName(playerName);
 
 		if(!player) { return; }
@@ -1095,6 +1097,12 @@ export class GameInstance
 			// player is trying to move cards to another player, illegal.
 			return;
 		}
+
+		if(!cm.inPlay()[card])
+		{
+			return;
+		}
+
 
 		let actualLocation = this.model.isInvalidMoveOnClient(playerName, card, startLocation, endLocation);
 		

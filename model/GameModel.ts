@@ -1010,6 +1010,9 @@ export default class GameModel implements GM
 
 		//postmove
 
+		
+
+
 		this.updateTurnstatePostMove(card, startLocation, endLocation);
 
 		// cant move to a goal location yet
@@ -1154,8 +1157,6 @@ export default class GameModel implements GM
 
 
 		let cards = cm.inPlay();
-
-		console.log(cards[card].action)
 
 		if(card == "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh" || cards[card].action?.startsWith("Reminder("))
 			this.turnstate.updateSpecialEffects(this.board);
