@@ -10,7 +10,8 @@ import {
 	Card,
 	PackListPack,
 	GameOptions, defaultGameOptions,
-	Player
+	Player,
+	CardConfig
 } from "../model/lib.js";
 
 import GameModel from "../model/GameModel.js";
@@ -48,8 +49,11 @@ export class TsssfGameServer
 	public games: {[key:string] : GameInstance};
 	private wsServer: ws.Server;
 
-	constructor()
+	private DEFAULT_CARDS: CardConfig;
+
+	constructor(cardConfig: CardConfig)
 	{
+		this.DEFAULT_CARDS = cardConfig;
 		this.wsServer = new ws.Server({ noServer: true });
 		this.games = {};
 
@@ -134,7 +138,7 @@ export class TsssfGameServer
 			while(this.games[key] !== undefined)
 		}
 		
-		this.games[key] = new GameInstance();
+		this.games[key] = new GameInstance(this.DEFAULT_CARDS);
 
 		return key;
 	}
@@ -216,6 +220,8 @@ export class GameInstance
 	public isLobbyOpen = true; 
 	public deathCount = 0;
 
+	public cardConfig: CardConfig;
+
 
 	public newConnections: ws[] = [];
 
@@ -228,8 +234,9 @@ export class GameInstance
 
 	public debug = false;
 
-	constructor()
+	constructor(cardConfig: CardConfig)
 	{
+		this.cardConfig = JSON.parse(JSON.stringify(cardConfig));
 		this.lastMessageTimestamp = new Date().getTime();
 	}
 
@@ -276,7 +283,6 @@ export class GameInstance
 						}
 						catch(e){ }
 
-						options.customCards = game.gameOptions.customCards; // keep the previously loaded custom cards
 						game.setLobbyOptions(options);
 
 						return;	
@@ -295,7 +301,7 @@ export class GameInstance
 
 					if(message.startsWith("uploadCards;") && game.host == socket)
 					{
-						let customCards = game.gameOptions.customCards;
+						let customCards = game.cardConfig.custom;
 
 						if(customCards.currentSize > UPLOAD_LIMIT || message.length > UPLOAD_LIMIT)
 						{
@@ -546,6 +552,7 @@ export class GameInstance
 
 		let isHost = this.host == socket;
 
+		// See also SCHEMA.LOBBY_PAYLOAD in lobby.ts
 		return "lobby;" + JSON.stringify({
 
 			id: player?.id || 0,
@@ -556,6 +563,7 @@ export class GameInstance
 
 			isHost,
 			gameOptions: isHost ? this.gameOptions : {},
+			cardConfig: this.cardConfig
 		})
 	}
 
@@ -992,8 +1000,7 @@ export class GameInstance
 		}
 
 		newOptions.cardDecks = options.cardDecks || newOptions.cardDecks;
-		newOptions.customCards = options.customCards || newOptions.customCards;
-		cm.init(newOptions);
+		cm.init(this.cardConfig, newOptions);
 
 		this.gameOptions = newOptions;
 	}

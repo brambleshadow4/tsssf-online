@@ -19,8 +19,11 @@ import {buildTemplate, buildTemplateHTML} from "../build/md.js";
 import en_US from "../views/tokens.js";
 import es_ES from "../i18n/es-ES/views/tokens.js";
 import zz_ZZ from "../i18n/zz-ZZ/views/tokens.js";
+import {pack} from "../build/pack.js";
 
 dotenv.config();
+
+const app = express()
 
 const PORT = process.env.PORT || (process.env.KEY ? 443 : 80);
 
@@ -33,332 +36,471 @@ const translations = {
 } as any;
 
 
-translations[defaultLocale].Version = JSON.parse(fs.readFileSync("./package.json", {encoding: "utf8"})).version;
-translations[defaultLocale].NavTemplate = fs.readFileSync("./views/navTemplate.html", {encoding: "utf8"});
-
-for(let lang in translations)
+function setupTranslations()
 {
-	for(let key in translations[defaultLocale])
-	{	
-		translations[lang][key] = translations[lang][key] || translations[defaultLocale][key]		
-	}
+	translations[defaultLocale].Version = JSON.parse(fs.readFileSync("./package.json", {encoding: "utf8"})).version;
+	translations[defaultLocale].NavTemplate = fs.readFileSync("./views/navTemplate.html", {encoding: "utf8"});
 
-	let prefix = "./i18n/" + lang;
-
-	if(lang == defaultLocale)
-		prefix = ".";
-
-	let navTemplate = translations[defaultLocale].NavTemplate
-
-	if(fs.existsSync(prefix + "/views/navTemplate.html"))
+	for(let lang in translations)
 	{
-		navTemplate = fs.readFileSync(prefix + "/views/navTemplate.html", {encoding: "utf8"});
-		translations[lang].NavTemplate = navTemplate
+		for(let key in translations[defaultLocale])
+		{	
+			translations[lang][key] = translations[lang][key] || translations[defaultLocale][key]		
+		}
+
+		let prefix = "./i18n/" + lang;
+
+		if(lang == defaultLocale)
+			prefix = ".";
+
+		let navTemplate = translations[defaultLocale].NavTemplate
+
+		if(fs.existsSync(prefix + "/views/navTemplate.html"))
+		{
+			navTemplate = fs.readFileSync(prefix + "/views/navTemplate.html", {encoding: "utf8"});
+			translations[lang].NavTemplate = navTemplate
+		}
+
+		for(let file of [
+			"/views/info/resources.md",
+			"/views/info/addYourOwnCards/addYourOwnCards.md",
+			"/views/info/quickRules.md",
+			"/views/info/rulebook.md",
+			"/views/info/faq.md"
+		]){
+
+			let fullFile = prefix + file;
+			if(fs.existsSync(fullFile))
+			{
+				buildTemplate(fullFile, navTemplate);
+			}
+			else if(navTemplate != translations[defaultLocale].NavTemplate)
+			{
+				buildTemplate("." + file, navTemplate, fullFile);
+			}
+		}
+
+		fs.writeFileSync(prefix + "/views/info/index.html", buildTemplateHTML("<script type='module' src='/info/knowledgeBase.js'></script>", translations[lang].NavTemplate))
 	}
 
-	for(let file of [
-		"/views/info/resources.md",
-		"/views/info/addYourOwnCards/addYourOwnCards.md",
-		"/views/info/quickRules.md",
-		"/views/info/rulebook.md",
-		"/views/info/faq.md"
-	]){
 
-		let fullFile = prefix + file;
-		if(fs.existsSync(fullFile))
-		{
-			buildTemplate(fullFile, navTemplate);
-		}
-		else if(navTemplate != translations[defaultLocale].NavTemplate)
-		{
-			buildTemplate("." + file, navTemplate, fullFile);
-		}
+
+
+	// compile markdown
+
+	for(let lang in translations)
+	{
+		
 	}
-
-	fs.writeFileSync(prefix + "/views/info/index.html", buildTemplateHTML("<script type='module' src='/info/knowledgeBase.js'></script>", translations[lang].NavTemplate))
 }
 
 
 
 
-// compile markdown
-
-for(let lang in translations)
+async function main()
 {
-	
-}
+	setupTranslations();
 
+	app.use(cookieParser());
 
-const app = express()
-app.use(cookieParser());
+	var argSet = new Set(process.argv);
 
-var argSet = new Set(process.argv);
+	app.get('/', function(req:any,res:any, next:any){
 
-app.get('/', function(req:any,res:any, next:any){
+		switch(req.query.lang){
+			case "en-US":
+			case "es-ES":
+			case "zz-ZZ":
 
-	switch(req.query.lang){
-		case "en-US":
-		case "es-ES":
-		case "zz-ZZ":
-
-			res.cookie('lang', req.query.lang);
-			res.setHeader("Content-Type", "text/json");
-			res.sendStatus(200);
-			return;
-	}
-
-	next();
-	
-}, file("./views/home.html"));
-
-app.get("/home.css", file("./views/home.css"))
-
-
-
-app.get('/img/**', fmap("/img/**", "./img/**"));
-app.get('/fonts/**', fmap("/fonts/**", "./fonts/**"));
-app.get('/packs/**', fmap("/packs/**", "./packs/**"));
-app.get('/model/**', fmap("/model/**", "./model/**"));
-
-
-app.get("/favicon.ico", file("./img/favicon.ico"))
-
-
-app.get('/.well-known/**', fmap("/.well-known/**", "./.well-known/**"));
-
-
-
-app.get("/info", file("./views/info/index.html"))
-app.get("/info/cardlist", file("./views/info/index.html"))
-app.get("/info/concept", file("./views/info/index.html"))
-app.get("/info/card", file("./views/info/index.html"))
-app.get("/info/resources", file("./views/info/resources.html"))
-
-app.get("/info/addYourOwnCards", file("./views/info/addYourOwnCards/addYourOwnCards.html"))
-app.get("/info/addYourOwnCards/upload2.png", file("./views/info/addYourOwnCards/upload2.png"))
-app.get("/info/highlight.min.css", file("./views/info/addYourOwnCards/highlight.min.css"))
-app.get("/info/highlight.min.js", file("./views/info/addYourOwnCards/highlight.min.js"))
-
-
-app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
-app.get("/lobby/packOrder.js", file("./views/lobby/packOrder.js"))
-
-
-
-app.get("/tokens.js", function(req, res){
-
-	res.setHeader("Content-Type", "text/javascript");
-	res.send("export default " + JSON.stringify(translations[getLang(req)]));
-});
-
-
-
-app.get("/info/rulebook", file("./views/info/rulebook.html"))
-app.get("/info/rulebook.css", file("./views/info/rulebook.css"))
-app.get("/info/quickRules", file("./views/info/quickRules.html"))
-app.get("/info/faq", file("./views/info/faq.html"))
-
-
-
-app.get("/lobby.css", file("./views/lobby/lobby.css"));
-app.get("/lobby", function(req,res)
-{
-	let query = req.originalUrl.substring(req.originalUrl.indexOf("?")+1);
-
-	var key = query.toUpperCase();
-
-	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
-	{
-		sendIfExists("./views/app.html", getLang(req), res);
-	}
-	else
-	{
-		res.redirect("/");
-	}
-});
-
-app.get("/imgproxy", async function(req,res){
-
-	if(req.query.url)
-	{
-		let url = "" + req.query.url
-		let request = await fetch(url);
-		let blob = await request.blob() as any;
-		let arrayBuff = await blob.arrayBuffer();
-		let buff = Buffer.from(arrayBuff);
-
-		if(url.endsWith(".png")) res.setHeader("Content-Type", "image/png");
-		if(url.endsWith(".jpg")) res.setHeader("Content-Type", "image/jpeg");
-		if(url.endsWith(".jpeg")) res.setHeader("Content-Type", "image/jpeg");
-
-		res.send(buff);
-	}
-})
-
-
-app.get("/game", function(req, res)
-{
-	let query = req.originalUrl.substring(req.originalUrl.indexOf("?")+1);
-
-	var key = query.toUpperCase();
-
-	if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
-	{
-		sendIfExists("./views/app.html", getLang(req), res);
-	}
-	else
-	{
-		res.redirect("/");
-	}
-});
-
-app.get("/tutorial", file("./views/app.html"));
-
-app.get("/stats", async function(req, res){
-
-	var template = fs.readFileSync('./views/stats.html', 'utf8');
-	var stats = await getStats() as any;
-
-	for(var key in stats)
-	{
-		template = template.replace(key, stats[key].toString());
-	}
-
-	var liveStats = tsssfServer.getStats();
-	template = template.replace("$1", "" + liveStats.players);
-
-	template = template.replace("$2", "" +liveStats.games);
-
-	template = template.replace("$graph1.", JSON.stringify(stats.gamesHostedThisWeek));
-	template = template.replace("$graph2.", JSON.stringify(stats.playersJoinedThisWeek));
-	template = template.replace("$date.", "" +liveStats.startTime);
-
-	res.send(template);
-})
-
-
-
-app.get("/host", function(req, res){
-
-	var key = tsssfServer.openLobby();
-	res.redirect("/lobby?" + key);
-})
-
-
-let potentialPlayerRequests: {[k:string]: {type: "add" | "remove", timezone?:string, platform: "discord", expireTime?: number}} = {};
-
-
-
-app.get("/updatePotentialPlayers", async function(req,res) {
-
-
-	if(req.query?.type == "add")
-	{
-		let days = Number(req.query?.days || 30);
-		if (!days)
-		{
-			days = 30;
+				res.cookie('lang', req.query.lang);
+				res.setHeader("Content-Type", "text/json");
+				res.sendStatus(200);
+				return;
 		}
 
-		if(days < 1)
-		{
-			days = 1
-		} 
+		next();
+		
+	}, file("./views/home.html"));
 
-		if(days>90)
+	app.get("/home.css", file("./views/home.css"))
+
+
+
+	app.get('/img/**', fmap("/img/**", "./img/**"));
+	app.get('/fonts/**', fmap("/fonts/**", "./fonts/**"));
+	app.get('/packs/**', fmap("/packs/**", "./packs/**"));
+	app.get('/model/**', fmap("/model/**", "./model/**"));
+
+
+	app.get("/favicon.ico", file("./img/favicon.ico"))
+
+
+	app.get('/.well-known/**', fmap("/.well-known/**", "./.well-known/**"));
+
+
+
+	app.get("/info", file("./views/info/index.html"))
+	app.get("/info/cardlist", file("./views/info/index.html"))
+	app.get("/info/concept", file("./views/info/index.html"))
+	app.get("/info/card", file("./views/info/index.html"))
+	app.get("/info/resources", file("./views/info/resources.html"))
+
+	app.get("/info/addYourOwnCards", file("./views/info/addYourOwnCards/addYourOwnCards.html"))
+	app.get("/info/addYourOwnCards/upload2.png", file("./views/info/addYourOwnCards/upload2.png"))
+	app.get("/info/highlight.min.css", file("./views/info/addYourOwnCards/highlight.min.css"))
+	app.get("/info/highlight.min.js", file("./views/info/addYourOwnCards/highlight.min.js"))
+
+
+	app.get("/lobby/cardSelectComponent.js", file("./views/lobby/cardSelectComponent.js"))
+	app.get("/lobby/packOrder.js", file("./views/lobby/packOrder.js"))
+
+
+
+	app.get("/tokens.js", function(req, res){
+
+		res.setHeader("Content-Type", "text/javascript");
+		res.send("export default " + JSON.stringify(translations[getLang(req)]));
+	});
+
+
+
+	app.get("/info/rulebook", file("./views/info/rulebook.html"))
+	app.get("/info/rulebook.css", file("./views/info/rulebook.css"))
+	app.get("/info/quickRules", file("./views/info/quickRules.html"))
+	app.get("/info/faq", file("./views/info/faq.html"))
+
+
+
+	app.get("/lobby.css", file("./views/lobby/lobby.css"));
+	app.get("/lobby", function(req,res)
+	{
+		let query = req.originalUrl.substring(req.originalUrl.indexOf("?")+1);
+
+		var key = query.toUpperCase();
+
+		if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
 		{
-			days = 90;
+			sendIfExists("./views/app.html", getLang(req), res);
 		}
-
-		let timezone = Number(req.query?.timezone || 0);
-		timezone = timezone/60;
-
-		let timezoneStr = "";
-		if(timezone > 0)
-			timezoneStr = "UTC-" + Math.abs(timezone)
 		else
-			timezoneStr = "UTC+" + Math.abs(timezone);
-
-		let reqNo = await crypto.randomInt(1, 999999999);
-
-		potentialPlayerRequests[reqNo] = {
-			type: "add",
-			timezone: timezoneStr,
-			platform: "discord",
-			expireTime: new Date().getTime() + 24*3600*1000*days
-		}
-
-		if(req.query?.platform == "discord")
 		{
-			res.redirect("https://discord.com/api/oauth2/authorize?client_id=969750697308463115&redirect_uri=https%3A%2F%2Ftsssf.net%2FcallbackPotentialPlayers&response_type=code&scope=identify&state=" + reqNo);
-			//res.redirect("/callbackPotentialPlayers?state=" + reqNo);
+			res.redirect("/");
 		}
+	});
 
-		return;
-	}
+	app.get("/imgproxy", async function(req,res){
 
-	if(req.query?.type == "remove")
-	{
-		let reqNo = await crypto.randomInt(1, 999999999);
-
-		potentialPlayerRequests[reqNo] = {
-			type: "remove",
-			platform: "discord"
-		}
-
-		if(req.query?.platform == "discord")
+		if(req.query.url)
 		{
-			res.redirect("https://discord.com/api/oauth2/authorize?client_id=969750697308463115&redirect_uri=https%3A%2F%2Ftsssf.net%2FcallbackPotentialPlayers&response_type=code&scope=identify&state=" + reqNo);
-			//res.redirect("/callbackPotentialPlayers?state=" + reqNo);
+			let url = "" + req.query.url
+			let request = await fetch(url);
+			let blob = await request.blob() as any;
+			let arrayBuff = await blob.arrayBuffer();
+			let buff = Buffer.from(arrayBuff);
+
+			if(url.endsWith(".png")) res.setHeader("Content-Type", "image/png");
+			if(url.endsWith(".jpg")) res.setHeader("Content-Type", "image/jpeg");
+			if(url.endsWith(".jpeg")) res.setHeader("Content-Type", "image/jpeg");
+
+			res.send(buff);
+		}
+	})
+
+
+	app.get("/game", function(req, res)
+	{
+		let query = req.originalUrl.substring(req.originalUrl.indexOf("?")+1);
+
+		var key = query.toUpperCase();
+
+		if(tsssfServer.games[key] && (tsssfServer.games[key].isLobbyOpen || tsssfServer.games[key].isInGame))
+		{
+			sendIfExists("./views/app.html", getLang(req), res);
+		}
+		else
+		{
+			res.redirect("/");
+		}
+	});
+
+	app.get("/tutorial", file("./views/app.html"));
+
+	app.get("/stats", async function(req, res){
+
+		var template = fs.readFileSync('./views/stats.html', 'utf8');
+		var stats = await getStats() as any;
+
+		for(var key in stats)
+		{
+			template = template.replace(key, stats[key].toString());
 		}
 
-		return;
-	}
+		var liveStats = tsssfServer.getStats();
+		template = template.replace("$1", "" + liveStats.players);
 
-	res.redirect("/");
-});
+		template = template.replace("$2", "" +liveStats.games);
+
+		template = template.replace("$graph1.", JSON.stringify(stats.gamesHostedThisWeek));
+		template = template.replace("$graph2.", JSON.stringify(stats.playersJoinedThisWeek));
+		template = template.replace("$date.", "" +liveStats.startTime);
+
+		res.send(template);
+	})
 
 
-app.get("/callbackPotentialPlayers", async function(req,res)
-{
 
-	let playerReq = potentialPlayerRequests[(req.query.state || "") as string]
+	app.get("/host", function(req, res){
 
-	if(!playerReq)
-	{
+		var key = tsssfServer.openLobby();
+		res.redirect("/lobby?" + key);
+	})
+
+
+	let potentialPlayerRequests: {[k:string]: {type: "add" | "remove", timezone?:string, platform: "discord", expireTime?: number}} = {};
+
+
+
+	app.get("/updatePotentialPlayers", async function(req,res) {
+
+
+		if(req.query?.type == "add")
+		{
+			let days = Number(req.query?.days || 30);
+			if (!days)
+			{
+				days = 30;
+			}
+
+			if(days < 1)
+			{
+				days = 1
+			} 
+
+			if(days>90)
+			{
+				days = 90;
+			}
+
+			let timezone = Number(req.query?.timezone || 0);
+			timezone = timezone/60;
+
+			let timezoneStr = "";
+			if(timezone > 0)
+				timezoneStr = "UTC-" + Math.abs(timezone)
+			else
+				timezoneStr = "UTC+" + Math.abs(timezone);
+
+			let reqNo = await crypto.randomInt(1, 999999999);
+
+			potentialPlayerRequests[reqNo] = {
+				type: "add",
+				timezone: timezoneStr,
+				platform: "discord",
+				expireTime: new Date().getTime() + 24*3600*1000*days
+			}
+
+			if(req.query?.platform == "discord")
+			{
+				res.redirect("https://discord.com/api/oauth2/authorize?client_id=969750697308463115&redirect_uri=https%3A%2F%2Ftsssf.net%2FcallbackPotentialPlayers&response_type=code&scope=identify&state=" + reqNo);
+				//res.redirect("/callbackPotentialPlayers?state=" + reqNo);
+			}
+
+			return;
+		}
+
+		if(req.query?.type == "remove")
+		{
+			let reqNo = await crypto.randomInt(1, 999999999);
+
+			potentialPlayerRequests[reqNo] = {
+				type: "remove",
+				platform: "discord"
+			}
+
+			if(req.query?.platform == "discord")
+			{
+				res.redirect("https://discord.com/api/oauth2/authorize?client_id=969750697308463115&redirect_uri=https%3A%2F%2Ftsssf.net%2FcallbackPotentialPlayers&response_type=code&scope=identify&state=" + reqNo);
+				//res.redirect("/callbackPotentialPlayers?state=" + reqNo);
+			}
+
+			return;
+		}
+
 		res.redirect("/");
-		return;
-	}
+	});
 
-	var playerName = "";
-	var playerAvatar = "";
-	var playerID = "";
-	var success = false;
 
-	if(playerReq.platform == "discord"){
-		[success, playerID, playerName, playerAvatar] = await getDiscordCredentials((req.query.code || "") as any);
-		//[success, playerID, playerName, playerAvatar] = await getTestCredentials()
-	}
-
-	if(!success)
+	app.get("/callbackPotentialPlayers", async function(req,res)
 	{
+
+		let playerReq = potentialPlayerRequests[(req.query.state || "") as string]
+
+		if(!playerReq)
+		{
+			res.redirect("/");
+			return;
+		}
+
+		var playerName = "";
+		var playerAvatar = "";
+		var playerID = "";
+		var success = false;
+
+		if(playerReq.platform == "discord"){
+			[success, playerID, playerName, playerAvatar] = await getDiscordCredentials((req.query.code || "") as any);
+			//[success, playerID, playerName, playerAvatar] = await getTestCredentials()
+		}
+
+		if(!success)
+		{
+			res.redirect("/");
+			return;
+		}
+
+
+		if(playerReq.type == "add")
+		{
+			await addPotentialPlayer(playerID, playerReq.platform, playerName, playerAvatar, playerReq.timezone || "UTC+0", playerReq.expireTime as number)
+		}
+
+		if(playerReq.type == "remove")
+		{
+			await removePotentialPlayer(playerID, playerReq.platform);
+		}
+
 		res.redirect("/");
-		return;
-	}
+	})
 
+	app.get('/**', fmap("/**", "./views/**"));
 
-	if(playerReq.type == "add")
+	var server;
+	if(process.env.KEY)
 	{
-		await addPotentialPlayer(playerID, playerReq.platform, playerName, playerAvatar, playerReq.timezone || "UTC+0", playerReq.expireTime as number)
+		server = https.createServer({
+			key: fs.readFileSync(process.env.KEY as string),
+			cert: fs.readFileSync(process.env.CERT as string),
+			passphrase: process.env.PASSPHRASE
+		}, app)
+		.listen(PORT, function () {
+			console.log(`TSSSF secure web server listening on port ${PORT}!`)
+		});
 	}
-
-	if(playerReq.type == "remove")
+	else
 	{
-		await removePotentialPlayer(playerID, playerReq.platform);
+		server = app.listen(PORT, () => console.log(`TSSSF web server listening on port ${PORT}!`))
+	}
+	
+	///--------------------------------------------------------------------------------------
+
+	// Set up a headless websocket server that prints any
+	// events that come in.
+
+	// `server` is a vanilla Node.js HTTP server, so use
+	// the same ws upgrade process described here:
+	// https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server
+
+	let cardConfig = await pack();
+
+	const tsssfServer = new TsssfGameServer(cardConfig);
+
+	server.on('upgrade', (request, socket, head) => {
+		tsssfServer.handleUpgrade(request, socket, head, (socket: any) => {
+			tsssfServer.emit('connection', socket, request);
+		});
+	});
+
+	let args = process.argv.slice(2);
+
+	let options: {preset?:string} = {};
+
+	for(let i=0; i<args.length; i++)
+	{
+		if(args[i] == "--preset" && args[i+1])
+		{
+			options.preset = args[i+1];
+		}
 	}
 
-	res.redirect("/");
-})
+	if(options.preset)
+	{
+		let baseRules = {
+			cardDecks:["Core.*"],
+			ruleset: "turnsOnly",
+			keepLobbyOpen: true
+		};
+		let allCards = {
+			cardDecks:[
+				"Core.*",
+				"EC.*",
+				"PU.*",
+				"NoHoldsBarred.*",
+				"HorriblePeople.2014ConExclusives.*",
+				"HorriblePeople.2015ConExclusives.*",
+				"HorriblePeople.2015Workshop.*",
+				"HorriblePeople.AdventurePack.*",
+				"HorriblePeople.DungeonDelvers.*",
+				"HorriblePeople.FlufflePuff.*",
+				"HorriblePeople.GraciousGivers.*",
+				"HorriblePeople.Hearthswarming.*",
+				"HorriblePeople.Mean6.*",
+				"HorriblePeople.Misc.*",
+				"HorriblePeople.WeeabooParadaisu.*",
+			],
+			ruleset: "turnsOnly",
+			keepLobbyOpen: true
+		};
+		switch(options.preset)
+		{
+			case "ships":
+				tsssfServer.openLobby("DEV");
+				tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
+				tsssfServer.games.DEV.startGame([
+					"Core.Ship.CanITellYouASecret",
+					"Core.Ship.DoYouThinkLoveCanBloomEvenOnABattlefield",
+					"Core.Ship.CultMeeting",
+					"Core.Ship.YerAPrincessHarry",
+					"EC.Ship.BlindDate",
+					"EC.Ship.ScienceExperiments",
+					"HorriblePeople.2015ConExclusives.Ship.ObjectofAdoration",
+					"HorriblePeople.Mean6.Ship.TheNightmareBecomesYou",
+					"HorriblePeople.GraciousGivers.Ship.DunkedInTheDatingPool"
+				]);
+				break;
+		
+			case "changelings":
+				tsssfServer.openLobby("DEV");
+				tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
+				tsssfServer.games.DEV.startGame([
+					"NoHoldsBarred.Pony.Sleight",
+					"NoHoldsBarred.Pony.Plushling",
+					"NoHoldsBarred.Pony.KingVespid",
+					"Core.Pony.EarthChangeling",
+					"Core.Pony.UnicornChangeling",
+					"Core.Pony.PegasusChangeling",
+					"Core.Pony.QueenChrysalis",
+					"NoHoldsBarred.Pony.PixelPrism"
+				]);
+
+				break;
+			case "special1":
+				tsssfServer.openLobby("DEV");
+				tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
+				tsssfServer.games.DEV.startGame([
+					"HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh",
+					"HorriblePeople.GraciousGivers.Pony.PrincessCelestAI",
+					"NoHoldsBarred.Pony.Abarenbou",
+				]);
+
+				break;
+		}
+	}
+
+
+}
+
+
+
+
 
 async function getDiscordCredentials(code: string): Promise<[boolean, string, string, string]>
 {
@@ -433,7 +575,7 @@ async function getTestCredentials(): Promise<[boolean, string, string, string]>
 
 
 
-app.get('/**', fmap("/**", "./views/**"));
+
 
 function getLang(req: any)
 {
@@ -461,23 +603,6 @@ function getLangFromReq(req: any): string
 	return "";
 }
 
-
-var server;
-if(process.env.KEY)
-{
-	server = https.createServer({
-		key: fs.readFileSync(process.env.KEY as string),
-		cert: fs.readFileSync(process.env.CERT as string),
-		passphrase: process.env.PASSPHRASE
-	}, app)
-	.listen(PORT, function () {
-		console.log(`TSSSF secure web server listening on port ${PORT}!`)
-	});
-}
-else
-{
-	server = app.listen(PORT, () => console.log(`TSSSF web server listening on port ${PORT}!`))
-}
 
 
 function addTranslatedTokens(text: string, lang: string)
@@ -572,108 +697,5 @@ async function sendIfExists(url:string, lang: string, res: any)
 	else
 	{
 		res.send("404 error sad");
-	}
-}
-
-///--------------------------------------------------------------------------------------
-
-// Set up a headless websocket server that prints any
-// events that come in.
-
-// `server` is a vanilla Node.js HTTP server, so use
-// the same ws upgrade process described here:
-// https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server
-
-const tsssfServer = new TsssfGameServer();
-
-server.on('upgrade', (request, socket, head) => {
-	tsssfServer.handleUpgrade(request, socket, head, (socket: any) => {
-		tsssfServer.emit('connection', socket, request);
-	});
-});
-
-let args = process.argv.slice(2);
-
-let options: {preset?:string} = {};
-
-for(let i=0; i<args.length; i++)
-{
-	if(args[i] == "--preset" && args[i+1])
-	{
-		options.preset = args[i+1];
-	}
-}
-
-if(options.preset)
-{
-	let baseRules = {
-		cardDecks:["Core.*"],
-		ruleset: "turnsOnly",
-		keepLobbyOpen: true
-	};
-	let allCards = {
-		cardDecks:[
-			"Core.*",
-			"EC.*",
-			"PU.*",
-			"NoHoldsBarred.*",
-			"HorriblePeople.2014ConExclusives.*",
-			"HorriblePeople.2015ConExclusives.*",
-			"HorriblePeople.2015Workshop.*",
-			"HorriblePeople.AdventurePack.*",
-			"HorriblePeople.DungeonDelvers.*",
-			"HorriblePeople.FlufflePuff.*",
-			"HorriblePeople.GraciousGivers.*",
-			"HorriblePeople.Hearthswarming.*",
-			"HorriblePeople.Mean6.*",
-			"HorriblePeople.Misc.*",
-			"HorriblePeople.WeeabooParadaisu.*",
-		],
-		ruleset: "turnsOnly",
-		keepLobbyOpen: true
-	};
-	switch(options.preset)
-	{
-		case "ships":
-			tsssfServer.openLobby("DEV");
-			tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
-			tsssfServer.games.DEV.startGame([
-				"Core.Ship.CanITellYouASecret",
-				"Core.Ship.DoYouThinkLoveCanBloomEvenOnABattlefield",
-				"Core.Ship.CultMeeting",
-				"Core.Ship.YerAPrincessHarry",
-				"EC.Ship.BlindDate",
-				"EC.Ship.ScienceExperiments",
-				"HorriblePeople.2015ConExclusives.Ship.ObjectofAdoration",
-				"HorriblePeople.Mean6.Ship.TheNightmareBecomesYou",
-				"HorriblePeople.GraciousGivers.Ship.DunkedInTheDatingPool"
-			]);
-			break;
-	
-		case "changelings":
-			tsssfServer.openLobby("DEV");
-			tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
-			tsssfServer.games.DEV.startGame([
-				"NoHoldsBarred.Pony.Sleight",
-				"NoHoldsBarred.Pony.Plushling",
-				"NoHoldsBarred.Pony.KingVespid",
-				"Core.Pony.EarthChangeling",
-				"Core.Pony.UnicornChangeling",
-				"Core.Pony.PegasusChangeling",
-				"Core.Pony.QueenChrysalis",
-				"NoHoldsBarred.Pony.PixelPrism"
-			]);
-
-			break;
-		case "special1":
-			tsssfServer.openLobby("DEV");
-			tsssfServer.games.DEV.setLobbyOptions(allCards as GameOptions);
-			tsssfServer.games.DEV.startGame([
-				"HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh",
-				"HorriblePeople.GraciousGivers.Pony.PrincessCelestAI",
-				"NoHoldsBarred.Pony.Abarenbou",
-			]);
-
-			break;
 	}
 }

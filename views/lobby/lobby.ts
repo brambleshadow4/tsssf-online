@@ -12,7 +12,8 @@ import {
 	PackListHeader,
 	PackListItem,
 	PackListPack,
-	GameOptions
+	GameOptions,
+	CardConfig
 } from "../../model/lib.js";
 
 import texts from "../tokens.js";
@@ -68,8 +69,6 @@ export function loadView(handshakeMessage: string)
 		history.replaceState(null, "", "/lobby" + window.location.search)
 	}
 
-	cm.init(allCardsGameOptions());
-
 	document.body.innerHTML = LobbyView.HTML;
 	document.head.innerHTML = LobbyView.HEAD;
 
@@ -88,8 +87,10 @@ export function loadView(handshakeMessage: string)
 }
 
 
-function loadCardPages(options: GameOptions)
+function loadCardPages(cardConfig: CardConfig, options: GameOptions)
 {
+	
+
 	document.getElementById('uploadErrors')!.innerHTML = "";
 	(document.getElementById('packUpload') as HTMLInputElement).value = "";
 
@@ -102,14 +103,13 @@ function loadCardPages(options: GameOptions)
 	var deckElementList: HTMLElement[] = [];
 	var allPacks = packs.slice();
 
-	if(options.customCards.descriptions.length)
+	if(cardConfig.custom.descriptions.length)
 	{
 		allPacks.push({"h": texts.LobbyUploads, "id":"uploadBanner"});
-		allPacks = allPacks.concat(options.customCards.descriptions);
+		allPacks = allPacks.concat(cardConfig.custom.descriptions);
 	}
 
-
-	cm.init(allCardsGameOptions(options.customCards));
+	cm.init(cardConfig, allCardsGameOptions());
 
 	var uploadHeader: HTMLElement | undefined;
 
@@ -170,7 +170,7 @@ function loadCardPages(options: GameOptions)
 	startCards.innerHTML = "";
 
 	var startCardNames = packs.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
-	var customStartCards = options.customCards.descriptions.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
+	var customStartCards = cardConfig.custom.descriptions.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
 
 
 	if(customStartCards.length && uploadHeader)
@@ -264,7 +264,16 @@ function onMessage(event: MessageEvent)
 {
 	if(event.data.startsWith("lobby;"))
 	{
-		let payload = JSON.parse(event.data.substring("lobby;".length))
+		// See also SCHEMA.SEARCH in gameServer.ts
+		let payload:{
+			cardConfig: CardConfig,
+			isClosed: boolean,
+			gameOptions: GameOptions,
+			isHost: boolean,
+			name: string,
+			players: string[],
+			id: string,
+		} = JSON.parse(event.data.substring("lobby;".length))
 
 		if(payload.isClosed)
 		{
@@ -280,7 +289,7 @@ function onMessage(event: MessageEvent)
 			ishost = true;
 			document.getElementById('rightSide')!.classList.add('host');
 
-			loadCardPages(payload.gameOptions);
+			loadCardPages(payload.cardConfig, payload.gameOptions);
 
 			for(var key in cardBoxElements)
 			{

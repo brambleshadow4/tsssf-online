@@ -1,6 +1,15 @@
 export type Card = string;
 
-
+export interface CardConfig
+{
+	order: {},
+	standard: {[key:string]: CardProps},
+	custom: {
+		cards: {[key:string]: CardProps},
+		descriptions: PackListItem[],
+		currentSize: number
+	}
+}
 
 interface CardPropsBase {
 	url: string,
@@ -131,23 +140,13 @@ export interface GameOptions
 	startCard: string,
 	keepLobbyOpen: boolean,
 	teams: {[key: string]: string},
-	ruleset: "turnsOnly" | "sandbox",
-	customCards: {
-		cards: {[key: string]: CardProps},
-		descriptions: PackListItem[],
-		currentSize: number
-	}	
+	ruleset: "turnsOnly" | "sandbox"
 }
 
 export function defaultGameOptions(): GameOptions
 {
 	return {
 		cardDecks: ["Core.*"],
-		customCards: {
-			descriptions: [],
-			cards: {},
-			currentSize: 0
-		},
 		startCard: "Core.Start.FanficAuthorTwilight",
 		keepLobbyOpen: false,
 		teams: {},
@@ -155,19 +154,10 @@ export function defaultGameOptions(): GameOptions
 	};
 }
 
-export function allCardsGameOptions(customCards?: {
-	cards: {[key: string]: CardProps},
-	descriptions: PackListItem[],
-	currentSize: number
-}): GameOptions
+export function allCardsGameOptions(): GameOptions
 {
 	return {
 		cardDecks: ["*"],
-		customCards: customCards || {
-			descriptions: [],
-			cards: {},
-			currentSize: 0
-		},
 		startCard: "Core.Start.FanficAuthorTwilight",
 		keepLobbyOpen: false,
 		teams: {},

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import sharp from "sharp";
-
+import {CardConfig, CardProps} from "../model/lib.js";
 import {validatePack} from "../model/packLib.js";
 
 
@@ -27,12 +27,12 @@ function findPacks(topFolder:any, path:any, packs:any)
 	return packs;
 };
 
-export async function pack()
+export async function pack(): Promise<CardConfig>
 {
 	let packsSet = findPacks("./packs/", "./packs", new Set());
 	let packs: any = {};
 
-	let cards: any = {};
+	let cards: {[card:string]: CardProps} = {};
 
 	for(let namespace of packsSet)
 	{
@@ -117,8 +117,6 @@ export async function pack()
 		}
 	}
 
-	fs.writeFileSync("./model/cards.ts", "//auto-generated file using npm run build\nvar cards: {[key: string]: any} = " + JSON.stringify(cards, undefined,"\t") + "\nexport default cards");
-
 	var order;
 	if(fs.existsSync("./packs/order.json"))
 	{
@@ -164,9 +162,13 @@ export async function pack()
 	order = order.map( (x:any) => packs[x] ? packs[x] : x );
 	order = order.filter((x:any) => typeof x == "object" || packs[x]);
 
-	fs.writeFileSync(
-		"./model/packs.ts", "//auto-generated file using npm run build\nimport {PackListItem} from \"./lib.js\";\nvar order: PackListItem[] =" 
-		+ JSON.stringify(order, undefined,"\t")
-		+ "\nexport default order"
-	);
+	return {
+		order,
+		standard: cards,
+		custom: {
+			cards: {},
+			descriptions: [],
+			currentSize: 0,
+		}
+	}
 }
