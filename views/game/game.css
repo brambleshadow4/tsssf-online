@@ -163,11 +163,15 @@
 
 	border-top-right-radius: 5px;
 	border-bottom-right-radius: 5px;
-	background-color: #fce1ca;
+	
+	background-color: #c6a57a;
 	border-right: solid 3px var(--woodBorder);
 	border-top: solid 3px var(--woodBorder);
 	border-bottom: solid 3px var(--woodBorder);
 	cursor: pointer;
+
+	transition-property: background-color;
+	transition-duration: .5s;
 
 }
 
@@ -185,7 +189,11 @@
 #tableOffside.open
 {
 	right: 20%;
-	
+}
+
+#tableOffside.open #expandOffside
+{
+	background-color: #fce1ca;
 }
 
 #tableOffside.open #expandOffside img 
@@ -212,7 +220,8 @@ body.cardsUnapproved .card.custom
 
 .card.justPlayed
 {
-	box-shadow: 0 0 .8vh .8vh gold;
+	/*box-shadow: 0 0 .8vh .8vh rgb(123, 94, 5);*/
+	box-shadow: 0 0 .8vh .8vh rgb(244, 182, 64);
 	/*filter: grayscale(0%);*/
 }
 
@@ -309,9 +318,6 @@ body
 	vertical-align: middle;
 
 	overflow: hidden;
-
-	background-image: url(/img/bkgTable.jpg);
-	background-size: cover;
 }
 
 button, input
@@ -468,12 +474,31 @@ input[type="number"]
 	overflow-x: auto;
 	overflow-y: hidden;
 
+	background-image: url(/img/bkgTable.jpg);
+	background-size: cover;
+	background-position: bottom;
+
 	/*background-color: white;*/
 }
 
+
+.backgroundTint 
+{
+	position: absolute;
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	z-index: -1;
+	/*background-color: rgba(255,0,0,.5);*/
+}
+
+
+
 .nomove #cardRow, .nomove #sidebar, .nomove #tableOffside, .nomove #expandOffside
 {
-	background-color: #C8C8C8;
+	/*background-color: #C8C8C8;*/
+	filter: grayscale(75%);
 }
 
 .nomove .shuffle, .nomove .card.grab, .nomove .card{
@@ -571,9 +596,9 @@ input[type="number"]
 .popup
 {
 	font-size: initial;
-	border: solid 2px var(--woodBorder);
+	border: solid 2px black;
 	z-index: var(--popupZLevel);
-	background-image: url(/img/bkgWood2.jpg);
+	background-color: white;
 	overflow-y: auto;
 
 	overflow: visible;

@@ -26,6 +26,7 @@ var HTML = `
 		</div>
 		<div id="goalDiscardPile" class='card discard'></div>
 		<div id='turnInfo'></div>
+		<div class='backgroundTint'></div>
 	</div>
 	<div id='tableOffside'>
 		<div id='expandOffside'><img src="/img/ios-arrow-forward.svg"/></div>
@@ -38,6 +39,7 @@ var HTML = `
 				<h2>{{OffsideRemovedCards}}</h2>
 				<div id='removedCards'></div>
 			</div>
+			<div class='backgroundTint'></div>
 		</div>
 	</div>
 	<div id='playingArea'>
@@ -76,6 +78,7 @@ var HTML = `
 			<div class='card ship'></div>
 		</div>
 	</div>
+	<div class='backgroundTint'></div>
 </div>
 <div id='preloadedImages' style="display: none;"></div>
 <img id='dragimg' src="/img/sym/void.png"/ >
