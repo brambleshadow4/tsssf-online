@@ -123,7 +123,7 @@ async function setupBoard(options:{
 
 	model.turnstate = new Turnstate();
 	model.turnstate.init(model, "tutorial");
-
+	model.cardConfig = cardConfig;
 	model.playerName="tutorial";
 	updateGame(model);
 }
