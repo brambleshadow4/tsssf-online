@@ -1,4 +1,3 @@
-import cards from "./cards.js";
 import {CardProps, isStart, GameOptions, CardConfig} from "./lib.js";
 
 var allCards: {[key:string]: CardProps} = {};
@@ -24,9 +23,9 @@ export function init(cardConfig: CardConfig, gameOptions: GameOptions)
 	let newAllCards: {[key: string]: any} = {};
 
 	// convert base cards
-	for(var key in cards)
+	for(var key in cardConfig.standard)
 	{
-		newAllCards[key] = JSON.parse(JSON.stringify(cards[key]));
+		newAllCards[key] = JSON.parse(JSON.stringify(cardConfig.standard[key]));
 
 		var urlToImg = "/packs/" + key.split(".").join("/");
 		newAllCards[key].url = urlToImg + ".png";

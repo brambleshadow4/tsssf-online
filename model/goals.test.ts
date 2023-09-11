@@ -7,11 +7,15 @@ import {
 	isGoal,
 	Card,
 	Location, GameOptions, Player, GameModel,
-	allCardsGameOptions
+	allCardsGameOptions, CardConfig
 } from "./lib.js";
+import {pack} from "../build/pack.js";
 
 import {typecheckGoal} from "./goalCriteria.js";
 import Turnstate from "./turnstate.js";
+
+
+let cachedCards: CardConfig | undefined;
 
 interface MockPlayer extends Player
 {
@@ -37,16 +41,16 @@ function expectGoalAchieved(game: GameModel, goal: Card)
 	expect(game.achievedGoals.has(goal)).toBe(true);
 }
 
-function setupGame(setupOptions?:{
+async function setupGame(setupOptions?:{
 	cardDecks?: string[],
 	startCard?: string
 
-}):[GameInstance, MockPlayer]
+}):Promise<[GameInstance, MockPlayer]>
 {	
-	let game = new GameInstance();
-	
+	let cardConfig = await pack();
+	let game = new GameInstance(cardConfig);
 
-	cm.init(allCardsGameOptions());
+	cm.init(cardConfig, allCardsGameOptions());
 
 	let fakeSocket = {
 		isAlive: true,
@@ -156,9 +160,9 @@ function evalGoalLogic(model: GameModel, goalLogic: string): boolean
 
 export default function(){
 
-	test("ShippedWithOppositeGenderedSelf", () => {
+	test("ShippedWithOppositeGenderedSelf", async () => {
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 
 		let goal = "Core.Goal.BuddingCuriosity";
 		let ship = "Core.Ship.DudeLooksLikeALady";
@@ -178,9 +182,9 @@ export default function(){
 		expectGoalAchieved(game.model, goal);
 	});
 
-	test("PlayPonies", ()=>{
+	test("PlayPonies", async ()=>{
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 		let goal = "Core.Goal.ChancellorPuddingheadsEntourage";
 
 		let ships = ["Core.Ship.BadPonyGoToMyRoom", "Core.Ship.BoredOnASundayAfternoon","Core.Ship.CheckingItOffMyList"];
@@ -206,9 +210,9 @@ export default function(){
 	});
 
 
-	test("changeling disguise on play doesn't count as a breakup", () =>{
+	test("changeling disguise on play doesn't count as a breakup", async () =>{
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 		let changeling = "Core.Pony.UnicornChangeling";
 		let ship = "Core.Ship.BadPonyGoToMyRoom";
 		player.grab(changeling);
@@ -243,8 +247,8 @@ export default function(){
 		//   |   |
 		//   A - B 
 
-		beforeEach(() => {
-			[game, player] = setupGame();
+		beforeEach(async () => {
+			[game, player] = await setupGame();
 			
 			[ship1, ship2, ship3, ship4, p1, p2, changeling].forEach(x => player.grab(x));
 
@@ -257,7 +261,7 @@ export default function(){
 			player.endTurn();
 		});
 
-		test("changeling redisguising breaks up existing ships", () =>{
+		test("changeling redisguising breaks up existing ships", async () =>{
 
 			player.move(ship1, "player,Test", "sr,0,0");
 			player.move(changeling, "player,Test", "p,1,0");
@@ -273,7 +277,7 @@ export default function(){
 
 		});
 
-		test("changeling redisguise doesn't change what pony was played", () =>{
+		test("changeling redisguise doesn't change what pony was played", async () =>{
 
 			player.move(ship1, "player,Test", "sr,0,0");
 			player.move(changeling, "player,Test", "p,1,0");
@@ -290,7 +294,7 @@ export default function(){
 			expect(game.model.turnstate!.playedPonies[0]).toBe(changeling + ":1");
 		});
 
-		test("changeling redisguise counts played cards correctly", () =>{
+		test("changeling redisguise counts played cards correctly", async () =>{
 
 			player.move(ship1, "player,Test", "sr,0,0");
 			player.move(changeling, "player,Test", "p,1,0");
@@ -328,9 +332,9 @@ export default function(){
 		//           |   
 		//        change:2
 
-		beforeEach(() =>{
+		beforeEach(async () =>{
 
-			[game, player] = setupGame();
+			[game, player] = await setupGame();
 			[ship1, ship2, lovePoison, pony, changeling].forEach(x => player.grab(x));
 
 
@@ -344,7 +348,7 @@ export default function(){
 		});
 
 
-		test("love poison changeling breaks 1 ship", () =>{
+		test("love poison changeling breaks 1 ship", async () =>{
 
 			let brokenShips = game.model.turnstate!.brokenShips;
 			expect(brokenShips.length).toBe(0);
@@ -359,7 +363,7 @@ export default function(){
 			hasShipPair(brokenShips, changeling+":1", pony)
 		});
 
-		test("love poison changeling counts as 2 played ships", () =>{
+		test("love poison changeling counts as 2 played ships", async () =>{
 
 			let playedShips = game.model.turnstate!.playedShips;
 			expect(playedShips.length).toBe(1);
@@ -401,9 +405,9 @@ export default function(){
 		let ship5 = "Core.Ship.Amnesia";
 		let ship6 = "Core.Ship.BeachEpisode";
 
-		beforeEach(() => {
+		beforeEach(async () =>  {
 
-			[game, player] = setupGame();
+			[game, player] = await setupGame();
 			player.grab(ponyA, ponyB, ponyC, ponyD, changeling, ship1, ship2, ship3, ship4, ship5, ship6);
 
 			player.move(ship1, "player,Test", "sr,0,0");
@@ -427,7 +431,7 @@ export default function(){
 			player.move(ponyC, "offset,2,-1", "p,1,0");
 		});
 
-		test("changeling swap breaks changeling ships", () =>{
+		test("changeling swap breaks changeling ships", async () =>{
 
 			let brokenShips = game.model.turnstate!.brokenShips;
 
@@ -439,7 +443,7 @@ export default function(){
 
 		});
 
-		test("changeling swap played ships", () =>{
+		test("changeling swap played ships", async () =>{
 
 			let playedShips = game.model.turnstate!.playedShips;
 
@@ -448,20 +452,20 @@ export default function(){
 	
 		});
 
-		test("changeling swap played ponies", () =>{
+		test("changeling swap played ponies", async () =>{
 			expect(game.model.turnstate!.playedPonies.length).toBe(0);		
 		});
 
-		test("changeling swap played ship cards", () =>{
+		test("changeling swap played ship cards", async () =>{
 			expect(game.model.turnstate!.playedShipCards.length).toBe(1);		
 		});
 
 	});
 	
 
-	test("BreakShip: It's not evil w/ changeling", () =>{
+	test("BreakShip: It's not evil w/ changeling", async () =>{
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 		let goal = "Core.Goal.ItsNotEvil";
 
 		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
@@ -490,9 +494,9 @@ export default function(){
 	});
 
 
-	test("Replace changling only breaks ships once", ()=>{
+	test("Replace changling only breaks ships once", async ()=>{
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 		let start = "Core.Start.FanficAuthorTwilight";
 		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
 		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
@@ -528,9 +532,9 @@ export default function(){
 		hasShipPair(game.model.turnstate!.playedShips, pony2, changeling+":1")
 	});
 
-	test("genderSwapped + CharityAuction", () => {
+	test("genderSwapped + CharityAuction", async () => {
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 		let goal = "Core.Goal.CharityAuction";
 		player.drawGoal(goal);
 
@@ -553,9 +557,9 @@ export default function(){
 		expectGoalAchieved(game.model, goal);
 	});
 
-	test("PlayLovePoisons", () => {
+	test("PlayLovePoisons", async () => {
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 		let goal = "Core.Goal.Epidemic";
 		player.drawGoal(goal);
 
@@ -577,9 +581,9 @@ export default function(){
 		expectGoalAchieved(game.model, goal);
 	});
 
-	test("PlayPonies takes into account card.count property", () =>{
+	test("PlayPonies takes into account card.count property", async () =>{
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 		let goal = "Core.Goal.QueenPlatinumsCourt";
 		player.drawGoal(goal);
 
@@ -600,9 +604,9 @@ export default function(){
 		expectGoalAchieved(game.model, goal);
 	});
 
-	test("Alicorn Big Mac + Star Student Twilight achieve Pretty Pretty Princess", () =>{
+	test("Alicorn Big Mac + Star Student Twilight achieve Pretty Pretty Princess", async () =>{
 
-		let [game, player] = setupGame({
+		let [game, player] = await setupGame({
 			cardDecks: ["Core.*", "HorriblePeople.2015Workshop.*"],
 			startCard: "ChildrenOfKefentse.Promo.Start.FanficEditorStarlight"
 		});
@@ -628,9 +632,9 @@ export default function(){
 		expectGoalAchieved(game.model, goal);
 	});
 
-	test("larson effect still applies when turn ends", () =>{
+	test("larson effect still applies when turn ends", async () =>{
 
-		let [game, player] = setupGame({
+		let [game, player] = await setupGame({
 			cardDecks: ["Core.*", "HorriblePeople.2015Workshop.*"],
 			startCard: "ChildrenOfKefentse.Promo.Start.FanficEditorStarlight"
 		});
@@ -659,9 +663,9 @@ export default function(){
 
 	});
 
-	test("larson effect always transforms changelings", () =>{
+	test("larson effect always transforms changelings", async () =>{
 
-		let [game, player] = setupGame({
+		let [game, player] = await setupGame({
 			cardDecks: ["Core.*", "HorriblePeople.2015Workshop.*"]}
 		);
 		
@@ -687,9 +691,9 @@ export default function(){
 
 	});
 
-	test("fullCopy keeps both genders", () => {
+	test("fullCopy keeps both genders", async () => {
 
-		let [game, player] = setupGame({
+		let [game, player] = await setupGame({
 			cardDecks: ["Core.*", "NoHoldsBarred.*"]}
 		);
 
@@ -713,9 +717,9 @@ export default function(){
 		expect(evalGoalLogic(game.model, "ExistsShip(gender=female, gender=female, 1)")).toBe(true);
 	});
 
-	test("fullCopy keeps both races", () => {
+	test("fullCopy keeps both races", async () => {
 
-		let [game, player] = setupGame({
+		let [game, player] = await setupGame({
 			cardDecks: ["Core.*", "NoHoldsBarred.*"]}
 		);
 
@@ -740,9 +744,9 @@ export default function(){
 		expect(evalGoalLogic(game.model, "ExistsPony(race=unicorn, 2)")).toBe(true);
 	});
 
-	test("fullCopy keeps both names", () => {
+	test("fullCopy keeps both names", async () => {
 
-		let [game, player] = setupGame({
+		let [game, player] = await setupGame({
 			cardDecks: ["Core.*", "NoHoldsBarred.*"]}
 		);
 
@@ -764,9 +768,9 @@ export default function(){
 		expect(evalGoalLogic(game.model, "ExistsShip(name=Twilight Sparkle, name=Pixel Prism)")).toBe(true);
 	});
 
-	test("aloe/lotus ships count as two ships", () => {
+	test("aloe/lotus ships count as two ships", async () => {
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 
 		let aloelotus = "Core.Pony.AloeAndLotus";
 		let malePony = "Core.Pony.BigMacintosh";
@@ -790,9 +794,9 @@ export default function(){
 		expect(evalGoalLogic(game.model, "PlayShips(gender=male, gender=female, 2)")).toBe(true);
 	})
 
-	test("goals w/ card= prop", () =>{
+	test("goals w/ card= prop", async () =>{
 
-		let [game, player] = setupGame({
+		let [game, player] = await setupGame({
 			cardDecks: ["Core.*", "HorriblePeople.DungeonDelvers.*"]
 		});
 
@@ -832,9 +836,9 @@ export default function(){
 
 	// swap counts
 
-	test("SwapCount - swapping two cards increases the swap count", () =>{
+	test("SwapCount - swapping two cards increases the swap count", async () =>{
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 
 		let pony1 = "Core.Pony.BigMacintosh";
 		let pony2 = "Core.Pony.Caramel"
@@ -858,9 +862,9 @@ export default function(){
 		expect(evalGoalLogic(game.model, "SwapCount(2)")).toBe(true);
 	});
 
-	test("SwapCount - swapping two cards, then back, does not increase swap count", () =>{
+	test("SwapCount - swapping two cards, then back, does not increase swap count", async () =>{
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 
 		let pony1 = "Core.Pony.BigMacintosh";
 		let pony2 = "Core.Pony.Caramel"
@@ -888,9 +892,9 @@ export default function(){
 		expect(evalGoalLogic(game.model, "SwapCount(2)")).toBe(false);
 	});
 
-	test("SwapCount - love poison does not increase swap", () =>{
+	test("SwapCount - love poison does not increase swap", async () =>{
 
-		let [game, player] = setupGame();
+		let [game, player] = await setupGame();
 
 		let pony1 = "Core.Pony.BigMacintosh";
 		let pony2 = "Core.Pony.Bloomberg";

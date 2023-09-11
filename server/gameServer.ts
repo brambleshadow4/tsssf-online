@@ -957,6 +957,7 @@ export class GameInstance
 	{
 		let player = this.getPlayerByName(playerName)!;
 		var model = this.model.getPlayerModel(playerName);
+		model.cardConfig = this.cardConfig;
 		player.socket.send("game;" + JSON.stringify([this.gameOptions, model]));
 	}
 

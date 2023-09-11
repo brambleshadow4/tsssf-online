@@ -2,7 +2,7 @@ export type Card = string;
 
 export interface CardConfig
 {
-	order: {},
+	order: PackListItem[],
 	standard: {[key:string]: CardProps},
 	custom: {
 		cards: {[key:string]: CardProps},

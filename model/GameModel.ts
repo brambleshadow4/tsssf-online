@@ -1,7 +1,7 @@
 import {
 	GameModel as GM, Card, Player, randomizeOrder, Location, isPony, isShip, isGoal, getNeighborKeys,
 	isBlank, isBoardLoc, isOffsetLoc, isGoalLoc, isDiscardLoc,
-	GameOptions, CardElement, isPlayerLoc, isAnon
+	GameOptions, CardElement, isPlayerLoc, isAnon, CardConfig
 } from "./lib.js";
 
 
@@ -11,6 +11,7 @@ import * as cm from "./cardManager.js";
 
 import Turnstate, { fromClientTurnstate } from "./turnstate.js";
 import { isArrowFunction } from "typescript";
+import { parse } from "path";
 
 var PROP_VALUES = {
 
@@ -45,6 +46,8 @@ export default class GameModel implements GM
 	} = {};
 
 	public playerName: string = "";
+
+	public cardConfig?: CardConfig;
 
 	public ponyDiscardPile: Card[] = [];
 	public shipDiscardPile: Card[] = [];
@@ -1213,7 +1216,7 @@ export function playerGameModelFromObj(parsedModel: any)
 
 		newModel.playerName = parsedModel.playerName || "";
 
-
+		newModel.cardConfig = parsedModel.cardConfig;
 		newModel.ponyDiscardPile = parsedModel.ponyDiscardPile || [];
 		newModel.shipDiscardPile = parsedModel.shipDiscardPile || [];
 		newModel.goalDiscardPile = parsedModel.goalDiscardPile || [];

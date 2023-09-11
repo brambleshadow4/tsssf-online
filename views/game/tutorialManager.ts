@@ -1,5 +1,6 @@
 import {
-	GameOptions, defaultGameOptions, isGoal, isStart, isShip, isPony, isBlank, Card, isBoardLoc, isGoalLoc, isOffsetLoc, isDiscardLoc
+	GameOptions, defaultGameOptions, isGoal, isStart, isShip, isPony, isBlank, Card, isBoardLoc, isGoalLoc, isOffsetLoc, isDiscardLoc,
+	CardConfig
 } from "../../model/lib.js";
 
 import {setHoverBubbleFull, clearHoverBubble, updateHand, updateShipDiscard, updatePonyDiscard} from "./peripheralComponents.js";
@@ -16,13 +17,13 @@ let win = window as unknown as {
 let tutorialState = 0;
 let model: GameModel;
 
-function setupBoard(options:{
+async function setupBoard(options:{
 	drawPile: Card[],
 	discardPile: Card[],
 	board?: {[k:string]: Card},
 	currentGoals?: string[],
 	hand?: Card[],
-}): void
+}): Promise<void>
 {
 	let bubble = document.createElement('div');
 
@@ -57,7 +58,9 @@ function setupBoard(options:{
 		model.cardLocations[model.currentGoals[2]] = "goal,2";
 	}
 
-	cm.init(win.gameOptions);
+	let cardConfig: CardConfig = await(await fetch("/cards.json")).json();
+
+	cm.init(cardConfig, win.gameOptions);
 
 	for(let card of options.drawPile)
 	{

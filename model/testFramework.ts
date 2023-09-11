@@ -5,17 +5,17 @@ let tests: [string, Function][] = [];
 
 let beforeEachClosure: Function | undefined = undefined;
 
-export function group(name: string, fun: Function)
+export async function group(name: string, fun: Function)
 {
 
 	let oldBeforeEach = beforeEachClosure;
 
-	fun();
+	await fun();
 
 	beforeEachClosure = oldBeforeEach;
 }
 
-export function beforeEach(fun: Function)
+export function beforeEach(fun: () => Promise<void>)
 {
 	if(beforeEachClosure == undefined)
 	{
@@ -24,7 +24,7 @@ export function beforeEach(fun: Function)
 	else
 	{
 		let f = beforeEachClosure;
-		beforeEachClosure = () => {f(); fun();}
+		beforeEachClosure = async () => {await f(); await fun();}
 	}
 }
 
@@ -56,58 +56,63 @@ export function expect(value1: any)
 }
 
 import goalTests from "./goals.test.js"; goalTests();
-
 import packLibTests from "./packLib.test.js"; packLibTests();
 
-let passCount = 0;
-let fails = [];
-
-if(testNo)
+async function runAllTests()
 {
-	let [name, fun] = tests[testNo-1];
-	let failed = false;
-	try
-	{
-		fun();
-		passCount++;
-	}
-	catch(e)
-	{
-		console.log("TEST FAILED " + name);
-		console.log(e);
-		failed = true;
-	}
+		
+	let passCount = 0;
+	let fails = [];
 
-	if(!failed)
+	if(testNo)
 	{
-		console.log("TEST PASSED");
-	}
-}
-else
-{
-	let no = 1;
-	for(var item of tests)
-	{
-		let [name, fun] = item;
-
+		let [name, fun] = tests[testNo-1];
+		let failed = false;
 		try
 		{
-			fun();
+			await fun();
 			passCount++;
 		}
 		catch(e)
 		{
-			console.log("TEST #" + no + " FAILED " + name);
-			console.log(e)
+			console.log("TEST FAILED " + name);
+			console.log(e);
+			failed = true;
 		}
 
-		no++;
+		if(!failed)
+		{
+			console.log("TEST PASSED");
+		}
+	}
+	else
+	{
+		let no = 1;
+		for(var item of tests)
+		{
+			let [name, fun] = item;
+
+			try
+			{
+				await fun();
+				passCount++;
+			}
+			catch(e)
+			{
+				console.log("TEST #" + no + " FAILED " + name);
+				console.log(e)
+			}
+
+			no++;
+		}
+
+		console.log(`${passCount}/${tests.length} passed`);
 	}
 
-	console.log(`${passCount}/${tests.length} passed`);
 }
 
 
+runAllTests();
 
 
 

@@ -3,7 +3,6 @@ import cookieParser from 'cookie-parser';
 import fs from 'fs';
 import ws from 'ws';
 import https from "https";
-import cards from "../model/cards.js"
 import {TsssfGameServer} from "./gameServer.js";
 import {getStats, getPotentialPlayers, removePotentialPlayer, addPotentialPlayer} from "./stats.js";
 import {GameOptions} from "../model/lib.js";
@@ -100,6 +99,8 @@ function setupTranslations()
 async function main()
 {
 	setupTranslations();
+
+	let cardConfig = await pack();
 
 	app.use(cookieParser());
 
@@ -255,6 +256,11 @@ async function main()
 		res.redirect("/lobby?" + key);
 	})
 
+	app.get("/cards.json", function(req, res){
+
+		res.json(cardConfig);
+	})
+
 
 	let potentialPlayerRequests: {[k:string]: {type: "add" | "remove", timezone?:string, platform: "discord", expireTime?: number}} = {};
 
@@ -399,7 +405,7 @@ async function main()
 	// the same ws upgrade process described here:
 	// https://www.npmjs.com/package/ws#multiple-servers-sharing-a-single-https-server
 
-	let cardConfig = await pack();
+
 
 	const tsssfServer = new TsssfGameServer(cardConfig);
 
@@ -699,3 +705,5 @@ async function sendIfExists(url:string, lang: string, res: any)
 		res.send("404 error sad");
 	}
 }
+
+main();

@@ -10,20 +10,14 @@ import {validatePack} from "../../model/packLib.js";
 
 import {
 	PackListHeader,
-	PackListItem,
 	PackListPack,
 	GameOptions,
 	CardConfig
 } from "../../model/lib.js";
 
 import texts from "../tokens.js";
-
-
 import * as cm from "../../model/cardManager.js";
-
-
 import {WebSocketPlus} from "../viewSelector.js";
-import packs from "../../model/packs.js";
 
 var gameOptionsDiv: HTMLElement;
 var chooseCardsDiv: HTMLElement;
@@ -89,8 +83,6 @@ export function loadView(handshakeMessage: string)
 
 function loadCardPages(cardConfig: CardConfig, options: GameOptions)
 {
-	
-
 	document.getElementById('uploadErrors')!.innerHTML = "";
 	(document.getElementById('packUpload') as HTMLInputElement).value = "";
 
@@ -101,12 +93,12 @@ function loadCardPages(cardConfig: CardConfig, options: GameOptions)
 	document.getElementById('expansions')!.innerHTML = "";
 
 	var deckElementList: HTMLElement[] = [];
-	var allPacks = packs.slice();
+	var allPacks = cardConfig.order.slice();
 
 	if(cardConfig.custom.descriptions.length)
 	{
 		allPacks.push({"h": texts.LobbyUploads, "id":"uploadBanner"});
-		allPacks = allPacks.concat(cardConfig.custom.descriptions);
+		allPacks = allPacks.concat(cardConfig.custom.descriptions as PackListHeader[]);
 	}
 
 	cm.init(cardConfig, allCardsGameOptions());
@@ -119,7 +111,19 @@ function loadCardPages(cardConfig: CardConfig, options: GameOptions)
 		{
 			info = info as PackListHeader;
 			let el = document.createElement('h3');
-			el.innerHTML = info.h as string;
+
+			let text = info.h;
+			let token = /{{(.*?)}}/.exec(text);
+
+
+			while(token)
+			{
+				let newText = (texts as any)[token[1]] || "blar"
+				text = text.replace(token[0], newText);
+				token = /{{(.*?)}}/.exec(text);
+			}
+
+			el.innerHTML = text
 
 			if(info.id == "uploadBanner")
 			{
@@ -169,9 +173,8 @@ function loadCardPages(cardConfig: CardConfig, options: GameOptions)
 	var startCards = document.getElementById('startCards')!;
 	startCards.innerHTML = "";
 
-	var startCardNames = packs.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
-	var customStartCards = cardConfig.custom.descriptions.map((x: any) => x.startCards || []).reduce((a,b) => a.concat(b), []);
-
+	var startCardNames = Object.keys(cardConfig.standard).filter(x => isStart(x));
+	var customStartCards = Object.keys(cardConfig.custom.cards).filter(x => isStart(x));
 
 	if(customStartCards.length && uploadHeader)
 	{
@@ -264,7 +267,7 @@ function onMessage(event: MessageEvent)
 {
 	if(event.data.startsWith("lobby;"))
 	{
-		// See also SCHEMA.SEARCH in gameServer.ts
+		// See also SCHEMA.LOBBY_PAYLOAD in gameServer.ts
 		let payload:{
 			cardConfig: CardConfig,
 			isClosed: boolean,

@@ -99,9 +99,7 @@ import {
 	//broadcastEffects
 } from "./network.js";
 
-
 import {createPopup} from "./popupComponent.js";
-import cards from "../../model/cards.js";
 
 let win = window as unknown as {
 	model: GameModel,
@@ -216,7 +214,7 @@ function LoadCards(): void
 
 	let model = win.model;
 
-	cm.init(win.gameOptions);
+	cm.init(win.model.cardConfig!, win.gameOptions);
 
 	let cards = cm.inPlay();
 

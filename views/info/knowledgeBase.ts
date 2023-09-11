@@ -5,7 +5,7 @@ import * as lib from "../../model/lib.js";
 import * as cm from "../../model/cardManager.js";
 import faq from "./faq.js";
 
-function buildPage()
+async function buildPage()
 {
 	switch(location.pathname)
 	{
@@ -26,13 +26,11 @@ function buildPage()
 
 
 	let title = document.head.getElementsByTagName('title')[0] as HTMLTitleElement;
+	let cardConfig: lib.CardConfig = await(await fetch("/cards.json")).json();
 
 	switch(location.pathname)
 	{
-
-
 		case "/info/cardlist":
-
 
 			document.body.classList.add('cardlist');
 
@@ -41,16 +39,15 @@ function buildPage()
 				var main = document.getElementById('main')!;
 				main.innerHTML += "<h1>"+ s.HelpTabCardReference +" <span id='filterCount'></span></h1>";
 				title.innerHTML = s.HelpTabCardReference + ": Twilight Sparkle's Secret Shipfic Folder Online";
-				console.log("here");
 			}
 
-			cm.init(lib.allCardsGameOptions());
+			cm.init(cardConfig, lib.allCardsGameOptions());
 			main.appendChild(cardReference(cm.all(), false));
 
 			break;
 
 		case "/info/card":
-			cm.init(lib.allCardsGameOptions());
+			cm.init(cardConfig, lib.allCardsGameOptions());
 
 
 
