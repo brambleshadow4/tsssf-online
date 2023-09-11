@@ -32,8 +32,6 @@ npm run build performs several operations outlined below. It will need to be rer
 
 * Generates .thumb.png files
 * Creates .ts files from corresponding config files
-   * cards.ts
-   * packs.ts
    * faq.ts
 
 
