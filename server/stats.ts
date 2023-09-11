@@ -78,7 +78,7 @@ function timeQuery(db: sqlite3.Database, table: string, start:number, end:number
 		let query = "SELECT COUNT(timestamp) as count FROM " + table + " WHERE timestamp BETWEEN ? AND ?";
 
 		db.all(query, [start, end],
-			function(err, rows){
+			function(err, rows:any[]){
 
 				if(err)
 				{
