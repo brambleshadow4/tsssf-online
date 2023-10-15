@@ -82,11 +82,7 @@ export async function pack(): Promise<CardConfig>
 						if(fs.existsSync(pngImage))
 						{
 							let image = sharp(pngImage);
-							if (!fs.existsSync(thumbImage))
-							{
-								image.resize(197, 272).toFile(thumbImage);
-							}
-
+							
 							if(!((await image.metadata()).isProgressive))
 							{	
 								console.log("interlacing " + key)
@@ -94,6 +90,12 @@ export async function pack(): Promise<CardConfig>
 								await image.png({progressive: true}).toFile(pngImage2)
 								fs.copyFileSync(pngImage2, pngImage);
 								fs.unlinkSync(pngImage2);
+							}
+
+							if (!fs.existsSync(thumbImage))
+							{
+								let image2 = sharp(pngImage);
+								image2.resize(197, 272).toFile(thumbImage);
 							}
 						}
 
