@@ -239,7 +239,10 @@ export function updatePonyDiscard(cardOnTop?: Card)
 {
 	let model = win.model as GameModel & {ponyDrawPileLength: number}
 	if(model.mode == "client" ? model.ponyDrawPileLength == 0 : model.ponyDrawPile.length == 0)
+	{
 		document.getElementById("ponyDrawPile")!.classList.add('blank');
+	}
+		
 	else
 		document.getElementById("ponyDrawPile")!.classList.remove('blank');
 

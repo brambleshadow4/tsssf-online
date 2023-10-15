@@ -57,6 +57,10 @@ export default class GameModel implements GM
 	public shipDrawPile: Card[] = [];
 	public goalDrawPile: Card[] = [];
 
+	public ponyDrawPileLength = 0;
+	public shipDrawPileLength = 0;
+	public goalDrawPileLength = 0;
+
 	public currentGoals: Card[] = [];
 	public achievedGoals: Set<Card> = new Set();
 	public tempGoals: Card[] = [];
@@ -691,6 +695,27 @@ export default class GameModel implements GM
 			this.cardLocations[this.currentGoals[1]] = "goal,1";
 			this.cardLocations[this.currentGoals[2]] = "goal,2";
 		}
+
+		for(let player of this.players)
+		{
+			for(let i=0; i<4; i++)
+			{
+				if(this.ponyDrawPile.length == 0)
+					break;
+				let card = this.ponyDrawPile.pop()!;
+				player.hand.push(card);
+				this.cardLocations[card] = "player," + player.name;
+			}
+
+			for(let i=0; i<3; i++)
+			{
+				if(this.shipDrawPile.length == 0)
+					break;
+				let card = this.shipDrawPile.pop()!;
+				player.hand.push(card);
+				this.cardLocations[card] = "player," + player.name;
+			}
+		}
 		
 
 		if(gameOptions.ruleset == "turnsOnly")
@@ -1011,46 +1036,7 @@ export default class GameModel implements GM
 			this.tempGoals.push(card);
 		}
 
-		//postmove
-
-		
-
-
-		this.updateTurnstatePostMove(card, startLocation, endLocation);
-
-		// cant move to a goal location yet
-
-		// TODO move this logic
-		/*socket.send("move;" + card + ";" + startLocation + ";" + endLocation);
-
-		if(startLocation == "hand" || startLocation == "winnings")
-			startLocation = "player,"+player.name;
-
-		if(endLocation == "hand" || endLocation == "winnings")
-			endLocation = "player,"+player.name;
-
-		this.toEveryoneElse(socket, "move;" + card + ";" + startLocation + ";" + endLocation);*/
-
-
-		/*if(isPlayerLoc(endLocation) || isPlayerLoc(startLocation))
-		{
-			this.sendPlayerCounts(player);
-		}*/
-
-
-		/*if(isDiscardLoc(startLocation) && !isDiscardLoc(endLocation))
-		{
-			var [pile,slot] = startLocation.split(",");
-			let model2 = this as any;
-			if(model2[pile].length)
-			{
-				var topCard = model2[pile][model2[pile].length-1]
-				this.toEveryone( "move;" + topCard + ";" + pile + ",stack;" + pile + ",top");
-			}
-		}*/
-	
-		// TODO
-		// this.checkIfGoalsWereAchieved();
+		this.updateTurnstatePostMove(card, startLocation, endLocation);		
 	}
 
 	private updateTurnstatePreMove(card: Card, startLocation: string, endLocation: string): void
@@ -1220,6 +1206,10 @@ export function playerGameModelFromObj(parsedModel: any)
 		newModel.ponyDiscardPile = parsedModel.ponyDiscardPile || [];
 		newModel.shipDiscardPile = parsedModel.shipDiscardPile || [];
 		newModel.goalDiscardPile = parsedModel.goalDiscardPile || [];
+
+		newModel.ponyDrawPileLength = parsedModel.ponyDrawPileLength;
+		newModel.shipDrawPileLength = parsedModel.shipDrawPileLength;
+		newModel.goalDrawPileLength = parsedModel.goalDrawPileLength;
 
 		newModel.currentGoals = parsedModel.currentGoals || [];
 
