@@ -483,8 +483,6 @@ export function updatePlayerList()
 		adjPlayers.push(adjPlayers.shift()!);
 	}
 
-	adjPlayers.shift();
-
 	for(let player of adjPlayers)
 	{
 		var div = document.createElement('div');
