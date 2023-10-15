@@ -2,6 +2,7 @@ import * as cm from "./cardManager.js";
 import {slashStringToSet, isBlank, Card, CardProps, CardSetProps, OverrideProps, Location} from "./lib.js";
 import GameModel from "./GameModel.js";
 
+
 function toSetProps(props: CardProps ): CardSetProps
 {
 	return {
@@ -16,12 +17,21 @@ function toSetProps(props: CardProps ): CardSetProps
 	}
 }
 
+/*function getCardProp<T extends keyof CardSetProps>(model: GameModel, cardFull: Card, prop: T): CardSetProps[T]
+{
+	let x = getCardPropInner(model, cardFull, prop);
+	let display: any = x;
+	if(display && display.constructor == Set)
+		display = [...display].join(";");
+
+	console.log(cardFull + " " + prop + "=" + display)
+	return x;
+}*/
+
 
 function getCardProp<T extends keyof CardSetProps>(model: GameModel, cardFull: Card, prop: T): CardSetProps[T]
 {
 	let turnstate = model.turnstate!;
-	//console.log("getCardProp(" + cardFull + ", " + prop + ")");
-
 	let cards = cm.inPlay();
 
 
@@ -131,29 +141,42 @@ function getCardProp<T extends keyof CardSetProps>(model: GameModel, cardFull: C
 	let setProps = props as Set<string>[];
 
 
+	var returnValue: any;
+
 	switch(mergeMode)
 	{
 		case "top":
 
 			if(setProps[2].size > 0)
-				return props[2];
+				returnValue = props[2];
 
 			else if(setProps[1].size > 0)
-				return props[1];
+				returnValue = props[1];
 
 			else
-				return props[0];
+				returnValue = props[0];
+			break;
 
 		case "base":
-			return props[1];
+			returnValue = props[1];
+			break;
 
 		case "merge":
-			return new Set([...setProps[0], ...setProps[1], ...setProps[2]]) as any;
+			returnValue = new Set([...setProps[0], ...setProps[1], ...setProps[2]]) as any;
+			break;
 
 		case "pdomerge":
-			return new Set([...setProps[0], ...setProps[2]]) as any;
+			returnValue = new Set([...setProps[0], ...setProps[2]]) as any;
+			break;
 
 	}
+
+	if(prop == "keywords" && mergeMode != "base" && turnstate.specialEffects.larsonEffect)
+	{
+		returnValue.add("Princess")
+	}
+
+	return returnValue;
 }
 
 

@@ -34,7 +34,7 @@ export function test(name: string, fun: Function): void {
 	if(beforeEachClosure)
 	{
 		let f = beforeEachClosure;
-		tests.push([name, () => {f(); fun()}])
+		tests.push([name, async () => {await f(); await fun()}])
 	}
 	else
 	{
@@ -59,8 +59,7 @@ import goalTests from "./goals.test.js"; goalTests();
 import packLibTests from "./packLib.test.js"; packLibTests();
 
 async function runAllTests()
-{
-		
+{	
 	let passCount = 0;
 	let fails = [];
 
@@ -68,6 +67,7 @@ async function runAllTests()
 	{
 		let [name, fun] = tests[testNo-1];
 		let failed = false;
+		
 		try
 		{
 			await fun();
@@ -87,10 +87,13 @@ async function runAllTests()
 	}
 	else
 	{
+
 		let no = 1;
 		for(var item of tests)
 		{
 			let [name, fun] = item;
+
+			//console.log(no + " " + name)
 
 			try
 			{

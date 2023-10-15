@@ -14,6 +14,10 @@ import {pack} from "../build/pack.js";
 import {typecheckGoal} from "./goalCriteria.js";
 import Turnstate from "./turnstate.js";
 
+var PACKS:CardConfig | null = null;
+
+
+
 
 let cachedCards: CardConfig | undefined;
 
@@ -47,7 +51,12 @@ async function setupGame(setupOptions?:{
 
 }):Promise<[GameInstance, MockPlayer]>
 {	
-	let cardConfig = await pack();
+	if(!PACKS)
+	{
+		PACKS = await pack();
+		cardConfig = PACKS;
+	}
+	var cardConfig:CardConfig = PACKS;
 	let game = new GameInstance(cardConfig);
 
 	cm.init(cardConfig, allCardsGameOptions());
@@ -689,6 +698,45 @@ export default function(){
 		player.setEffect(changeling, "disguise", "Core.Pony.RoyalGuardShiningArmor");
 		expectGoalAchieved(game.model, goal);
 
+	});
+
+	test("larson effect works with Princess Pile", async () =>{
+
+		let [game, player] = await setupGame({
+			cardDecks: ["Core.*", "HorriblePeople.2015Workshop.*"]}
+		);
+		
+		let goal = "Core.Goal.PrincessPile";
+		player.drawGoal(goal);
+
+		let bigmac = "HorriblePeople.2015Workshop.Pony.AlicornBigMacintosh";
+		
+		let pony1 = "Core.Pony.Octavia";
+		let pony2 = "Core.Pony.FreedomFighterPinkiePie"
+		let pony3 = "Core.Pony.DramaticallyWoundedRarity"
+		
+		let ship1 = "Core.Ship.BadPonyGoToMyRoom";
+		let ship2 = "Core.Ship.BoredOnASundayAfternoon";
+		let ship3 = "Core.Ship.WeveGotToStopMeetingLikeThis";
+		let ship4 = "Core.Ship.FillyhoodCrush";
+
+		player.grab(ship1, ship2, ship3, ship4, bigmac, pony1, pony2, pony3);
+
+		player.move(ship1, "player,Test", "sr,0,0");
+		player.move(pony1, "player,Test", "p,1,0");
+
+		player.move(ship2, "player,Test", "sr,1,0");
+		player.move(pony2, "player,Test", "p,2,0");
+
+		player.move(ship3, "player,Test", "sr,2,0");
+		player.move(pony3, "player,Test", "p,3,0");
+
+		expectGoalUnachieved(game.model, goal);
+
+		player.move(ship4, "player,Test", "sd,0,0");
+		player.move(bigmac, "player,Test", "p,0,1");
+
+		expectGoalAchieved(game.model, goal);
 	});
 
 	test("fullCopy keeps both genders", async () => {
