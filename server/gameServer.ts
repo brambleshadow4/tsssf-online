@@ -531,9 +531,39 @@ export class GameInstance
 		{
 			if(this.model.turnstate && !this.model.turnstate.currentPlayer)
 				this.changeTurnToNextPlayer();
+			
+			this.sendPlayerlistsToEachPlayer();
+
+			// Deal in new player!
+			for(let i=0; i < 4; i++)
+			{
+				if(this.model.ponyDrawPile.length == 0)
+					break;
+				
+				let card = this.model.ponyDrawPile.pop()!;
+				player.hand.push(card);
+				this.model.cardLocations[card] = "player," + player.name;
+
+				this.toEveryoneElse(player.name, "move;anon:pony;ponyDrawPile;player," + player.name);
+			}
+
+			for(let i=0; i < 3; i++)
+			{
+				if(this.model.shipDrawPile.length == 0)
+					break;
+				
+				let card = this.model.shipDrawPile.pop()!;
+				player.hand.push(card);
+				this.model.cardLocations[card] = "player," + player.name;
+
+				this.toEveryoneElse(player.name, "move;anon:ship;shipDrawPile;player," + player.name);
+			}
 
 			this.sendCurrentState(player.name);
-			this.sendPlayerlistsToEachPlayer();
+
+			this.toEveryone("draw;ship;" + this.model.shipDrawPile.length);
+			this.toEveryone("draw;pony;" + this.model.ponyDrawPile.length);
+			this.sendPlayerCounts(player);			
 		}
 		
 		if(this.isLobbyOpen)
